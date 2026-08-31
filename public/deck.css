@@ -303,7 +303,10 @@ body {
 
 .gauge footer {
   flex: 0 0 auto; width: 100%; position: relative; z-index: 1;
-  background: inherit;
+  /* Fundo próprio e opaco. Herdar o do cartão trazia junto a transparência
+     dele, e a ponta do arco aparecia atrás do texto "Reseta em". */
+  background: linear-gradient(to top, rgba(6, 9, 15, .94), rgba(6, 9, 15, .78));
+  border-radius: 0 0 8px 8px;
   display: flex; justify-content: space-between; align-items: baseline; gap: .8em;
   padding-top: clamp(6px, 1vh, 12px);
   border-top: 1px solid var(--rule);
@@ -596,4 +599,167 @@ body[data-state="boot"] .deck { opacity: .45; }
     transition-duration: .001ms !important;
   }
   #aurora { display: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MOTOR DO DECK — abas, face viva e toque longo
+   -----------------------------------------------------------------------
+   O que separa um deck de um controle remoto: o botão certo já está no
+   lugar certo, e a face dele já está mostrando o número que importa.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.deck-wrap { display: flex; flex-direction: column; gap: calc(var(--gap) * .55); min-height: 0; }
+
+/* ── abas ──────────────────────────────────────────────────────────── */
+
+.pages {
+  position: relative;
+  display: flex; gap: .2em;
+  padding: 3px;
+  border: 1px solid var(--rule); border-radius: 10px;
+  background: var(--panel);
+  align-self: start;
+}
+[data-lite="1"] .pages { background: #0A111D; }
+
+.pages button {
+  position: relative; z-index: 1;
+  font: inherit; font-size: clamp(11px, 1.3vw, 15px); font-weight: 550;
+  letter-spacing: -.01em;
+  color: var(--dim); background: transparent; border: 0; cursor: pointer;
+  padding: .5em 1.1em; border-radius: 7px;
+  display: flex; align-items: center; gap: .5em;
+  transition: color .2s ease;
+  white-space: nowrap;
+}
+.pages button[aria-selected="true"] { color: var(--text); }
+.pages button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* Contagem de botões visíveis naquela aba. */
+.pages .tab-count {
+  font-size: .78em; font-weight: 600; color: var(--faint);
+  background: rgba(255,255,255,.06); border-radius: 999px;
+  padding: .05em .5em; min-width: 1.6em; text-align: center;
+}
+.pages button[aria-selected="true"] .tab-count { color: var(--dim); }
+
+/* Ponto de atenção. Duas intensidades de propósito: azul parado significa
+   "tem algo em destaque aqui", vermelho pulsante significa "decida agora".
+   Usar o alarme para as duas coisas gastaria o alarme. */
+.pages .tab-alert {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+  box-shadow: 0 0 6px var(--accent);
+}
+.pages .tab-alert[data-level="alarm"] {
+  background: var(--stop); box-shadow: 0 0 8px var(--stop);
+  animation: breathe 1.4s ease-in-out infinite;
+}
+
+/* O marcador desliza entre as abas em vez de piscar de uma para outra. */
+.pages-marker {
+  position: absolute; top: 3px; bottom: 3px; left: 0; z-index: 0;
+  border-radius: 7px; background: rgba(255,255,255,.075);
+  border: 1px solid var(--rule);
+  transition: transform .34s var(--ease-out), width .34s var(--ease-out);
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) { .pages-marker { transition: none; } }
+
+/* ── página do deck ────────────────────────────────────────────────── */
+
+.deck { position: relative; }
+.deck[data-sliding="left"]  .deck-row { animation: pageInLeft  .3s var(--ease-out); }
+.deck[data-sliding="right"] .deck-row { animation: pageInRight .3s var(--ease-out); }
+@keyframes pageInLeft  { from { opacity: 0; transform: translateX(26px); } }
+@keyframes pageInRight { from { opacity: 0; transform: translateX(-26px); } }
+
+/* Botão que entra ou sai porque o contexto mudou. */
+.btn { animation: btnIn .3s var(--ease-out) backwards; }
+@keyframes btnIn { from { opacity: 0; transform: scale(.94); } }
+
+/* ── urgência ──────────────────────────────────────────────────────── */
+
+/* Um botão urgente não muda de cor: ele ganha relevo. Cor já está sendo
+   usada para dizer o que a ação faz, e sobrecarregar o canal confunde. */
+.btn[data-urgent="1"] {
+  border-color: var(--rule-bright);
+  background: linear-gradient(180deg, rgba(255,255,255,.1), rgba(255,255,255,.03));
+  box-shadow: 0 4px 18px rgba(0,0,0,.35);
+}
+.btn[data-urgent="1"]::before { opacity: 1; height: 3px; }
+
+/* ── face viva ─────────────────────────────────────────────────────── */
+
+.btn { padding-bottom: .8em; }
+
+.badge {
+  position: absolute; top: .45em; right: .6em; z-index: 2;
+  font-size: clamp(11px, 1.35vw, 16px); font-weight: 650;
+  letter-spacing: -.03em; color: var(--dim);
+  font-variant-numeric: tabular-nums;
+  transition: color .3s ease;
+  pointer-events: none;
+}
+.badge small { font-size: .68em; font-weight: 500; margin-left: .08em; opacity: .75; }
+.badge[data-level="warn"] { color: var(--warn); }
+.badge[data-level="crit"] { color: var(--stop); }
+
+/* Barra na base: o mesmo número, legível de três metros sem ler dígito. */
+.badge-bar {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 3px; z-index: 2;
+  background: rgba(255,255,255,.05); overflow: hidden;
+  border-radius: 0 0 11px 11px;
+}
+.badge-bar i {
+  display: block; height: 100%; width: 0;
+  background: var(--dim);
+  transition: width .55s var(--ease-out), background .3s ease;
+}
+.badge-bar[data-level="warn"] i { background: var(--warn); }
+.badge-bar[data-level="crit"] i { background: var(--stop); }
+
+/* ── toque longo ───────────────────────────────────────────────────── */
+
+/* Preenche da esquerda para a direita enquanto o dedo está apoiado. Ao
+   encher, dispara a ação secundária. Soltar antes cancela — e o recuo é
+   rápido de propósito, para o cancelamento parecer cancelamento. */
+.hold-fill {
+  position: absolute; inset: 0; z-index: 0;
+  background: linear-gradient(90deg, rgba(106,166,255,.30), rgba(106,166,255,.14));
+  transform-origin: left center;
+  transform: scaleX(0);
+  pointer-events: none;
+}
+.btn[data-holding="1"] .hold-fill { transition: transform var(--hold-ms, 620ms) linear; transform: scaleX(1); }
+.btn:not([data-holding="1"]) .hold-fill { transition: transform .16s ease; transform: scaleX(0); }
+
+/* O conteúdo fica acima do preenchimento do toque longo. Precisa listar os
+   elementos em vez de usar `.btn > *`: aquela forma aplicava
+   `position: relative` também na face e na barra, que são absolutos — e as
+   duas caíam para o fim do fluxo, no rodapé do botão. */
+.btn > svg,
+.btn > .btn-label,
+.btn > .btn-hint { position: relative; z-index: 1; }
+
+/* Aviso do que o toque longo vai fazer, revelado enquanto o dedo apoia. */
+.hold-label {
+  position: absolute; inset: auto 0 .3em 0; z-index: 2;
+  font-size: clamp(9px, 1vw, 12px); font-weight: 600; color: var(--accent);
+  text-align: center; opacity: 0; transform: translateY(4px);
+  transition: opacity .18s ease, transform .18s ease;
+  pointer-events: none;
+}
+.btn[data-holding="1"] .hold-label { opacity: 1; transform: translateY(0); }
+.btn[data-holding="1"] .btn-hint { opacity: 0; }
+
+/* Marca discreta no canto: este botão tem uma segunda função. */
+.btn[data-hasHold="1"]::after {
+  content: ""; position: absolute; left: .5em; bottom: .55em;
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--faint);
+}
+.btn[data-holding="1"]::after { background: var(--accent); }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn[data-holding="1"] .hold-fill { transition: none; transform: scaleX(1); }
 }

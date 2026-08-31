@@ -236,43 +236,268 @@ function paintStats(s) {
 
 /* ══════════════════════════════════ botões ══════════════════════════════ */
 
-let deckBuilt = "";
+/* ══════════════════════════════ deck ════════════════════════════════════ */
+
+let currentPage = sessionStorage.getItem("deck-page") || "main";
+let deckSig = "";
+let pagesSig = "";
 const confirmTimers = new Map();
+const HOLD_MS = 620;
 
-function buildDeck(actions) {
-  const key = actions.map((a) => a.id).join("|");
-  if (deckBuilt === key) return;
-  deckBuilt = key;
+/** Formata o número que aparece na face do botão. */
+function fmtBadge(b) {
+  if (!b || b.value == null) return "";
+  switch (b.format) {
+    case "pct":
+      return `${Math.round(b.value)}<small>%</small>`;
+    case "usd":
+      return `<small>$</small>${b.value.toFixed(2)}`;
+    case "duration": {
+      const s = Math.max(0, Math.round(b.value));
+      // Abaixo de cinco segundos o número muda rápido demais para ser lido e
+      // só polui a face. O cronômetro aparece quando começa a significar algo.
+      if (s < 5) return "";
+      if (s < 60) return `${s}<small>s</small>`;
+      const m = Math.floor(s / 60);
+      if (m < 60) return `${m}<small>m</small>${String(s % 60).padStart(2, "0")}`;
+      return `${Math.floor(m / 60)}<small>h</small>${String(m % 60).padStart(2, "0")}`;
+    }
+    default:
+      return String(Math.round(b.value));
+  }
+}
 
-  const deck = $("deck");
-  deck.innerHTML = "";
-  const groups = ["permission", "control", "prompt"];
+/* ── abas ──────────────────────────────────────────────────────────── */
 
-  for (const g of groups) {
-    const items = actions.filter((a) => (a.group || "control") === g);
-    if (!items.length) continue;
-    const row = document.createElement("div");
-    row.className = "deck-row";
-    row.dataset.group = g;
-    row.style.gridTemplateColumns = `repeat(${items.length}, 1fr)`;
-    for (const a of items) row.appendChild(makeButton(a));
-    deck.appendChild(row);
+function buildPages(pages) {
+  const sig = pages.map((p) => `${p.id}:${p.count}:${p.urgent ? 1 : 0}`).join("|");
+  const nav = $("pages");
+
+  if (pagesSig !== sig) {
+    pagesSig = sig;
+    // Preserva o marcador deslizante ao reconstruir os botões.
+    for (const el of [...nav.querySelectorAll("button")]) el.remove();
+    for (const p of pages) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.dataset.page = p.id;
+      b.setAttribute("role", "tab");
+      b.innerHTML =
+        `<span>${escapeHtml(p.label)}</span>` +
+        `<span class="tab-count">${p.count}</span>` +
+        (p.urgent ? `<span class="tab-alert" data-level="${p.level || "highlight"}"></span>` : "");
+      b.addEventListener("click", () => goToPage(p.id));
+      nav.appendChild(b);
+    }
+  }
+
+  // A aba escolhida pode ter sumido (o contexto mudou): cai para a primeira.
+  if (!pages.some((p) => p.id === currentPage)) {
+    currentPage = pages.length ? pages[0].id : "main";
+  }
+
+  for (const b of nav.querySelectorAll("button")) {
+    b.setAttribute("aria-selected", b.dataset.page === currentPage ? "true" : "false");
+  }
+  moveMarker();
+}
+
+/** Desliza o marcador até a aba ativa. */
+function moveMarker() {
+  const nav = $("pages");
+  const active = nav.querySelector('button[aria-selected="true"]');
+  const marker = $("pagesMarker");
+  if (!active) {
+    marker.style.width = "0px";
+    return;
+  }
+  marker.style.width = `${active.offsetWidth}px`;
+  marker.style.transform = `translateX(${active.offsetLeft - 3}px)`;
+}
+
+function goToPage(id) {
+  if (id === currentPage) return;
+  const order = [...$("pages").querySelectorAll("button")].map((b) => b.dataset.page);
+  const dir = order.indexOf(id) > order.indexOf(currentPage) ? "left" : "right";
+  currentPage = id;
+  sessionStorage.setItem("deck-page", id);
+  lastInteraction = Date.now();
+  beep(700, 0.04);
+  deckSig = ""; // força o redesenho da grade
+  $("deck").dataset.sliding = dir;
+  if (state) renderDeck(state);
+  setTimeout(() => delete $("deck").dataset.sliding, 320);
+}
+
+/* ── grade de botões ───────────────────────────────────────────────── */
+
+/**
+ * O conjunto de botões muda com o estado, então não dá para montar uma vez
+ * e esquecer. Mas redesenhar a cada quadro mataria as animações e cortaria
+ * um toque no meio. A saída é uma assinatura: só o que muda a ESTRUTURA
+ * (quais botões, em que ordem, habilitados) força remontagem; os números da
+ * face são atualizados no lugar, a cada atualização.
+ */
+function renderDeck(s) {
+  buildPages(s.pages || []);
+
+  const mine = (s.actions || []).filter((a) => (a.page || "main") === currentPage);
+  const sig = mine.map((a) => `${a.id}:${a.enabled ? 1 : 0}:${a.urgent ? 1 : 0}`).join("|");
+
+  if (sig !== deckSig) {
+    deckSig = sig;
+    const deck = $("deck");
+    deck.innerHTML = "";
+    let n = 0;
+    for (const g of ["permission", "control", "prompt"]) {
+      const items = mine.filter((a) => (a.group || "control") === g);
+      if (!items.length) continue;
+      const row = document.createElement("div");
+      row.className = "deck-row";
+      row.dataset.group = g;
+      row.style.gridTemplateColumns = `repeat(${colunas(items.length)}, 1fr)`;
+      for (const a of items) {
+        const b = makeButton(a);
+        b.style.animationDelay = `${Math.min(n++ * 22, 200)}ms`;
+        row.appendChild(b);
+      }
+      deck.appendChild(row);
+    }
+  }
+
+  paintBadges(mine);
+}
+
+/**
+ * Quantas colunas para N botões.
+ * Até cinco, uma fileira só. Acima disso, duas fileiras equilibradas — deixar
+ * o resto sozinho na segunda linha, ocupando um quinto da largura, faz o
+ * último botão parecer um erro de layout em vez de uma opção.
+ */
+function colunas(n) {
+  return n <= 5 ? n : Math.ceil(n / 2);
+}
+
+/** Atualiza só os números da face — sem remontar nada. */
+function paintBadges(actions) {
+  for (const a of actions) {
+    const btn = document.querySelector(`.btn[data-id="${a.id}"]`);
+    if (!btn) continue;
+
+    const el = btn.querySelector(".badge");
+    const bar = btn.querySelector(".badge-bar");
+    if (!a.badge) {
+      if (el) el.remove();
+      if (bar) bar.remove();
+      continue;
+    }
+    let target = el;
+    if (!target) {
+      target = document.createElement("span");
+      target.className = "badge";
+      btn.appendChild(target);
+    }
+    target.dataset.level = a.badge.level;
+    const html = fmtBadge(a.badge);
+    if (target.innerHTML !== html) target.innerHTML = html;
+
+    if (a.badge.bar != null) {
+      let barEl = bar;
+      if (!barEl) {
+        barEl = document.createElement("span");
+        barEl.className = "badge-bar";
+        barEl.innerHTML = "<i></i>";
+        btn.appendChild(barEl);
+      }
+      barEl.dataset.level = a.badge.level;
+      barEl.firstChild.style.width = `${a.badge.bar}%`;
+    } else if (bar) {
+      bar.remove();
+    }
   }
 }
 
 function makeButton(a) {
   const b = document.createElement("button");
   b.className = "btn";
+  b.type = "button";
   b.dataset.tone = a.tone || "neutral";
   b.dataset.id = a.id;
+  b.dataset.urgent = a.urgent ? "1" : "0";
+  b.disabled = a.enabled === false;
   if (a.confirm) b.dataset.needsConfirm = "1";
+  if (a.hold) b.dataset.hasHold = "1";
+
   b.innerHTML =
+    '<span class="hold-fill"></span>' +
     `<svg><use href="#i-${a.icon || "dot"}"></use></svg>` +
-    `<span class="btn-label">${a.label}</span>` +
-    (a.hint ? `<span class="btn-hint">${a.hint}</span>` : "");
-  b.addEventListener("pointerdown", (e) => ripple(b, e));
-  b.addEventListener("click", () => press(a, b));
+    `<span class="btn-label">${escapeHtml(a.label)}</span>` +
+    (a.hint ? `<span class="btn-hint">${escapeHtml(a.hint)}</span>` : "") +
+    (a.hold ? `<span class="hold-label">${escapeHtml(a.hold.label)}</span>` : "");
+
+  wireButton(b, a);
   return b;
+}
+
+/* ── toque, toque longo e confirmação ──────────────────────────────── */
+
+/**
+ * Um botão de parede precisa de três gestos distintos e sem ambiguidade:
+ *   toque curto  → ação principal
+ *   toque longo  → ação secundária (só onde `hold` existe)
+ *   toque duplo  → confirmação, nas ações que mudam o mundo
+ *
+ * Tudo por eventos de ponteiro. O `click` foi abandonado de propósito: com
+ * ele, um toque longo dispararia AS DUAS ações ao soltar o dedo.
+ */
+function wireButton(btn, a) {
+  let holdTimer = null;
+  let fired = false;
+
+  const startHold = (e) => {
+    if (btn.disabled) return;
+    lastInteraction = Date.now();
+    fired = false;
+    ripple(btn, e);
+    if (!a.hold) return;
+    btn.style.setProperty("--hold-ms", `${HOLD_MS}ms`);
+    btn.dataset.holding = "1";
+    holdTimer = setTimeout(() => {
+      fired = true;
+      delete btn.dataset.holding;
+      if (navigator.vibrate) navigator.vibrate([25, 40, 25]);
+      beep(420, 0.12);
+      fire(a.hold.id, btn);
+    }, HOLD_MS);
+  };
+
+  const endHold = () => {
+    clearTimeout(holdTimer);
+    holdTimer = null;
+    delete btn.dataset.holding;
+  };
+
+  btn.addEventListener("pointerdown", startHold);
+  btn.addEventListener("pointerup", () => {
+    endHold();
+    if (!fired) press(a, btn);
+  });
+  // Dedo escorregou para fora ou o navegador tomou o gesto: cancela tudo.
+  btn.addEventListener("pointerleave", () => {
+    endHold();
+    fired = true;
+  });
+  btn.addEventListener("pointercancel", () => {
+    endHold();
+    fired = true;
+  });
+  // Teclado nunca faz toque longo: Enter e Espaço são sempre a ação principal.
+  btn.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      press(a, btn);
+    }
+  });
 }
 
 function ripple(btn, e) {
@@ -289,8 +514,9 @@ function ripple(btn, e) {
 
 /**
  * Ações marcadas com `confirm` exigem dois toques.
- * "Sempre aprovar" e "commitar" mudam o mundo — um esbarrão no tablet não pode
- * disparar isso. A janela é curta o bastante para não virar burocracia.
+ * "Sempre aprovar", "limpar contexto" e "commitar" mudam o mundo — um
+ * esbarrão no tablet não pode disparar isso. A janela é curta o bastante
+ * para não virar burocracia.
  */
 function press(action, btn) {
   lastInteraction = Date.now();
@@ -324,13 +550,14 @@ async function fire(id, btn) {
     if (res.ok && data.ok) {
       flash(btn, "ok");
       beep(880, 0.07);
+      if (data.via === "chain") toast(`sequência: ${data.steps.join(" → ")}`, "ok");
     } else {
       flash(btn, "fail");
       beep(200, 0.16);
       toast(data.error || `erro ${res.status}`, "error");
       if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
     }
-  } catch (err) {
+  } catch {
     flash(btn, "fail");
     toast("deck fora de alcance", "error");
   }
@@ -343,26 +570,7 @@ function flash(btn, cls) {
   setTimeout(() => btn.classList.remove(cls), 760);
 }
 
-/** Habilita as decisões só quando existe permissão pendente de verdade. */
-function armButtons(s) {
-  const pending = s.gate && s.gate.pending.length > 0;
-  const gateOn = s.config.gateEnabled;
 
-  for (const btn of document.querySelectorAll(".btn[data-id]")) {
-    const a = s.actions.find((x) => x.id === btn.dataset.id);
-    if (!a || a.armed !== "gate") continue;
-    // Com o portão desligado, as teclas seguem valendo: não desabilita.
-    const armed = pending || !gateOn;
-    btn.dataset.armed = pending ? "1" : "0";
-    btn.disabled = !armed;
-  }
-
-  // A linha de decisões só ocupa espaço quando pode ser usada.
-  const row = document.querySelector('.deck-row[data-group="permission"]');
-  if (row) row.dataset.idle = gateOn && !pending ? "1" : "0";
-}
-
-/* ══════════════════════════════════ portão ══════════════════════════════ */
 
 let gateShownId = null;
 
@@ -401,14 +609,15 @@ function paintGate(s) {
     why.hidden = true;
   }
 
-  // Botões do cartão: reaproveitam as mesmas ações do deck.
+  // Botões do cartão: reaproveitam as mesmas ações do deck, com a mesma
+  // mecânica de confirmação. Remonta só quando o conjunto muda.
   const holder = $("gateActions");
-  if (holder.dataset.built !== "1") {
-    holder.dataset.built = "1";
+  const decisions = s.actions.filter((x) => x.group === "permission");
+  const sig = decisions.map((a) => a.id).join("|");
+  if (holder.dataset.sig !== sig) {
+    holder.dataset.sig = sig;
     holder.innerHTML = "";
-    for (const a of s.actions.filter((x) => x.group === "permission")) {
-      holder.appendChild(makeButton(a));
-    }
+    for (const a of decisions) holder.appendChild(makeButton(a));
   }
 }
 
@@ -505,8 +714,7 @@ function render(s) {
   paintGauge("7", s.usage.seven, s.burn && s.burn.seven, cfg);
   paintSpark(s.history);
   paintStats(s);
-  buildDeck(s.actions);
-  armButtons(s);
+  renderDeck(s);
   paintGate(s);
   paintDrawer(s);
 

@@ -86,25 +86,59 @@ node bin/claude-deck.js event waiting "oi" dispara um evento de teste
 npm test                                   63 testes, sem dependências
 ```
 
-## Personalizar os botões
+## O deck
 
-Tudo está em [`src/actions.js`](src/actions.js), num array só. A interface se
-monta a partir dele: adicionar um botão é adicionar um objeto.
+Não é um controle remoto de botões fixos. O conjunto muda conforme o que está
+acontecendo:
 
-Para mudar sem editar o código, coloque no `deck.config.json` (que fica fora do
-git). Um `id` que já existe **substitui** o embutido:
+- **Aparece quando serve.** "Aprovar" só existe quando há permissão pendente.
+  "Retomar" só aparece quando a quota passou de 90%.
+- **A face mostra o dado.** "Compactar" traz o uso de contexto e fica âmbar aos
+  70%, vermelho aos 85. "Interromper" vira cronômetro enquanto o Claude
+  trabalha. "Custo" mostra o gasto da sessão.
+- **O urgente sobe.** O botão que importa agora vai para o topo, na mesma
+  altura da mão.
+- **Toque longo é a segunda função.** Segure "Interromper" para "Parar tudo"
+  (dois `Esc`); segure "Compactar" para `/clear`.
+- **Três abas**: Controle, Prompts e Sessão. A aba avisa com um ponto quando
+  tem algo lá dentro — azul para destaque, vermelho pulsante para decisão.
+
+### Personalizar
+
+Tudo está em [`src/actions.js`](src/actions.js), num array só. Para mudar sem
+editar código, use o `deck.config.json` (fora do git). Um `id` que já existe
+**substitui** o embutido:
 
 ```json
 {
   "actions": [
-    { "id": "adr", "label": "Gerar ADR", "group": "prompt", "tone": "neutral",
+    { "id": "adr", "label": "Gerar ADR", "page": "prompts", "group": "prompt",
       "icon": "book", "kind": "text",
       "text": "escreva um ADR para a decisão que acabamos de tomar" },
+
+    { "id": "deploy", "label": "Publicar", "page": "sessao", "tone": "warn",
+      "icon": "power", "kind": "text", "text": "faça o deploy", "confirm": true,
+      "when":   { "status": ["idle"] },
+      "urgent": { "status": ["idle"] },
+      "badge":  { "source": "cost", "format": "usd" } },
 
     { "id": "allow", "keys": "2{Enter}" }
   ]
 }
 ```
+
+| Campo | Para quê |
+|---|---|
+| `when` | quando o botão existe — `status`, `gate`, `contextAbove`, `fiveAbove`, `sessionsAtLeast`, `anyOf` |
+| `urgent` | quando ele sobe para o topo (mesmo vocabulário) |
+| `badge` | número na face — `source` (`context`, `five`, `cost`, `elapsed`, `sessions`…), `format`, `warnAbove`, `critAbove` |
+| `hold` | id da ação disparada por toque longo |
+| `kind: "chain"` | `steps: [{ "action": "id" }, { "wait": 300 }]` |
+| `confirm` | exige toque duplo |
+| `secondary` | não vira botão próprio: só existe como destino de `hold` |
+
+Referência quebrada não derruba o painel: um `hold` para o nada é desarmado
+com aviso, e uma sequência inválida é descartada.
 
 ## Segurança, sem enrolação
 

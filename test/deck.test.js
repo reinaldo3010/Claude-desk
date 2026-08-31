@@ -371,3 +371,62 @@ test("servidor: SSE entrega o estado inicial e depois as mudanças", async () =>
     ctrl.abort();
   });
 });
+
+/* ═══════════════════════════ sequências no servidor ═════════════════════ */
+
+test("servidor: sequência executa os passos em ordem", async () => {
+  await withServer({}, async ({ base, deck }) => {
+    const r = await post(base, "/api/action?t=token-de-teste", { action: "panic" });
+    assert.equal(r.status, 200);
+    const body = await r.json();
+    assert.equal(body.ok, true);
+    assert.equal(body.via, "chain");
+    assert.deepEqual(body.steps, ["interrupt", "interrupt"]);
+  });
+});
+
+test("servidor: passo que falha aborta o resto da sequência", async () => {
+  // Injetor real sem alvo: a injeção recusa em vez de digitar na janela em
+  // foco. O injetor simulado não serviria aqui, porque ele não checa alvo.
+  await withServer({ DECK_INJECTOR: "xdotool", DECK_TARGET: "" }, async ({ base }) => {
+    const r = await post(base, "/api/action?t=token-de-teste", { action: "panic" });
+    assert.equal(r.status, 500);
+    const body = await r.json();
+    assert.equal(body.ok, false);
+    assert.match(body.error, /passo "interrupt"/);
+  });
+});
+
+test("servidor: o estado carrega deck resolvido e abas", async () => {
+  await withServer({}, async ({ base }) => {
+    const s = await (await fetch(base + "/api/state")).json();
+    assert.ok(Array.isArray(s.actions), "actions presente");
+    assert.ok(Array.isArray(s.pages), "pages presente");
+    assert.ok(s.pages.length >= 2, "mais de uma aba");
+    for (const a of s.actions) {
+      assert.ok(!("keys" in a) && !("text" in a), `${a.id} vazou conteúdo`);
+      assert.ok(typeof a.enabled === "boolean");
+    }
+  });
+});
+
+test("servidor: o deck responde ao estado sem reiniciar nada", async () => {
+  await withServer({}, async ({ base }) => {
+    // A assinatura estrutural é o que o painel usa para decidir se remonta a
+    // grade: quais botões, habilitados e urgentes. Comparar só os ids não
+    // serviria — um botão pode virar urgente sem trocar de posição.
+    const assinatura = (s) =>
+      s.actions.map((a) => `${a.id}:${a.enabled ? 1 : 0}:${a.urgent ? 1 : 0}`).join("|");
+
+    const antes = assinatura(await (await fetch(base + "/api/state")).json());
+    await post(base, "/api/hook", {
+      hook_event_name: "Notification",
+      session_id: "a",
+      notification_type: "permission_prompt",
+      message: "quer rodar npm",
+    });
+    const depois = assinatura(await (await fetch(base + "/api/state")).json());
+    assert.notEqual(antes, depois, "mudar de estado precisa mudar o deck");
+    assert.match(depois, /allow:1:1/, "os botões de decisão sobem quando o Claude espera");
+  });
+});

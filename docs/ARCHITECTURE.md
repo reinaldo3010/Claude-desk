@@ -35,6 +35,7 @@ Claude Code
 | `bin/claude-deck.js` | CLI: start, install, uninstall, doctor, dump, event |
 | `src/config.js` | precedência ambiente → `deck.config.json` → padrão |
 | `src/actions.js` | **catálogo único** de botões; a UI se monta a partir dele |
+| `src/deckengine.js` | resolve o deck para o estado: visibilidade, urgência, face |
 | `src/usage.js` | normaliza e agrega snapshots; histórico e taxa de queima |
 | `src/store.js` | eventos de hook → estado do painel |
 | `src/gate.js` | portão de permissão remota |
@@ -105,6 +106,40 @@ tempo todo, e até 2 segundos de atraso justamente no evento que importa.
 Com SSE o alerta aparece no instante do hook e o rádio dorme entre eventos.
 Há batimento a cada 25s (contra proxies e o Wi-Fi adormecendo) e queda
 automática para polling se o SSE não subir depois de duas tentativas.
+
+### O deck é resolvido a cada estado, não montado uma vez
+
+**Escolha:** `src/deckengine.js` decide, a cada atualização, quais botões
+existem, quais sobem para o topo e que número cada face mostra.
+
+Um deck de botões fixos é um controle remoto: você olha, procura, decide. O
+que separa disso um instrumento são três mecanismos, todos declarativos:
+
+| Mecanismo | Campo | Efeito |
+|---|---|---|
+| Visibilidade por contexto | `when` | "Aprovar" não fica morto esperando uma permissão que não veio |
+| Face viva | `badge` | "Compactar" mostra o uso de contexto e fica âmbar aos 70% |
+| Urgência | `urgent` | o botão que importa agora sobe para a mesma altura da mão |
+
+Mais dois gestos, para dobrar a superfície sem dobrar os botões: **toque
+longo** (`hold`) aponta para uma segunda ação, e **sequências** (`kind:
+"chain"`) executam passos com pausas — é assim que "Parar tudo" manda dois
+`Esc`, um para interromper e outro para limpar o que ficou digitado.
+
+**Custo aceito:** o conjunto de botões muda sozinho, então o painel precisa
+saber quando remontar a grade sem cortar um toque no meio. A saída é uma
+assinatura estrutural (`id:habilitado:urgente`): só ela força remontagem; os
+números da face são atualizados no lugar.
+
+**Vocabulário deliberadamente pequeno:** as condições combinam com E lógico e
+existe um único OU (`anyOf`). Ele entrou porque um caso real precisava — os
+botões de decisão aparecem com permissão pendente **ou** com o portão
+desligado (aí eles valem pelo fallback de teclas). Um DSL maior seria mais
+poderoso e menos testável.
+
+**Sequência de sequência é impossível por construção**, não por detecção: a
+montagem recusa, e o servidor limita a profundidade a um. Ciclo não precisa
+ser procurado.
 
 ### Um único catálogo de ações
 

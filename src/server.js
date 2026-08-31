@@ -28,6 +28,7 @@ const { History, readSessions, aggregate } = require("./usage");
 const { inject } = require("./inject");
 const oauth = require("./oauth");
 const actionsLib = require("./actions");
+const engine = require("./deckengine");
 const sec = require("./security");
 
 const MIME = {
@@ -133,7 +134,7 @@ class Deck {
     const seven = usage.limits.seven_day?.pct ?? null;
     this.history.push(now, five, seven);
 
-    return {
+    const snapshot = {
       now,
       status: this.store.status,
       headline: this.store.headline,
@@ -177,7 +178,6 @@ class Deck {
         live: this.isLive(s, now),
       })),
       gate: this.gate.snapshot(),
-      actions: actionsLib.toPublic(this.actions),
       config: {
         warnAt: this.cfg.warnPercent,
         alertAt: this.cfg.alertPercent,
@@ -188,6 +188,13 @@ class Deck {
       },
       warnings: this.warnings.slice(-5),
     };
+
+    // O deck é resolvido DEPOIS do resto: quais botões aparecem, quais sobem
+    // para o topo e que número cada face mostra são funções do estado que
+    // acabamos de montar.
+    snapshot.actions = engine.resolve(this.actions, snapshot);
+    snapshot.pages = engine.pagesOf(this.actions, snapshot);
+    return snapshot;
   }
 
   /**
@@ -227,9 +234,33 @@ class Deck {
   }
 
   /** Executa uma ação do painel. */
-  async runAction(id, { by = "deck" } = {}) {
+  async runAction(id, { by = "deck", depth = 0 } = {}) {
     const action = this.actions.find((a) => a.id === id);
     if (!action) return { ok: false, code: 404, error: "ação desconhecida" };
+
+    // Sequências: passos executados em ordem, com as pausas declaradas.
+    // A profundidade é limitada a 1 (uma chain não chama outra chain), o que
+    // torna ciclo impossível por construção em vez de por detecção.
+    if (action.kind === "chain") {
+      if (depth > 0) return { ok: false, code: 409, error: "sequência aninhada não é permitida" };
+      const done = [];
+      for (const step of action.steps) {
+        if (step.wait) {
+          await new Promise((r) => setTimeout(r, Math.min(5000, step.wait)));
+          continue;
+        }
+        const r = await this.runAction(step.action, { by, depth: depth + 1 });
+        done.push(step.action);
+        // Um passo que falha aborta o resto: metade de uma sequência no
+        // terminal é pior do que nenhuma.
+        if (!r.ok) {
+          this.audit({ action: id, by, via: "chain", abortedAt: step.action, error: r.error });
+          return { ok: false, code: r.code || 500, error: `passo "${step.action}": ${r.error}`, done };
+        }
+      }
+      this.audit({ action: id, by, via: "chain", steps: done });
+      return { ok: true, via: "chain", steps: done };
+    }
 
     // Decisões tentam o portão primeiro: é o caminho preciso.
     if (action.kind === "decision") {
