@@ -1,0 +1,25 @@
+# segredos e estado local — nunca versionar
+.deck-token
+deck.config.json
+deck.local.json
+settings.json
+usage-cache.json
+usage-exact.json
+.deck-state/
+audit.log
+
+# node
+node_modules/
+npm-debug.log*
+*.tsbuildinfo
+
+# sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# build / temporários
+dist/
+coverage/
+*.log
+*.tmp
