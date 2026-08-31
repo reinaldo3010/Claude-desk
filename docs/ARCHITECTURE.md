@@ -66,9 +66,11 @@ significaria depender do formato dele e quebrar quando ele mudasse.
 
 **Escolha:** `{"type": "http", "url": "…/api/hook", "async": true, "timeout": 5}`.
 
-Alternativa descartada: script `.cmd` chamando `curl`. Ela precisa de um
-arquivo por plataforma, perde o payload estruturado, e exige provar que o
-`curl` não trava o Claude Code quando o deck está desligado.
+Alternativa descartada: script `.cmd` chamando `curl` (era o caminho do
+esqueleto). Ela precisa de um arquivo por plataforma, perde o payload
+estruturado, e exige provar que o `curl` não trava o Claude Code quando o deck
+está desligado. O `deck-event.cmd` original não estava entre os arquivos
+recebidos — a comparação é com o mecanismo descrito, não com aquele código.
 
 Com `async: true` o hook não espera resposta e não entra na conta do timeout.
 Deck desligado é um POST que falha na hora, invisível.

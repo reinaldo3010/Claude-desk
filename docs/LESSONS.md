@@ -76,10 +76,18 @@ diferença entre sistemas operacionais.
 
 **Terceiro, o travamento.** A preocupação do esqueleto era legítima ("confirme
 que os hooks nunca travam o Claude Code se o deck estiver desligado") mas a
-solução era frágil: um `.cmd` que sai com 0 de propósito, mais um timeout de
-`curl` para validar. Hooks HTTP com `"async": true` não esperam resposta e não
-entram na conta do timeout. O problema deixa de existir por construção, em vez
-de ser contornado.
+solução, pela descrição, era frágil: um `.cmd` que sai com 0 de propósito, mais
+um timeout de `curl` para validar. Hooks HTTP com `"async": true` não esperam
+resposta e não entram na conta do timeout. O problema deixa de existir por
+construção, em vez de ser contornado.
+
+> **Ressalva de procedência.** Dos seis arquivos que o prompt original listava,
+> dois não chegaram junto: `deck-event.cmd` e `claude-deck.ahk`. O que este
+> documento diz sobre o `.cmd` vem da descrição no próprio prompt e das
+> chamadas a ele no `hooks-snippet.json` e no `INSTALL.md` — não da leitura do
+> arquivo. E o `install/claude-deck.ahk` deste repositório é uma reescrita do
+> zero, não uma revisão do original: nenhuma comparação com o script anterior
+> foi feita, então um detalhe que ele resolvesse bem pode ter se perdido.
 
 ## O "aperte 1" era uma roleta
 
