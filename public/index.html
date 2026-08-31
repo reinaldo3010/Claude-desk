@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#05070C">
+<meta name="theme-color" content="#100F0D">
 <meta name="color-scheme" content="dark">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -24,7 +24,7 @@
 
   <!-- ── faixa de estado ─────────────────────────────────────────── -->
   <header class="ribbon" id="ribbon">
-    <span class="beacon" aria-hidden="true"><i></i><i></i></span>
+    <span class="mark-slot" id="markSlot"></span>
     <div class="ribbon-text">
       <h1 id="headline">Conectando</h1>
       <p id="detail"></p>
@@ -153,6 +153,7 @@
 <!-- ── protetor de tela ──────────────────────────────────────────── -->
 <div class="saver" id="saver" hidden>
   <div class="saver-inner" id="saverInner">
+    <div class="saver-mark" id="saverMark"></div>
     <time id="saverClock">--:--</time>
     <div class="saver-bars">
       <span><i id="saverBar5"></i></span>

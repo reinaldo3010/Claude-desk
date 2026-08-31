@@ -1,8 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#05070C"/>
-  <circle cx="256" cy="256" r="150" fill="none" stroke="#16202F" stroke-width="34"/>
-  <circle cx="256" cy="256" r="150" fill="none" stroke="#34D8A0" stroke-width="34"
-          stroke-linecap="round" stroke-dasharray="612 942"
-          transform="rotate(135 256 256)"/>
-  <circle cx="256" cy="256" r="46" fill="#34D8A0"/>
+<!-- A marca do painel, mesma geometria de marcaClaude() em public/deck.js.
+     O símbolo e o nome Claude são marcas da Anthropic; este é um painel
+     pessoal, não um produto oficial. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect width="100" height="100" rx="22" fill="#100F0D"/>
+  <g transform="translate(50 50)" fill="#D97757">
+      <path d="M -2.05 -7 L -3.9 -43.1 A 3.9 3.9 0 0 1 3.9 -43.1 L 2.05 -7 Z" transform="rotate(0)"/>
+      <path d="M -2.05 -7 L -3.9 -41.4 A 3.9 3.9 0 0 1 3.9 -41.4 L 2.05 -7 Z" transform="rotate(30)"/>
+      <path d="M -2.05 -7 L -3.9 -39.7 A 3.9 3.9 0 0 1 3.9 -39.7 L 2.05 -7 Z" transform="rotate(60)"/>
+      <path d="M -2.05 -7 L -3.9 -43.1 A 3.9 3.9 0 0 1 3.9 -43.1 L 2.05 -7 Z" transform="rotate(90)"/>
+      <path d="M -2.05 -7 L -3.9 -41.4 A 3.9 3.9 0 0 1 3.9 -41.4 L 2.05 -7 Z" transform="rotate(120)"/>
+      <path d="M -2.05 -7 L -3.9 -39.7 A 3.9 3.9 0 0 1 3.9 -39.7 L 2.05 -7 Z" transform="rotate(150)"/>
+      <path d="M -2.05 -7 L -3.9 -43.1 A 3.9 3.9 0 0 1 3.9 -43.1 L 2.05 -7 Z" transform="rotate(180)"/>
+      <path d="M -2.05 -7 L -3.9 -41.4 A 3.9 3.9 0 0 1 3.9 -41.4 L 2.05 -7 Z" transform="rotate(210)"/>
+      <path d="M -2.05 -7 L -3.9 -39.7 A 3.9 3.9 0 0 1 3.9 -39.7 L 2.05 -7 Z" transform="rotate(240)"/>
+      <path d="M -2.05 -7 L -3.9 -43.1 A 3.9 3.9 0 0 1 3.9 -43.1 L 2.05 -7 Z" transform="rotate(270)"/>
+      <path d="M -2.05 -7 L -3.9 -41.4 A 3.9 3.9 0 0 1 3.9 -41.4 L 2.05 -7 Z" transform="rotate(300)"/>
+      <path d="M -2.05 -7 L -3.9 -39.7 A 3.9 3.9 0 0 1 3.9 -39.7 L 2.05 -7 Z" transform="rotate(330)"/>
+      <circle r="5.8"/>
+  </g>
 </svg>

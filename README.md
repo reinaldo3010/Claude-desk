@@ -83,7 +83,7 @@ node bin/claude-deck.js uninstall          desfaz o registro
 node bin/claude-deck.js doctor             diagnóstico da máquina
 node bin/claude-deck.js dump               imprime o que o deck está lendo
 node bin/claude-deck.js event waiting "oi" dispara um evento de teste
-npm test                                   124 testes, sem dependências
+npm test                                   130 testes, sem dependências
 ```
 
 ## Comparação com o Codex Micro
@@ -136,6 +136,42 @@ app desktop não a executa. O estado, o modo de permissão e o nível de esforç
 continuam funcionando nos dois, porque vêm dos hooks — que carregam
 `permission_mode` e `effort.level` em todo evento. Sem quota, os medidores
 encolhem sozinhos e o espaço vai para os botões.
+
+## A cara do painel
+
+A identidade é do Claude, e ela mora nos dois lugares que sobrevivem a um
+aparelho fraco: **a paleta e a marca**.
+
+- **A laranja do Claude é o único acento.** `#D97757` na marca, no marcador de
+  aba, no seletor aceso, no traço do gráfico. O fundo é carvão quente, não o
+  azul-preto de dashboard genérico que estava aqui antes.
+- **A marca é o indicador de estado.** Ela não fica ao lado do estado — o jeito
+  como ela se move *é* o estado. Ocioso: respira devagar. Trabalhando: uma onda
+  percorre as doze lâminas, que é a leitura de "pensando" que se entende de
+  longe sem ler uma palavra. Esperando você: o conjunto inteiro pulsa em
+  vermelho. Erro: pisca duas vezes.
+- **Ela é geometria, não imagem.** Desenhada em `marcaClaude()`, herda a cor do
+  tema, escala sem borrar, e o mesmo cálculo gera o `public/icon.svg` — o
+  atalho no tablet e o painel são a mesma forma.
+- **O fundo é um shader.** Um triângulo em tela cheia e um *fragment shader*
+  escrito à mão: um campo de luz que escorre e muda de cor com o estado.
+
+### Por que não three.js
+
+Foi considerado e recusado. O three.js é um grafo de cena — existe para
+administrar centenas de objetos, câmeras e luzes; aqui há **um** retângulo.
+Seriam ~600 KB de download, parse e memória num tablet de sete anos para
+desenhar o que cabe em trinta linhas de GLSL.
+
+E o WebGL cru não é só mais leve: é **mais barato que o fundo anterior**, que
+era a CPU pintando três gradientes gigantes a 24 fps. Agora é a placa
+calculando pixels a meia resolução. Abaixo dele há dois degraus, e nenhum é
+tela preta: sem WebGL cai para o canvas 2D; no modo leve, para o gradiente
+estático. A identidade continua lá nos dois, porque ela está na paleta e na
+marca — não no fundo.
+
+O nome e o símbolo do Claude são marcas da Anthropic. Este é um painel pessoal
+para controlar o Claude Code, não um produto oficial.
 
 ## O deck
 

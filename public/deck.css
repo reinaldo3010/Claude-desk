@@ -2,7 +2,12 @@
    Claude Deck — folha de estilo
    -----------------------------------------------------------------------------
    Alvo: tablet Android antigo, paisagem, quiosque, visto a três metros.
-   Por isso três regras guiam tudo aqui:
+   Por isso quatro regras guiam tudo aqui:
+
+     0. A identidade mora na paleta e na marca, não no fundo animado. O fundo
+        é a primeira coisa que morre no aparelho fraco; se a identidade
+        estivesse nele, ela desapareceria justamente onde mais precisa
+        aparecer.
 
      1. Animar só `transform` e `opacity`. São as duas propriedades que a GPU
         resolve sozinha; qualquer outra coisa força recálculo de layout e
@@ -14,32 +19,48 @@
    ========================================================================== */
 
 :root {
-  /* fundo em camadas — quase preto com viés azul, confortável à noite */
-  --bg-0: #05070C;
-  --bg-1: #0A0F18;
-  --panel: rgba(255, 255, 255, .035);
-  --panel-strong: rgba(255, 255, 255, .06);
-  --rule: rgba(255, 255, 255, .09);
-  --rule-bright: rgba(255, 255, 255, .16);
+  /* ── identidade ────────────────────────────────────────────────────
+     A laranja do Claude é o único acento da interface: a marca, o
+     marcador de aba, o seletor aceso, o traço do gráfico. Os estados
+     (verde, âmbar, vermelho) seguem semânticos e foram reafinados para
+     conviver com ela sem briga de matiz.
 
-  --text: #EAF0F7;
-  --dim: #7E8CA0;
-  --faint: #4A5568;
+     O alerta é deliberadamente mais saturado que a laranja da marca.
+     A três metros, matiz parecido vira matiz igual — o que separa os
+     dois é a saturação e o pulso, não o tom. */
+  --claude: #D97757;
+  --claude-lit: #EC9271;
+  --claude-deep: #7C3A20;
+  --claude-veil: rgba(217, 119, 87, .13);
+
+  /* fundo em camadas — carvão quente, não azul. É o que distingue o
+     painel do Claude de qualquer painel escuro genérico. */
+  --bg-0: #100F0D;
+  --bg-1: #1A1815;
+  --bg-2: #23201C;
+  --panel: rgba(245, 240, 230, .040);
+  --panel-strong: rgba(245, 240, 230, .075);
+  --rule: rgba(245, 240, 230, .10);
+  --rule-bright: rgba(217, 119, 87, .34);
+
+  --text: #F4F1EA;
+  --dim: #A8A29A;
+  --faint: #6C665E;
 
   /* semântica de estado */
-  --go: #34D8A0;
-  --go-deep: #0E7A5C;
-  --warn: #F2B544;
-  --warn-deep: #8A6314;
-  --stop: #FF5C48;
-  --stop-deep: #8E241A;
-  --accent: #6AA6FF;
-  --accent-deep: #1E4C8F;
+  --go: #4FB286;
+  --go-deep: #155844;
+  --warn: #E3A44F;
+  --warn-deep: #7C5416;
+  --stop: #FF3B30;
+  --stop-deep: #8A150E;
+  --accent: var(--claude);
+  --accent-deep: var(--claude-deep);
 
   /* gradiente do arco, trocado por JS conforme o nível */
   --arc-a: var(--go);
-  --arc-b: #5BE6C8;
-  --glow: rgba(52, 216, 160, .40);
+  --arc-b: #6FD3A8;
+  --glow: rgba(79, 178, 134, .40);
 
   --gap: clamp(10px, 1.5vw, 22px);
   --radius: 14px;
@@ -83,12 +104,12 @@ body {
 }
 [data-lite="1"] #aurora { display: none; }
 [data-lite="1"] body,
-[data-lite="1"] { background: radial-gradient(120% 90% at 50% 0%, #0C1524 0%, #05070C 70%); }
+[data-lite="1"] { background: radial-gradient(120% 90% at 50% 0%, #221E19 0%, #100F0D 70%); }
 
 /* Vinheta: escurece as bordas e faz o centro parecer iluminado. */
 .vignette {
   position: fixed; inset: 0; z-index: 1; pointer-events: none;
-  background: radial-gradient(115% 85% at 50% 42%, transparent 40%, rgba(0,0,0,.55) 100%);
+  background: radial-gradient(115% 85% at 50% 42%, transparent 40%, rgba(0,0,0,.38) 100%);
 }
 
 /* Halo nas bordas — respira quando o Claude está esperando por você. */
@@ -98,7 +119,7 @@ body {
   box-shadow: inset 0 0 clamp(60px, 9vw, 130px) var(--stop);
   transition: opacity .5s ease;
 }
-[data-state="waiting"] .edge-glow { opacity: .5; animation: breathe 2.6s ease-in-out infinite; }
+[data-state="waiting"] .edge-glow { opacity: .42; animation: breathe 2.6s ease-in-out infinite; }
 [data-state="error"]   .edge-glow { opacity: .38; box-shadow: inset 0 0 90px var(--warn); }
 @keyframes breathe { 50% { opacity: .12; } }
 
@@ -132,25 +153,103 @@ body {
   transition: background .45s ease, border-color .45s ease, box-shadow .45s ease;
   overflow: hidden;
 }
-[data-lite="1"] .ribbon { backdrop-filter: none; background: #0C1220; }
+[data-lite="1"] .ribbon { backdrop-filter: none; background: var(--bg-1); }
 
-/* Farol: um núcleo e um anel que se expande — pulso de radar. */
-.beacon { position: relative; width: 14px; height: 14px; flex: 0 0 auto; }
-.beacon i {
-  position: absolute; inset: 0; border-radius: 50%;
-  background: var(--dim);
-  transition: background .4s ease;
+/* ── a marca do Claude ─────────────────────────────────────────────────
+   O farol antigo era um ponto colorido: dizia o estado, não dizia de quem
+   era o painel. A marca faz as duas coisas — é a identidade e é o
+   indicador, porque a forma como ela se move É o estado.
+
+   Regra de custo: as lâminas animam só `opacity`; o conjunto anima só
+   `transform`. Nada aqui força recálculo de layout, e a `transform-origin`
+   fica no elemento inteiro (nunca num nó SVG interno, onde o
+   `transform-box` de WebView antigo é imprevisível). */
+
+.marca {
+  position: relative; flex: 0 0 auto;
+  width: var(--marca-tam, 44px); height: var(--marca-tam, 44px);
+  display: grid; place-items: center;
 }
-.beacon i:last-child { opacity: 0; }
-[data-state="working"] .beacon i { background: var(--go); }
-[data-state="working"] .beacon i:last-child { opacity: 1; animation: radar 1.8s var(--ease-out) infinite; }
-[data-state="waiting"] .beacon i { background: var(--stop); }
-[data-state="waiting"] .beacon i:last-child { opacity: 1; animation: radar 1s var(--ease-out) infinite; }
-[data-state="error"]   .beacon i { background: var(--warn); }
-@keyframes radar {
-  0%   { transform: scale(1);   opacity: .7; }
-  100% { transform: scale(3.4); opacity: 0; }
+.marca-svg {
+  position: relative; z-index: 1;
+  width: 100%; height: 100%; overflow: visible;
+  transform-origin: 50% 50%;
 }
+.lamina, .marca-nucleo {
+  fill: var(--marca-cor, var(--claude));
+  transition: fill .55s ease;
+}
+.lamina { opacity: .82; }
+.marca-nucleo { opacity: .95; }
+
+/* Halo: a luz que a marca lança no painel. Só opacidade muda. */
+.marca-halo {
+  position: absolute; inset: -38%;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    var(--marca-cor, var(--claude)) 0%, transparent 68%);
+  opacity: .13;
+  transition: opacity .6s ease;
+  pointer-events: none;
+}
+
+/* ── estados ────────────────────────────────────────────────────────
+   Ocioso respira. Trabalhando, uma onda percorre as lâminas: é a leitura
+   de "pensando" que se entende de longe sem ler uma palavra. Esperando,
+   o conjunto inteiro pulsa em vermelho. Erro pisca duas vezes e para. */
+
+[data-state="idle"] .marca-svg { animation: marca-respira 5.4s ease-in-out infinite; }
+[data-state="idle"] .lamina    { animation: marca-cintila 6.2s ease-in-out infinite;
+                                 animation-delay: calc(var(--i) * -.42s); }
+
+[data-state="working"] .marca { --marca-cor: var(--claude-lit); }
+[data-state="working"] .marca-halo { opacity: .3; }
+[data-state="working"] .marca-svg { animation: marca-gira 9s linear infinite; }
+[data-state="working"] .lamina {
+  animation: marca-onda 1.45s ease-in-out infinite;
+  animation-delay: calc(var(--i) * -.121s);   /* 1.45s ÷ 12 lâminas */
+}
+
+[data-state="waiting"] .marca { --marca-cor: var(--stop); }
+[data-state="waiting"] .marca-halo { opacity: .42; animation: marca-alerta 1s ease-in-out infinite; }
+[data-state="waiting"] .marca-svg { animation: marca-chama 1s ease-in-out infinite; }
+[data-state="waiting"] .lamina { opacity: 1; }
+
+[data-state="error"] .marca { --marca-cor: var(--warn); }
+[data-state="error"] .marca-svg { animation: marca-pisca 2.4s ease-in-out infinite; }
+
+[data-state="offline"] .marca { --marca-cor: var(--faint); }
+[data-state="offline"] .marca-halo { opacity: 0; }
+[data-state="offline"] .lamina { opacity: .34; }
+
+[data-state="boot"] .marca-svg { animation: marca-nasce 1.1s var(--ease-out) both; }
+[data-state="boot"] .lamina {
+  animation: marca-acende .7s var(--ease-out) both;
+  animation-delay: calc(var(--i) * .055s);
+}
+
+@keyframes marca-respira { 50% { transform: scale(1.04); } }
+@keyframes marca-cintila { 0%, 100% { opacity: .72; } 50% { opacity: .95; } }
+@keyframes marca-gira    { to { transform: rotate(360deg); } }
+@keyframes marca-onda    { 0%, 100% { opacity: .3; } 18% { opacity: 1; } }
+@keyframes marca-chama   { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+@keyframes marca-alerta  { 50% { opacity: .16; } }
+@keyframes marca-pisca   { 0%, 12%, 24%, 100% { opacity: 1; } 6%, 18% { opacity: .25; } }
+@keyframes marca-nasce   { from { transform: scale(.5) rotate(-40deg); opacity: 0; } }
+@keyframes marca-acende  { from { opacity: 0; } to { opacity: .82; } }
+
+/* No modo leve sobra a marca parada: identidade sem custo de quadro. */
+[data-lite="1"] .marca-svg,
+[data-lite="1"] .lamina { animation: none !important; }
+[data-lite="1"] .marca-halo { opacity: .1; }
+
+/* Quem pediu menos movimento no sistema recebe menos movimento. */
+@media (prefers-reduced-motion: reduce) {
+  .marca-svg, .lamina, .marca-halo { animation: none !important; }
+}
+
+.marca-fita { --marca-tam: clamp(46px, 5.6vw, 78px); }
+.marca-protetor { --marca-tam: clamp(90px, 13vw, 160px); margin: 0 auto .5em; }
 
 .ribbon-text { min-width: 0; flex: 1; }
 .ribbon-text h1 {
@@ -168,7 +267,7 @@ body {
   font-size: clamp(11px, 1.2vw, 14px); color: var(--accent);
   border: 1px solid var(--accent-deep); border-radius: 999px;
   padding: .28em .8em; white-space: nowrap;
-  background: rgba(106,166,255,.08);
+  background: rgba(217,119,87,.08);
 }
 .elapsed {
   font-size: clamp(13px, 1.6vw, 19px); color: var(--dim);
@@ -176,11 +275,11 @@ body {
 }
 
 [data-state="waiting"] .ribbon {
-  background: linear-gradient(100deg, rgba(255,92,72,.22), rgba(255,92,72,.07));
-  border-color: rgba(255,92,72,.5);
-  box-shadow: 0 0 40px rgba(255,92,72,.18);
+  background: linear-gradient(100deg, rgba(255,59,48,.22), rgba(255,59,48,.07));
+  border-color: rgba(255,59,48,.5);
+  box-shadow: 0 0 40px rgba(255,59,48,.18);
 }
-[data-state="error"] .ribbon { border-color: rgba(242,181,68,.45); }
+[data-state="error"] .ribbon { border-color: rgba(227,164,79,.45); }
 [data-state="offline"] .ribbon { opacity: .55; }
 
 .tab-toggle {
@@ -216,12 +315,12 @@ body {
   min-height: 0; position: relative; overflow: hidden;
   transition: border-color .5s ease, box-shadow .5s ease;
 }
-[data-lite="1"] .gauge { backdrop-filter: none; background: #0A111D; }
+[data-lite="1"] .gauge { backdrop-filter: none; background: var(--bg-1); }
 
-.gauge[data-level="warn"] { border-color: rgba(242,181,68,.34); }
+.gauge[data-level="warn"] { border-color: rgba(227,164,79,.34); }
 .gauge[data-level="crit"] {
-  border-color: rgba(255,92,72,.45);
-  box-shadow: 0 0 34px rgba(255,92,72,.14), inset 0 0 40px rgba(255,92,72,.05);
+  border-color: rgba(255,59,48,.45);
+  box-shadow: 0 0 34px rgba(255,59,48,.14), inset 0 0 40px rgba(255,59,48,.05);
 }
 
 .gauge h2 {
@@ -235,10 +334,17 @@ body {
   position: relative; flex: 1 1 auto; min-height: 0; width: 100%;
   display: grid; place-items: center;
 }
-/* Sem aspect-ratio: o viewBox do SVG já mantém o círculo redondo e o
-   preserveAspectRatio padrão o encaixa na caixa. Forçar 1:1 aqui fazia o
-   mostrador estourar a altura do cartão e cobrir o rodapé. */
-.dial svg { width: 100%; height: 100%; overflow: visible; }
+/* O SVG é posicionado em absoluto de propósito. Com ele no fluxo, um
+   `height: 100%` cai na razão intrínseca 1:1 do viewBox sempre que a altura
+   do pai é indefinida — medido: 400,7 px de SVG numa caixa de 234,3 px, e o
+   arco descia por cima do rodapé. Tirar o `aspect-ratio` não bastava, porque
+   quem impunha o quadrado era o próprio viewBox. Em absoluto com `inset: 0`
+   a caixa vem do pai, que tem altura definida, e o `preserveAspectRatio`
+   encaixa o círculo dentro dela. */
+.dial svg {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; overflow: visible;
+}
 
 .dial circle {
   fill: none;
@@ -250,7 +356,7 @@ body {
   /* 2π·84 = 527.79 · três quartos disso = 395.84 */
   stroke-dasharray: 395.84 527.79;
 }
-.dial-track { stroke: rgba(255,255,255,.055); }
+.dial-track { stroke: rgba(245,240,230,.055); }
 
 /* Arco fantasma: onde o consumo vai chegar no ritmo atual. */
 .dial-ghost {
@@ -279,7 +385,7 @@ body {
 .odometer { display: flex; align-items: baseline; }
 .odo-digit {
   height: 1em; overflow: hidden; position: relative;
-  font-size: clamp(46px, 7.2vw, 104px); font-weight: 650; letter-spacing: -.055em;
+  font-size: clamp(40px, 6vw, 88px); font-weight: 650; letter-spacing: -.055em;
   line-height: 1;
 }
 .odo-col {
@@ -289,7 +395,7 @@ body {
 }
 .odo-col span { height: 1em; line-height: 1; display: block; }
 .odo-static {
-  font-size: clamp(46px, 7.2vw, 104px); font-weight: 650; letter-spacing: -.055em;
+  font-size: clamp(40px, 6vw, 88px); font-weight: 650; letter-spacing: -.055em;
   line-height: 1; color: var(--faint);
 }
 .unit {
@@ -303,13 +409,11 @@ body {
 
 .gauge footer {
   flex: 0 0 auto; width: 100%; position: relative; z-index: 1;
-  /* Fundo próprio e opaco. Herdar o do cartão trazia junto a transparência
-     dele, e a ponta do arco aparecia atrás do texto "Reseta em". */
-  background: linear-gradient(to top, rgba(6, 9, 15, .94), rgba(6, 9, 15, .78));
-  border-radius: 0 0 8px 8px;
+  /* Sem fundo. Ele existia para esconder a ponta do arco que passava por
+     trás de "Reseta em" — com o SVG contido na própria caixa isso não
+     acontece mais, e a tarja escura só ficava atravessando o cartão. */
   display: flex; justify-content: space-between; align-items: baseline; gap: .8em;
   padding-top: clamp(6px, 1vh, 12px);
-  border-top: 1px solid var(--rule);
   font-size: clamp(11px, 1.2vw, 14px); color: var(--dim);
 }
 .gauge footer b {
@@ -329,7 +433,7 @@ body {
   padding: clamp(10px, 1.4vh, 18px);
   min-height: 0;
 }
-[data-lite="1"] .spark-card, [data-lite="1"] .stats { backdrop-filter: none; background: #0A111D; }
+[data-lite="1"] .spark-card, [data-lite="1"] .stats { backdrop-filter: none; background: var(--bg-1); }
 
 .spark-card { flex: 1 1 auto; display: flex; flex-direction: column; position: relative; }
 .spark-card h3 {
@@ -376,7 +480,7 @@ body {
   min-height: clamp(56px, 9.5vh, 92px);
   border: 1px solid var(--rule);
   border-radius: 12px;
-  background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.015));
+  background: linear-gradient(180deg, rgba(245,240,230,.055), rgba(245,240,230,.015));
   color: var(--text); font: inherit; cursor: pointer;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: .18em; padding: .4em .5em;
@@ -399,26 +503,26 @@ body {
 .btn[data-tone="warn"]::before   { background: var(--warn); }
 .btn[data-tone="accent"]::before { background: var(--accent); }
 
-.btn:active { transform: scale(.965); background: rgba(255,255,255,.09); }
+.btn:active { transform: scale(.965); background: rgba(245,240,230,.09); }
 .btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
 .btn[disabled] { opacity: .3; cursor: not-allowed; }
 .btn[data-armed="1"] { opacity: 1; }
 .btn[data-armed="1"][data-tone="go"] {
-  border-color: rgba(52,216,160,.5);
-  box-shadow: 0 0 24px rgba(52,216,160,.18);
+  border-color: rgba(79,178,134,.5);
+  box-shadow: 0 0 24px rgba(79,178,134,.18);
   animation: armed 2s ease-in-out infinite;
 }
-@keyframes armed { 50% { box-shadow: 0 0 8px rgba(52,216,160,.06); } }
+@keyframes armed { 50% { box-shadow: 0 0 8px rgba(79,178,134,.06); } }
 
 /* Confirmação em dois toques: o botão vira contagem regressiva. */
-.btn[data-confirm="pending"] { border-color: var(--warn); background: rgba(242,181,68,.12); }
+.btn[data-confirm="pending"] { border-color: var(--warn); background: rgba(227,164,79,.12); }
 .btn[data-confirm="pending"] .btn-label::after { content: " · confirmar"; color: var(--warn); }
 
 /* Ondulação a partir do ponto tocado. */
 .ripple {
   position: absolute; border-radius: 50%; pointer-events: none;
-  background: radial-gradient(circle, rgba(255,255,255,.5), transparent 70%);
+  background: radial-gradient(circle, rgba(255,255,255,.55), transparent 70%);
   transform: translate(-50%, -50%) scale(0);
   animation: ripple .55s var(--ease-out) forwards;
 }
@@ -426,8 +530,8 @@ body {
 
 .btn.ok   { animation: flashOk .7s var(--ease-out); }
 .btn.fail { animation: flashFail .7s var(--ease-out); }
-@keyframes flashOk   { 0%,100% { background: rgba(255,255,255,.03); } 22% { background: rgba(52,216,160,.42); } }
-@keyframes flashFail { 0%,100% { background: rgba(255,255,255,.03); } 12%,44% { background: rgba(255,92,72,.42); } 28% { background: rgba(255,255,255,.03); } }
+@keyframes flashOk   { 0%,100% { background: rgba(245,240,230,.03); } 22% { background: rgba(79,178,134,.42); } }
+@keyframes flashFail { 0%,100% { background: rgba(245,240,230,.03); } 12%,44% { background: rgba(255,59,48,.42); } 28% { background: rgba(245,240,230,.03); } }
 
 /* ── cartão de permissão ───────────────────────────────────────────── */
 
@@ -445,15 +549,15 @@ body {
 .gate-card {
   width: min(760px, 100%); max-height: 100%; overflow: auto;
   border: 1px solid var(--rule-bright); border-radius: 18px;
-  background: linear-gradient(165deg, #101827, #080C14);
+  background: linear-gradient(165deg, #262219, #14120F);
   padding: clamp(16px, 2.4vh, 30px);
   box-shadow: 0 30px 90px rgba(0,0,0,.65);
   animation: riseIn .4s var(--ease-out);
 }
 @keyframes riseIn { from { transform: translateY(26px) scale(.97); opacity: 0; } }
 
-.gate-card[data-risk="high"]   { border-color: rgba(255,92,72,.55); box-shadow: 0 30px 90px rgba(0,0,0,.65), 0 0 60px rgba(255,92,72,.15); }
-.gate-card[data-risk="medium"] { border-color: rgba(242,181,68,.42); }
+.gate-card[data-risk="high"]   { border-color: rgba(255,59,48,.55); box-shadow: 0 30px 90px rgba(0,0,0,.65), 0 0 60px rgba(255,59,48,.15); }
+.gate-card[data-risk="medium"] { border-color: rgba(227,164,79,.42); }
 
 .gate-card header { display: flex; align-items: center; gap: .8em; margin-bottom: .9em; }
 .gate-card h2 { font-size: clamp(15px, 1.9vw, 23px); font-weight: 600; letter-spacing: -.02em; flex: 1; }
@@ -462,8 +566,8 @@ body {
   padding: .35em .8em; border-radius: 999px;
   border: 1px solid var(--rule); color: var(--dim);
 }
-.gate-card[data-risk="high"]   .gate-badge { color: var(--stop); border-color: var(--stop); background: rgba(255,92,72,.1); }
-.gate-card[data-risk="medium"] .gate-badge { color: var(--warn); border-color: var(--warn); background: rgba(242,181,68,.1); }
+.gate-card[data-risk="high"]   .gate-badge { color: var(--stop); border-color: var(--stop); background: rgba(255,59,48,.1); }
+.gate-card[data-risk="medium"] .gate-badge { color: var(--warn); border-color: var(--warn); background: rgba(227,164,79,.1); }
 .gate-card[data-risk="low"]    .gate-badge { color: var(--go); border-color: var(--go-deep); }
 .gate-timer { font-size: clamp(13px, 1.6vw, 19px); font-weight: 600; color: var(--dim); }
 
@@ -471,10 +575,10 @@ body {
 .gate-detail {
   font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
   font-size: clamp(12px, 1.4vw, 16px); line-height: 1.5;
-  background: #05080E; border: 1px solid var(--rule); border-radius: 9px;
+  background: #0B0A08; border: 1px solid var(--rule); border-radius: 9px;
   padding: .8em 1em; margin-bottom: .8em;
   white-space: pre-wrap; word-break: break-word;
-  max-height: 34vh; overflow: auto; color: #C9D6E6;
+  max-height: 34vh; overflow: auto; color: #DAD4C8;
 }
 .gate-why { color: var(--warn); font-size: clamp(11px, 1.3vw, 15px); margin-bottom: .9em; }
 .gate-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: .7em; }
@@ -485,7 +589,7 @@ body {
 .drawer {
   position: fixed; top: 0; right: 0; bottom: 0; z-index: 30;
   width: min(430px, 88vw);
-  background: linear-gradient(180deg, #0B111C, #06090F);
+  background: linear-gradient(180deg, #1B1815, #0C0B09);
   border-left: 1px solid var(--rule-bright);
   box-shadow: -24px 0 70px rgba(0,0,0,.6);
   padding: var(--gap);
@@ -507,7 +611,7 @@ body {
 .sessions { display: flex; flex-direction: column; gap: .6em; }
 .session {
   border: 1px solid var(--rule); border-radius: 11px;
-  padding: .75em .9em; background: rgba(255,255,255,.02);
+  padding: .75em .9em; background: rgba(245,240,230,.02);
 }
 .session-top { display: flex; align-items: center; gap: .5em; margin-bottom: .35em; }
 .led { width: 8px; height: 8px; border-radius: 50%; background: var(--faint); flex: 0 0 auto; }
@@ -520,13 +624,13 @@ body {
 }
 .session-bars { display: flex; gap: .8em; margin-top: .5em; font-size: clamp(10px, 1.1vw, 12px); color: var(--dim); }
 .session-bars b { color: var(--text); font-weight: 600; }
-.mini-bar { height: 3px; border-radius: 2px; background: rgba(255,255,255,.08); margin-top: .35em; overflow: hidden; }
+.mini-bar { height: 3px; border-radius: 2px; background: rgba(245,240,230,.08); margin-top: .35em; overflow: hidden; }
 .mini-bar i { display: block; height: 100%; background: var(--accent); transition: width .6s var(--ease-out); }
 
 .timeline { list-style: none; display: flex; flex-direction: column; gap: .1em; }
 .timeline li {
   display: flex; gap: .7em; align-items: baseline;
-  padding: .42em .2em; border-bottom: 1px solid rgba(255,255,255,.04);
+  padding: .42em .2em; border-bottom: 1px solid rgba(245,240,230,.04);
   font-size: clamp(11px, 1.2vw, 13px);
   animation: itemIn .3s var(--ease-out) backwards;
 }
@@ -559,7 +663,7 @@ body {
 }
 .saver time { font-size: clamp(60px, 13vw, 170px); font-weight: 200; letter-spacing: -.05em; display: block; }
 .saver-bars { display: flex; gap: 1.2em; justify-content: center; margin-top: 1.2em; }
-.saver-bars span { width: clamp(70px, 11vw, 130px); height: 3px; background: rgba(255,255,255,.14); border-radius: 2px; overflow: hidden; }
+.saver-bars span { width: clamp(70px, 11vw, 130px); height: 3px; background: rgba(245,240,230,.14); border-radius: 2px; overflow: hidden; }
 .saver-bars i { display: block; height: 100%; background: var(--dim); }
 .saver p { margin-top: 1em; color: var(--faint); font-size: clamp(11px, 1.3vw, 15px); }
 
@@ -570,13 +674,13 @@ body {
   transform: translate(-50%, 130%);
   max-width: min(560px, 88vw);
   padding: .75em 1.2em; border-radius: 11px;
-  background: #16202F; border: 1px solid var(--rule-bright);
+  background: var(--bg-2); border: 1px solid var(--rule-bright);
   box-shadow: 0 14px 40px rgba(0,0,0,.55);
   font-size: clamp(12px, 1.4vw, 15px);
   transition: transform .4s var(--ease-out);
 }
 .toast[data-show="1"] { transform: translate(-50%, 0); }
-.toast[data-kind="error"] { border-color: var(--stop); color: #FFD9D3; }
+.toast[data-kind="error"] { border-color: var(--stop); color: #FFD8D2; }
 .toast[data-kind="ok"] { border-color: var(--go-deep); }
 
 .icon-defs { position: absolute; width: 0; height: 0; }
@@ -620,7 +724,7 @@ body[data-state="boot"] .deck { opacity: .45; }
   background: var(--panel);
   align-self: start;
 }
-[data-lite="1"] .pages { background: #0A111D; }
+[data-lite="1"] .pages { background: var(--bg-1); }
 
 .pages button {
   position: relative; z-index: 1;
@@ -638,7 +742,7 @@ body[data-state="boot"] .deck { opacity: .45; }
 /* Contagem de botões visíveis naquela aba. */
 .pages .tab-count {
   font-size: .78em; font-weight: 600; color: var(--faint);
-  background: rgba(255,255,255,.06); border-radius: 999px;
+  background: rgba(245,240,230,.06); border-radius: 999px;
   padding: .05em .5em; min-width: 1.6em; text-align: center;
 }
 .pages button[aria-selected="true"] .tab-count { color: var(--dim); }
@@ -658,7 +762,7 @@ body[data-state="boot"] .deck { opacity: .45; }
 /* O marcador desliza entre as abas em vez de piscar de uma para outra. */
 .pages-marker {
   position: absolute; top: 3px; bottom: 3px; left: 0; z-index: 0;
-  border-radius: 7px; background: rgba(255,255,255,.075);
+  border-radius: 7px; background: rgba(245,240,230,.075);
   border: 1px solid var(--rule);
   transition: transform .34s var(--ease-out), width .34s var(--ease-out);
   pointer-events: none;
@@ -683,7 +787,7 @@ body[data-state="boot"] .deck { opacity: .45; }
    usada para dizer o que a ação faz, e sobrecarregar o canal confunde. */
 .btn[data-urgent="1"] {
   border-color: var(--rule-bright);
-  background: linear-gradient(180deg, rgba(255,255,255,.1), rgba(255,255,255,.03));
+  background: linear-gradient(180deg, rgba(245,240,230,.1), rgba(245,240,230,.03));
   box-shadow: 0 4px 18px rgba(0,0,0,.35);
 }
 .btn[data-urgent="1"]::before { opacity: 1; height: 3px; }
@@ -707,7 +811,7 @@ body[data-state="boot"] .deck { opacity: .45; }
 /* Barra na base: o mesmo número, legível de três metros sem ler dígito. */
 .badge-bar {
   position: absolute; left: 0; right: 0; bottom: 0; height: 3px; z-index: 2;
-  background: rgba(255,255,255,.05); overflow: hidden;
+  background: rgba(245,240,230,.05); overflow: hidden;
   border-radius: 0 0 11px 11px;
 }
 .badge-bar i {
@@ -725,7 +829,7 @@ body[data-state="boot"] .deck { opacity: .45; }
    rápido de propósito, para o cancelamento parecer cancelamento. */
 .hold-fill {
   position: absolute; inset: 0; z-index: 0;
-  background: linear-gradient(90deg, rgba(106,166,255,.30), rgba(106,166,255,.14));
+  background: linear-gradient(90deg, rgba(217,119,87,.30), rgba(217,119,87,.14));
   transform-origin: left center;
   transform: scaleX(0);
   pointer-events: none;
@@ -772,13 +876,13 @@ body[data-state="boot"] .deck { opacity: .45; }
    que a opção custa (âmbar = mais cara), e sobrepor os dois canais faria o
    painel mentir de longe. */
 .btn[data-active="1"] {
-  background: linear-gradient(180deg, rgba(106,166,255,.20), rgba(106,166,255,.07));
-  border-color: rgba(106,166,255,.55);
-  box-shadow: inset 0 0 0 1px rgba(106,166,255,.25), 0 0 22px rgba(106,166,255,.14);
+  background: linear-gradient(180deg, rgba(217,119,87,.20), rgba(217,119,87,.07));
+  border-color: rgba(217,119,87,.55);
+  box-shadow: inset 0 0 0 1px rgba(217,119,87,.25), 0 0 22px rgba(217,119,87,.14);
 }
 .btn[data-active="1"] .btn-label { color: #fff; }
 .btn[data-active="1"]::before { opacity: 1; height: 3px; background: var(--accent); }
-[data-lite="1"] .btn[data-active="1"] { box-shadow: none; background: rgba(106,166,255,.16); }
+[data-lite="1"] .btn[data-active="1"] { box-shadow: none; background: rgba(217,119,87,.16); }
 
 /* Ponto no canto: a marca de "esta é a atual", visível mesmo no modo leve. */
 .btn[data-active="1"] .active-dot {
@@ -806,8 +910,16 @@ body[data-state="boot"] .deck { opacity: .45; }
 /* Sem medidores, o deck herda a altura toda: as fileiras dividem o espaço e
    os botões crescem. Um painel de parede com metade da tela vazia é pior que
    um painel cheio de botões grandes. */
-[data-no-usage="1"] .deck { flex: 1 1 auto; min-height: 0; }
-[data-no-usage="1"] .deck-row { flex: 1 1 0; min-height: 0; }
+[data-no-usage="1"] .deck { flex: 1 1 auto; min-height: 0; justify-content: flex-start; }
+
+/* As fileiras crescem, mas com teto. Sem ele uma única fileira de três
+   botões esticava para a altura toda — medido em 460 px, com o rótulo
+   flutuando no meio de um vazio. Botão grande ajuda; botão do tamanho de
+   um pôster só afasta o dedo do alvo seguinte. */
+[data-no-usage="1"] .deck-row {
+  flex: 1 1 0; min-height: 0;
+  max-height: clamp(96px, 26vh, 240px);
+}
 [data-no-usage="1"] .btn { min-height: 0; }
 
 /* ── teclas de agente ──────────────────────────────────────────────── */
@@ -828,6 +940,6 @@ body[data-state="boot"] .deck { opacity: .45; }
 
 /* A conversa que está esperando ganha contorno, não só o ponto. */
 .btn[data-state="waiting"] {
-  border-color: rgba(255,92,72,.5);
-  box-shadow: 0 0 26px rgba(255,92,72,.16);
+  border-color: rgba(255,59,48,.5);
+  box-shadow: 0 0 26px rgba(255,59,48,.16);
 }

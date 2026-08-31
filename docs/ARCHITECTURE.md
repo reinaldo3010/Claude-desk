@@ -206,6 +206,62 @@ simples e fluido do que um bonito que engasga.
 O protetor de tela deriva devagar pela tela: OLED de tablet velho queima imagem
 parada.
 
+### Identidade no lugar mais barato
+
+**Escolha:** a identidade visual mora na paleta e na marca, não no fundo
+animado.
+
+O painel era azul-preto genérico de dashboard. Trocar isso não é enfeite: um
+painel de parede é reconhecido de longe pela cor antes de qualquer texto. A
+laranja do Claude (`#D97757`) virou o **único** acento — a marca, o marcador
+de aba, o seletor aceso, o traço do gráfico —, e o fundo passou de carvão
+azulado para carvão quente. Os estados seguem semânticos.
+
+**Um detalhe que precisou de decisão:** o alerta e a laranja da marca são
+matizes vizinhos, e a três metros matiz parecido vira matiz igual. O alerta
+foi empurrado para `#FF3B30`, muito mais saturado, e continua contando com o
+pulso. O que separa os dois é saturação e movimento, não tom.
+
+A marca é desenhada por geometria em `marcaClaude()`, não é arquivo de
+imagem: herda a cor do tema, escala sem borrar, e cada lâmina é um elemento
+que o CSS anima sozinho. O mesmo cálculo gera o `public/icon.svg`, então o
+atalho no tablet e o painel são literalmente a mesma forma.
+
+**Consequência que importa:** identidade na paleta e na marca sobrevive à
+degradação. No modo leve o fundo animado morre, e o painel continua sendo
+reconhecidamente do Claude. Se a identidade estivesse no fundo, ela seria a
+primeira coisa a desaparecer no aparelho mais fraco — exatamente onde ela
+mais precisa aparecer.
+
+### Fundo em WebGL cru, não three.js
+
+**Escolha:** um triângulo em tela cheia e um *fragment shader* escrito à mão.
+
+O three.js foi considerado e recusado. Ele é um grafo de cena: existe para
+administrar centenas de objetos, câmeras, luzes e materiais. Aqui há **um**
+retângulo. Seriam ~600 KB de download, parse e memória num tablet de sete
+anos para desenhar o que cabe em trinta linhas de GLSL — e a memória que ele
+ocuparia é a que falta para o resto do painel.
+
+Não é só uma questão de peso: o caminho de GPU é **mais barato que o que
+existia antes**. O fundo anterior era canvas 2D pintando três gradientes
+radiais gigantes na CPU, em resolução reduzida e travado em 24 fps. O shader
+calcula cada pixel na placa, a meia resolução, com teto de 30 fps.
+
+**Custo aceito:** GLSL escrito à mão não tem biblioteca para culpar quando
+quebra. Por isso há dois degraus abaixo dele, e nenhum deles é tela preta:
+
+| Situação | O que roda |
+|---|---|
+| Normal | shader WebGL |
+| Sem WebGL, ou shader recusado pela placa | canvas 2D, o fundo anterior |
+| Contexto WebGL perdido (Android faz isso) | entra o modo leve |
+| Modo leve, ou `prefers-reduced-motion` | gradiente estático da folha |
+
+O `failIfMajorPerformanceCaveat: true` na criação do contexto é deliberado:
+WebGL emulado em software seria mais lento que o canvas 2D, então nesse caso
+é melhor recusar e cair para o plano B.
+
 ### Liveness cruzada
 
 Uma sessão está viva se o snapshot é recente **ou** se chegou evento de hook
@@ -229,7 +285,7 @@ Coisas que os testes protegem e que não devem ser quebradas sem pensar:
 ## Testes
 
 ```bash
-npm test    # 124 testes
+npm test    # 130 testes
 ```
 
 | Arquivo | Cobre |
@@ -237,6 +293,8 @@ npm test    # 124 testes
 | `test/usage.test.js` | formatos oficial, antigo e corrompido; escalas; taxa de queima |
 | `test/security.test.js` | token, CIDR, limite, sanitização, cenários adversariais |
 | `test/deck.test.js` | portão, máquina de estados, `settings.json`, rotas HTTP e SSE |
+| `test/deckengine.test.js` | visibilidade, urgência, face viva, abas |
+| `test/identidade.test.js` | paleta, ícone igual à marca, degradação do fundo |
 
 Os testes de servidor sobem um servidor real em porta efêmera e falam HTTP de
 verdade — sem simulação, porque o que costuma quebrar é a integração.

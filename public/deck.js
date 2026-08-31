@@ -64,10 +64,10 @@ function levelOf(pct, warnAt, alertAt) {
 }
 
 const ARC_COLORS = {
-  ok:   { a: "#34D8A0", b: "#5BE6C8", glow: "rgba(52,216,160,.40)" },
-  warn: { a: "#F2B544", b: "#FFD98A", glow: "rgba(242,181,68,.40)" },
-  crit: { a: "#FF5C48", b: "#FF9478", glow: "rgba(255,92,72,.45)" },
-  idle: { a: "#4A5568", b: "#4A5568", glow: "rgba(0,0,0,0)" },
+  ok:   { a: "#4FB286", b: "#6FD3A8", glow: "rgba(79,178,134,.40)" },
+  warn: { a: "#E3A44F", b: "#F3C98A", glow: "rgba(227,164,79,.40)" },
+  crit: { a: "#FF3B30", b: "#FF8A72", glow: "rgba(255,59,48,.45)" },
+  idle: { a: "#6C665E", b: "#6C665E", glow: "rgba(0,0,0,0)" },
 };
 
 /* ══════════════════════════════════ odômetro ════════════════════════════ */
@@ -898,73 +898,302 @@ function beep(freq, dur = 0.07) {
   } catch { /* áudio é enfeite */ }
 }
 
+/* ══════════════════════════════════ marca ═══════════════════════════════ */
+
+/**
+ * A marca do Claude, desenhada por geometria — 12 lâminas radiais que saem de
+ * um núcleo e afinam em direção a ele. Nada de arquivo de imagem: assim ela
+ * herda a cor do tema, escala sem borrar e cada lâmina vira um elemento que a
+ * folha de estilo consegue animar sozinha.
+ *
+ * A animação é toda `opacity` nas lâminas mais um `transform` no conjunto —
+ * as duas coisas que a GPU resolve sem recalcular layout. Nenhum quadro é
+ * desenhado por JavaScript aqui.
+ *
+ * O símbolo e o nome Claude são marcas da Anthropic; este é um painel pessoal,
+ * não um produto oficial.
+ */
+const MARCA_LAMINAS = 12;
+
+function marcaClaude(classe = "") {
+  const dentro = 7;      // onde as lâminas nascem, perto do núcleo
+  const larguraDentro = 2.05;
+  const larguraFora = 3.9;
+
+  let laminas = "";
+  for (let i = 0; i < MARCA_LAMINAS; i++) {
+    // Comprimentos ligeiramente diferentes tiram o ar de engrenagem: o
+    // asterisco do Claude é orgânico, não um pictograma de relógio.
+    const fora = 47 - (i % 3) * 1.7;
+    const r = larguraFora;
+    const d =
+      `M ${-larguraDentro} ${-dentro} ` +
+      `L ${-larguraFora} ${-(fora - r)} ` +
+      `A ${r} ${r} 0 0 1 ${larguraFora} ${-(fora - r)} ` +
+      `L ${larguraDentro} ${-dentro} Z`;
+    laminas +=
+      `<g transform="rotate(${i * (360 / MARCA_LAMINAS)})">` +
+      `<path class="lamina" style="--i:${i}" d="${d}"/></g>`;
+  }
+
+  return (
+    `<span class="marca ${classe}" aria-hidden="true">` +
+    `<span class="marca-halo"></span>` +
+    `<svg viewBox="0 0 100 100" class="marca-svg">` +
+    `<g transform="translate(50 50)" class="marca-raios">${laminas}` +
+    `<circle class="marca-nucleo" r="${dentro - 1.2}"/></g></svg></span>`
+  );
+}
+
 /* ══════════════════════════════════ aurora ══════════════════════════════ */
 
 /**
- * Fundo vivo: manchas de luz que derivam devagar e mudam de cor com o estado.
- * Desenhado em resolução reduzida e limitado a ~24 quadros por segundo — num
- * tablet velho, o custo real está em pintar pixels, não em calcular posições.
+ * Fundo vivo: um campo de luz que escorre devagar e muda de cor com o estado.
+ *
+ * Por que WebGL cru e não three.js: o three.js é um grafo de cena — existe
+ * para administrar centenas de objetos, câmeras e luzes. Aqui há um retângulo
+ * só. Seriam ~600 KB de download, parse e memória num tablet de sete anos para
+ * desenhar o que cabe em um shader de trinta linhas. O caminho de GPU abaixo
+ * faz o mesmo efeito, mais bonito, e ainda sai mais barato que o desenho 2D
+ * que existia antes — lá era a CPU pintando três gradientes gigantes a cada
+ * quadro; aqui é a placa calculando pixel por pixel.
+ *
+ * Nada disso é obrigatório: sem WebGL cai para o canvas 2D, e no modo leve
+ * cai para o gradiente estático da folha de estilo.
  */
+
+/* Alvo de cor por estado: [luz, sombra, energia]. A cor persegue o alvo
+   devagar, então a troca de estado chega como maré, não como corte. */
+const AURORA_ALVOS = {
+  idle:    [[0.66, 0.36, 0.26], [0.13, 0.10, 0.09], 0.45],
+  working: [[0.85, 0.47, 0.33], [0.18, 0.12, 0.09], 1.00],
+  waiting: [[0.92, 0.21, 0.17], [0.18, 0.06, 0.05], 0.86],
+  error:   [[0.89, 0.64, 0.31], [0.17, 0.12, 0.07], 0.80],
+  offline: [[0.28, 0.27, 0.25], [0.09, 0.09, 0.08], 0.18],
+  boot:    [[0.55, 0.32, 0.24], [0.11, 0.10, 0.09], 0.32],
+};
+
+const AURORA_VS = `
+attribute vec2 pos;
+void main() { gl_Position = vec4(pos, 0.0, 1.0); }
+`;
+
+const AURORA_FS = `
+precision mediump float;
+uniform vec2  u_res;
+uniform float u_t;
+uniform vec3  u_luz;
+uniform vec3  u_sombra;
+uniform float u_energia;
+
+float hash(vec2 p) {
+  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+}
+float ruido(vec2 p) {
+  vec2 i = floor(p), f = fract(p);
+  vec2 u = f * f * (3.0 - 2.0 * f);
+  return mix(mix(hash(i),               hash(i + vec2(1.0, 0.0)), u.x),
+             mix(hash(i + vec2(0.0,1.0)), hash(i + vec2(1.0, 1.0)), u.x), u.y);
+}
+/* Três oitavas bastam: o efeito é névoa, não relevo. Cada oitava a mais
+   custa quatro senos por pixel num aparelho que não tem esse troco. */
+float fbm(vec2 p) {
+  float v = 0.0, a = 0.5;
+  for (int k = 0; k < 3; k++) { v += a * ruido(p); p *= 2.03; a *= 0.5; }
+  return v;
+}
+void main() {
+  vec2 uv = gl_FragCoord.xy / u_res;
+  vec2 p  = vec2(uv.x * (u_res.x / u_res.y), uv.y) * 1.55;
+  float t = u_t * (0.028 + 0.032 * u_energia);
+
+  /* Dois campos arrastando em direções diferentes, o segundo deformado pelo
+     primeiro. É o que transforma manchas paradas em fluxo. */
+  float f1 = fbm(p + vec2(t, -t * 0.62));
+  float f2 = fbm(p * 1.75 + vec2(-t * 0.8, t * 0.55) + f1 * 1.3);
+  float m  = smoothstep(0.22, 0.92, f1 * 0.62 + f2 * 0.52);
+
+  vec3 cor = mix(u_sombra, u_luz, m);
+  cor *= 0.22 + 0.78 * m;
+  cor *= 0.42 + 0.58 * u_energia;
+
+  /* Vinheta no shader: concentra a luz no centro e apaga as bordas, onde
+     ficam os botões. Sai de graça aqui e economiza uma camada no DOM. */
+  float d = distance(uv, vec2(0.5, 0.46));
+  cor *= 1.0 - 0.88 * smoothstep(0.32, 1.0, d);
+
+  cor += vec3(0.063, 0.059, 0.051);   /* piso: o mesmo --bg-0 da folha */
+  gl_FragColor = vec4(cor, 1.0);
+}
+`;
+
 function startAurora() {
   const cv = $("aurora");
+  if (!cv) return;
+  if (auroraWebGL(cv)) return;
+  auroraCanvas2D(cv);
+}
+
+/** Caminho preferido. Devolve false se a placa ou o navegador não colaborarem. */
+function auroraWebGL(cv) {
+  let gl;
+  try {
+    const opts = { alpha: false, antialias: false, depth: false, stencil: false,
+                   powerPreference: "low-power", failIfMajorPerformanceCaveat: true };
+    gl = cv.getContext("webgl", opts) || cv.getContext("experimental-webgl", opts);
+  } catch { return false; }
+  if (!gl) return false;
+
+  function compilar(tipo, fonte) {
+    const s = gl.createShader(tipo);
+    gl.shaderSource(s, fonte);
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+      console.warn("shader recusado:", gl.getShaderInfoLog(s));
+      return null;
+    }
+    return s;
+  }
+
+  const vs = compilar(gl.VERTEX_SHADER, AURORA_VS);
+  const fs = compilar(gl.FRAGMENT_SHADER, AURORA_FS);
+  if (!vs || !fs) return false;
+
+  const prog = gl.createProgram();
+  gl.attachShader(prog, vs);
+  gl.attachShader(prog, fs);
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+    console.warn("programa não linkou:", gl.getProgramInfoLog(prog));
+    return false;
+  }
+  gl.useProgram(prog);
+
+  /* Um triângulo maior que a tela cobre tudo com três vértices em vez de
+     seis, e sem a costura diagonal que dois triângulos deixam. */
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+  const pos = gl.getAttribLocation(prog, "pos");
+  gl.enableVertexAttribArray(pos);
+  gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+
+  const uRes = gl.getUniformLocation(prog, "u_res");
+  const uT = gl.getUniformLocation(prog, "u_t");
+  const uLuz = gl.getUniformLocation(prog, "u_luz");
+  const uSombra = gl.getUniformLocation(prog, "u_sombra");
+  const uEnergia = gl.getUniformLocation(prog, "u_energia");
+
+  /* Meia resolução: o efeito é névoa, e o navegador estica sem que ninguém
+     perceba. É a diferença entre rodar e engasgar num aparelho antigo. */
+  const ESCALA = 0.45;
+  function resize() {
+    cv.width = Math.max(1, Math.floor(innerWidth * ESCALA));
+    cv.height = Math.max(1, Math.floor(innerHeight * ESCALA));
+    gl.viewport(0, 0, cv.width, cv.height);
+    gl.uniform2f(uRes, cv.width, cv.height);
+  }
+  resize();
+  addEventListener("resize", resize, { passive: true });
+
+  const luz = [0.66, 0.36, 0.26];
+  const sombra = [0.13, 0.10, 0.09];
+  let energia = 0.32;
+  let relogio = 0;
+  let ultimo = 0;
+
+  function quadro(agora) {
+    requestAnimationFrame(quadro);
+    if (body.dataset.lite === "1" || document.hidden || saverOn) return;
+    if (gl.isContextLost && gl.isContextLost()) return;
+    if (agora - ultimo < 32) return;           // teto de ~30 fps
+    const dt = Math.min(120, agora - ultimo || 16);
+    ultimo = agora;
+    relogio += dt / 1000;
+
+    const alvo = AURORA_ALVOS[body.dataset.state] || AURORA_ALVOS.idle;
+    for (let i = 0; i < 3; i++) {
+      luz[i] += (alvo[0][i] - luz[i]) * 0.03;
+      sombra[i] += (alvo[1][i] - sombra[i]) * 0.03;
+    }
+    energia += (alvo[2] - energia) * 0.03;
+
+    gl.uniform1f(uT, relogio);
+    gl.uniform3f(uLuz, luz[0], luz[1], luz[2]);
+    gl.uniform3f(uSombra, sombra[0], sombra[1], sombra[2]);
+    gl.uniform1f(uEnergia, energia);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+  requestAnimationFrame(quadro);
+
+  /* Android recolhe o contexto quando quer. Perder o fundo não pode derrubar
+     o painel: entra o modo leve, que já tem gradiente estático. */
+  cv.addEventListener("webglcontextlost", (ev) => {
+    ev.preventDefault();
+    body.dataset.lite = "1";
+  });
+  return true;
+}
+
+/** Plano B, o desenho 2D de antes: manchas de luz derivando em ~24 fps. */
+function auroraCanvas2D(cv) {
   const ctx = cv.getContext("2d", { alpha: false });
   if (!ctx) return;
 
   let w = 0;
   let h = 0;
-  const SCALE = 0.34;
+  const ESCALA = 0.34;
 
-  const blobs = [
+  const manchas = [
     { x: 0.22, y: 0.28, r: 0.55, vx: 0.000021, vy: 0.000013 },
     { x: 0.78, y: 0.36, r: 0.48, vx: -0.000017, vy: 0.000022 },
     { x: 0.52, y: 0.82, r: 0.62, vx: 0.000012, vy: -0.000019 },
   ];
 
-  const PALETTES = {
-    idle:    [[26, 58, 92], [18, 74, 78], [30, 40, 84]],
-    working: [[24, 92, 110], [22, 110, 88], [30, 60, 120]],
-    waiting: [[132, 34, 26], [110, 44, 30], [90, 24, 40]],
-    error:   [[110, 74, 22], [90, 60, 24], [70, 44, 30]],
-    offline: [[20, 26, 38], [18, 24, 34], [22, 28, 40]],
-    boot:    [[20, 34, 56], [18, 40, 54], [24, 30, 58]],
-  };
-  let cur = PALETTES.idle.map((c) => [...c]);
+  /* Mesmos alvos do shader, em 0–255 e com uma terceira mancha de apoio. */
+  const cor = (a) => a.map((c) => Math.round(c * 255));
+  const PALETAS = {};
+  for (const [nome, alvo] of Object.entries(AURORA_ALVOS)) {
+    const luz = cor(alvo[0]);
+    const meio = cor(alvo[0].map((c, i) => (c + alvo[1][i]) / 2));
+    PALETAS[nome] = [luz, meio, cor(alvo[1].map((c) => c * 2.2))];
+  }
+  const atual = PALETAS.idle.map((c) => [...c]);
 
   function resize() {
-    w = cv.width = Math.max(1, Math.floor(innerWidth * SCALE));
-    h = cv.height = Math.max(1, Math.floor(innerHeight * SCALE));
+    w = cv.width = Math.max(1, Math.floor(innerWidth * ESCALA));
+    h = cv.height = Math.max(1, Math.floor(innerHeight * ESCALA));
   }
   resize();
   addEventListener("resize", resize, { passive: true });
 
-  let last = 0;
-  function frame(now) {
-    requestAnimationFrame(frame);
+  let ultimo = 0;
+  function quadro(agora) {
+    requestAnimationFrame(quadro);
     if (body.dataset.lite === "1" || document.hidden || saverOn) return;
-    if (now - last < 42) return; // ~24 fps é suficiente para algo tão lento
-    const dt = Math.min(120, now - last);
-    last = now;
+    if (agora - ultimo < 42) return;   // ~24 fps já basta para algo tão lento
+    const dt = Math.min(120, agora - ultimo);
+    ultimo = agora;
 
-    // A paleta persegue o alvo devagar: a troca de estado vira uma maré.
-    const target = PALETTES[body.dataset.state] || PALETTES.idle;
+    const alvo = PALETAS[body.dataset.state] || PALETAS.idle;
     for (let i = 0; i < 3; i++) {
-      for (let k = 0; k < 3; k++) cur[i][k] += (target[i][k] - cur[i][k]) * 0.02;
+      for (let k = 0; k < 3; k++) atual[i][k] += (alvo[i][k] - atual[i][k]) * 0.02;
     }
 
-    ctx.fillStyle = "#05070C";
+    ctx.fillStyle = "#100F0D";
     ctx.fillRect(0, 0, w, h);
     ctx.globalCompositeOperation = "lighter";
 
-    blobs.forEach((b, i) => {
+    manchas.forEach((b, i) => {
       b.x += b.vx * dt;
       b.y += b.vy * dt;
       if (b.x < 0.1 || b.x > 0.9) b.vx *= -1;
       if (b.y < 0.1 || b.y > 0.9) b.vy *= -1;
 
-      const [r, g, bl] = cur[i].map(Math.round);
-      const rad = b.r * Math.max(w, h);
-      const grad = ctx.createRadialGradient(b.x * w, b.y * h, 0, b.x * w, b.y * h, rad);
-      grad.addColorStop(0, `rgba(${r},${g},${bl},.55)`);
+      const [r, g, bl] = atual[i].map(Math.round);
+      const raio = b.r * Math.max(w, h);
+      const grad = ctx.createRadialGradient(b.x * w, b.y * h, 0, b.x * w, b.y * h, raio);
+      grad.addColorStop(0, `rgba(${r},${g},${bl},.5)`);
       grad.addColorStop(1, "rgba(0,0,0,0)");
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, w, h);
@@ -972,7 +1201,7 @@ function startAurora() {
 
     ctx.globalCompositeOperation = "source-over";
   }
-  requestAnimationFrame(frame);
+  requestAnimationFrame(quadro);
 }
 
 /* ══════════════════════════════ modo leve ═══════════════════════════════ */
@@ -1111,6 +1340,9 @@ function boot() {
       }
     } catch { /* Fully Kiosk tem a própria opção */ }
   }, { once: false });
+
+  $("markSlot").innerHTML = marcaClaude("marca-fita");
+  $("saverMark").innerHTML = marcaClaude("marca-protetor");
 
   startAurora();
   watchPerformance();
