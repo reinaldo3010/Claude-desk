@@ -138,6 +138,10 @@ function buildCommand(cfg, mode, payload) {
       return { cmd: "osascript", args: ["-e", script] };
     }
 
+    case "dry":
+      // Simulação: usada nos testes e no `doctor`. Não toca em nada.
+      return { cmd: "(simulado)", args: [mode, target || "(sem alvo)", payload], dry: true };
+
     case "none":
       return { error: "injeção de teclas desligada (injector=none)" };
 
@@ -169,8 +173,8 @@ function inject(cfg, action) {
     const built = buildCommand(cfg, mode, payload);
     if (built.error) return reject(new Error(built.error));
 
-    if (cfg.injector === "dry" || process.env.DECK_DRY_RUN) {
-      return resolve({ ok: true, detail: `simulado: ${built.cmd} ${built.args.join(" ")}` });
+    if (built.dry || process.env.DECK_DRY_RUN) {
+      return resolve({ ok: true, detail: `simulado: ${built.args.join(" ")}` });
     }
 
     execFile(built.cmd, built.args, { timeout: cfg.injectTimeoutMs, windowsHide: true }, (err, stdout, stderr) => {

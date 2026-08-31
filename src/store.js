@@ -99,7 +99,11 @@ class DeckStore {
    * Consome um payload de hook. `name` é o hook_event_name.
    * Aceita qualquer evento: os que não interessam viram só linha de log.
    */
-  ingest(name, payload = {}) {
+  ingest(name, rawPayload = {}) {
+    // Um valor `null` explícito passa pelo padrão do parâmetro (que só cobre
+    // `undefined`) e derrubaria todo acesso a campo abaixo. Normaliza aqui,
+    // uma vez, em vez de encher cada `case` de verificação.
+    const payload = rawPayload && typeof rawPayload === "object" ? rawPayload : {};
     const sid = payload.session_id || null;
     const sess = this._session(sid);
     if (sess) {

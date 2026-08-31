@@ -174,7 +174,7 @@ class Deck {
         version: s.version,
         agent: s.agent,
         staleMs: s.staleMs,
-        live: (s.staleMs ?? Infinity) < 90_000,
+        live: this.isLive(s, now),
       })),
       gate: this.gate.snapshot(),
       actions: actionsLib.toPublic(this.actions),
@@ -188,6 +188,23 @@ class Deck {
       },
       warnings: this.warnings.slice(-5),
     };
+  }
+
+  /**
+   * Uma sessão está viva?
+   *
+   * Não dá para responder só pela idade do snapshot. O Claude Code roda a
+   * statusLine em gatilhos — prompt enviado, resposta pronta, troca de modelo —
+   * e não em intervalo fixo. Meia hora lendo código não gera nenhuma
+   * atualização, e um limite curto marcaria como morta uma sessão aberta na
+   * sua frente. Então cruzamos duas fontes: a idade do snapshot e o último
+   * evento de hook daquela sessão, que chega a cada ferramenta usada.
+   */
+  isLive(session, now = Date.now()) {
+    const FRESH = 10 * 60_000;
+    if ((session.staleMs ?? Infinity) < FRESH) return true;
+    const seen = session.sessionId && this.store.sessions.get(session.sessionId);
+    return !!(seen && now - seen.at < FRESH);
   }
 
   /** Empurra o estado para todos os painéis conectados. */

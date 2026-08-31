@@ -146,11 +146,14 @@ class PermissionGate {
       return true;
     };
 
+    // Sem unref() de propósito. Enquanto este temporizador existe há um hook
+    // do Claude Code esperando resposta, e deixar o processo morrer antes de
+    // o prazo vencer significaria abandonar uma requisição aberta. Quem
+    // encerra o servidor chama drain(), que resolve tudo na hora.
     entry.timer = setTimeout(() => {
       // Prazo esgotado sem resposta: NÃO aprova. Devolve ao terminal.
       entry.settle(null, "tempo-esgotado");
     }, this.holdMs);
-    if (entry.timer.unref) entry.timer.unref();
 
     this.pending.set(entry.id, entry);
     this.onChange(this.snapshot());
