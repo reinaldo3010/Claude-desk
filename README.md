@@ -83,7 +83,7 @@ node bin/claude-deck.js uninstall          desfaz o registro
 node bin/claude-deck.js doctor             diagnóstico da máquina
 node bin/claude-deck.js dump               imprime o que o deck está lendo
 node bin/claude-deck.js event waiting "oi" dispara um evento de teste
-npm test                                   63 testes, sem dependências
+npm test                                   92 testes, sem dependências
 ```
 
 ## O deck

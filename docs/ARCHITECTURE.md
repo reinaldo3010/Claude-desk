@@ -229,7 +229,7 @@ Coisas que os testes protegem e que não devem ser quebradas sem pensar:
 ## Testes
 
 ```bash
-npm test    # 63 testes
+npm test    # 92 testes
 ```
 
 | Arquivo | Cobre |
