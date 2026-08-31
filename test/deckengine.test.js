@@ -476,3 +476,85 @@ test("'Ignorar permissões' exige dois toques", () => {
   const acts = actions.build();
   assert.equal(acts.find((a) => a.id === "d_modo_ignorar").confirm, true);
 });
+
+/* ═══════════════════════ teclas de agente ═══════════════════════════════ */
+
+function comSessoes(lista) {
+  return noDesktop({ sessions: lista });
+}
+
+test("uma tecla por sessão viva, nomeada pelo projeto", () => {
+  const acts = actions.build();
+  const st = comSessoes([
+    { id: "s1", live: true, cwd: "/home/r/orcamento-obra", state: "working", tool: "Bash" },
+    { id: "s2", live: true, cwd: "/home/r/site", state: "waiting" },
+    { id: "s3", live: false, cwd: "/home/r/morta", state: "idle" },
+  ]);
+  const teclas = resolve(acts, st).filter((a) => a.page === "agentes");
+  assert.equal(teclas.length, 2, "a sessão morta não vira tecla");
+  assert.deepEqual(teclas.map((t) => t.label).sort(), ["orcamento-obra", "site"]);
+});
+
+test("a cor da tecla é o estado DAQUELA conversa", () => {
+  const acts = actions.build();
+  const tom = (state) =>
+    resolve(acts, comSessoes([{ id: "s", live: true, cwd: "/a/b", state }]))
+      .find((t) => t.page === "agentes").tone;
+  assert.equal(tom("working"), "go");
+  assert.equal(tom("waiting"), "stop");
+  assert.equal(tom("error"), "warn");
+  assert.equal(tom("idle"), "neutral");
+});
+
+test("a conversa que está esperando sobe para o topo", () => {
+  const acts = actions.build();
+  const st = comSessoes([
+    { id: "s1", live: true, cwd: "/a/tranquila", state: "idle" },
+    { id: "s2", live: true, cwd: "/a/urgente", state: "waiting" },
+  ]);
+  const teclas = resolve(acts, st).filter((a) => a.page === "agentes");
+  assert.equal(teclas[0].label, "urgente");
+  assert.equal(teclas[0].urgent, true);
+});
+
+test("a aba Agentes conta sessões, não a ação-modelo", () => {
+  const acts = actions.build();
+  const st = comSessoes([
+    { id: "s1", live: true, cwd: "/a/um", state: "idle" },
+    { id: "s2", live: true, cwd: "/a/dois", state: "waiting" },
+    { id: "s3", live: true, cwd: "/a/tres", state: "working" },
+  ]);
+  const aba = pagesOf(acts, st).find((p) => p.id === "agentes");
+  assert.equal(aba.count, 3, "uma aba dizendo 1 com três conversas mentiria");
+  assert.equal(aba.level, "alarm", "há uma esperando");
+});
+
+test("sem sessão viva a aba Agentes não aparece", () => {
+  const acts = actions.build();
+  assert.ok(!pagesOf(acts, comSessoes([])).some((p) => p.id === "agentes"));
+});
+
+test("o teto de teclas de agente é respeitado", () => {
+  const acts = actions.build();
+  const muitas = Array.from({ length: 12 }, (_, i) => ({
+    id: `s${i}`, live: true, cwd: `/a/p${i}`, state: "idle",
+  }));
+  assert.equal(resolve(acts, comSessoes(muitas)).filter((a) => a.page === "agentes").length, 6);
+});
+
+test("a tecla de agente não digita nada — ela só foca", () => {
+  const acts = actions.build();
+  const t = resolve(acts, comSessoes([{ id: "s", live: true, cwd: "/a/b", state: "idle" }]))
+    .find((x) => x.page === "agentes");
+  assert.equal(t.kind, "focus", "kind=focus é tratado no cliente, sem ir ao servidor");
+  assert.equal(t.sessionId, "s");
+  assert.ok(!("keys" in t) && !("text" in t));
+});
+
+test("nome do projeto tolera caminho do Windows e caminho vazio", () => {
+  const { nomeCurto } = require("../src/deckengine");
+  assert.equal(nomeCurto("C:\\Users\\r\\projetos\\obra", "x"), "obra");
+  assert.equal(nomeCurto("/home/r/app/", "x"), "app");
+  assert.equal(nomeCurto(null, "fallback"), "fallback");
+  assert.equal(nomeCurto("", "fallback"), "fallback");
+});

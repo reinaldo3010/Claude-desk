@@ -709,13 +709,27 @@ const BASE_ACTIONS = [
     kind: "keys", keys: "^o",
     when: { surface: "desktop" },
   },
+  // ═════════════════════════ teclas de agente ═════════════════════════════
+  // Uma tecla por sessão viva, colorida pelo estado DAQUELA conversa. É a
+  // única ação dinâmica do catálogo — o motor a expande em N botões.
+  //
+  // O que ela responde, e nenhuma tecla fixa consegue: com quatro conversas
+  // abertas, QUAL delas está te esperando. Tocar numa foca o painel nela.
+  {
+    id: "agente",
+    label: "Agente",
+    page: "agentes",
+    group: "control",
+    kind: "agent",
+    max: 6,
+  },
 ];
 
-const VALID_KINDS = new Set(["decision", "keys", "text", "chain", "page"]);
+const VALID_KINDS = new Set(["decision", "keys", "text", "chain", "page", "agent"]);
 const VALID_TONES = new Set(["go", "stop", "warn", "neutral", "accent"]);
 const VALID_GROUPS = new Set(["permission", "control", "prompt"]);
 const VALID_DECISIONS = new Set(["allow", "allow_always", "deny"]);
-const VALID_PAGES = new Set(["main", "prompts", "sessao", "modelo", "esforco", "modo", "git", "quota"]);
+const VALID_PAGES = new Set(["main", "prompts", "sessao", "modelo", "esforco", "modo", "agentes", "git", "quota"]);
 const VALID_BADGE_FORMATS = new Set(["number", "pct", "usd", "duration", "text"]);
 
 /**

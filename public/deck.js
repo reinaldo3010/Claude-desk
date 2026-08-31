@@ -239,6 +239,9 @@ function paintStats(s) {
 /* ══════════════════════════════ deck ════════════════════════════════════ */
 
 let currentPage = sessionStorage.getItem("deck-page") || "main";
+// Qual sessão o painel está descrevendo. É estado DESTE tablet, não do
+// servidor: dois painéis na casa podem estar olhando conversas diferentes.
+let focusedSession = sessionStorage.getItem("deck-focus") || null;
 let deckSig = "";
 let pagesSig = "";
 const confirmTimers = new Map();
@@ -344,8 +347,12 @@ function renderDeck(s) {
   buildPages(s.pages || []);
 
   const mine = (s.actions || []).filter((a) => (a.page || "main") === currentPage);
+  // O foco é local, então entra na assinatura pelo valor do cliente.
   const sig = mine
-    .map((a) => `${a.id}:${a.enabled ? 1 : 0}:${a.urgent ? 1 : 0}:${a.active ? 1 : 0}`)
+    .map((a) => {
+      const aceso = a.kind === "focus" ? a.sessionId === focusedSession : a.active;
+      return `${a.id}:${a.enabled ? 1 : 0}:${a.urgent ? 1 : 0}:${aceso ? 1 : 0}:${a.state || ""}`;
+    })
     .join("|");
 
   if (sig !== deckSig) {
@@ -428,14 +435,17 @@ function makeButton(a) {
   b.dataset.tone = a.tone || "neutral";
   b.dataset.id = a.id;
   b.dataset.urgent = a.urgent ? "1" : "0";
-  b.dataset.active = a.active ? "1" : "0";
+  const aceso = a.kind === "focus" ? a.sessionId === focusedSession : a.active;
+  b.dataset.active = aceso ? "1" : "0";
+  if (a.state) b.dataset.state = a.state;
   b.disabled = a.enabled === false;
   if (a.confirm) b.dataset.needsConfirm = "1";
   if (a.hold) b.dataset.hasHold = "1";
 
   b.innerHTML =
     '<span class="hold-fill"></span>' +
-    (a.active ? '<span class="active-dot"></span>' : "") +
+    (aceso ? '<span class="active-dot"></span>' : "") +
+    (a.kind === "focus" ? '<span class="agent-led"></span>' : "") +
     `<svg><use href="#i-${a.icon || "dot"}"></use></svg>` +
     `<span class="btn-label">${escapeHtml(a.label)}</span>` +
     (a.hint ? `<span class="btn-hint">${escapeHtml(a.hint)}</span>` : "") +
@@ -524,8 +534,38 @@ function ripple(btn, e) {
  * esbarrão no tablet não pode disparar isso. A janela é curta o bastante
  * para não virar burocracia.
  */
+/** Rótulo curto do estado de uma sessão. */
+const ESTADO_SESSAO = {
+  working: "trabalhando",
+  waiting: "esperando você",
+  error: "com erro",
+  idle: "ocioso",
+  offline: "fechada",
+};
+
+/** Último trecho do caminho: o nome do projeto, que é como você chama a sessão. */
+function nomeCurtoUI(cwd) {
+  if (!cwd) return null;
+  const p = String(cwd).replace(/\\/g, "/").split("/").filter(Boolean);
+  return p[p.length - 1] || null;
+}
+
 function press(action, btn) {
   lastInteraction = Date.now();
+
+  // Tecla de agente não dispara nada no computador: ela escolhe sobre qual
+  // conversa o painel fala. Nada de ida ao servidor — é decisão local e
+  // instantânea, e continua funcionando mesmo com a injeção de teclas quebrada.
+  if (action.kind === "focus") {
+    focusedSession = focusedSession === action.sessionId ? null : action.sessionId;
+    if (focusedSession) sessionStorage.setItem("deck-focus", focusedSession);
+    else sessionStorage.removeItem("deck-focus");
+    beep(720, 0.05);
+    if (navigator.vibrate) navigator.vibrate(10);
+    deckSig = "";
+    if (state) render(state);
+    return;
+  }
 
   if (btn.dataset.needsConfirm === "1" && btn.dataset.confirm !== "pending") {
     btn.dataset.confirm = "pending";
@@ -701,11 +741,21 @@ function escapeHtml(s) {
 function render(s) {
   state = s;
   lastContact = Date.now();
-  body.dataset.state = s.status;
-  sinceTs = s.since;
+  // Com uma sessão em foco, a faixa fala DELA — inclusive a cor. Sem foco,
+  // fala do painel todo. Uma tecla de agente que só mudasse a cor do botão
+  // não responderia a pergunta que ela existe para responder.
+  const foco = focusedSession && (s.sessions || []).find((x) => x.id === focusedSession);
+  body.dataset.state = foco ? foco.state || "idle" : s.status;
+  sinceTs = foco ? foco.seenAt || s.since : s.since;
 
-  $("headline").textContent = s.headline || "";
-  $("detail").textContent = s.detail || "";
+  if (foco) {
+    const nome = nomeCurtoUI(foco.cwd) || foco.name || "sessão";
+    $("headline").textContent = `${nome} · ${ESTADO_SESSAO[foco.state] || foco.state || "ocioso"}`;
+    $("detail").textContent = foco.detail || foco.tool || "";
+  } else {
+    $("headline").textContent = s.headline || "";
+    $("detail").textContent = s.detail || "";
+  }
 
   const chip = $("toolChip");
   if (s.activeTool) {
@@ -727,6 +777,12 @@ function render(s) {
   // Sem leitura de quota (o app desktop não executa a nossa statusLine), os
   // dois medidores mostrariam "--" ocupando a maior parte do painel. Nesse
   // caso eles encolhem e o espaço vai para os botões, que continuam servindo.
+  if (focusedSession && !(s.sessions || []).some((x) => x.id === focusedSession)) {
+    focusedSession = null;
+    sessionStorage.removeItem("deck-focus");
+    deckSig = "";
+  }
+
   document.body.dataset.noUsage = s.usage.ok ? "0" : "1";
   if (!s.usage.ok) {
     $("detail").textContent =

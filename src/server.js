@@ -236,6 +236,12 @@ class Deck {
     if (seen.permissionMode) out.permissionMode = seen.permissionMode;
     if (seen.effort) out.effort = seen.effort;
     if (seen.model) out.modelId = seen.model;
+    // Estado POR SESSÃO. É o que permite uma tecla por agente mostrar em que
+    // pé aquela conversa está — sem isso o painel só sabe um estado global.
+    out.state = seen.status || null;
+    out.tool = seen.tool || null;
+    out.detail = seen.detail || null;
+    out.seenAt = seen.at;
     return out;
   }
 

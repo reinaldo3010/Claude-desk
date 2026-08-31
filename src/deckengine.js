@@ -182,10 +182,58 @@ function readBadge(badge, state) {
  * Devolve a lista de botões prontos para desenhar, já sem os campos sensíveis
  * (`keys`, `text`, `steps`) — o cliente só precisa saber o `id`.
  */
+/** Nome curto de um projeto, a partir do caminho de trabalho. */
+function nomeCurto(cwd, fallback) {
+  if (!cwd) return fallback;
+  const partes = String(cwd).replace(/\\/g, "/").split("/").filter(Boolean);
+  return partes[partes.length - 1] || fallback;
+}
+
+/**
+ * Expande uma tecla de agente numa tecla POR SESSÃO.
+ *
+ * É a única ação dinâmica do catálogo, e ela existe por um motivo concreto:
+ * o valor de um deck com várias sessões não é ter um botão de "aprovar", é
+ * saber QUAL das quatro conversas está te esperando. Uma tecla fixa não
+ * consegue dizer isso; uma tecla por sessão, colorida pelo estado daquela
+ * sessão, diz de longe.
+ */
+function expandirAgentes(modelo, state) {
+  const vivas = (state.sessions || []).filter((s) => s.live);
+  const limite = Math.max(1, modelo.max || 6);
+
+  return vivas.slice(0, limite).map((s, i) => {
+    const estado = s.state || "idle";
+    return {
+      id: `${modelo.id}:${s.id}`,
+      label: nomeCurto(s.cwd, s.name || `Sessão ${i + 1}`),
+      hint: s.tool || s.model || null,
+      page: modelo.page || "agentes",
+      group: modelo.group || "control",
+      // A cor diz o estado daquela conversa, não o do painel.
+      tone: { waiting: "stop", error: "warn", working: "go" }[estado] || "neutral",
+      icon: { waiting: "info", error: "power", working: "play" }[estado] || "chip",
+      kind: "focus",
+      sessionId: s.id,
+      state: estado,
+      enabled: true,
+      urgent: estado === "waiting" || estado === "error",
+      active: state.focus === s.id,
+      badge: null,
+      hold: null,
+      detail: s.detail || null,
+    };
+  });
+}
+
 function resolve(actions, state) {
   const out = [];
 
   for (const a of actions) {
+    if (a.kind === "agent") {
+      if (matches(a.when, state)) out.push(...expandirAgentes(a, state));
+      continue;
+    }
     // Ações `secondary` existem só como destino de toque longo ou de chain.
     // Renderizá-las também no grid duplicaria o comando e gastaria espaço.
     if (a.secondary) continue;
@@ -244,12 +292,24 @@ function pagesOf(actions, state) {
     const p = a.page || "main";
     if (!seen.has(p)) seen.set(p, { id: p, label: PAGE_LABELS[p] || p, count: 0, urgent: false, level: null });
     const entry = seen.get(p);
-    if (matches(a.when, state)) {
-      entry.count++;
-      if (a.urgent && matches(a.urgent, state)) {
+    if (!matches(a.when, state)) continue;
+
+    // Uma tecla de agente não conta como um botão: conta como quantas sessões
+    // ela vai virar. Uma aba dizendo "1" com quatro conversas abertas mentiria.
+    if (a.kind === "agent") {
+      const teclas = expandirAgentes(a, state);
+      entry.count += teclas.length;
+      if (teclas.some((t) => t.urgent)) {
         entry.urgent = true;
-        entry.level = alarme ? "alarm" : "highlight";
+        entry.level = "alarm";
       }
+      continue;
+    }
+
+    entry.count++;
+    if (a.urgent && matches(a.urgent, state)) {
+      entry.urgent = true;
+      entry.level = alarme ? "alarm" : "highlight";
     }
   }
   // Página sem nenhum botão visível não vira aba.
@@ -263,8 +323,9 @@ const PAGE_LABELS = {
   modelo: "Modelo",
   esforco: "Esforço",
   modo: "Modo",
+  agentes: "Agentes",
   git: "Git",
   quota: "Uso",
 };
 
-module.exports = { resolve, matches, readBadge, pagesOf, BADGE_SOURCES, PAGE_LABELS };
+module.exports = { resolve, matches, readBadge, pagesOf, expandirAgentes, nomeCurto, BADGE_SOURCES, PAGE_LABELS };

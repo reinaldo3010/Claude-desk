@@ -809,3 +809,25 @@ body[data-state="boot"] .deck { opacity: .45; }
 [data-no-usage="1"] .deck { flex: 1 1 auto; min-height: 0; }
 [data-no-usage="1"] .deck-row { flex: 1 1 0; min-height: 0; }
 [data-no-usage="1"] .btn { min-height: 0; }
+
+/* ── teclas de agente ──────────────────────────────────────────────── */
+
+/* Uma tecla por conversa. O LED é o que se lê de longe: com quatro sessões
+   abertas, a pergunta não é "o que fazer" mas "qual delas está me esperando".
+   A cor responde antes de você ler o nome do projeto. */
+.btn .agent-led {
+  position: absolute; top: .55em; right: .7em; z-index: 2;
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--faint);
+  transition: background .3s ease, box-shadow .3s ease;
+}
+.btn[data-state="working"] .agent-led { background: var(--go); box-shadow: 0 0 9px var(--go); }
+.btn[data-state="waiting"] .agent-led { background: var(--stop); box-shadow: 0 0 11px var(--stop); animation: breathe 1s ease-in-out infinite; }
+.btn[data-state="error"]   .agent-led { background: var(--warn); box-shadow: 0 0 9px var(--warn); }
+.btn[data-state="idle"]    .agent-led { background: var(--dim); }
+
+/* A conversa que está esperando ganha contorno, não só o ponto. */
+.btn[data-state="waiting"] {
+  border-color: rgba(255,92,72,.5);
+  box-shadow: 0 0 26px rgba(255,92,72,.16);
+}

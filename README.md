@@ -83,8 +83,39 @@ node bin/claude-deck.js uninstall          desfaz o registro
 node bin/claude-deck.js doctor             diagnóstico da máquina
 node bin/claude-deck.js dump               imprime o que o deck está lendo
 node bin/claude-deck.js event waiting "oi" dispara um evento de teste
-npm test                                   116 testes, sem dependências
+npm test                                   124 testes, sem dependências
 ```
+
+## Comparação com o Codex Micro
+
+Em julho de 2026 a OpenAI lançou o **Codex Micro**, um teclado físico de 13
+teclas para controlar agentes, feito com a Work Louder, a US$ 230 e em edição
+limitada. A ideia é a mesma deste projeto; o mapa honesto está abaixo.
+
+| Codex Micro | Claude Deck |
+|---|---|
+| 6 **Agent Keys** com RGB por conversa (ocioso, pensando, esperando, pronto, erro) | ✅ **aba Agentes** — uma tecla por sessão viva, LED pelo estado daquela conversa, nomeada pelo projeto e mostrando a ferramenta em uso |
+| Apertar a tecla abre aquele chat | ⚠️ **parcial** — o toque foca o painel naquela sessão; não existe atalho documentado para saltar para a sessão N no app |
+| Aceitar / Recusar | ✅ e o painel mostra **o comando real** com classificação de risco antes de você decidir |
+| Novo chat, enviar prompt | ✅ |
+| **Joystick** → workflows (revisar PR, depurar, refatorar) | ✅ aba Prompts, com quantos você quiser |
+| **Dial de raciocínio** | ✅ aba Esforço |
+| **Push-to-talk** (usa o microfone do PC) | ❌ **não temos** |
+| Sensor capacitivo | ❌ |
+| 13 teclas fixas, US$ 230, edição limitada | ✅ ilimitadas, grátis, em qualquer tablet |
+| — | ✅ **quota de 5h e semanal**, taxa de queima e projeção de esgotamento |
+| — | ✅ **portão de permissão** com o comando e o risco na tela |
+| — | ✅ vários painéis ao mesmo tempo, cada um focado numa sessão |
+
+O que falta mesmo é **push-to-talk**. Não é um botão: precisa de captura de
+áudio, transcrição e um caminho de volta para o app. Num painel de parede a
+três metros o microfone do tablet também não é o do PC, então não é só portar
+— é outro projeto. Está anotado, não escondido.
+
+A página oficial do produto respondeu 403 daqui; a comparação foi montada a
+partir da cobertura de [New Atlas](https://newatlas.com/computers/openai-codex-micro-keyboard/),
+[Tom's Hardware](https://www.tomshardware.com/peripherals/keyboards/openais-first-hardware-device-is-an-rgb-macropod-codex-micro-features-13-low-profile-keys-and-a-joystick-for-controlling-ai-coding-agents)
+e [Axios](https://www.axios.com/2026/07/15/openai-keyboard-codex-agents).
 
 ## App desktop ou terminal
 

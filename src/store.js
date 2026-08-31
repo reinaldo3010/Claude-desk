@@ -86,6 +86,8 @@ class DeckStore {
         permissionMode: null,
         effort: null,
         model: null,
+        tool: null,
+        detail: null,
       });
     }
     return this.sessions.get(id);
@@ -156,6 +158,7 @@ class DeckStore {
           sess.turn = payload.turn_number || sess.turn + 1;
         }
         const p = String(payload.prompt || "").replace(/\s+/g, " ").trim();
+        if (sess) sess.detail = p ? p.slice(0, 120) : null;
         this._set(STATUS.WORKING, "Claude trabalhando", p ? p.slice(0, 120) : null);
         this._push("prompt", p ? p.slice(0, 160) : "(prompt enviado)", { sessionId: sid });
         break;
@@ -166,13 +169,18 @@ class DeckStore {
         const tool = payload.tool_name || "ferramenta";
         const label = TOOL_LABELS[tool] || `usando ${tool}`;
         this.activeTool = { tool, at: Date.now(), label };
-        if (sess) sess.status = STATUS.WORKING;
+        if (sess) {
+          sess.status = STATUS.WORKING;
+          sess.tool = tool;
+          sess.detail = label;
+        }
         this._set(STATUS.WORKING, "Claude trabalhando", label);
         break;
       }
 
       case "PostToolUse":
         this.activeTool = null;
+        if (sess) sess.tool = null;
         break;
 
       case "PostToolUseFailure": {
@@ -213,6 +221,10 @@ class DeckStore {
         this.activeTool = null;
         if (sess) sess.status = STATUS.IDLE;
         const last = String(payload.last_assistant_message || "").replace(/\s+/g, " ").trim();
+        if (sess) {
+          sess.tool = null;
+          sess.detail = last ? last.slice(0, 140) : null;
+        }
         this._set(STATUS.IDLE, "Resposta pronta", last ? last.slice(0, 140) : null);
         this._push("done", last ? last.slice(0, 160) : "(resposta concluída)", { sessionId: sid });
         break;
