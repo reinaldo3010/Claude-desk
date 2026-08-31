@@ -21,6 +21,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const { execFileSync } = require("child_process");
 
 const { load } = require("../src/config");
 const { writeJsonAtomic } = require("../src/util");
@@ -96,8 +97,15 @@ function render(data, cfg) {
   const dir = shortPath(data?.workspace?.current_dir || data?.cwd);
   if (dir) parts1.push(fg(GREY, dir));
 
-  const branch = data?.workspace?.git_worktree || data?.worktree?.branch;
+  /* Mesma ordem de preferência do painel: o branch de verdade primeiro, o
+     nome do worktree só como último recurso — e marcado, para não passar por
+     branch. Ver `branchDe()` no fim do arquivo. */
+  const cwdAqui = data?.cwd || data?.workspace?.current_dir || null;
+  const branch = data?.worktree?.branch || branchDe(cwdAqui);
   if (branch) parts1.push(fg(GREEN, ` ${branch}`));
+  else if (data?.workspace?.git_worktree) {
+    parts1.push(fg(GREEN, `⑂ ${data.workspace.git_worktree}`));
+  }
 
   const pr = data?.pr;
   if (pr?.number) {
@@ -139,11 +147,49 @@ function render(data, cfg) {
   return [line1, line2].filter(Boolean).join("\n");
 }
 
+/**
+ * Resolve o branch de git da sessão.
+ *
+ * A statusLine não entrega branch: existe `worktree.branch`, mas só em sessão
+ * de worktree, e `workspace.git_worktree` é nome de worktree, não branch. Os
+ * próprios exemplos da documentação resolvem isso chamando o git. Como nós
+ * somos a statusLine e rodamos no diretório da sessão, resolvemos aqui.
+ *
+ * Nunca lança e nunca demora: falha, timeout ou repositório nenhum devolvem
+ * null. Um branch ausente é um campo vazio no painel; uma statusLine que
+ * trava é o terminal do usuário travando.
+ */
+function branchDe(cwd) {
+  if (!cwd) return null;
+  try {
+    const saida = execFileSync("git", ["branch", "--show-current"], {
+      cwd,
+      timeout: 700,
+      stdio: ["ignore", "pipe", "ignore"],
+      encoding: "utf8",
+    });
+    const nome = String(saida).trim();
+    return nome && nome.length <= 200 ? nome : null;
+  } catch {
+    return null;   // sem git, fora de repositório, HEAD solto, timeout
+  }
+}
+
 /** Grava o snapshot. Falhar aqui é aceitável: o terminal continua funcionando. */
 function persist(data, cfg) {
   const id = String(data?.session_id || "sem-sessao").replace(/[^A-Za-z0-9_.-]/g, "_").slice(0, 80);
   const file = path.join(cfg.sessionsDir, `${id}.json`);
-  writeJsonAtomic(file, { at: Date.now(), pid: process.pid, payload: data });
+  const cwd = data?.cwd || data?.workspace?.current_dir || null;
+
+  /* `payload` guarda exatamente o que o Claude Code entregou, sem invenção
+     nossa no meio. O que nós descobrimos por conta própria vai em `deck`, para
+     a procedência do dado continuar legível daqui a seis meses. */
+  writeJsonAtomic(file, {
+    at: Date.now(),
+    pid: process.pid,
+    payload: data,
+    deck: { branch: branchDe(cwd) },
+  });
 
   // Faxina barata: remove snapshots velhos para o diretório não crescer sem fim.
   try {

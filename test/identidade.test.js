@@ -137,3 +137,30 @@ test("o fundo tem plano B sem WebGL e não vira tela preta", () => {
   // o painel.
   assert.match(js, /webglcontextlost/);
 });
+
+/* ── procedência do dado ────────────────────────────────────────────────── */
+
+test("nome de worktree não é usado como branch", () => {
+  // A statusLine não entrega branch. `workspace.git_worktree` é nome de
+  // worktree e está ausente na árvore principal: usá-lo como branch deixava a
+  // coluna do painel vazia justamente no caso comum.
+  const { parseStatusline } = require("../src/usage");
+  const semBranch = parseStatusline({
+    session_id: "s1",
+    workspace: { current_dir: "/x", git_worktree: "feature-xyz" },
+  });
+  assert.equal(semBranch.branch, null, "nome de worktree não pode virar branch");
+  assert.equal(semBranch.worktree, "feature-xyz", "ele é worktree, e aparece como worktree");
+
+  // O campo documentado de branch vence.
+  const comBranch = parseStatusline({
+    session_id: "s2",
+    workspace: { current_dir: "/x" },
+    worktree: { branch: "feat/planilha" },
+  });
+  assert.equal(comBranch.branch, "feat/planilha");
+
+  // E o que a nossa própria statusLine resolveu entra pelo meta.
+  const doDeck = parseStatusline({ session_id: "s3" }, { branch: "main" });
+  assert.equal(doDeck.branch, "main");
+});

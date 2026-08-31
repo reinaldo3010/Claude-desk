@@ -4,6 +4,7 @@
  * CLI do Claude Deck.
  *
  *   claude-deck start        sobe o servidor
+ *   claude-deck demo         preview com dados simulados, sem instalar nada
  *   claude-deck install      registra statusLine e hooks no ~/.claude/settings.json
  *   claude-deck uninstall    desfaz o registro
  *   claude-deck doctor       diagnóstico completo da máquina
@@ -22,6 +23,7 @@ const settings = require("../src/settings");
 const sec = require("../src/security");
 const { readSessions, aggregate } = require("../src/usage");
 const { buildCommand } = require("../src/inject");
+const demoLib = require("../src/demo");
 
 const B = (s) => `\x1b[1m${s}\x1b[0m`;
 const D = (s) => `\x1b[2m${s}\x1b[0m`;
@@ -297,11 +299,81 @@ async function sendEvent(cfg, positional) {
   }
 }
 
+// ------------------------------------------------------------------- demo
+
+/**
+ * Preview no próprio PC, antes de instalar qualquer coisa.
+ *
+ * Duas garantias, e elas são o motivo deste comando existir:
+ *   · não mexe no `~/.claude/settings.json` e não precisa de hook instalado;
+ *   · o injetor é forçado para `dry`, então nenhuma tecla sai do processo.
+ *
+ * A segunda garantia é o que torna o botão "Aprovar" seguro de testar aqui:
+ * não existe Claude Code nenhum atrás dele. Testar aprovação contra o Claude
+ * de verdade é a última coisa a fazer, não a primeira.
+ */
+function demo(cfg) {
+  const casa = demoLib.criarCasa();
+  const cfgDemo = {
+    ...cfg,
+    sessionsDir: path.join(casa, "sessions"),
+    injector: "dry",
+    target: "(demonstração — nada é digitado)",
+    gateHoldMs: cfg.gateHoldMs > 0 ? cfg.gateHoldMs : 90_000,
+    oauthEnabled: false,
+  };
+
+  const { server, deck } = createServer(cfgDemo);
+  let parar = () => {};
+
+  server.on("error", (err) => {
+    if (err.code === "EADDRINUSE") {
+      console.error(R(`\n  A porta ${cfgDemo.port} já está ocupada.`));
+      console.error(D(`  Use  DECK_PORT=8789 claude-deck demo\n`));
+    } else {
+      console.error(R(`\n  Falha ao subir: ${err.message}\n`));
+    }
+    process.exit(1);
+  });
+
+  server.listen(cfgDemo.port, cfgDemo.host, () => {
+    const t = deck.token;
+    console.log(`\n  ${B("Claude Deck")} ${Y("— demonstração")}`);
+    console.log(`  ${D("─".repeat(58))}`);
+    console.log(`  abra aqui  ${B(`http://localhost:${cfgDemo.port}/?t=${t}`)}`);
+    for (const ip of localIps()) {
+      console.log(`  no tablet  http://${ip}:${cfgDemo.port}/?t=${t}`);
+    }
+    console.log(`  ${D("─".repeat(58))}`);
+    console.log(`  ${OK} ${D("seu settings.json não foi tocado — nenhum hook é necessário")}`);
+    console.log(`  ${OK} ${D("injetor em dry: nenhuma tecla é digitada em janela nenhuma")}`);
+    console.log(`  ${OK} ${D("por isso o botão Aprovar é seguro aqui: não há nada atrás dele")}`);
+    console.log(`\n  ${D(`roteiro de ${Math.round(demoLib.DURACAO_MS / 1000)}s, em laço. Ctrl+C encerra.`)}\n`);
+
+    parar = demoLib.iniciar(deck, casa, (texto) => {
+      const hora = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      console.log(`  ${D(hora)}  ${texto}`);
+    });
+  });
+
+  const bye = () => {
+    console.log(D("\n  encerrando a demonstração…"));
+    parar();
+    deck.gate.drain();
+    server.close(() => process.exit(0));
+    setTimeout(() => process.exit(0), 1500).unref();
+  };
+  process.on("SIGINT", bye);
+  process.on("SIGTERM", bye);
+}
+
 function help() {
   console.log(`
   ${B("claude-deck")} — painel de parede para o Claude Code
 
     start                  sobe o servidor  ${D("(padrão)")}
+    demo                   preview com dados simulados, sem instalar nada
+                           ${D("não toca no settings.json; não digita em janela nenhuma")}
     install [--gate]       registra statusLine e hooks no settings.json
                            ${D("--gate liga o portão de permissão remota (experimental)")}
                            ${D("--dry-run mostra o que faria, sem escrever")}
@@ -321,6 +393,7 @@ function main() {
 
   switch (cmd) {
     case "start": return start(cfg);
+    case "demo": return demo(cfg);
     case "install": return doInstall(cfg, flags);
     case "uninstall": return doUninstall(flags);
     case "doctor": return process.exit(doctor(cfg) ? 1 : 0);

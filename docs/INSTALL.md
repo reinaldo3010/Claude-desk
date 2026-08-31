@@ -7,6 +7,29 @@ entrega `rate_limits` na statusLine) e um tablet na mesma rede Wi-Fi.
 
 ---
 
+## 0. Ver funcionando antes de instalar nada
+
+Comece por aqui. Não precisa de hook, não mexe no seu `settings.json`, e não
+digita tecla em janela nenhuma:
+
+```bash
+git clone <este-repo> claude-deck && cd claude-deck
+node bin/claude-deck.js demo
+```
+
+Abra a URL que ele imprime. O painel atravessa um roteiro de 78 segundos em
+laço: ocioso, trabalhando com ferramenta, três sessões, **permissão pendente**,
+quota subindo até o vermelho, esperando você, erro, e volta.
+
+Os dados são sintéticos, mas entram pelo mesmo caminho de código que o Claude
+Code real usa. Não é maquete: se algo estiver quebrado, quebra aqui também.
+
+**O botão "Aprovar" é seguro nesse modo** — não existe Claude Code atrás dele.
+É a única forma de exercitar o portão de permissão sem apostar numa aprovação
+de verdade. Toque em tudo.
+
+Depois de ver funcionando, siga para a instalação de verdade.
+
 ## 1. Baixar e instalar
 
 ```bash

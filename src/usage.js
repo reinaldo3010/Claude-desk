@@ -128,7 +128,14 @@ function parseStatusline(raw, meta = {}) {
     promptId: raw.prompt_id || null,
     cwd: raw.cwd || get(raw, "workspace.current_dir") || null,
     projectDir: get(raw, "workspace.project_dir") || null,
-    branch: get(raw, "workspace.git_worktree") || null,
+    /* Não existe campo de branch geral na statusLine — a própria documentação
+       obtém branch chamando `git branch --show-current`. O que existe é
+       `worktree.branch`, presente só em sessão de worktree, e ausente em
+       worktree criado por hook. `workspace.git_worktree` é NOME DE WORKTREE,
+       não branch, e some na árvore principal: chamá-lo de branch deixava a
+       coluna vazia justamente no caso comum. Por isso a nossa própria
+       statusLine resolve o branch e o entrega em `meta.branch`. */
+    branch: get(raw, "worktree.branch") || meta.branch || null,
     repo: get(raw, "workspace.repo.name") || null,
     repoOwner: get(raw, "workspace.repo.owner") || null,
     model: get(raw, "model.display_name") || get(raw, "model.id") || null,
@@ -141,7 +148,7 @@ function parseStatusline(raw, meta = {}) {
     vim: get(raw, "vim.mode") || null,
     agent: get(raw, "agent.name") || null,
     pr: raw.pr ? { number: raw.pr.number ?? null, url: raw.pr.url ?? null, state: raw.pr.review_state ?? null } : null,
-    worktree: get(raw, "worktree.name") || null,
+    worktree: get(raw, "worktree.name") || get(raw, "workspace.git_worktree") || null,
 
     context: {
       used: normalizePercent(ctx.used_percentage),
@@ -198,6 +205,7 @@ function readSessions(dir, ttlMs = 30 * 60_000, now = Date.now()) {
     const snap = parseStatusline(raw.payload || raw, {
       at: raw.at || mtime,
       sessionId: path.basename(name, ".json"),
+      branch: (raw.deck && raw.deck.branch) || null,
     });
     if (snap) {
       snap.staleMs = now - (snap.at || mtime);

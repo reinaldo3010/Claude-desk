@@ -62,7 +62,10 @@ O passo a passo completo, incluindo a configuração do tablet, está em
 
 Do próprio Claude Code. Desde a v2.1.x ele entrega `rate_limits.five_hour` e
 `.seven_day` no stdin do `statusLine`, junto com `context_window`, `cost`,
-`prompt_cache`, modelo, branch e PR. O deck instala a própria statusLine, que
+`prompt_cache`, modelo e PR. **Branch não vem** — não existe esse campo no
+payload, e os próprios exemplos da documentação resolvem chamando
+`git branch --show-current`. Como a statusLine é nossa e roda no diretório da
+sessão, ela resolve o branch e o grava separado do que o Claude Code entregou. O deck instala a própria statusLine, que
 grava esses dados e ainda imprime uma barra de status decente no terminal.
 
 Isso importa porque significa **não depender de nenhum projeto de terceiro**
