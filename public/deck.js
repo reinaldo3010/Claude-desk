@@ -252,6 +252,8 @@ function fmtBadge(b) {
       return `${Math.round(b.value)}<small>%</small>`;
     case "usd":
       return `<small>$</small>${b.value.toFixed(2)}`;
+    case "text":
+      return `<small>${escapeHtml(String(b.value))}</small>`;
     case "duration": {
       const s = Math.max(0, Math.round(b.value));
       // Abaixo de cinco segundos o número muda rápido demais para ser lido e
@@ -722,8 +724,15 @@ function render(s) {
   paintGate(s);
   paintDrawer(s);
 
+  // Sem leitura de quota (o app desktop não executa a nossa statusLine), os
+  // dois medidores mostrariam "--" ocupando a maior parte do painel. Nesse
+  // caso eles encolhem e o espaço vai para os botões, que continuam servindo.
+  document.body.dataset.noUsage = s.usage.ok ? "0" : "1";
   if (!s.usage.ok) {
-    $("detail").textContent = "Sem leitura de quota — mande uma mensagem no Claude Code";
+    $("detail").textContent =
+      s.config.surface === "desktop"
+        ? "Sem quota: o app desktop não roda a statusLine — veja docs/INSTALL.md"
+        : "Sem leitura de quota — mande uma mensagem no Claude Code";
   }
 
   // Alerta de espera acorda a tela.

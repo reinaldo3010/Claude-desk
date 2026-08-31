@@ -49,6 +49,45 @@ const APPROVAL_KEYS = {
   deny: process.env.DECK_KEY_DENY || "{Esc}",
 };
 
+
+/* ═══════════════════════ MENUS DO APP DESKTOP ═══════════════════════════
+ * O app desktop não é o terminal. Dois fatos documentados definem tudo aqui:
+ *
+ *   1. os atalhos do modo interativo do terminal NÃO valem no desktop —
+ *      Shift+Tab não cicla modo de permissão lá;
+ *   2. o desktop tem os próprios acordes, e `1`–`9` escolhe item num menu
+ *      aberto. Então cada ação vira duas teclas: abre o menu, escolhe.
+ *
+ * ⚠️  A NUMERAÇÃO ABAIXO FOI LIDA DE FOTOS DA TELA, NÃO DE DOCUMENTAÇÃO.
+ * A posição de um item muda se a lista mudar — "Ignorar permissões", por
+ * exemplo, só aparece depois de habilitada nas configurações, e sem ela os
+ * itens seguintes sobem uma casa. CONFIRA abrindo o menu uma vez e ajuste
+ * aqui: é o único lugar que precisa mudar.
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+const DESKTOP = {
+  // Ctrl+Shift+M · Modo de permissão
+  modo: {
+    abrir: "^+m",
+    itens: { automatico: 1, manual: 2, aceitar: 3, planejar: 4, ignorar: 5 },
+  },
+  // Ctrl+Shift+I · Modelo. Os modelos antigos ficam atrás de "Mais modelos >",
+  // um submenu — não são alcançáveis por um número só, então não viram botão.
+  modelo: {
+    abrir: "^+i",
+    itens: { fable: 1, opus: 2, sonnet: 3, haiku: 4 },
+  },
+  // Ctrl+Shift+E · Esforço. No desktop isso abre um CONTROLE DESLIZANTE, não
+  // uma lista numerada. Não dá para mapear número em posição a partir de uma
+  // foto, então aqui existe só o botão que abre o menu — e nada é inventado.
+  esforco: { abrir: "^+e" },
+};
+
+/** Monta a sequência "abre o menu, espera, escolhe o item". */
+function menuDesktop(abrir, item) {
+  return [{ keys: abrir }, { wait: 220 }, { keys: String(item) }];
+}
+
 const BASE_ACTIONS = [
   // ══════════════════════════ decisões de permissão ═══════════════════════
   // Só existem quando há o que decidir. Com nada pendente elas somem e
@@ -146,6 +185,9 @@ const BASE_ACTIONS = [
     icon: "map",
     kind: "keys",
     keys: "+{Tab}",
+    // Documentado: os atalhos do modo interativo do terminal não valem no
+    // app desktop. Este botão seria um clique que não faz nada lá.
+    when: { surface: "terminal" },
   },
   {
     id: "continue",
@@ -270,6 +312,7 @@ const BASE_ACTIONS = [
   // ══════════════════════════ estado da sessão ════════════════════════════
   {
     id: "cost",
+    when: { surface: "terminal" },
     label: "Custo",
     hint: "/cost",
     page: "sessao",
@@ -282,6 +325,7 @@ const BASE_ACTIONS = [
   },
   {
     id: "model",
+    when: { surface: "terminal" },
     label: "Modelo",
     hint: "/model",
     page: "sessao",
@@ -293,6 +337,7 @@ const BASE_ACTIONS = [
   },
   {
     id: "effort",
+    when: { surface: "terminal" },
     label: "Esforço",
     hint: "/effort",
     page: "sessao",
@@ -304,6 +349,7 @@ const BASE_ACTIONS = [
   },
   {
     id: "status",
+    when: { surface: "terminal" },
     label: "Status",
     hint: "/status",
     page: "sessao",
@@ -316,6 +362,7 @@ const BASE_ACTIONS = [
   },
   {
     id: "usage",
+    when: { surface: "terminal" },
     label: "Uso",
     hint: "/usage",
     page: "sessao",
@@ -328,6 +375,7 @@ const BASE_ACTIONS = [
   },
   {
     id: "resume_hint",
+    when: { surface: "terminal" },
     label: "Retomar",
     hint: "quando o limite zerar",
     page: "sessao",
@@ -350,6 +398,7 @@ const BASE_ACTIONS = [
   // família acende: acender os três seria mentira bonita.
   {
     id: "m_opus",
+    when: { surface: "terminal" },
     label: "Opus",
     hint: "raciocínio complexo",
     page: "modelo",
@@ -362,6 +411,7 @@ const BASE_ACTIONS = [
   },
   {
     id: "m_sonnet",
+    when: { surface: "terminal" },
     label: "Sonnet",
     hint: "dia a dia",
     page: "modelo",
@@ -374,6 +424,7 @@ const BASE_ACTIONS = [
   },
   {
     id: "m_haiku",
+    when: { surface: "terminal" },
     label: "Haiku",
     hint: "rápido e barato",
     page: "modelo",
@@ -386,6 +437,7 @@ const BASE_ACTIONS = [
   },
   {
     id: "m_fable",
+    when: { surface: "terminal" },
     label: "Fable",
     hint: "mais capaz · mais caro",
     page: "modelo",
@@ -400,6 +452,7 @@ const BASE_ACTIONS = [
   },
   {
     id: "m_best",
+    when: { surface: "terminal" },
     label: "Melhor",
     hint: "/model best",
     page: "modelo",
@@ -412,6 +465,7 @@ const BASE_ACTIONS = [
   },
   {
     id: "m_opusplan",
+    when: { surface: "terminal" },
     label: "Opus + plano",
     hint: "planeja em Opus, executa em Sonnet",
     page: "modelo",
@@ -423,6 +477,7 @@ const BASE_ACTIONS = [
   },
   {
     id: "m_opus1m",
+    when: { surface: "terminal" },
     label: "Opus 1M",
     hint: "sessões longas",
     page: "modelo",
@@ -434,6 +489,7 @@ const BASE_ACTIONS = [
   },
   {
     id: "m_default",
+    when: { surface: "terminal" },
     label: "Padrão",
     hint: "volta ao da conta",
     page: "modelo",
@@ -450,6 +506,7 @@ const BASE_ACTIONS = [
   // só para a sessão. `auto` limpa o nível salvo do modelo ativo.
   {
     id: "e_low",
+    when: { surface: "terminal" },
     label: "Baixo",
     hint: "tarefas curtas",
     page: "esforco",
@@ -462,6 +519,7 @@ const BASE_ACTIONS = [
   },
   {
     id: "e_medium",
+    when: { surface: "terminal" },
     label: "Médio",
     hint: "economiza tokens",
     page: "esforco",
@@ -474,6 +532,7 @@ const BASE_ACTIONS = [
   },
   {
     id: "e_high",
+    when: { surface: "terminal" },
     label: "Alto",
     hint: "padrão",
     page: "esforco",
@@ -486,6 +545,7 @@ const BASE_ACTIONS = [
   },
   {
     id: "e_xhigh",
+    when: { surface: "terminal" },
     label: "Extra",
     hint: "xhigh · código e agentes",
     page: "esforco",
@@ -500,6 +560,7 @@ const BASE_ACTIONS = [
   },
   {
     id: "e_max",
+    when: { surface: "terminal" },
     label: "Máximo",
     hint: "só a sessão · pode divagar",
     page: "esforco",
@@ -512,6 +573,7 @@ const BASE_ACTIONS = [
   },
   {
     id: "e_ultracode",
+    when: { surface: "terminal" },
     label: "Ultracode",
     hint: "xhigh + orquestração",
     page: "esforco",
@@ -523,6 +585,7 @@ const BASE_ACTIONS = [
   },
   {
     id: "e_auto",
+    when: { surface: "terminal" },
     label: "Auto",
     hint: "limpa o nível salvo",
     page: "esforco",
@@ -534,6 +597,7 @@ const BASE_ACTIONS = [
   },
   {
     id: "e_fast",
+    when: { surface: "terminal" },
     label: "Turbo",
     hint: "/fast · Opus 5 e 4.8",
     page: "esforco",
@@ -544,14 +608,115 @@ const BASE_ACTIONS = [
     text: "/fast",
     active: { fastMode: true },
   },
+  // ═══════════════════ app desktop: modo de permissão ═════════════════════
+  {
+    id: "d_modo_auto", label: "Automático", hint: "Claude decide as permissões",
+    page: "modo", group: "control", tone: "accent", icon: "infinity",
+    kind: "chain", steps: menuDesktop(DESKTOP.modo.abrir, DESKTOP.modo.itens.automatico),
+    when: { surface: "desktop" },
+    active: { permissionMode: ["auto", "default"] },
+  },
+  {
+    id: "d_modo_manual", label: "Manual", hint: "sempre perguntar",
+    page: "modo", group: "control", tone: "neutral", icon: "check",
+    kind: "chain", steps: menuDesktop(DESKTOP.modo.abrir, DESKTOP.modo.itens.manual),
+    when: { surface: "desktop" },
+    active: { permissionMode: ["default"] },
+  },
+  {
+    id: "d_modo_aceitar", label: "Aceitar edições", hint: "edições sem perguntar",
+    page: "modo", group: "control", tone: "warn", icon: "play",
+    kind: "chain", steps: menuDesktop(DESKTOP.modo.abrir, DESKTOP.modo.itens.aceitar),
+    when: { surface: "desktop" },
+    active: { permissionMode: ["acceptEdits"] },
+  },
+  {
+    id: "d_modo_plano", label: "Planejar", hint: "plano antes de alterar",
+    page: "modo", group: "control", tone: "accent", icon: "map",
+    kind: "chain", steps: menuDesktop(DESKTOP.modo.abrir, DESKTOP.modo.itens.planejar),
+    when: { surface: "desktop" },
+    active: { permissionMode: ["plan"] },
+  },
+  {
+    id: "d_modo_ignorar", label: "Ignorar permissões", hint: "aceita tudo",
+    page: "modo", group: "control", tone: "stop", icon: "power",
+    kind: "chain", steps: menuDesktop(DESKTOP.modo.abrir, DESKTOP.modo.itens.ignorar),
+    // Este desliga a rede de proteção inteira. Dois toques, sempre.
+    confirm: true,
+    when: { surface: "desktop" },
+    active: { permissionMode: ["bypassPermissions", "dontAsk"] },
+  },
+
+  // ═══════════════════════ app desktop: modelo ════════════════════════════
+  {
+    id: "d_fable", label: "Fable 5", hint: "mais capaz · mais caro",
+    page: "modelo", group: "control", tone: "warn", icon: "chip",
+    kind: "chain", steps: menuDesktop(DESKTOP.modelo.abrir, DESKTOP.modelo.itens.fable),
+    confirm: true,
+    when: { surface: "desktop" }, active: { modelIs: ["fable"] },
+  },
+  {
+    id: "d_opus", label: "Opus 5", hint: "raciocínio complexo",
+    page: "modelo", group: "control", tone: "accent", icon: "chip",
+    kind: "chain", steps: menuDesktop(DESKTOP.modelo.abrir, DESKTOP.modelo.itens.opus),
+    when: { surface: "desktop" }, active: { modelIs: ["opus"] },
+  },
+  {
+    id: "d_sonnet", label: "Sonnet 5", hint: "dia a dia",
+    page: "modelo", group: "control", tone: "neutral", icon: "chip",
+    kind: "chain", steps: menuDesktop(DESKTOP.modelo.abrir, DESKTOP.modelo.itens.sonnet),
+    when: { surface: "desktop" }, active: { modelIs: ["sonnet"] },
+  },
+  {
+    id: "d_haiku", label: "Haiku 4.5", hint: "rápido e barato",
+    page: "modelo", group: "control", tone: "neutral", icon: "chip",
+    kind: "chain", steps: menuDesktop(DESKTOP.modelo.abrir, DESKTOP.modelo.itens.haiku),
+    when: { surface: "desktop" }, active: { modelIs: ["haiku"] },
+  },
+  {
+    id: "d_mais_modelos", label: "Mais modelos", hint: "abre o menu — escolha na tela",
+    page: "modelo", group: "control", tone: "neutral", icon: "info",
+    kind: "keys", keys: DESKTOP.modelo.abrir,
+    when: { surface: "desktop" },
+  },
+
+  // ═══════════════════════ app desktop: esforço ═══════════════════════════
+  {
+    id: "d_esforco", label: "Esforço", hint: "abre o controle deslizante",
+    page: "esforco", group: "control", tone: "accent", icon: "gauge",
+    kind: "keys", keys: DESKTOP.esforco.abrir,
+    when: { surface: "desktop" },
+    badge: { source: "effortLabel", format: "text" },
+  },
+
+  // ═════════════════════ app desktop: painéis e visão ═════════════════════
+  {
+    id: "d_tarefas", label: "Segundo plano", hint: "Ctrl+Shift+F",
+    page: "esforco", group: "control", tone: "neutral", icon: "chart",
+    kind: "keys", keys: "^+f",
+    when: { surface: "desktop" },
+    badge: { source: "subagents", format: "number" },
+  },
+  {
+    id: "d_diff", label: "Diff", hint: "Ctrl+Shift+D",
+    page: "esforco", group: "control", tone: "neutral", icon: "search",
+    kind: "keys", keys: "^+d",
+    when: { surface: "desktop" },
+  },
+  {
+    id: "d_visao", label: "Detalhe da conversa", hint: "Ctrl+O · cicla os modos",
+    page: "esforco", group: "control", tone: "neutral", icon: "book",
+    kind: "keys", keys: "^o",
+    when: { surface: "desktop" },
+  },
 ];
 
 const VALID_KINDS = new Set(["decision", "keys", "text", "chain", "page"]);
 const VALID_TONES = new Set(["go", "stop", "warn", "neutral", "accent"]);
 const VALID_GROUPS = new Set(["permission", "control", "prompt"]);
 const VALID_DECISIONS = new Set(["allow", "allow_always", "deny"]);
-const VALID_PAGES = new Set(["main", "prompts", "sessao", "modelo", "esforco", "git", "quota"]);
-const VALID_BADGE_FORMATS = new Set(["number", "pct", "usd", "duration"]);
+const VALID_PAGES = new Set(["main", "prompts", "sessao", "modelo", "esforco", "modo", "git", "quota"]);
+const VALID_BADGE_FORMATS = new Set(["number", "pct", "usd", "duration", "text"]);
 
 /**
  * Valida uma ação. Devolve lista de problemas (vazia = ação boa).
@@ -581,8 +746,10 @@ function validate(a, all = []) {
     else {
       for (const [i, step] of a.steps.entries()) {
         if (!step || typeof step !== "object") errs.push(`passo ${i} não é objeto`);
-        else if (step.action == null && step.wait == null)
-          errs.push(`passo ${i} precisa de action ou wait`);
+        else if (step.action == null && step.wait == null && step.keys == null)
+          errs.push(`passo ${i} precisa de action, keys ou wait`);
+        else if (step.keys != null && require("./inject").validateKeys(step.keys))
+          errs.push(`passo ${i}: ${require("./inject").validateKeys(step.keys)}`);
         else if (step.wait != null && (typeof step.wait !== "number" || step.wait < 0 || step.wait > 5000))
           errs.push(`passo ${i}: wait fora de 0..5000ms`);
       }

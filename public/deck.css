@@ -786,3 +786,26 @@ body[data-state="boot"] .deck { opacity: .45; }
   width: 7px; height: 7px; border-radius: 50%;
   background: var(--accent); box-shadow: 0 0 8px var(--accent);
 }
+
+/* ── painel sem leitura de quota ───────────────────────────────────── */
+
+/* No app desktop a barra de status é da própria aplicação e não executa a
+   nossa statusLine, então não há percentual de uso. Dois mostradores gigantes
+   escritos "--" seriam a maior parte da tela dizendo nada. Eles encolhem para
+   uma faixa fina e devolvem o espaço para o deck, que continua funcionando. */
+[data-no-usage="1"] .stage { flex: 0 0 auto; }
+[data-no-usage="1"] .shell { grid-template-rows: auto auto 1fr; }
+[data-no-usage="1"] .gauge .dial { display: none; }
+[data-no-usage="1"] .gauge { padding: .7em 1em; }
+[data-no-usage="1"] .gauge h2 { font-size: clamp(10px, 1.1vw, 12px); }
+[data-no-usage="1"] .gauge footer { border-top: 0; background: transparent; padding-top: .3em; }
+[data-no-usage="1"] .spark-card { display: none; }
+[data-no-usage="1"] .center-rail { justify-content: center; }
+[data-no-usage="1"] .deck-wrap { min-height: 0; }
+
+/* Sem medidores, o deck herda a altura toda: as fileiras dividem o espaço e
+   os botões crescem. Um painel de parede com metade da tela vazia é pior que
+   um painel cheio de botões grandes. */
+[data-no-usage="1"] .deck { flex: 1 1 auto; min-height: 0; }
+[data-no-usage="1"] .deck-row { flex: 1 1 0; min-height: 0; }
+[data-no-usage="1"] .btn { min-height: 0; }

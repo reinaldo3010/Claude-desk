@@ -28,6 +28,11 @@ function sanitizeText(text) {
 }
 
 /** Teclas cruas aceitas: {Enter}, {Esc}, +{Tab}, ^c, dígitos, letras. */
+// Charset fechado de propósito. Já tentei abrir para a crase, por causa do
+// Ctrl+` que abre o terminal do app desktop, e desfiz: crase é o caractere de
+// escape do AutoHotkey (e o de substituição de comando em shell). Afrouxar
+// uma verificação de segurança para caber um botão que ninguém vai usar de um
+// tablet é a troca errada — o botão saiu, a verificação ficou.
 const KEYS_RE = /^[A-Za-z0-9 +^!#{}\-_.,;:/\\]*$/;
 function validateKeys(keys) {
   const s = String(keys ?? "");
@@ -39,12 +44,16 @@ function validateKeys(keys) {
 
 /**
  * Gramática das teclas, no dialeto do AutoHotkey:
- *   modificador opcional (+ shift, ^ ctrl, ! alt, # win)
- *   seguido de {NomeDaTecla} ou de um único caractere.
- * O modificador vem ANTES do grupo entre chaves — foi por não tratar isso
- * que "+{Tab}" já foi lido como shift+"{" mais as letras T, a, b.
+ *   zero ou mais modificadores (+ shift, ^ ctrl, ! alt, # win)
+ *   seguidos de {NomeDaTecla} ou de um único caractere.
+ *
+ * Dois erros já moraram aqui, ambos silenciosos:
+ *   - o modificador vem ANTES do grupo entre chaves, e não tratar isso fazia
+ *     "+{Tab}" virar shift+"{" mais as letras T, a, b;
+ *   - aceitar só UM modificador fazia "^+m" (Ctrl+Shift+M) virar "ctrl++"
+ *     mais "m" — e o app desktop usa exatamente esse tipo de acorde.
  */
-const KEY_TOKEN_RE = /(\+|\^|!|#)?(?:\{([^}]+)\}|(.))/g;
+const KEY_TOKEN_RE = /([+^!#]*)(?:\{([^}]+)\}|(.))/g;
 
 const NAMED_KEYS_X11 = {
   enter: "Return", return: "Return", esc: "Escape", escape: "Escape", tab: "Tab",
@@ -60,12 +69,20 @@ function keysToXdotool(keys) {
   KEY_TOKEN_RE.lastIndex = 0;
   let m;
   while ((m = KEY_TOKEN_RE.exec(keys)) !== null) {
-    const prefix = mods[m[1]] || "";
+    // Ordem canônica dos modificadores: o xdotool aceita qualquer uma, mas
+    // fixar uma torna a saída comparável em teste.
+    const prefix = ["^", "!", "+", "#"]
+      .filter((c) => (m[1] || "").includes(c))
+      .map((c) => mods[c])
+      .join("");
     if (m[2] != null) {
       const name = m[2].toLowerCase();
       out.push(prefix + (NAMED_KEYS_X11[name] || m[2]));
     } else if (m[3] != null && m[3] !== "") {
       out.push(prefix + m[3]);
+    } else if (prefix && m[1]) {
+      // Modificadores soltos no fim da sequência não viram tecla nenhuma.
+      continue;
     }
   }
   return out;
@@ -83,11 +100,12 @@ function keysToAppleScript(keys) {
   KEY_TOKEN_RE.lastIndex = 0;
   let m;
   while ((m = KEY_TOKEN_RE.exec(keys)) !== null) {
+    const raw = m[1] || "";
     const mods = [];
-    if (m[1] === "+") mods.push("shift down");
-    if (m[1] === "^") mods.push("control down");
-    if (m[1] === "!") mods.push("option down");
-    if (m[1] === "#") mods.push("command down");
+    if (raw.includes("+")) mods.push("shift down");
+    if (raw.includes("^")) mods.push("control down");
+    if (raw.includes("!")) mods.push("option down");
+    if (raw.includes("#")) mods.push("command down");
     const using = mods.length ? ` using {${mods.join(", ")}}` : "";
 
     if (m[2] != null) {

@@ -430,3 +430,75 @@ test("servidor: o deck responde ao estado sem reiniciar nada", async () => {
     assert.match(depois, /allow:1:1/, "os botões de decisão sobem quando o Claude espera");
   });
 });
+
+/* ═══════════ hooks como fonte onde a statusLine não roda ════════════════ */
+
+test("os hooks trazem modo de permissão, esforço e modelo de todo evento", () => {
+  // Isto é o que faz o painel funcionar no app desktop: a barra de status de
+  // lá é da própria aplicação e não executa a nossa statusLine, mas todo
+  // payload de hook carrega permission_mode e effort.level.
+  const s = new DeckStore();
+  s.ingest("UserPromptSubmit", {
+    session_id: "a",
+    prompt: "oi",
+    permission_mode: "plan",
+    effort: { level: "xhigh" },
+  });
+  const sess = s.sessions.get("a");
+  assert.equal(sess.permissionMode, "plan");
+  assert.equal(sess.effort, "xhigh");
+
+  s.ingest("PostModelSwitch", { session_id: "a", to_model: "claude-sonnet-5" });
+  assert.equal(s.sessions.get("a").model, "claude-sonnet-5");
+});
+
+test("payload sem esses campos não apaga o que já se sabia", () => {
+  const s = new DeckStore();
+  s.ingest("SessionStart", { session_id: "a", permission_mode: "acceptEdits" });
+  s.ingest("PreToolUse", { session_id: "a", tool_name: "Bash" });
+  assert.equal(s.sessions.get("a").permissionMode, "acceptEdits", "o valor persiste");
+});
+
+test("servidor: o estado funde o que veio dos hooks com o snapshot", async () => {
+  await withServer({ DECK_SURFACE: "desktop" }, async ({ base }) => {
+    await post(base, "/api/hook", {
+      hook_event_name: "UserPromptSubmit",
+      session_id: "sX",
+      prompt: "oi",
+      permission_mode: "plan",
+      effort: { level: "max" },
+    });
+    const s = await (await fetch(base + "/api/state")).json();
+    assert.equal(s.config.surface, "desktop");
+    const sess = s.sessions.find((x) => x.id === "sX");
+    // A sessão só aparece na lista se houver snapshot em disco; o que importa
+    // aqui é que a superfície chega ao painel e o deck reage a ela.
+    assert.ok(s.pages.some((p) => p.id === "modo"), "a aba Modo aparece no desktop");
+    assert.ok(!s.actions.some((a) => a.id === "plan_mode"), "Shift+Tab não vai para o desktop");
+  });
+});
+
+test("servidor: sessão conhecida só pelos hooks aparece mesmo sem snapshot", async () => {
+  // Sem isto o painel fica cego onde a statusLine não roda — o app desktop,
+  // cuja barra de status é da própria aplicação. Nenhum snapshot em disco
+  // significaria `sessions` vazio para sempre, e nenhum seletor acenderia.
+  await withServer({ DECK_SURFACE: "desktop" }, async ({ base }) => {
+    await post(base, "/api/hook", {
+      hook_event_name: "UserPromptSubmit",
+      session_id: "so-hooks",
+      prompt: "oi",
+      permission_mode: "plan",
+      effort: { level: "xhigh" },
+    });
+    const s = await (await fetch(base + "/api/state")).json();
+    const sess = s.sessions.find((x) => x.id === "so-hooks");
+    assert.ok(sess, "a sessão precisa aparecer");
+    assert.equal(sess.source, "hooks");
+    assert.equal(sess.live, true);
+    assert.equal(sess.permissionMode, "plan");
+    assert.equal(sess.effort, "xhigh");
+
+    const aceso = s.actions.filter((a) => a.page === "modo" && a.active).map((a) => a.id);
+    assert.deepEqual(aceso, ["d_modo_plano"], "o modo em uso acende sem statusLine nenhuma");
+  });
+});

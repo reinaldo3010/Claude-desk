@@ -177,6 +177,8 @@ class Deck {
         agent: s.agent,
         staleMs: s.staleMs,
         live: this.isLive(s, now),
+        // Os hooks sabem coisas que o snapshot pode não saber.
+        ...this.fromHooks(s.sessionId),
       })),
       gate: this.gate.snapshot(),
       config: {
@@ -184,11 +186,35 @@ class Deck {
         alertAt: this.cfg.alertPercent,
         screensaverMin: this.cfg.screensaverMin,
         injector: this.cfg.injector,
+        surface: this.cfg.surface,
         hasTarget: !!String(this.cfg.target || "").trim(),
         gateEnabled: this.gate.enabled,
       },
       warnings: this.warnings.slice(-5),
     };
+
+    // União, não enriquecimento. Uma sessão conhecida SÓ pelos hooks precisa
+    // existir na lista — senão o painel fica cego onde a statusLine não roda,
+    // que é justamente o caso do app desktop: lá a barra de status é da
+    // aplicação e não executa comando nenhum, então não há snapshot em disco
+    // e `sessions` ficaria permanentemente vazio.
+    const comSnapshot = new Set(sessions.map((s) => s.sessionId));
+    for (const [id, seen] of this.store.sessions) {
+      if (comSnapshot.has(id)) continue;
+      if (now - seen.at > this.cfg.sessionTtlMs) continue;
+      snapshot.sessions.push({
+        id,
+        name: null,
+        model: null,
+        cwd: seen.cwd || null,
+        context: {},
+        cost: {},
+        staleMs: now - seen.at,
+        live: now - seen.at < 10 * 60_000,
+        source: "hooks",
+        ...this.fromHooks(id),
+      });
+    }
 
     // O deck é resolvido DEPOIS do resto: quais botões aparecem, quais sobem
     // para o topo e que número cada face mostra são funções do estado que
@@ -196,6 +222,21 @@ class Deck {
     snapshot.actions = engine.resolve(this.actions, snapshot);
     snapshot.pages = engine.pagesOf(this.actions, snapshot);
     return snapshot;
+  }
+
+  /**
+   * O que os hooks sabem sobre uma sessão e o snapshot pode não saber.
+   * Vale para qualquer superfície, mas é o que sustenta o app desktop:
+   * lá a barra de status é da aplicação e não executa a nossa statusLine.
+   */
+  fromHooks(sessionId) {
+    const seen = sessionId && this.store.sessions.get(sessionId);
+    if (!seen) return {};
+    const out = {};
+    if (seen.permissionMode) out.permissionMode = seen.permissionMode;
+    if (seen.effort) out.effort = seen.effort;
+    if (seen.model) out.modelId = seen.model;
+    return out;
   }
 
   /**
@@ -250,13 +291,29 @@ class Deck {
           await new Promise((r) => setTimeout(r, Math.min(5000, step.wait)));
           continue;
         }
-        const r = await this.runAction(step.action, { by, depth: depth + 1 });
-        done.push(step.action);
+        // Um passo pode ser uma ação nomeada ou teclas cruas. Teclas em linha
+        // existem por causa dos menus do app desktop: abrir com Ctrl+Shift+I
+        // e escolher com "2" são dois toques que não têm nome próprio e não
+        // fazem sentido como botões separados.
+        let r;
+        if (step.keys) {
+          try {
+            await inject(this.cfg, { kind: "keys", keys: step.keys });
+            r = { ok: true };
+          } catch (err) {
+            r = { ok: false, error: err.message, code: 500 };
+          }
+          done.push(step.keys);
+        } else {
+          r = await this.runAction(step.action, { by, depth: depth + 1 });
+          done.push(step.action);
+        }
         // Um passo que falha aborta o resto: metade de uma sequência no
         // terminal é pior do que nenhuma.
         if (!r.ok) {
-          this.audit({ action: id, by, via: "chain", abortedAt: step.action, error: r.error });
-          return { ok: false, code: r.code || 500, error: `passo "${step.action}": ${r.error}`, done };
+          const qual = step.action || step.keys;
+          this.audit({ action: id, by, via: "chain", abortedAt: qual, error: r.error });
+          return { ok: false, code: r.code || 500, error: `passo "${qual}": ${r.error}`, done };
         }
       }
       this.audit({ action: id, by, via: "chain", steps: done });

@@ -83,8 +83,28 @@ node bin/claude-deck.js uninstall          desfaz o registro
 node bin/claude-deck.js doctor             diagnóstico da máquina
 node bin/claude-deck.js dump               imprime o que o deck está lendo
 node bin/claude-deck.js event waiting "oi" dispara um evento de teste
-npm test                                   103 testes, sem dependências
+npm test                                   116 testes, sem dependências
 ```
+
+## App desktop ou terminal
+
+O deck controla uma das duas superfícies, escolhida no `deck.config.json`:
+
+```json
+{ "surface": "desktop", "target": "ahk_exe Claude.exe" }
+```
+
+No **desktop** os menus abrem por acorde (`Ctrl+Shift+M` modo, `Ctrl+Shift+I`
+modelo, `Ctrl+Shift+E` esforço) e cada botão manda duas teclas: abre e escolhe.
+No **terminal** valem os comandos de barra. Um botão feito para uma superfície
+não aparece na outra — `Shift+Tab`, por exemplo, não cicla modo de permissão
+no desktop, então aquele botão some de lá.
+
+**A quota só existe no terminal.** A `statusLine` é um elemento de terminal e o
+app desktop não a executa. O estado, o modo de permissão e o nível de esforço
+continuam funcionando nos dois, porque vêm dos hooks — que carregam
+`permission_mode` e `effort.level` em todo evento. Sem quota, os medidores
+encolhem sozinhos e o espaço vai para os botões.
 
 ## O deck
 
@@ -100,7 +120,7 @@ acontecendo:
   altura da mão.
 - **Toque longo é a segunda função.** Segure "Interromper" para "Parar tudo"
   (dois `Esc`); segure "Compactar" para `/clear`.
-- **Cinco abas**: Controle, Prompts, Sessão, Modelo e Esforço. A aba avisa com
+- **Abas por superfície**: no terminal Controle, Prompts, Sessão, Modelo e Esforço; no desktop Controle, Prompts, Modo, Modelo e Esforço. A aba avisa com
   um ponto quando tem algo lá dentro — azul para destaque, vermelho pulsante
   para decisão.
 - **A opção em uso acende.** Nas abas Modelo e Esforço os botões formam um

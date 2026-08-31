@@ -36,6 +36,10 @@ const BADGE_SOURCES = {
   sessions: (s) => (s.sessions || []).filter((x) => x.live).length,
   pending: (s) => (s.gate && s.gate.pending ? s.gate.pending.length : 0),
   elapsed: (s) => (s.since ? Math.floor((s.now - s.since) / 1000) : null),
+  // Texto em vez de número: a face mostra o nível por extenso quando não há
+  // um botão por nível para acender (é o caso do esforço no app desktop,
+  // onde o menu é um controle deslizante).
+  effortLabel: (s) => firstLive(s, (x) => x.effort),
 };
 
 /**
@@ -104,6 +108,18 @@ function matches(when, state) {
   }
   if (when.hasTarget === true && !(state.config && state.config.hasTarget)) return false;
 
+  // Superfície: o app desktop e o terminal não compartilham mecanismo. No
+  // desktop, Shift+Tab não cicla modo de permissão (está documentado que os
+  // atalhos do modo interativo do terminal não valem lá), e os menus abrem
+  // por acorde. Um botão feito para um dos dois não aparece no outro.
+  if (when.surface && (!state.config || state.config.surface !== when.surface)) return false;
+
+  // Modo de permissão, lido dos hooks (vem em todo payload).
+  if (Array.isArray(when.permissionMode)) {
+    const m = firstLive(state, (s) => s.permissionMode);
+    if (!m || !when.permissionMode.includes(m)) return false;
+  }
+
   // Reconhecimento por FAMÍLIA de modelo, de propósito. O statusLine informa o
   // modelo resolvido, não o apelido que foi digitado — então "opus", "opus[1m]"
   // e "opusplan" chegam aqui indistinguíveis. Acender os três seria mentira;
@@ -145,6 +161,9 @@ function readBadge(badge, state) {
     return null;
   }
   if (value == null || (typeof value === "number" && !Number.isFinite(value))) return null;
+  if (badge.format === "text") {
+    return { value: String(value).slice(0, 12), format: "text", level: "ok", bar: null };
+  }
 
   const warn = typeof badge.warnAbove === "number" && value >= badge.warnAbove;
   const crit = typeof badge.critAbove === "number" && value >= badge.critAbove;
@@ -243,6 +262,7 @@ const PAGE_LABELS = {
   sessao: "Sessão",
   modelo: "Modelo",
   esforco: "Esforço",
+  modo: "Modo",
   git: "Git",
   quota: "Uso",
 };

@@ -77,7 +77,16 @@ class DeckStore {
   _session(id) {
     if (!id) return null;
     if (!this.sessions.has(id)) {
-      this.sessions.set(id, { id, status: STATUS.IDLE, at: Date.now(), turn: 0, cwd: null });
+      this.sessions.set(id, {
+        id,
+        status: STATUS.IDLE,
+        at: Date.now(),
+        turn: 0,
+        cwd: null,
+        permissionMode: null,
+        effort: null,
+        model: null,
+      });
     }
     return this.sessions.get(id);
   }
@@ -109,6 +118,18 @@ class DeckStore {
     if (sess) {
       sess.at = Date.now();
       if (payload.cwd) sess.cwd = payload.cwd;
+
+      // Decisão de projeto, não detalhe de implementação: `permission_mode` e
+      // `effort.level` vêm em TODO payload de hook, não só em alguns. É isso
+      // que mantém os seletores do painel corretos onde a statusLine não roda
+      // — o app desktop, por exemplo, cuja barra de status é da própria
+      // aplicação e não executa comando nenhum.
+      if (payload.permission_mode) sess.permissionMode = payload.permission_mode;
+      if (payload.effort && payload.effort.level) sess.effort = payload.effort.level;
+      // O modelo só aparece em alguns eventos; guarda sempre que passar.
+      const modelo = payload.model || payload.to_model;
+      if (typeof modelo === "string") sess.model = modelo;
+      else if (modelo && typeof modelo.id === "string") sess.model = modelo.id;
     }
 
     switch (name) {

@@ -89,12 +89,60 @@ Abra a URL **local** no PC e teste os botões com o Claude Code aberto.
 > que escreva em disco ou rode `git`. Um deck que aprova errado é pior do que
 > não ter deck.
 
+## 4b. App desktop ou terminal?
+
+O deck controla uma das duas superfícies, e elas **não** compartilham
+mecanismo. Escolha no `deck.config.json`:
+
+```json
+{ "surface": "desktop", "target": "ahk_exe Claude.exe" }
+```
+
+| | Terminal (CLI) | App desktop |
+|---|---|---|
+| Trocar modelo | `/model opus` digitado | `Ctrl+Shift+I` e depois um número |
+| Trocar esforço | `/effort xhigh` digitado | `Ctrl+Shift+E` abre um controle deslizante |
+| Modo de permissão | `Shift+Tab` cicla | `Ctrl+Shift+M` e depois um número |
+| Quota (5h e semana) | ✅ pela statusLine | ❌ ver abaixo |
+| Estado, modo e esforço | ✅ | ✅ pelos hooks |
+
+Isso está documentado: os atalhos do modo interativo do terminal, incluindo
+`Shift+Tab`, **não valem no app desktop**. Por isso o botão "Modo plano" nem
+aparece quando `surface` é `desktop` — seria um clique que não faz nada.
+
+### O que muda de verdade no desktop
+
+**A quota some.** A `statusLine` é um elemento de terminal; o app desktop tem
+a própria barra de status e não executa comando nenhum para montá-la. Sem ela
+não há `rate_limits`, `context_window` nem `cost` — os medidores encolhem
+sozinhos e o espaço vai para os botões.
+
+**O resto continua.** Os hooks funcionam nas duas superfícies (a documentação
+diz que `settings.json` é compartilhado), e **todo payload de hook carrega
+`permission_mode` e `effort.level`**. É daí que o painel sabe o estado, o modo
+e o nível para acender o botão certo, sem statusLine nenhuma.
+
+> **Duas coisas que eu não pude verificar daqui** e que você confirma em um
+> minuto na sua máquina:
+>
+> 1. **A numeração dos menus.** Ela está numa tabela única no topo de
+>    `src/actions.js` (`DESKTOP`), e foi lida de fotos da sua tela — não de
+>    documentação. A posição de um item muda se a lista mudar: "Ignorar
+>    permissões" só aparece depois de habilitada nas configurações, e sem ela
+>    os itens seguintes sobem uma casa. Abra o menu uma vez, confira, ajuste
+>    ali.
+> 2. **O esforço.** `Ctrl+Shift+E` abre um controle deslizante, não uma lista
+>    numerada. Não dá para mapear número em posição a partir de uma foto, então
+>    existe só um botão que abre o menu. Se `1`–`9` funcionar lá, me diga qual
+>    número dá qual nível e viram cinco botões.
+
 ## 5. Descobrir a janela alvo
 
 O deck precisa saber onde digitar. O `doctor` lista as janelas abertas.
 
 | Terminal | `DECK_TARGET` |
 |---|---|
+| **App desktop do Claude** | `ahk_exe Claude.exe` |
 | Windows Terminal | `ahk_exe WindowsTerminal.exe` |
 | PowerShell clássico | `ahk_exe powershell.exe` |
 | VS Code (terminal integrado) | `ahk_exe Code.exe` |

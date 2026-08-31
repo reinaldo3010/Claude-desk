@@ -24,7 +24,7 @@ function estado(over = {}) {
     counters: { tools: 7 },
     usage: { five: { pct: 30 }, seven: { pct: 55 }, totals: { costUsd: 1.5 } },
     gate: { pending: [] },
-    config: { gateEnabled: true, hasTarget: true },
+    config: { gateEnabled: true, hasTarget: true, surface: "terminal" },
     sessions: [{ live: true, context: { used: 40 } }],
     ...over,
   };
@@ -385,4 +385,94 @@ test("os comandos digitados são exatamente os documentados", () => {
 test("os colchetes de opus[1m] sobrevivem à sanitização", () => {
   const { sanitizeText } = require("../src/inject");
   assert.equal(sanitizeText("/model opus[1m]"), "/model opus[1m]");
+});
+
+/* ═══════════════════ superfície: desktop x terminal ═════════════════════ */
+
+function noDesktop(over = {}) {
+  const base = estado(over);
+  base.config = { ...base.config, surface: "desktop" };
+  return base;
+}
+
+test("cada superfície mostra só os botões que funcionam nela", () => {
+  const acts = actions.build();
+  const term = resolve(acts, estado()).map((a) => a.id);
+  const desk = resolve(acts, noDesktop()).map((a) => a.id);
+
+  // barra no terminal, acorde no desktop — nunca os dois juntos
+  assert.ok(term.includes("m_opus") && !term.includes("d_opus"));
+  assert.ok(desk.includes("d_opus") && !desk.includes("m_opus"));
+});
+
+test("Shift+Tab não aparece no desktop — lá ele não faz nada", () => {
+  // Documentado: os atalhos do modo interativo do terminal não valem no app
+  // desktop. Deixar o botão seria oferecer um clique que não faz nada.
+  const acts = actions.build();
+  assert.ok(resolve(acts, estado()).some((a) => a.id === "plan_mode"));
+  assert.ok(!resolve(acts, noDesktop()).some((a) => a.id === "plan_mode"));
+});
+
+test("a aba Modo só existe no desktop", () => {
+  const acts = actions.build();
+  assert.ok(!pagesOf(acts, estado()).some((p) => p.id === "modo"));
+  const abas = pagesOf(acts, noDesktop());
+  const modo = abas.find((p) => p.id === "modo");
+  assert.ok(modo, "a aba Modo precisa existir no desktop");
+  assert.equal(modo.label, "Modo");
+  assert.equal(modo.count, 5, "cinco modos, como no menu do app");
+});
+
+test("os botões do desktop abrem o menu e escolhem o item", () => {
+  const acts = actions.build();
+  const passos = (id) => acts.find((a) => a.id === id).steps.map((s) => s.keys ?? `wait${s.wait}`);
+
+  assert.deepEqual(passos("d_opus"), ["^+i", "wait220", "2"], "Ctrl+Shift+I depois 2");
+  assert.deepEqual(passos("d_modo_plano"), ["^+m", "wait220", "4"], "Ctrl+Shift+M depois 4");
+  assert.deepEqual(passos("d_modo_ignorar"), ["^+m", "wait220", "5"]);
+});
+
+test("os acordes do desktop passam pela validação de teclas", () => {
+  const { validateKeys } = require("../src/inject");
+  const acts = actions.build();
+  for (const a of acts) {
+    if (a.kind === "keys") assert.equal(validateKeys(a.keys), null, `${a.id}: ${a.keys}`);
+    if (a.kind === "chain") {
+      for (const s of a.steps) {
+        if (s.keys) assert.equal(validateKeys(s.keys), null, `${a.id} passo ${s.keys}`);
+      }
+    }
+  }
+});
+
+test("o modo de permissão em uso acende, vindo dos hooks", () => {
+  const acts = actions.build();
+  const aceso = (modo) => {
+    const st = noDesktop({ sessions: [{ live: true, permissionMode: modo }] });
+    return resolve(acts, st).filter((a) => a.page === "modo" && a.active).map((a) => a.id);
+  };
+  assert.deepEqual(aceso("plan"), ["d_modo_plano"]);
+  assert.deepEqual(aceso("acceptEdits"), ["d_modo_aceitar"]);
+  assert.deepEqual(aceso("bypassPermissions"), ["d_modo_ignorar"]);
+  assert.deepEqual(aceso("auto"), ["d_modo_auto"]);
+});
+
+test("sem sinal de modo, nenhum botão de modo acende", () => {
+  const acts = actions.build();
+  const st = noDesktop({ sessions: [{ live: true }] });
+  assert.equal(resolve(acts, st).filter((a) => a.page === "modo" && a.active).length, 0);
+});
+
+test("a face de texto mostra o nível de esforço por extenso", () => {
+  const b = readBadge({ source: "effortLabel", format: "text" },
+    noDesktop({ sessions: [{ live: true, effort: "xhigh" }] }));
+  assert.equal(b.value, "xhigh");
+  assert.equal(b.format, "text");
+  assert.equal(b.bar, null);
+});
+
+test("'Ignorar permissões' exige dois toques", () => {
+  // Desliga a rede de proteção inteira; um esbarrão no tablet não pode fazer isso.
+  const acts = actions.build();
+  assert.equal(acts.find((a) => a.id === "d_modo_ignorar").confirm, true);
 });

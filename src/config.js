@@ -82,6 +82,10 @@ function load() {
       path.join(os.homedir(), ".claude", ".credentials.json"),
 
     // --- injeção de teclas ---
+    // Qual superfície o deck controla: "desktop" (app Claude, menus por
+    // acorde) ou "terminal" (CLI, comandos de barra). Muda quais botões
+    // aparecem e o que cada um digita — não é cosmético.
+    surface: (env.DECK_SURFACE || f.surface || "terminal") === "desktop" ? "desktop" : "terminal",
     injector: env.DECK_INJECTOR || f.injector || defaultInjector(),
     ahkExe: env.AHK_EXE || f.ahkExe || defaultAhkPath(),
     ahkScript: env.DECK_AHK || f.ahkScript || path.join(ROOT, "install", "claude-deck.ahk"),
