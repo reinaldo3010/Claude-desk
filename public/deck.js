@@ -787,7 +787,7 @@ function render(s) {
   if (!s.usage.ok) {
     $("detail").textContent =
       s.config.surface === "desktop"
-        ? "Sem quota: o app desktop não roda a statusLine — veja docs/INSTALL.md"
+        ? "Sem quota: nenhuma statusLine chegou — rode o doctor para saber por quê"
         : "Sem leitura de quota — mande uma mensagem no Claude Code";
   }
 

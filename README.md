@@ -131,11 +131,25 @@ No **terminal** valem os comandos de barra. Um botão feito para uma superfície
 não aparece na outra — `Shift+Tab`, por exemplo, não cicla modo de permissão
 no desktop, então aquele botão some de lá.
 
-**A quota só existe no terminal.** A `statusLine` é um elemento de terminal e o
-app desktop não a executa. O estado, o modo de permissão e o nível de esforço
-continuam funcionando nos dois, porque vêm dos hooks — que carregam
-`permission_mode` e `effort.level` em todo evento. Sem quota, os medidores
-encolhem sozinhos e o espaço vai para os botões.
+**Os hooks funcionam nas duas superfícies, e isso é documentado.** A página de
+hooks diz, com todas as letras: *"Claude Code fires the same hook events
+wherever it runs: sessions in the terminal, IDE extensions, the Desktop app,
+and Claude Code on the web"*, e a página do desktop confirma que
+`~/.claude/settings.json` é compartilhado. Por isso estado, ferramenta em uso,
+modo de permissão, nível de esforço, sessões e teclas de agente chegam no
+painel nas duas.
+
+**A quota é a única peça em aberto.** Ela vem da `statusLine`, e a
+documentação **não diz** se o app desktop a executa: a statusLine é descrita
+como uma barra no rodapé do terminal, mas ela não aparece na lista de
+"what's not available in Desktop". Ou seja: não é sabido que não funciona — é
+não sabido. O `doctor` responde em cinco segundos na sua máquina.
+
+Se a statusLine não rodar, sobra o plano B que já existe: o mesmo endpoint que
+alimenta o `/usage`, lido com o token OAuth que já está no disco. Ele não é
+documentado, então pode quebrar sem aviso — mas é a diferença entre ter quota
+e não ter. E se nenhum dos dois vier, os medidores encolhem sozinhos e o
+espaço vai para os botões.
 
 ## A cara do painel
 
