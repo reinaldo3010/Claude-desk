@@ -1,0 +1,20 @@
+{
+  "name": "claude-deck",
+  "version": "1.0.0",
+  "description": "Painel de parede para o Claude Code: quota, alerta de espera e deck de ações num tablet.",
+  "bin": {
+    "claude-deck": "bin/claude-deck.js"
+  },
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node bin/claude-deck.js start",
+    "doctor": "node bin/claude-deck.js doctor",
+    "install-hooks": "node bin/claude-deck.js install",
+    "test": "node --test test/*.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "private": true
+}

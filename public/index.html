@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#100F0D">
+<meta name="color-scheme" content="dark">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Claude Deck</title>
+<link rel="stylesheet" href="deck.css">
+</head>
+<body data-state="boot" data-lite="0">
+
+<!-- Fundo animado. Um canvas só, redimensionado para caber no orçamento
+     de GPU de um tablet velho. Vira gradiente estático no modo leve. -->
+<canvas id="aurora" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+<div class="edge-glow" aria-hidden="true"></div>
+<div class="scanline" aria-hidden="true"></div>
+
+<main class="shell">
+
+  <!-- ── faixa de estado ─────────────────────────────────────────── -->
+  <header class="ribbon" id="ribbon">
+    <span class="mark-slot" id="markSlot"></span>
+    <div class="ribbon-text">
+      <h1 id="headline">Conectando</h1>
+      <p id="detail"></p>
+    </div>
+    <div class="ribbon-meta">
+      <span class="chip" id="toolChip" hidden></span>
+      <span class="elapsed" id="elapsed"></span>
+    </div>
+    <button class="tab-toggle" id="tabToggle" aria-label="Abrir detalhes">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+    </button>
+  </header>
+
+  <!-- ── medidores ───────────────────────────────────────────────── -->
+  <section class="stage">
+
+    <article class="gauge" id="gauge5" data-level="idle">
+      <h2>Janela de 5 horas</h2>
+      <div class="dial">
+        <svg viewBox="0 0 200 200" aria-hidden="true">
+          <defs>
+            <linearGradient id="grad5" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%"  stop-color="var(--arc-a)"/>
+              <stop offset="100%" stop-color="var(--arc-b)"/>
+            </linearGradient>
+          </defs>
+          <circle class="dial-track" cx="100" cy="100" r="84"/>
+          <circle class="dial-ghost" cx="100" cy="100" r="84"/>
+          <circle class="dial-arc"   cx="100" cy="100" r="84" stroke="url(#grad5)"/>
+        </svg>
+        <div class="dial-core">
+          <div class="odometer" id="odo5" role="img" aria-label="0 por cento"></div>
+          <span class="unit">%</span>
+        </div>
+      </div>
+      <footer>
+        <div><span>Reseta em</span><b id="reset5">--</b></div>
+        <div class="burn" id="burn5"></div>
+      </footer>
+    </article>
+
+    <div class="center-rail">
+      <div class="spark-card">
+        <h3>Consumo <span id="sparkRange"></span></h3>
+        <svg class="spark" id="spark" viewBox="0 0 300 90" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="var(--accent)" stop-opacity=".38"/>
+              <stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path class="spark-area" id="sparkArea" d=""/>
+          <path class="spark-line" id="sparkLine" d=""/>
+          <circle class="spark-head" id="sparkHead" r="3.5" cx="-10" cy="-10"/>
+        </svg>
+        <p class="spark-empty" id="sparkEmpty">Coletando histórico…</p>
+      </div>
+
+      <div class="stats" id="stats"></div>
+    </div>
+
+    <article class="gauge" id="gauge7" data-level="idle">
+      <h2>Semana</h2>
+      <div class="dial">
+        <svg viewBox="0 0 200 200" aria-hidden="true">
+          <defs>
+            <linearGradient id="grad7" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%"  stop-color="var(--arc-a)"/>
+              <stop offset="100%" stop-color="var(--arc-b)"/>
+            </linearGradient>
+          </defs>
+          <circle class="dial-track" cx="100" cy="100" r="84"/>
+          <circle class="dial-ghost" cx="100" cy="100" r="84"/>
+          <circle class="dial-arc"   cx="100" cy="100" r="84" stroke="url(#grad7)"/>
+        </svg>
+        <div class="dial-core">
+          <div class="odometer" id="odo7" role="img" aria-label="0 por cento"></div>
+          <span class="unit">%</span>
+        </div>
+      </div>
+      <footer>
+        <div><span>Reseta em</span><b id="reset7">--</b></div>
+        <div class="burn" id="burn7"></div>
+      </footer>
+    </article>
+
+  </section>
+
+  <!-- ── botões ──────────────────────────────────────────────────── -->
+  <div class="deck-wrap">
+    <nav class="pages" id="pages" aria-label="Páginas do deck">
+      <span class="pages-marker" id="pagesMarker" aria-hidden="true"></span>
+    </nav>
+    <section class="deck" id="deck" aria-label="Ações"></section>
+  </div>
+
+</main>
+
+<!-- ── cartão de permissão ───────────────────────────────────────── -->
+<div class="gate-layer" id="gateLayer" hidden>
+  <article class="gate-card" id="gateCard" data-risk="low">
+    <header>
+      <span class="gate-badge" id="gateRisk">verificando</span>
+      <h2>Claude pede permissão</h2>
+      <span class="gate-timer" id="gateTimer"></span>
+    </header>
+    <p class="gate-tool" id="gateTool">—</p>
+    <pre class="gate-detail" id="gateDetail"></pre>
+    <p class="gate-why" id="gateWhy" hidden></p>
+    <div class="gate-actions" id="gateActions"></div>
+  </article>
+</div>
+
+<!-- ── painel lateral: sessões e registro ────────────────────────── -->
+<aside class="drawer" id="drawer" hidden>
+  <header>
+    <h2>Sessões e eventos</h2>
+    <button id="drawerClose" aria-label="Fechar">✕</button>
+  </header>
+  <section class="sessions" id="sessions"></section>
+  <h3>Últimos eventos</h3>
+  <ol class="timeline" id="timeline"></ol>
+  <footer class="drawer-foot" id="drawerFoot"></footer>
+</aside>
+
+<!-- ── protetor de tela ──────────────────────────────────────────── -->
+<div class="saver" id="saver" hidden>
+  <div class="saver-inner" id="saverInner">
+    <div class="saver-mark" id="saverMark"></div>
+    <time id="saverClock">--:--</time>
+    <div class="saver-bars">
+      <span><i id="saverBar5"></i></span>
+      <span><i id="saverBar7"></i></span>
+    </div>
+    <p id="saverNote"></p>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<svg class="icon-defs" aria-hidden="true">
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-cross" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-infinity" viewBox="0 0 24 24"><path d="M6.5 12a3.5 3.5 0 1 1 3.5 3.5c-2 0-3-1.5-4-3.5s-2-3.5-4-3.5a3.5 3.5 0 0 0 0 7c2 0 3-1.5 4-3.5Z"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 5.5v13l11-6.5z"/></symbol>
+  <symbol id="i-map" viewBox="0 0 24 24"><path d="m9 4-6 3v13l6-3 6 3 6-3V4l-6 3zM9 4v13M15 7v13"/></symbol>
+  <symbol id="i-compress" viewBox="0 0 24 24"><path d="M4 9h5V4M20 9h-5V4M4 15h5v5M20 15h-5v5"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></symbol>
+  <symbol id="i-beaker" viewBox="0 0 24 24"><path d="M9 3v6l-5 9a2 2 0 0 0 1.8 3h12.4a2 2 0 0 0 1.8-3l-5-9V3M8 3h8M6.5 15h11"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 1 2-2h13"/></symbol>
+  <symbol id="i-git" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="9" r="2.5"/><path d="M6 8.5v7M8.4 7.2 15.6 8M18 11.5c0 4-4 3.5-6.5 5"/></symbol>
+  <symbol id="i-dot" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/></symbol>
+  <symbol id="i-power" viewBox="0 0 24 24"><path d="M12 3v9"/><path d="M6.5 6.8a8 8 0 1 0 11 0"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></symbol>
+  <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M15 5.5a4.5 4.5 0 0 0-6 5.9L4 16.4V20h3.6l5-5a4.5 4.5 0 0 0 5.9-6L16 11.5 12.5 8z"/></symbol>
+  <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M14.5 9.5a3 3 0 0 0-5 2c0 2.5 5 1.5 5 4a3 3 0 0 1-5 2M12 7v10"/></symbol>
+  <symbol id="i-chip" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="1.5"/><path d="M10 3v4M14 3v4M10 17v4M14 17v4M3 10h4M3 14h4M17 10h4M17 14h4"/></symbol>
+  <symbol id="i-gauge" viewBox="0 0 24 24"><path d="M4 17a8 8 0 1 1 16 0"/><path d="M12 17l4.5-5"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 11v5M12 8.2v.1"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></symbol>
+</svg>
+
+<script src="deck.js"></script>
+</body>
+</html>

@@ -1,0 +1,945 @@
+/* =============================================================================
+   Claude Deck — folha de estilo
+   -----------------------------------------------------------------------------
+   Alvo: tablet Android antigo, paisagem, quiosque, visto a três metros.
+   Por isso quatro regras guiam tudo aqui:
+
+     0. A identidade mora na paleta e na marca, não no fundo animado. O fundo
+        é a primeira coisa que morre no aparelho fraco; se a identidade
+        estivesse nele, ela desapareceria justamente onde mais precisa
+        aparecer.
+
+     1. Animar só `transform` e `opacity`. São as duas propriedades que a GPU
+        resolve sozinha; qualquer outra coisa força recálculo de layout e
+        derruba os quadros num aparelho fraco.
+     2. Nada de brilho gratuito. Sombra e desfoque custam caro — aparecem só
+        onde carregam informação (proximidade do limite, estado de alerta).
+     3. Tudo tem versão degradada: `[data-lite="1"]` desliga desfoque, sombra
+        e o fundo animado quando o próprio painel percebe que está engasgando.
+   ========================================================================== */
+
+:root {
+  /* ── identidade ────────────────────────────────────────────────────
+     A laranja do Claude é o único acento da interface: a marca, o
+     marcador de aba, o seletor aceso, o traço do gráfico. Os estados
+     (verde, âmbar, vermelho) seguem semânticos e foram reafinados para
+     conviver com ela sem briga de matiz.
+
+     O alerta é deliberadamente mais saturado que a laranja da marca.
+     A três metros, matiz parecido vira matiz igual — o que separa os
+     dois é a saturação e o pulso, não o tom. */
+  --claude: #D97757;
+  --claude-lit: #EC9271;
+  --claude-deep: #7C3A20;
+  --claude-veil: rgba(217, 119, 87, .13);
+
+  /* fundo em camadas — carvão quente, não azul. É o que distingue o
+     painel do Claude de qualquer painel escuro genérico. */
+  --bg-0: #100F0D;
+  --bg-1: #1A1815;
+  --bg-2: #23201C;
+  --panel: rgba(245, 240, 230, .040);
+  --panel-strong: rgba(245, 240, 230, .075);
+  --rule: rgba(245, 240, 230, .10);
+  --rule-bright: rgba(217, 119, 87, .34);
+
+  --text: #F4F1EA;
+  --dim: #A8A29A;
+  --faint: #6C665E;
+
+  /* semântica de estado */
+  --go: #4FB286;
+  --go-deep: #155844;
+  --warn: #E3A44F;
+  --warn-deep: #7C5416;
+  --stop: #FF3B30;
+  --stop-deep: #8A150E;
+  --accent: var(--claude);
+  --accent-deep: var(--claude-deep);
+
+  /* gradiente do arco, trocado por JS conforme o nível */
+  --arc-a: var(--go);
+  --arc-b: #6FD3A8;
+  --glow: rgba(79, 178, 134, .40);
+
+  --gap: clamp(10px, 1.5vw, 22px);
+  --radius: 14px;
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* Declarar `display` numa classe anula o `[hidden]{display:none}` da folha do
+   navegador — foi assim que o cartão de permissão apareceu na tela sem ter
+   permissão nenhuma pendente. Esta linha devolve o comportamento esperado. */
+[hidden] { display: none !important; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-0);
+  color: var(--text);
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+}
+
+body {
+  font: 400 16px/1.4 ui-sans-serif, -apple-system, "Segoe UI", Roboto, system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* ── fundo animado ─────────────────────────────────────────────────── */
+
+#aurora {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  opacity: .85;
+  transition: opacity .8s ease;
+}
+[data-lite="1"] #aurora { display: none; }
+[data-lite="1"] body,
+[data-lite="1"] { background: radial-gradient(120% 90% at 50% 0%, #221E19 0%, #100F0D 70%); }
+
+/* Vinheta: escurece as bordas e faz o centro parecer iluminado. */
+.vignette {
+  position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  background: radial-gradient(115% 85% at 50% 42%, transparent 40%, rgba(0,0,0,.38) 100%);
+}
+
+/* Halo nas bordas — respira quando o Claude está esperando por você. */
+.edge-glow {
+  position: fixed; inset: 0; z-index: 2; pointer-events: none;
+  opacity: 0;
+  box-shadow: inset 0 0 clamp(60px, 9vw, 130px) var(--stop);
+  transition: opacity .5s ease;
+}
+[data-state="waiting"] .edge-glow { opacity: .42; animation: breathe 2.6s ease-in-out infinite; }
+[data-state="error"]   .edge-glow { opacity: .38; box-shadow: inset 0 0 90px var(--warn); }
+@keyframes breathe { 50% { opacity: .12; } }
+
+/* Textura fina de varredura: tira o aspecto "chapado" de tela grande. */
+.scanline {
+  position: fixed; inset: 0; z-index: 3; pointer-events: none; opacity: .035;
+  background: repeating-linear-gradient(180deg, #fff 0 1px, transparent 1px 3px);
+}
+[data-lite="1"] .scanline { display: none; }
+
+/* ── esqueleto ─────────────────────────────────────────────────────── */
+
+.shell {
+  position: relative; z-index: 4;
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: var(--gap);
+  padding: var(--gap);
+}
+
+/* ── faixa de estado ───────────────────────────────────────────────── */
+
+.ribbon {
+  display: flex; align-items: center; gap: clamp(10px, 1.4vw, 18px);
+  padding: clamp(10px, 1.3vh, 18px) clamp(14px, 1.6vw, 22px);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--panel);
+  backdrop-filter: blur(14px);
+  transition: background .45s ease, border-color .45s ease, box-shadow .45s ease;
+  overflow: hidden;
+}
+[data-lite="1"] .ribbon { backdrop-filter: none; background: var(--bg-1); }
+
+/* ── a marca do Claude ─────────────────────────────────────────────────
+   O farol antigo era um ponto colorido: dizia o estado, não dizia de quem
+   era o painel. A marca faz as duas coisas — é a identidade e é o
+   indicador, porque a forma como ela se move É o estado.
+
+   Regra de custo: as lâminas animam só `opacity`; o conjunto anima só
+   `transform`. Nada aqui força recálculo de layout, e a `transform-origin`
+   fica no elemento inteiro (nunca num nó SVG interno, onde o
+   `transform-box` de WebView antigo é imprevisível). */
+
+.marca {
+  position: relative; flex: 0 0 auto;
+  width: var(--marca-tam, 44px); height: var(--marca-tam, 44px);
+  display: grid; place-items: center;
+}
+.marca-svg {
+  position: relative; z-index: 1;
+  width: 100%; height: 100%; overflow: visible;
+  transform-origin: 50% 50%;
+}
+.lamina, .marca-nucleo {
+  fill: var(--marca-cor, var(--claude));
+  transition: fill .55s ease;
+}
+.lamina { opacity: .82; }
+.marca-nucleo { opacity: .95; }
+
+/* Halo: a luz que a marca lança no painel. Só opacidade muda. */
+.marca-halo {
+  position: absolute; inset: -38%;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    var(--marca-cor, var(--claude)) 0%, transparent 68%);
+  opacity: .13;
+  transition: opacity .6s ease;
+  pointer-events: none;
+}
+
+/* ── estados ────────────────────────────────────────────────────────
+   Ocioso respira. Trabalhando, uma onda percorre as lâminas: é a leitura
+   de "pensando" que se entende de longe sem ler uma palavra. Esperando,
+   o conjunto inteiro pulsa em vermelho. Erro pisca duas vezes e para. */
+
+[data-state="idle"] .marca-svg { animation: marca-respira 5.4s ease-in-out infinite; }
+[data-state="idle"] .lamina    { animation: marca-cintila 6.2s ease-in-out infinite;
+                                 animation-delay: calc(var(--i) * -.42s); }
+
+[data-state="working"] .marca { --marca-cor: var(--claude-lit); }
+[data-state="working"] .marca-halo { opacity: .3; }
+[data-state="working"] .marca-svg { animation: marca-gira 9s linear infinite; }
+[data-state="working"] .lamina {
+  animation: marca-onda 1.45s ease-in-out infinite;
+  animation-delay: calc(var(--i) * -.121s);   /* 1.45s ÷ 12 lâminas */
+}
+
+[data-state="waiting"] .marca { --marca-cor: var(--stop); }
+[data-state="waiting"] .marca-halo { opacity: .42; animation: marca-alerta 1s ease-in-out infinite; }
+[data-state="waiting"] .marca-svg { animation: marca-chama 1s ease-in-out infinite; }
+[data-state="waiting"] .lamina { opacity: 1; }
+
+[data-state="error"] .marca { --marca-cor: var(--warn); }
+[data-state="error"] .marca-svg { animation: marca-pisca 2.4s ease-in-out infinite; }
+
+[data-state="offline"] .marca { --marca-cor: var(--faint); }
+[data-state="offline"] .marca-halo { opacity: 0; }
+[data-state="offline"] .lamina { opacity: .34; }
+
+[data-state="boot"] .marca-svg { animation: marca-nasce 1.1s var(--ease-out) both; }
+[data-state="boot"] .lamina {
+  animation: marca-acende .7s var(--ease-out) both;
+  animation-delay: calc(var(--i) * .055s);
+}
+
+@keyframes marca-respira { 50% { transform: scale(1.04); } }
+@keyframes marca-cintila { 0%, 100% { opacity: .72; } 50% { opacity: .95; } }
+@keyframes marca-gira    { to { transform: rotate(360deg); } }
+@keyframes marca-onda    { 0%, 100% { opacity: .3; } 18% { opacity: 1; } }
+@keyframes marca-chama   { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+@keyframes marca-alerta  { 50% { opacity: .16; } }
+@keyframes marca-pisca   { 0%, 12%, 24%, 100% { opacity: 1; } 6%, 18% { opacity: .25; } }
+@keyframes marca-nasce   { from { transform: scale(.5) rotate(-40deg); opacity: 0; } }
+@keyframes marca-acende  { from { opacity: 0; } to { opacity: .82; } }
+
+/* No modo leve sobra a marca parada: identidade sem custo de quadro. */
+[data-lite="1"] .marca-svg,
+[data-lite="1"] .lamina { animation: none !important; }
+[data-lite="1"] .marca-halo { opacity: .1; }
+
+/* Quem pediu menos movimento no sistema recebe menos movimento. */
+@media (prefers-reduced-motion: reduce) {
+  .marca-svg, .lamina, .marca-halo { animation: none !important; }
+}
+
+.marca-fita { --marca-tam: clamp(46px, 5.6vw, 78px); }
+.marca-protetor { --marca-tam: clamp(90px, 13vw, 160px); margin: 0 auto .5em; }
+
+.ribbon-text { min-width: 0; flex: 1; }
+.ribbon-text h1 {
+  font-size: clamp(17px, 2.4vw, 30px); font-weight: 600; letter-spacing: -.025em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ribbon-text p {
+  font-size: clamp(12px, 1.4vw, 16px); color: var(--dim); margin-top: .18em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ribbon-text p:empty { display: none; }
+
+.ribbon-meta { display: flex; align-items: center; gap: .6em; flex: 0 0 auto; }
+.chip {
+  font-size: clamp(11px, 1.2vw, 14px); color: var(--accent);
+  border: 1px solid var(--accent-deep); border-radius: 999px;
+  padding: .28em .8em; white-space: nowrap;
+  background: rgba(217,119,87,.08);
+}
+.elapsed {
+  font-size: clamp(13px, 1.6vw, 19px); color: var(--dim);
+  font-weight: 600; letter-spacing: -.02em; min-width: 3.2em; text-align: right;
+}
+
+[data-state="waiting"] .ribbon {
+  background: linear-gradient(100deg, rgba(255,59,48,.22), rgba(255,59,48,.07));
+  border-color: rgba(255,59,48,.5);
+  box-shadow: 0 0 40px rgba(255,59,48,.18);
+}
+[data-state="error"] .ribbon { border-color: rgba(227,164,79,.45); }
+[data-state="offline"] .ribbon { opacity: .55; }
+
+.tab-toggle {
+  width: clamp(38px, 4.4vw, 50px); height: clamp(38px, 4.4vw, 50px);
+  flex: 0 0 auto; border-radius: 10px; cursor: pointer;
+  border: 1px solid var(--rule); background: transparent; color: var(--dim);
+  display: grid; place-items: center;
+  transition: transform .12s var(--ease-out), color .2s, border-color .2s;
+}
+.tab-toggle svg { width: 55%; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.tab-toggle:active { transform: scale(.9); color: var(--text); border-color: var(--rule-bright); }
+
+/* ── palco: medidores ──────────────────────────────────────────────── */
+
+.stage {
+  display: grid;
+  grid-template-columns: 1fr minmax(0, .82fr) 1fr;
+  gap: var(--gap);
+  min-height: 0;
+}
+@media (max-aspect-ratio: 5/4) {
+  /* Retrato ou quase quadrado: a coluna central vai para baixo. */
+  .stage { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr auto; }
+  .center-rail { grid-column: 1 / -1; grid-row: 2; flex-direction: row; }
+}
+
+.gauge {
+  border: 1px solid var(--rule); border-radius: var(--radius);
+  background: var(--panel);
+  backdrop-filter: blur(10px);
+  padding: clamp(10px, 1.5vh, 20px);
+  display: flex; flex-direction: column; align-items: center;
+  min-height: 0; position: relative; overflow: hidden;
+  transition: border-color .5s ease, box-shadow .5s ease;
+}
+[data-lite="1"] .gauge { backdrop-filter: none; background: var(--bg-1); }
+
+.gauge[data-level="warn"] { border-color: rgba(227,164,79,.34); }
+.gauge[data-level="crit"] {
+  border-color: rgba(255,59,48,.45);
+  box-shadow: 0 0 34px rgba(255,59,48,.14), inset 0 0 40px rgba(255,59,48,.05);
+}
+
+.gauge h2 {
+  font-size: clamp(11px, 1.25vw, 15px); font-weight: 500;
+  color: var(--dim); text-transform: uppercase; letter-spacing: .12em;
+  flex: 0 0 auto;
+}
+
+/* --- mostrador circular --- */
+.dial {
+  position: relative; flex: 1 1 auto; min-height: 0; width: 100%;
+  display: grid; place-items: center;
+}
+/* O SVG é posicionado em absoluto de propósito. Com ele no fluxo, um
+   `height: 100%` cai na razão intrínseca 1:1 do viewBox sempre que a altura
+   do pai é indefinida — medido: 400,7 px de SVG numa caixa de 234,3 px, e o
+   arco descia por cima do rodapé. Tirar o `aspect-ratio` não bastava, porque
+   quem impunha o quadrado era o próprio viewBox. Em absoluto com `inset: 0`
+   a caixa vem do pai, que tem altura definida, e o `preserveAspectRatio`
+   encaixa o círculo dentro dela. */
+.dial svg {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; overflow: visible;
+}
+
+.dial circle {
+  fill: none;
+  stroke-width: 13;
+  stroke-linecap: round;
+  /* Arco de 270°: começa embaixo à esquerda e termina embaixo à direita. */
+  transform: rotate(135deg);
+  transform-origin: 100px 100px;
+  /* 2π·84 = 527.79 · três quartos disso = 395.84 */
+  stroke-dasharray: 395.84 527.79;
+}
+.dial-track { stroke: rgba(245,240,230,.055); }
+
+/* Arco fantasma: onde o consumo vai chegar no ritmo atual. */
+.dial-ghost {
+  stroke: var(--arc-a);
+  opacity: .18;
+  stroke-dasharray: 0 527.79;
+  transition: stroke-dasharray 1.2s var(--ease-out);
+}
+
+.dial-arc {
+  stroke-dasharray: 0 527.79;
+  filter: drop-shadow(0 0 10px var(--glow));
+  transition: stroke-dasharray .9s var(--ease-out), filter .5s ease;
+}
+[data-lite="1"] .dial-arc { filter: none; }
+.gauge[data-level="crit"] .dial-arc { animation: arcPulse 1.6s ease-in-out infinite; }
+@keyframes arcPulse { 50% { opacity: .62; } }
+
+.dial-core {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center; gap: .04em;
+  pointer-events: none;
+}
+
+/* --- odômetro: cada dígito é uma coluna que desliza --- */
+.odometer { display: flex; align-items: baseline; }
+.odo-digit {
+  height: 1em; overflow: hidden; position: relative;
+  font-size: clamp(40px, 6vw, 88px); font-weight: 650; letter-spacing: -.055em;
+  line-height: 1;
+}
+.odo-col {
+  display: flex; flex-direction: column;
+  transition: transform .62s var(--ease-spring);
+  will-change: transform;
+}
+.odo-col span { height: 1em; line-height: 1; display: block; }
+.odo-static {
+  font-size: clamp(40px, 6vw, 88px); font-weight: 650; letter-spacing: -.055em;
+  line-height: 1; color: var(--faint);
+}
+.unit {
+  font-size: clamp(16px, 2.1vw, 30px); font-weight: 500;
+  color: var(--dim);
+  /* Sobe até a altura do topo dos dígitos. `align-self: flex-start` mirava o
+     topo do mostrador inteiro e deixava o símbolo boiando longe do número. */
+  align-self: center;
+  transform: translateY(-0.95em);
+}
+
+.gauge footer {
+  flex: 0 0 auto; width: 100%; position: relative; z-index: 1;
+  /* Sem fundo. Ele existia para esconder a ponta do arco que passava por
+     trás de "Reseta em" — com o SVG contido na própria caixa isso não
+     acontece mais, e a tarja escura só ficava atravessando o cartão. */
+  display: flex; justify-content: space-between; align-items: baseline; gap: .8em;
+  padding-top: clamp(6px, 1vh, 12px);
+  font-size: clamp(11px, 1.2vw, 14px); color: var(--dim);
+}
+.gauge footer b {
+  color: var(--text); font-weight: 600;
+  font-size: clamp(15px, 1.9vw, 24px); letter-spacing: -.025em; margin-left: .45em;
+}
+.burn { color: var(--faint); font-size: clamp(10px, 1.1vw, 13px); text-align: right; }
+.burn[data-hot="1"] { color: var(--warn); }
+
+/* ── coluna central ────────────────────────────────────────────────── */
+
+.center-rail { display: flex; flex-direction: column; gap: var(--gap); min-height: 0; }
+
+.spark-card, .stats {
+  border: 1px solid var(--rule); border-radius: var(--radius);
+  background: var(--panel); backdrop-filter: blur(10px);
+  padding: clamp(10px, 1.4vh, 18px);
+  min-height: 0;
+}
+[data-lite="1"] .spark-card, [data-lite="1"] .stats { backdrop-filter: none; background: var(--bg-1); }
+
+.spark-card { flex: 1 1 auto; display: flex; flex-direction: column; position: relative; }
+.spark-card h3 {
+  font-size: clamp(10px, 1.1vw, 13px); font-weight: 500; color: var(--dim);
+  text-transform: uppercase; letter-spacing: .12em; margin-bottom: .5em;
+}
+.spark-card h3 span { color: var(--faint); text-transform: none; letter-spacing: 0; }
+.spark { flex: 1 1 auto; width: 100%; min-height: 0; overflow: visible; }
+.spark-area { fill: url(#sparkFill); }
+.spark-line {
+  fill: none; stroke: var(--accent); stroke-width: 2;
+  stroke-linejoin: round; stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.spark-head { fill: var(--accent); filter: drop-shadow(0 0 6px var(--accent)); }
+.spark-empty {
+  position: absolute; inset: auto 0 40% 0; text-align: center;
+  color: var(--faint); font-size: clamp(11px, 1.2vw, 14px);
+}
+
+.stats { flex: 0 0 auto; display: grid; grid-template-columns: repeat(2, 1fr); gap: .55em 1em; }
+.stat { min-width: 0; }
+.stat dt {
+  font-size: clamp(9px, 1vw, 11px); color: var(--faint);
+  text-transform: uppercase; letter-spacing: .1em;
+}
+.stat dd {
+  font-size: clamp(14px, 1.7vw, 21px); font-weight: 600; letter-spacing: -.025em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.stat dd small { font-size: .6em; font-weight: 500; color: var(--dim); margin-left: .25em; }
+
+/* ── deck de botões ────────────────────────────────────────────────── */
+
+.deck { display: flex; flex-direction: column; gap: calc(var(--gap) * .7); }
+.deck-row { display: grid; gap: calc(var(--gap) * .7); }
+/* Com o portão ligado e nada pendente, a linha de decisões não tem o que
+   fazer: em vez de ocupar a faixa mais visível do painel com três botões
+   mortos, ela sai de cena e devolve o espaço aos botões que funcionam. */
+.deck-row[data-idle="1"] { display: none; }
+
+.btn {
+  position: relative; overflow: hidden;
+  min-height: clamp(56px, 9.5vh, 92px);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(245,240,230,.055), rgba(245,240,230,.015));
+  color: var(--text); font: inherit; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: .18em; padding: .4em .5em;
+  transition: transform .1s var(--ease-out), border-color .2s, background .2s, opacity .25s;
+  will-change: transform;
+}
+.btn svg { width: clamp(17px, 2.1vw, 25px); height: clamp(17px, 2.1vw, 25px);
+  fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.btn .btn-label { font-size: clamp(12px, 1.5vw, 18px); font-weight: 550; letter-spacing: -.015em; }
+.btn .btn-hint { font-size: clamp(9px, 1vw, 12px); color: var(--faint); }
+
+/* Fita luminosa no topo: dá a cor da ação sem pintar o botão inteiro. */
+.btn::before {
+  content: ""; position: absolute; inset: 0 0 auto 0; height: 2px;
+  background: var(--faint); opacity: .55;
+  transition: opacity .2s, background .2s;
+}
+.btn[data-tone="go"]::before     { background: var(--go); }
+.btn[data-tone="stop"]::before   { background: var(--stop); }
+.btn[data-tone="warn"]::before   { background: var(--warn); }
+.btn[data-tone="accent"]::before { background: var(--accent); }
+
+.btn:active { transform: scale(.965); background: rgba(245,240,230,.09); }
+.btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.btn[disabled] { opacity: .3; cursor: not-allowed; }
+.btn[data-armed="1"] { opacity: 1; }
+.btn[data-armed="1"][data-tone="go"] {
+  border-color: rgba(79,178,134,.5);
+  box-shadow: 0 0 24px rgba(79,178,134,.18);
+  animation: armed 2s ease-in-out infinite;
+}
+@keyframes armed { 50% { box-shadow: 0 0 8px rgba(79,178,134,.06); } }
+
+/* Confirmação em dois toques: o botão vira contagem regressiva. */
+.btn[data-confirm="pending"] { border-color: var(--warn); background: rgba(227,164,79,.12); }
+.btn[data-confirm="pending"] .btn-label::after { content: " · confirmar"; color: var(--warn); }
+
+/* Ondulação a partir do ponto tocado. */
+.ripple {
+  position: absolute; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle, rgba(255,255,255,.55), transparent 70%);
+  transform: translate(-50%, -50%) scale(0);
+  animation: ripple .55s var(--ease-out) forwards;
+}
+@keyframes ripple { to { transform: translate(-50%, -50%) scale(1); opacity: 0; } }
+
+.btn.ok   { animation: flashOk .7s var(--ease-out); }
+.btn.fail { animation: flashFail .7s var(--ease-out); }
+@keyframes flashOk   { 0%,100% { background: rgba(245,240,230,.03); } 22% { background: rgba(79,178,134,.42); } }
+@keyframes flashFail { 0%,100% { background: rgba(245,240,230,.03); } 12%,44% { background: rgba(255,59,48,.42); } 28% { background: rgba(245,240,230,.03); } }
+
+/* ── cartão de permissão ───────────────────────────────────────────── */
+
+.gate-layer {
+  position: fixed; inset: 0; z-index: 40;
+  display: grid; place-items: center;
+  padding: var(--gap);
+  background: rgba(3, 5, 9, .82);
+  backdrop-filter: blur(8px);
+  animation: fadeIn .28s ease;
+}
+[data-lite="1"] .gate-layer { backdrop-filter: none; background: rgba(3,5,9,.94); }
+@keyframes fadeIn { from { opacity: 0; } }
+
+.gate-card {
+  width: min(760px, 100%); max-height: 100%; overflow: auto;
+  border: 1px solid var(--rule-bright); border-radius: 18px;
+  background: linear-gradient(165deg, #262219, #14120F);
+  padding: clamp(16px, 2.4vh, 30px);
+  box-shadow: 0 30px 90px rgba(0,0,0,.65);
+  animation: riseIn .4s var(--ease-out);
+}
+@keyframes riseIn { from { transform: translateY(26px) scale(.97); opacity: 0; } }
+
+.gate-card[data-risk="high"]   { border-color: rgba(255,59,48,.55); box-shadow: 0 30px 90px rgba(0,0,0,.65), 0 0 60px rgba(255,59,48,.15); }
+.gate-card[data-risk="medium"] { border-color: rgba(227,164,79,.42); }
+
+.gate-card header { display: flex; align-items: center; gap: .8em; margin-bottom: .9em; }
+.gate-card h2 { font-size: clamp(15px, 1.9vw, 23px); font-weight: 600; letter-spacing: -.02em; flex: 1; }
+.gate-badge {
+  font-size: clamp(9px, 1vw, 11px); text-transform: uppercase; letter-spacing: .12em;
+  padding: .35em .8em; border-radius: 999px;
+  border: 1px solid var(--rule); color: var(--dim);
+}
+.gate-card[data-risk="high"]   .gate-badge { color: var(--stop); border-color: var(--stop); background: rgba(255,59,48,.1); }
+.gate-card[data-risk="medium"] .gate-badge { color: var(--warn); border-color: var(--warn); background: rgba(227,164,79,.1); }
+.gate-card[data-risk="low"]    .gate-badge { color: var(--go); border-color: var(--go-deep); }
+.gate-timer { font-size: clamp(13px, 1.6vw, 19px); font-weight: 600; color: var(--dim); }
+
+.gate-tool { font-size: clamp(13px, 1.5vw, 17px); color: var(--accent); font-weight: 600; margin-bottom: .5em; }
+.gate-detail {
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: clamp(12px, 1.4vw, 16px); line-height: 1.5;
+  background: #0B0A08; border: 1px solid var(--rule); border-radius: 9px;
+  padding: .8em 1em; margin-bottom: .8em;
+  white-space: pre-wrap; word-break: break-word;
+  max-height: 34vh; overflow: auto; color: #DAD4C8;
+}
+.gate-why { color: var(--warn); font-size: clamp(11px, 1.3vw, 15px); margin-bottom: .9em; }
+.gate-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: .7em; }
+.gate-actions .btn { min-height: clamp(58px, 10vh, 88px); }
+
+/* ── gaveta lateral ────────────────────────────────────────────────── */
+
+.drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 30;
+  width: min(430px, 88vw);
+  background: linear-gradient(180deg, #1B1815, #0C0B09);
+  border-left: 1px solid var(--rule-bright);
+  box-shadow: -24px 0 70px rgba(0,0,0,.6);
+  padding: var(--gap);
+  overflow-y: auto; overscroll-behavior: contain;
+  animation: slideIn .32s var(--ease-out);
+}
+@keyframes slideIn { from { transform: translateX(100%); } }
+.drawer header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1em; }
+.drawer h2 { font-size: clamp(14px, 1.7vw, 19px); font-weight: 600; }
+.drawer h3 {
+  font-size: clamp(10px, 1.1vw, 12px); color: var(--faint);
+  text-transform: uppercase; letter-spacing: .12em; margin: 1.2em 0 .6em;
+}
+.drawer header button {
+  width: 38px; height: 38px; border-radius: 9px; cursor: pointer;
+  background: transparent; border: 1px solid var(--rule); color: var(--dim); font-size: 15px;
+}
+
+.sessions { display: flex; flex-direction: column; gap: .6em; }
+.session {
+  border: 1px solid var(--rule); border-radius: 11px;
+  padding: .75em .9em; background: rgba(245,240,230,.02);
+}
+.session-top { display: flex; align-items: center; gap: .5em; margin-bottom: .35em; }
+.led { width: 8px; height: 8px; border-radius: 50%; background: var(--faint); flex: 0 0 auto; }
+.led[data-live="1"] { background: var(--go); box-shadow: 0 0 8px var(--go); animation: breathe 2.4s ease-in-out infinite; }
+.session-model { font-weight: 600; font-size: clamp(12px, 1.4vw, 15px); }
+.session-ver { color: var(--faint); font-size: .8em; margin-left: auto; }
+.session-path {
+  font-family: ui-monospace, monospace; font-size: clamp(10px, 1.1vw, 12px); color: var(--dim);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; direction: rtl; text-align: left;
+}
+.session-bars { display: flex; gap: .8em; margin-top: .5em; font-size: clamp(10px, 1.1vw, 12px); color: var(--dim); }
+.session-bars b { color: var(--text); font-weight: 600; }
+.mini-bar { height: 3px; border-radius: 2px; background: rgba(245,240,230,.08); margin-top: .35em; overflow: hidden; }
+.mini-bar i { display: block; height: 100%; background: var(--accent); transition: width .6s var(--ease-out); }
+
+.timeline { list-style: none; display: flex; flex-direction: column; gap: .1em; }
+.timeline li {
+  display: flex; gap: .7em; align-items: baseline;
+  padding: .42em .2em; border-bottom: 1px solid rgba(245,240,230,.04);
+  font-size: clamp(11px, 1.2vw, 13px);
+  animation: itemIn .3s var(--ease-out) backwards;
+}
+@keyframes itemIn { from { opacity: 0; transform: translateX(10px); } }
+.timeline time { color: var(--faint); flex: 0 0 auto; font-size: .92em; }
+.timeline .kind { width: 6px; height: 6px; border-radius: 50%; flex: 0 0 auto; background: var(--faint); align-self: center; }
+.timeline li[data-kind="attention"] .kind, .timeline li[data-kind="permission"] .kind { background: var(--stop); }
+.timeline li[data-kind="done"] .kind { background: var(--go); }
+.timeline li[data-kind="error"] .kind, .timeline li[data-kind="warn"] .kind { background: var(--warn); }
+.timeline li[data-kind="prompt"] .kind { background: var(--accent); }
+.timeline span.txt { color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.drawer-foot { margin-top: 1.4em; padding-top: 1em; border-top: 1px solid var(--rule); color: var(--faint); font-size: 11px; line-height: 1.7; }
+
+/* ── protetor de tela ──────────────────────────────────────────────── */
+
+.saver {
+  position: fixed; inset: 0; z-index: 50;
+  background: #000; display: grid; place-items: center;
+  animation: fadeIn .9s ease;
+}
+.saver-inner {
+  text-align: center; opacity: .5;
+  /* Deriva devagar: OLED de tablet velho queima imagem parada. */
+  animation: drift 90s linear infinite alternate;
+}
+@keyframes drift {
+  from { transform: translate(-7vw, -5vh); }
+  to   { transform: translate(7vw, 5vh); }
+}
+.saver time { font-size: clamp(60px, 13vw, 170px); font-weight: 200; letter-spacing: -.05em; display: block; }
+.saver-bars { display: flex; gap: 1.2em; justify-content: center; margin-top: 1.2em; }
+.saver-bars span { width: clamp(70px, 11vw, 130px); height: 3px; background: rgba(245,240,230,.14); border-radius: 2px; overflow: hidden; }
+.saver-bars i { display: block; height: 100%; background: var(--dim); }
+.saver p { margin-top: 1em; color: var(--faint); font-size: clamp(11px, 1.3vw, 15px); }
+
+/* ── aviso flutuante ───────────────────────────────────────────────── */
+
+.toast {
+  position: fixed; left: 50%; bottom: calc(var(--gap) * 1.4); z-index: 60;
+  transform: translate(-50%, 130%);
+  max-width: min(560px, 88vw);
+  padding: .75em 1.2em; border-radius: 11px;
+  background: var(--bg-2); border: 1px solid var(--rule-bright);
+  box-shadow: 0 14px 40px rgba(0,0,0,.55);
+  font-size: clamp(12px, 1.4vw, 15px);
+  transition: transform .4s var(--ease-out);
+}
+.toast[data-show="1"] { transform: translate(-50%, 0); }
+.toast[data-kind="error"] { border-color: var(--stop); color: #FFD8D2; }
+.toast[data-kind="ok"] { border-color: var(--go-deep); }
+
+.icon-defs { position: absolute; width: 0; height: 0; }
+
+/* ── entrada e acessibilidade ──────────────────────────────────────── */
+
+.shell > * { animation: enter .55s var(--ease-out) backwards; }
+.shell > *:nth-child(1) { animation-delay: .02s; }
+.shell > *:nth-child(2) { animation-delay: .09s; }
+.shell > *:nth-child(3) { animation-delay: .16s; }
+@keyframes enter { from { opacity: 0; transform: translateY(14px); } }
+
+body[data-state="boot"] .stage,
+body[data-state="boot"] .deck { opacity: .45; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+  #aurora { display: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MOTOR DO DECK — abas, face viva e toque longo
+   -----------------------------------------------------------------------
+   O que separa um deck de um controle remoto: o botão certo já está no
+   lugar certo, e a face dele já está mostrando o número que importa.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.deck-wrap { display: flex; flex-direction: column; gap: calc(var(--gap) * .55); min-height: 0; }
+
+/* ── abas ──────────────────────────────────────────────────────────── */
+
+.pages {
+  position: relative;
+  display: flex; gap: .2em;
+  padding: 3px;
+  border: 1px solid var(--rule); border-radius: 10px;
+  background: var(--panel);
+  align-self: start;
+}
+[data-lite="1"] .pages { background: var(--bg-1); }
+
+.pages button {
+  position: relative; z-index: 1;
+  font: inherit; font-size: clamp(11px, 1.3vw, 15px); font-weight: 550;
+  letter-spacing: -.01em;
+  color: var(--dim); background: transparent; border: 0; cursor: pointer;
+  padding: .5em 1.1em; border-radius: 7px;
+  display: flex; align-items: center; gap: .5em;
+  transition: color .2s ease;
+  white-space: nowrap;
+}
+.pages button[aria-selected="true"] { color: var(--text); }
+.pages button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* Contagem de botões visíveis naquela aba. */
+.pages .tab-count {
+  font-size: .78em; font-weight: 600; color: var(--faint);
+  background: rgba(245,240,230,.06); border-radius: 999px;
+  padding: .05em .5em; min-width: 1.6em; text-align: center;
+}
+.pages button[aria-selected="true"] .tab-count { color: var(--dim); }
+
+/* Ponto de atenção. Duas intensidades de propósito: azul parado significa
+   "tem algo em destaque aqui", vermelho pulsante significa "decida agora".
+   Usar o alarme para as duas coisas gastaria o alarme. */
+.pages .tab-alert {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+  box-shadow: 0 0 6px var(--accent);
+}
+.pages .tab-alert[data-level="alarm"] {
+  background: var(--stop); box-shadow: 0 0 8px var(--stop);
+  animation: breathe 1.4s ease-in-out infinite;
+}
+
+/* O marcador desliza entre as abas em vez de piscar de uma para outra. */
+.pages-marker {
+  position: absolute; top: 3px; bottom: 3px; left: 0; z-index: 0;
+  border-radius: 7px; background: rgba(245,240,230,.075);
+  border: 1px solid var(--rule);
+  transition: transform .34s var(--ease-out), width .34s var(--ease-out);
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) { .pages-marker { transition: none; } }
+
+/* ── página do deck ────────────────────────────────────────────────── */
+
+.deck { position: relative; }
+.deck[data-sliding="left"]  .deck-row { animation: pageInLeft  .3s var(--ease-out); }
+.deck[data-sliding="right"] .deck-row { animation: pageInRight .3s var(--ease-out); }
+@keyframes pageInLeft  { from { opacity: 0; transform: translateX(26px); } }
+@keyframes pageInRight { from { opacity: 0; transform: translateX(-26px); } }
+
+/* Botão que entra ou sai porque o contexto mudou. */
+.btn { animation: btnIn .3s var(--ease-out) backwards; }
+@keyframes btnIn { from { opacity: 0; transform: scale(.94); } }
+
+/* ── urgência ──────────────────────────────────────────────────────── */
+
+/* Um botão urgente não muda de cor: ele ganha relevo. Cor já está sendo
+   usada para dizer o que a ação faz, e sobrecarregar o canal confunde. */
+.btn[data-urgent="1"] {
+  border-color: var(--rule-bright);
+  background: linear-gradient(180deg, rgba(245,240,230,.1), rgba(245,240,230,.03));
+  box-shadow: 0 4px 18px rgba(0,0,0,.35);
+}
+.btn[data-urgent="1"]::before { opacity: 1; height: 3px; }
+
+/* ── face viva ─────────────────────────────────────────────────────── */
+
+.btn { padding-bottom: .8em; }
+
+.badge {
+  position: absolute; top: .45em; right: .6em; z-index: 2;
+  font-size: clamp(11px, 1.35vw, 16px); font-weight: 650;
+  letter-spacing: -.03em; color: var(--dim);
+  font-variant-numeric: tabular-nums;
+  transition: color .3s ease;
+  pointer-events: none;
+}
+.badge small { font-size: .68em; font-weight: 500; margin-left: .08em; opacity: .75; }
+.badge[data-level="warn"] { color: var(--warn); }
+.badge[data-level="crit"] { color: var(--stop); }
+
+/* Barra na base: o mesmo número, legível de três metros sem ler dígito. */
+.badge-bar {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 3px; z-index: 2;
+  background: rgba(245,240,230,.05); overflow: hidden;
+  border-radius: 0 0 11px 11px;
+}
+.badge-bar i {
+  display: block; height: 100%; width: 0;
+  background: var(--dim);
+  transition: width .55s var(--ease-out), background .3s ease;
+}
+.badge-bar[data-level="warn"] i { background: var(--warn); }
+.badge-bar[data-level="crit"] i { background: var(--stop); }
+
+/* ── toque longo ───────────────────────────────────────────────────── */
+
+/* Preenche da esquerda para a direita enquanto o dedo está apoiado. Ao
+   encher, dispara a ação secundária. Soltar antes cancela — e o recuo é
+   rápido de propósito, para o cancelamento parecer cancelamento. */
+.hold-fill {
+  position: absolute; inset: 0; z-index: 0;
+  background: linear-gradient(90deg, rgba(217,119,87,.30), rgba(217,119,87,.14));
+  transform-origin: left center;
+  transform: scaleX(0);
+  pointer-events: none;
+}
+.btn[data-holding="1"] .hold-fill { transition: transform var(--hold-ms, 620ms) linear; transform: scaleX(1); }
+.btn:not([data-holding="1"]) .hold-fill { transition: transform .16s ease; transform: scaleX(0); }
+
+/* O conteúdo fica acima do preenchimento do toque longo. Precisa listar os
+   elementos em vez de usar `.btn > *`: aquela forma aplicava
+   `position: relative` também na face e na barra, que são absolutos — e as
+   duas caíam para o fim do fluxo, no rodapé do botão. */
+.btn > svg,
+.btn > .btn-label,
+.btn > .btn-hint { position: relative; z-index: 1; }
+
+/* Aviso do que o toque longo vai fazer, revelado enquanto o dedo apoia. */
+.hold-label {
+  position: absolute; inset: auto 0 .3em 0; z-index: 2;
+  font-size: clamp(9px, 1vw, 12px); font-weight: 600; color: var(--accent);
+  text-align: center; opacity: 0; transform: translateY(4px);
+  transition: opacity .18s ease, transform .18s ease;
+  pointer-events: none;
+}
+.btn[data-holding="1"] .hold-label { opacity: 1; transform: translateY(0); }
+.btn[data-holding="1"] .btn-hint { opacity: 0; }
+
+/* Marca discreta no canto: este botão tem uma segunda função. */
+.btn[data-hasHold="1"]::after {
+  content: ""; position: absolute; left: .5em; bottom: .55em;
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--faint);
+}
+.btn[data-holding="1"]::after { background: var(--accent); }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn[data-holding="1"] .hold-fill { transition: none; transform: scaleX(1); }
+}
+
+/* ── opção ativa ───────────────────────────────────────────────────── */
+
+/* Numa fileira de opções mutuamente exclusivas — modelo, nível de esforço —
+   o botão em uso precisa ser reconhecível SEM ler o rótulo. Aqui isso é
+   feito por preenchimento e contorno, não por cor: a cor já está dizendo o
+   que a opção custa (âmbar = mais cara), e sobrepor os dois canais faria o
+   painel mentir de longe. */
+.btn[data-active="1"] {
+  background: linear-gradient(180deg, rgba(217,119,87,.20), rgba(217,119,87,.07));
+  border-color: rgba(217,119,87,.55);
+  box-shadow: inset 0 0 0 1px rgba(217,119,87,.25), 0 0 22px rgba(217,119,87,.14);
+}
+.btn[data-active="1"] .btn-label { color: #fff; }
+.btn[data-active="1"]::before { opacity: 1; height: 3px; background: var(--accent); }
+[data-lite="1"] .btn[data-active="1"] { box-shadow: none; background: rgba(217,119,87,.16); }
+
+/* Ponto no canto: a marca de "esta é a atual", visível mesmo no modo leve. */
+.btn[data-active="1"] .active-dot {
+  position: absolute; top: .5em; left: .6em; z-index: 2;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 8px var(--accent);
+}
+
+/* ── painel sem leitura de quota ───────────────────────────────────── */
+
+/* No app desktop a barra de status é da própria aplicação e não executa a
+   nossa statusLine, então não há percentual de uso. Dois mostradores gigantes
+   escritos "--" seriam a maior parte da tela dizendo nada. Eles encolhem para
+   uma faixa fina e devolvem o espaço para o deck, que continua funcionando. */
+[data-no-usage="1"] .stage { flex: 0 0 auto; }
+[data-no-usage="1"] .shell { grid-template-rows: auto auto 1fr; }
+[data-no-usage="1"] .gauge .dial { display: none; }
+[data-no-usage="1"] .gauge { padding: .7em 1em; }
+[data-no-usage="1"] .gauge h2 { font-size: clamp(10px, 1.1vw, 12px); }
+[data-no-usage="1"] .gauge footer { border-top: 0; background: transparent; padding-top: .3em; }
+[data-no-usage="1"] .spark-card { display: none; }
+[data-no-usage="1"] .center-rail { justify-content: center; }
+[data-no-usage="1"] .deck-wrap { min-height: 0; }
+
+/* Sem medidores, o deck herda a altura toda: as fileiras dividem o espaço e
+   os botões crescem. Um painel de parede com metade da tela vazia é pior que
+   um painel cheio de botões grandes. */
+[data-no-usage="1"] .deck { flex: 1 1 auto; min-height: 0; justify-content: flex-start; }
+
+/* As fileiras crescem, mas com teto. Sem ele uma única fileira de três
+   botões esticava para a altura toda — medido em 460 px, com o rótulo
+   flutuando no meio de um vazio. Botão grande ajuda; botão do tamanho de
+   um pôster só afasta o dedo do alvo seguinte. */
+[data-no-usage="1"] .deck-row {
+  flex: 1 1 0; min-height: 0;
+  max-height: clamp(96px, 26vh, 240px);
+}
+[data-no-usage="1"] .btn { min-height: 0; }
+
+/* ── teclas de agente ──────────────────────────────────────────────── */
+
+/* Uma tecla por conversa. O LED é o que se lê de longe: com quatro sessões
+   abertas, a pergunta não é "o que fazer" mas "qual delas está me esperando".
+   A cor responde antes de você ler o nome do projeto. */
+.btn .agent-led {
+  position: absolute; top: .55em; right: .7em; z-index: 2;
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--faint);
+  transition: background .3s ease, box-shadow .3s ease;
+}
+.btn[data-state="working"] .agent-led { background: var(--go); box-shadow: 0 0 9px var(--go); }
+.btn[data-state="waiting"] .agent-led { background: var(--stop); box-shadow: 0 0 11px var(--stop); animation: breathe 1s ease-in-out infinite; }
+.btn[data-state="error"]   .agent-led { background: var(--warn); box-shadow: 0 0 9px var(--warn); }
+.btn[data-state="idle"]    .agent-led { background: var(--dim); }
+
+/* A conversa que está esperando ganha contorno, não só o ponto. */
+.btn[data-state="waiting"] {
+  border-color: rgba(255,59,48,.5);
+  box-shadow: 0 0 26px rgba(255,59,48,.16);
+}
