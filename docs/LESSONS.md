@@ -149,6 +149,32 @@ evento de hook daquela sessão.
 em JavaScript só cobre `undefined`. Um `null` explícito passava direto e
 quebrava no primeiro acesso a campo.
 
+## Acender o botão certo é uma questão de honestidade
+
+As abas Modelo e Esforço são seletores: o botão da opção em uso acende. Isso
+exige saber qual opção está em uso, e a fonte disponível — a statusLine —
+não responde exatamente essa pergunta.
+
+Ela informa o **modelo resolvido** (`claude-opus-5`), não o apelido que foi
+digitado. Os apelidos `opus`, `opus[1m]` e `opusplan` resolvem para a mesma
+família e chegam indistinguíveis. Havia três saídas:
+
+1. acender os três — mentira;
+2. acender o primeiro — mentira pior, porque parece precisa;
+3. acender só a família e deixar os outros dois sem indicador.
+
+A terceira. Os três botões funcionam; só um mostra estado, e é o único sobre
+o qual existe informação. O mesmo vale para `ultracode`, que a documentação
+diz reportar como `xhigh`: o botão que acende é "Extra", e o rótulo do
+Ultracode carrega `xhigh + orquestração` para o painel não deixar dúvida.
+
+Um indicador que às vezes mente é pior do que indicador nenhum: você para de
+olhar para ele, e aí ele não serve nem quando está certo.
+
+Sobre a procedência: apelidos e níveis foram lidos da documentação do Claude
+Code, não da memória, e estão travados por teste. Um apelido inventado não
+daria erro visível — viraria um comando inválido digitado no terminal.
+
 ## O que quebra numa atualização do Claude Code
 
 Em ordem de probabilidade.
@@ -164,16 +190,22 @@ Se as duas deixarem de valer, o portão para de decidir — e o efeito é o
 terminal perguntar, que é o comportamento sem portão. *Falha para o lado
 seguro.*
 
-**3. Nomes de evento de hook.** São ~30 e crescem. Um nome que suma vira um
+**3. Apelidos de modelo e níveis de esforço.** `/model` e `/effort` aceitam
+argumento em linha, e os valores aceitos podem mudar quando um modelo novo
+sai. Um apelido descontinuado vira um comando inválido no terminal — visível,
+mas chato. *Onde olhar:* as páginas `modelo` e `esforco` em `src/actions.js`,
+e o teste "os comandos digitados são exatamente os documentados".
+
+**4. Nomes de evento de hook.** São ~30 e crescem. Um nome que suma vira um
 hook que nunca dispara: o painel fica menos informado, não quebrado. Eventos
 novos caem no `default` e viram linha de log. *Onde olhar:* `HOOK_EVENTS` em
 `src/settings.js` e o `switch` em `src/store.js`.
 
-**4. Campos novos na statusLine.** São aditivos por contrato — a documentação
+**5. Campos novos na statusLine.** São aditivos por contrato — a documentação
 marca quase tudo como "pode estar ausente", e o parser trata tudo como
 opcional. Um campo novo é oportunidade, não risco.
 
-**5. `rate_limits` sumir para algum plano.** Já é condicional hoje: só aparece
+**6. `rate_limits` sumir para algum plano.** Já é condicional hoje: só aparece
 para Pro e Max, e só depois da primeira resposta da API. O painel degrada para
 "--" e o `doctor` explica o motivo em vez de mandar você caçar um bug.
 

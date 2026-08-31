@@ -163,6 +163,7 @@ class Deck {
         id: s.sessionId,
         name: s.sessionName,
         model: s.model,
+        modelId: s.modelId,
         cwd: s.cwd,
         branch: s.branch,
         repo: s.repo,

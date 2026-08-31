@@ -260,3 +260,129 @@ test("o catálogo embutido é válido de ponta a ponta", () => {
     assert.deepEqual(actions.validate(a, list), [], `ação "${a.id}" inválida`);
   }
 });
+
+/* ═══════════════════ seletores de modelo e esforço ══════════════════════ */
+
+/** Estado com uma sessão viva usando modelo e esforço dados. */
+function comSessao(modelId, effort, fastMode = false) {
+  return estado({
+    sessions: [{ live: true, model: modelId, modelId, effort, fastMode, context: { used: 30 } }],
+  });
+}
+
+test("o botão do modelo em uso acende", () => {
+  const acts = actions.build();
+  const aceso = (st) =>
+    resolve(acts, st).filter((a) => a.page === "modelo" && a.active).map((a) => a.id);
+
+  assert.deepEqual(aceso(comSessao("claude-opus-5", "high")), ["m_opus"]);
+  assert.deepEqual(aceso(comSessao("claude-sonnet-5", "high")), ["m_sonnet"]);
+  assert.deepEqual(aceso(comSessao("claude-haiku-4-5", "high")), ["m_haiku"]);
+  assert.deepEqual(aceso(comSessao("claude-fable-5", "high")), ["m_fable"]);
+});
+
+test("família é reconhecida pelo nome de exibição também, não só pelo id", () => {
+  const acts = actions.build();
+  const st = estado({ sessions: [{ live: true, model: "Opus", modelId: null, effort: "high" }] });
+  assert.ok(resolve(acts, st).find((a) => a.id === "m_opus").active);
+});
+
+test("HONESTIDADE: apelidos da mesma família não acendem sozinhos", () => {
+  // O statusLine informa o modelo RESOLVIDO, não o apelido digitado. Com
+  // "opus", "opus[1m]" e "opusplan" resolvendo para a mesma família, acender
+  // os três seria mentira e acender o errado seria pior.
+  const acts = actions.build();
+  const acesos = resolve(acts, comSessao("claude-opus-5", "high"))
+    .filter((a) => a.active)
+    .map((a) => a.id);
+  assert.ok(!acesos.includes("m_opus1m"));
+  assert.ok(!acesos.includes("m_opusplan"));
+  assert.ok(!acesos.includes("m_best"));
+});
+
+test("sem sessão viva, nenhum modelo acende", () => {
+  const acts = actions.build();
+  const st = estado({ sessions: [{ live: false, model: "Opus", modelId: "claude-opus-5" }] });
+  assert.equal(resolve(acts, st).filter((a) => a.active).length, 0);
+  assert.equal(resolve(acts, estado({ sessions: [] })).filter((a) => a.active).length, 0);
+});
+
+test("o nível de esforço em uso acende", () => {
+  const acts = actions.build();
+  const aceso = (nivel) =>
+    resolve(acts, comSessao("claude-opus-5", nivel))
+      .filter((a) => a.page === "esforco" && a.active)
+      .map((a) => a.id);
+
+  assert.deepEqual(aceso("low"), ["e_low"]);
+  assert.deepEqual(aceso("medium"), ["e_medium"]);
+  assert.deepEqual(aceso("high"), ["e_high"]);
+  assert.deepEqual(aceso("max"), ["e_max"]);
+});
+
+test("HONESTIDADE: ultracode é reportado como xhigh e acende 'Extra'", () => {
+  // Documentado: ultracode não é um nível distinto do modelo, ele reporta
+  // xhigh. Não dá para distinguir daqui, e o rótulo do botão diz isso.
+  const acts = actions.build();
+  const acesos = resolve(acts, comSessao("claude-opus-5", "xhigh"))
+    .filter((a) => a.page === "esforco" && a.active)
+    .map((a) => a.id);
+  assert.deepEqual(acesos, ["e_xhigh"]);
+  assert.ok(!acesos.includes("e_ultracode"), "ultracode não é distinguível de xhigh");
+});
+
+test("modo turbo acende quando está ligado", () => {
+  const acts = actions.build();
+  const ligado = resolve(acts, comSessao("claude-opus-5", "high", true));
+  assert.ok(ligado.find((a) => a.id === "e_fast").active);
+  const desligado = resolve(acts, comSessao("claude-opus-5", "high", false));
+  assert.ok(!desligado.find((a) => a.id === "e_fast").active);
+});
+
+test("trocar de modelo troca qual botão acende, e só um por vez", () => {
+  const acts = actions.build();
+  for (const id of ["claude-opus-5", "claude-sonnet-5", "claude-haiku-4-5", "claude-fable-5"]) {
+    const acesos = resolve(acts, comSessao(id, "high")).filter(
+      (a) => a.page === "modelo" && a.active
+    );
+    assert.equal(acesos.length, 1, `${id} deveria acender exatamente um botão`);
+  }
+});
+
+test("as abas de modelo e esforço existem e têm rótulo", () => {
+  const acts = actions.build();
+  const abas = pagesOf(acts, comSessao("claude-opus-5", "high"));
+  const porId = Object.fromEntries(abas.map((p) => [p.id, p.label]));
+  assert.equal(porId.modelo, "Modelo");
+  assert.equal(porId.esforco, "Esforço");
+});
+
+test("os comandos digitados são exatamente os documentados", () => {
+  // Estes textos vão direto para o terminal. Um apelido inventado viraria um
+  // comando inválido silencioso, então a lista fica travada por teste.
+  const acts = actions.build();
+  const cmd = (id) => acts.find((a) => a.id === id).text;
+
+  assert.equal(cmd("m_opus"), "/model opus");
+  assert.equal(cmd("m_sonnet"), "/model sonnet");
+  assert.equal(cmd("m_haiku"), "/model haiku");
+  assert.equal(cmd("m_fable"), "/model fable");
+  assert.equal(cmd("m_best"), "/model best");
+  assert.equal(cmd("m_opusplan"), "/model opusplan");
+  assert.equal(cmd("m_opus1m"), "/model opus[1m]");
+  assert.equal(cmd("m_default"), "/model default");
+
+  assert.equal(cmd("e_low"), "/effort low");
+  assert.equal(cmd("e_medium"), "/effort medium");
+  assert.equal(cmd("e_high"), "/effort high");
+  assert.equal(cmd("e_xhigh"), "/effort xhigh");
+  assert.equal(cmd("e_max"), "/effort max");
+  assert.equal(cmd("e_ultracode"), "/effort ultracode");
+  assert.equal(cmd("e_auto"), "/effort auto");
+  assert.equal(cmd("e_fast"), "/fast");
+});
+
+test("os colchetes de opus[1m] sobrevivem à sanitização", () => {
+  const { sanitizeText } = require("../src/inject");
+  assert.equal(sanitizeText("/model opus[1m]"), "/model opus[1m]");
+});

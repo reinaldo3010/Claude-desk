@@ -83,7 +83,7 @@ node bin/claude-deck.js uninstall          desfaz o registro
 node bin/claude-deck.js doctor             diagnóstico da máquina
 node bin/claude-deck.js dump               imprime o que o deck está lendo
 node bin/claude-deck.js event waiting "oi" dispara um evento de teste
-npm test                                   92 testes, sem dependências
+npm test                                   103 testes, sem dependências
 ```
 
 ## O deck
@@ -100,8 +100,32 @@ acontecendo:
   altura da mão.
 - **Toque longo é a segunda função.** Segure "Interromper" para "Parar tudo"
   (dois `Esc`); segure "Compactar" para `/clear`.
-- **Três abas**: Controle, Prompts e Sessão. A aba avisa com um ponto quando
-  tem algo lá dentro — azul para destaque, vermelho pulsante para decisão.
+- **Cinco abas**: Controle, Prompts, Sessão, Modelo e Esforço. A aba avisa com
+  um ponto quando tem algo lá dentro — azul para destaque, vermelho pulsante
+  para decisão.
+- **A opção em uso acende.** Nas abas Modelo e Esforço os botões formam um
+  seletor: o modelo e o nível ativos ficam iluminados, com um ponto no canto.
+
+### Modelo e esforço em um toque
+
+| Aba | Botões |
+|---|---|
+| **Modelo** | Opus · Sonnet · Haiku · Fable · Melhor · Opus + plano · Opus 1M · Padrão |
+| **Esforço** | Baixo · Médio · Alto · Extra (xhigh) · Máximo · Ultracode · Auto · Turbo (`/fast`) |
+
+Os comandos são `/model <apelido>` e `/effort <nível>`, que aceitam argumento
+em linha. Os apelidos e níveis vêm da documentação do Claude Code e estão
+travados por teste — um apelido inventado viraria um comando inválido
+silencioso no seu terminal.
+
+**Duas limitações honestas**, ambas por causa do que a statusLine informa:
+
+- Ela entrega o modelo **resolvido**, não o apelido digitado. Então `opus`,
+  `opus[1m]` e `opusplan` chegam indistinguíveis, e só a **família** acende.
+  Os três botões funcionam; apenas "Opus" mostra o indicador.
+- `ultracode` é reportado como `xhigh` (documentado). O botão que acende é
+  "Extra", e o rótulo do Ultracode diz `xhigh + orquestração` para deixar
+  claro por quê.
 
 ### Personalizar
 

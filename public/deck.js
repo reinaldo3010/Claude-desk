@@ -342,7 +342,9 @@ function renderDeck(s) {
   buildPages(s.pages || []);
 
   const mine = (s.actions || []).filter((a) => (a.page || "main") === currentPage);
-  const sig = mine.map((a) => `${a.id}:${a.enabled ? 1 : 0}:${a.urgent ? 1 : 0}`).join("|");
+  const sig = mine
+    .map((a) => `${a.id}:${a.enabled ? 1 : 0}:${a.urgent ? 1 : 0}:${a.active ? 1 : 0}`)
+    .join("|");
 
   if (sig !== deckSig) {
     deckSig = sig;
@@ -424,12 +426,14 @@ function makeButton(a) {
   b.dataset.tone = a.tone || "neutral";
   b.dataset.id = a.id;
   b.dataset.urgent = a.urgent ? "1" : "0";
+  b.dataset.active = a.active ? "1" : "0";
   b.disabled = a.enabled === false;
   if (a.confirm) b.dataset.needsConfirm = "1";
   if (a.hold) b.dataset.hasHold = "1";
 
   b.innerHTML =
     '<span class="hold-fill"></span>' +
+    (a.active ? '<span class="active-dot"></span>' : "") +
     `<svg><use href="#i-${a.icon || "dot"}"></use></svg>` +
     `<span class="btn-label">${escapeHtml(a.label)}</span>` +
     (a.hint ? `<span class="btn-hint">${escapeHtml(a.hint)}</span>` : "") +

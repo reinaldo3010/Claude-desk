@@ -38,6 +38,19 @@ const BADGE_SOURCES = {
   elapsed: (s) => (s.since ? Math.floor((s.now - s.since) / 1000) : null),
 };
 
+/**
+ * Modelo e esforço da sessão viva, normalizados para comparação.
+ * O statusLine entrega `model.display_name` ("Opus") e `model.id`
+ * ("claude-opus-5"); qualquer um dos dois serve para reconhecer a família.
+ */
+function liveModel(state) {
+  const id = firstLive(state, (s) => s.modelId) || "";
+  const name = firstLive(state, (s) => s.model) || "";
+  return `${id} ${name}`.toLowerCase();
+}
+
+const liveEffort = (state) => String(firstLive(state, (s) => s.effort) || "").toLowerCase();
+
 /** Primeiro valor não nulo entre as sessões vivas. */
 function firstLive(state, pick) {
   for (const s of state.sessions || []) {
@@ -91,6 +104,27 @@ function matches(when, state) {
   }
   if (when.hasTarget === true && !(state.config && state.config.hasTarget)) return false;
 
+  // Reconhecimento por FAMÍLIA de modelo, de propósito. O statusLine informa o
+  // modelo resolvido, não o apelido que foi digitado — então "opus", "opus[1m]"
+  // e "opusplan" chegam aqui indistinguíveis. Acender os três seria mentira;
+  // acender a família é verdade. Os apelidos específicos ficam sem indicador.
+  if (Array.isArray(when.modelIs)) {
+    const m = liveModel(state);
+    if (!m.trim() || !when.modelIs.some((fam) => m.includes(String(fam).toLowerCase()))) return false;
+  }
+
+  // Mesma honestidade no esforço: `ultracode` é reportado como `xhigh`
+  // (documentado), então os dois não são distinguíveis a partir daqui.
+  if (Array.isArray(when.effortIs)) {
+    const e = liveEffort(state);
+    if (!e || !when.effortIs.includes(e)) return false;
+  }
+
+  if (typeof when.fastMode === "boolean") {
+    const fast = firstLive(state, (s) => s.fastMode);
+    if (Boolean(fast) !== when.fastMode) return false;
+  }
+
   return true;
 }
 
@@ -142,6 +176,9 @@ function resolve(actions, state) {
     if (!visible && !a.keepVisible) continue;
 
     const urgent = !!(a.urgent && matches(a.urgent, state));
+    // `active` acende o botão que corresponde ao estado atual — é o que faz
+    // uma fileira de opções virar um seletor em vez de seis atalhos soltos.
+    const active = !!(a.active && matches(a.active, state));
 
     out.push({
       id: a.id,
@@ -155,6 +192,7 @@ function resolve(actions, state) {
       confirm: !!a.confirm,
       enabled: visible,
       urgent,
+      active,
       badge: readBadge(a.badge, state),
       hold: a.hold ? { id: a.hold, label: labelOf(actions, a.hold) } : null,
       target: a.kind === "page" ? a.target : undefined,
@@ -203,6 +241,8 @@ const PAGE_LABELS = {
   main: "Controle",
   prompts: "Prompts",
   sessao: "Sessão",
+  modelo: "Modelo",
+  esforco: "Esforço",
   git: "Git",
   quota: "Uso",
 };

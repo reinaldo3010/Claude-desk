@@ -9,7 +9,7 @@
  *   id        identificador estável (usado pela API e pelo log de auditoria)
  *   label     texto do botão
  *   hint      legenda secundária
- *   page      aba onde o botão vive: main | prompts | sessao  (padrão main)
+ *   page      aba: main | prompts | sessao | modelo | esforco  (padrão main)
  *   group     agrupamento dentro da aba: permission | control | prompt
  *   tone      cor: go | stop | warn | neutral | accent
  *   icon      nome do ícone desenhado na UI
@@ -28,6 +28,8 @@
  *   confirm   exige toque duplo
  *   keepVisible  fica na tela desabilitado em vez de sumir
  *   secondary  não vira botão próprio: só existe como destino de hold/chain
+ *   active     condição que ACENDE o botão — usada para transformar uma
+ *              fileira de opções num seletor (modelo e esforço em uso)
  *
  * SOBRE O MAPEAMENTO DE TECLAS DE APROVAÇÃO
  * -----------------------------------------
@@ -338,13 +340,217 @@ const BASE_ACTIONS = [
     when: { fiveAbove: 90 },
     urgent: { status: ["error"] },
   },
+  // ══════════════════════════ seleção de modelo ═══════════════════════════
+  // `/model <apelido>` aceita argumento em linha e vale para a sessão atual.
+  // Apelidos conferidos na documentação do Claude Code, não de memória.
+  //
+  // O botão da FAMÍLIA em uso acende. Apelidos que resolvem para a mesma
+  // família — opus, opus[1m], opusplan — não são distinguíveis pelo statusLine,
+  // que informa o modelo resolvido e não o apelido digitado. Por isso só a
+  // família acende: acender os três seria mentira bonita.
+  {
+    id: "m_opus",
+    label: "Opus",
+    hint: "raciocínio complexo",
+    page: "modelo",
+    group: "control",
+    tone: "accent",
+    icon: "chip",
+    kind: "text",
+    text: "/model opus",
+    active: { modelIs: ["opus"] },
+  },
+  {
+    id: "m_sonnet",
+    label: "Sonnet",
+    hint: "dia a dia",
+    page: "modelo",
+    group: "control",
+    tone: "neutral",
+    icon: "chip",
+    kind: "text",
+    text: "/model sonnet",
+    active: { modelIs: ["sonnet"] },
+  },
+  {
+    id: "m_haiku",
+    label: "Haiku",
+    hint: "rápido e barato",
+    page: "modelo",
+    group: "control",
+    tone: "neutral",
+    icon: "chip",
+    kind: "text",
+    text: "/model haiku",
+    active: { modelIs: ["haiku"] },
+  },
+  {
+    id: "m_fable",
+    label: "Fable",
+    hint: "mais capaz · mais caro",
+    page: "modelo",
+    group: "control",
+    tone: "warn",
+    icon: "chip",
+    kind: "text",
+    text: "/model fable",
+    // O salto de preço é real: dois toques antes de trocar.
+    confirm: true,
+    active: { modelIs: ["fable"] },
+  },
+  {
+    id: "m_best",
+    label: "Melhor",
+    hint: "/model best",
+    page: "modelo",
+    group: "control",
+    tone: "accent",
+    icon: "chip",
+    kind: "text",
+    text: "/model best",
+    confirm: true,
+  },
+  {
+    id: "m_opusplan",
+    label: "Opus + plano",
+    hint: "planeja em Opus, executa em Sonnet",
+    page: "modelo",
+    group: "control",
+    tone: "accent",
+    icon: "map",
+    kind: "text",
+    text: "/model opusplan",
+  },
+  {
+    id: "m_opus1m",
+    label: "Opus 1M",
+    hint: "sessões longas",
+    page: "modelo",
+    group: "control",
+    tone: "accent",
+    icon: "chip",
+    kind: "text",
+    text: "/model opus[1m]",
+  },
+  {
+    id: "m_default",
+    label: "Padrão",
+    hint: "volta ao da conta",
+    page: "modelo",
+    group: "control",
+    tone: "neutral",
+    icon: "info",
+    kind: "text",
+    text: "/model default",
+  },
+
+  // ══════════════════════════ nível de esforço ════════════════════════════
+  // `/effort <nível>` também aceita argumento em linha.
+  // low, medium, high e xhigh ficam salvos por modelo; max e ultracode valem
+  // só para a sessão. `auto` limpa o nível salvo do modelo ativo.
+  {
+    id: "e_low",
+    label: "Baixo",
+    hint: "tarefas curtas",
+    page: "esforco",
+    group: "control",
+    tone: "neutral",
+    icon: "gauge",
+    kind: "text",
+    text: "/effort low",
+    active: { effortIs: ["low"] },
+  },
+  {
+    id: "e_medium",
+    label: "Médio",
+    hint: "economiza tokens",
+    page: "esforco",
+    group: "control",
+    tone: "neutral",
+    icon: "gauge",
+    kind: "text",
+    text: "/effort medium",
+    active: { effortIs: ["medium"] },
+  },
+  {
+    id: "e_high",
+    label: "Alto",
+    hint: "padrão",
+    page: "esforco",
+    group: "control",
+    tone: "accent",
+    icon: "gauge",
+    kind: "text",
+    text: "/effort high",
+    active: { effortIs: ["high"] },
+  },
+  {
+    id: "e_xhigh",
+    label: "Extra",
+    hint: "xhigh · código e agentes",
+    page: "esforco",
+    group: "control",
+    tone: "accent",
+    icon: "gauge",
+    kind: "text",
+    text: "/effort xhigh",
+    // Ultracode é reportado como xhigh, então este botão acende nos dois
+    // casos. Está dito no rótulo do Ultracode para não confundir.
+    active: { effortIs: ["xhigh"] },
+  },
+  {
+    id: "e_max",
+    label: "Máximo",
+    hint: "só a sessão · pode divagar",
+    page: "esforco",
+    group: "control",
+    tone: "warn",
+    icon: "gauge",
+    kind: "text",
+    text: "/effort max",
+    active: { effortIs: ["max"] },
+  },
+  {
+    id: "e_ultracode",
+    label: "Ultracode",
+    hint: "xhigh + orquestração",
+    page: "esforco",
+    group: "control",
+    tone: "warn",
+    icon: "power",
+    kind: "text",
+    text: "/effort ultracode",
+  },
+  {
+    id: "e_auto",
+    label: "Auto",
+    hint: "limpa o nível salvo",
+    page: "esforco",
+    group: "control",
+    tone: "neutral",
+    icon: "infinity",
+    kind: "text",
+    text: "/effort auto",
+  },
+  {
+    id: "e_fast",
+    label: "Turbo",
+    hint: "/fast · Opus 5 e 4.8",
+    page: "esforco",
+    group: "control",
+    tone: "warn",
+    icon: "bolt",
+    kind: "text",
+    text: "/fast",
+    active: { fastMode: true },
+  },
 ];
 
 const VALID_KINDS = new Set(["decision", "keys", "text", "chain", "page"]);
 const VALID_TONES = new Set(["go", "stop", "warn", "neutral", "accent"]);
 const VALID_GROUPS = new Set(["permission", "control", "prompt"]);
 const VALID_DECISIONS = new Set(["allow", "allow_always", "deny"]);
-const VALID_PAGES = new Set(["main", "prompts", "sessao", "git", "quota"]);
+const VALID_PAGES = new Set(["main", "prompts", "sessao", "modelo", "esforco", "git", "quota"]);
 const VALID_BADGE_FORMATS = new Set(["number", "pct", "usd", "duration"]);
 
 /**
