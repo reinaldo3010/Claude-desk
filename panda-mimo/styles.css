@@ -550,23 +550,26 @@ h2 .hand { font-size: 1.15em; }
 /* ---------- selos de confiança ---------- */
 .trust { padding-block: .5rem clamp(2rem, 4vw, 3rem); }
 .trust__in {
-  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem;
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem;
 }
 .trust__item {
-  display: flex; align-items: center; gap: 1rem;
-  padding: 1rem 1.2rem;
+  display: grid; gap: .6rem; justify-items: start; align-content: start;
+  padding: 1rem 1.1rem 1.1rem;
   background: var(--white);
   border: 1.5px solid var(--sand);
   border-radius: var(--r-md);
 }
-.trust__item img { width: 78px; height: 78px; object-fit: contain; flex: none; }
-.trust__item h3 { font-family: var(--f-display); font-weight: 600; font-size: 1.05rem; }
+.trust__item img { width: auto; height: 62px; max-width: 100%; object-fit: contain; filter: drop-shadow(0 6px 10px rgba(23,21,18,.12)); }
 .trust__item p { font-size: var(--fs-s); color: var(--ink-soft); }
-@media (max-width: 900px) { .trust__in { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { .trust__in { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .trust__in { grid-template-columns: 1fr; } .trust__item { grid-template-columns: auto 1fr; align-items: center; } .trust__item img { height: 52px; } }
 
 /* ---------- produtos: cartão com adesivo em vez de foto ---------- */
-.product__photo--sticker { display: grid; place-items: center; background: var(--sand-soft); }
-.product__photo--sticker img { width: 72%; height: 72%; object-fit: contain; }
+.product__photo--sticker {
+  display: grid; place-items: center;
+  background: var(--sand-soft) radial-gradient(circle, rgba(255,181,156,.45) 1.6px, transparent 1.7px) 0 0 / 22px 22px;
+}
+.product__photo--sticker img { width: 78%; height: 78%; object-fit: contain; filter: drop-shadow(0 16px 20px rgba(23,21,18,.16)); }
 .product--soon { background: var(--cream); box-shadow: none; border: 2px dashed var(--sand); }
 .product--soon .product__cta { color: var(--ink-soft); }
 
@@ -629,17 +632,10 @@ h2 .hand { font-size: 1.15em; }
 
 /* ---------- passos com adesivo ---------- */
 .step__sticker { position: absolute; top: .6rem; right: .7rem; width: 74px; height: auto; }
+.step__sticker--icon { width: 54px; top: .9rem; right: .9rem; }
 
 /* ---------- diferenciais: ícones redondos ---------- */
-.promise__badge {
-  display: grid; place-items: center;
-  width: 78px; height: 78px; border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #FFFDF8, var(--cream) 70%);
-  border: 5px solid var(--peach);
-  box-shadow: 0 10px 20px -8px rgba(0,0,0,.6), inset 0 -4px 8px rgba(23,21,18,.08);
-  margin-bottom: .3rem;
-}
-.promise__badge img { width: 46px; height: 46px; object-fit: contain; }
+.promise__icon { width: 80px; height: 80px; object-fit: contain; margin-bottom: .3rem; filter: drop-shadow(0 10px 16px rgba(0,0,0,.5)); }
 
 /* ---------- cuidados ---------- */
 .care { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.2rem; }
@@ -718,3 +714,33 @@ h2 .hand { font-size: 1.15em; }
 @media (max-width: 860px) {
   .builder__stage, .faq__side { position: static; top: auto; }
 }
+
+
+/* ---------- faixas (fitas com frase) ---------- */
+.ribbon { width: min(280px, 80%); height: auto; margin-bottom: -.2rem; filter: drop-shadow(0 6px 10px rgba(23,21,18,.14)); }
+.ribbon--left { width: min(240px, 80%); margin-bottom: .2rem; }
+
+/* ---------- galeria: mockups sem fundo ---------- */
+.gallery figure {
+  display: grid; place-items: center;
+  background: var(--white) radial-gradient(circle, rgba(255,181,156,.4) 1.6px, transparent 1.7px) 0 0 / 22px 22px;
+  border: 1.5px solid var(--sand);
+}
+.gallery img { width: 80%; height: 80%; object-fit: contain; filter: drop-shadow(0 14px 18px rgba(23,21,18,.14)); }
+
+/* ---------- redes: ícones 3D ---------- */
+.social img { width: 28px; height: 28px; object-fit: contain; }
+
+/* ---------- botão flutuante 3D ---------- */
+.fab { background: transparent; box-shadow: none; width: 66px; height: 66px; }
+.fab img { width: 66px; height: 66px; object-fit: contain; filter: drop-shadow(0 12px 18px rgba(23,21,18,.35)); }
+
+/* ---------- decoração ---------- */
+.contact__bow { position: absolute; top: .4rem; left: -8%; width: 36%; height: auto; rotate: -12deg; z-index: 1; filter: drop-shadow(0 10px 14px rgba(23,21,18,.2)); }
+.footer__paw { position: absolute; bottom: 4px; height: auto; }
+.footer__paw--a { left: calc(50% - 128px); width: 34px; rotate: -18deg; }
+.footer__paw--b { left: calc(50% + 92px); width: 30px; rotate: 14deg; }
+.occasions__art { position: relative; display: grid; place-items: center; }
+#ocasioes, #contato, .footer { overflow-x: clip; }
+.occasions__leaf { position: absolute; top: -6%; left: -18%; width: 34%; height: auto; rotate: -20deg; }
+.occasions__flower { position: absolute; bottom: -10%; right: -20%; width: 30%; height: auto; }

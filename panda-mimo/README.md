@@ -36,7 +36,7 @@ panda-mimo/
 ├── index.html   página única
 ├── styles.css   estilos (paleta e tipografia da marca)
 ├── script.js    links de WhatsApp e o simulador "Monte seu mimo"
-└── assets/      logo, mascote, adesivos e fotos recortados do material da marca (WebP)
+└── assets/      logo, mascote, adesivos, mockups e ícones extraídos das folhas transparentes da marca (WebP)
 ```
 
 ## Identidade aplicada
