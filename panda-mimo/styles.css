@@ -512,8 +512,7 @@ h2 .hand { font-size: 1.15em; }
 .contact__meta dd { margin: 0; font-size: var(--fs-s); }
 .contact__logo {
   width: min(100%, 320px); margin-inline: auto;
-  border-radius: 50%;
-  box-shadow: 0 24px 50px -20px rgba(23, 21, 18, .35);
+  filter: drop-shadow(0 24px 30px rgba(23, 21, 18, .28));
   rotate: -4deg;
 }
 
@@ -634,7 +633,15 @@ h2 .hand { font-size: 1.15em; }
 .step__sticker { position: absolute; top: .6rem; right: .7rem; width: 74px; height: auto; }
 
 /* ---------- diferenciais: ícones redondos ---------- */
-.promise img { width: 76px; height: 76px; object-fit: contain; border-radius: 50%; filter: drop-shadow(0 8px 14px rgba(0,0,0,.4)); }
+.promise__badge {
+  display: grid; place-items: center;
+  width: 78px; height: 78px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #FFFDF8, var(--cream) 70%);
+  border: 5px solid var(--peach);
+  box-shadow: 0 10px 20px -8px rgba(0,0,0,.6), inset 0 -4px 8px rgba(23,21,18,.08);
+  margin-bottom: .3rem;
+}
+.promise__badge img { width: 46px; height: 46px; object-fit: contain; }
 
 /* ---------- cuidados ---------- */
 .care { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.2rem; }
