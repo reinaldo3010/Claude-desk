@@ -4,10 +4,11 @@
 
 /* ---------- CONFIGURAÇÃO: edite aqui ----------
    WHATSAPP: só números, com DDI e DDD. Ex.: "5511999998888"
-   INSTAGRAM: só o @, sem o arroba.                          */
+   INSTAGRAM / TIKTOK: só o @, sem o arroba.                */
 const CONFIG = {
   WHATSAPP: "5500000000000",
   INSTAGRAM: "pandamimo",
+  TIKTOK: "pandamimo",
 };
 
 /* ---------- links de contato ---------- */
@@ -22,16 +23,21 @@ document.querySelectorAll(".js-wa").forEach((a) => {
 document.querySelectorAll(".js-ig").forEach((a) => {
   a.href = `https://instagram.com/${CONFIG.INSTAGRAM}`;
 });
+document.querySelectorAll(".js-tt").forEach((a) => {
+  a.href = `https://tiktok.com/@${CONFIG.TIKTOK}`;
+});
 
 document.getElementById("ano").textContent = new Date().getFullYear();
 
 /* ---------- Monte seu mimo ---------- */
 const form = document.getElementById("builder");
 const preview = document.querySelector(".preview");
-const nome = document.getElementById("b-nome");
 const count = document.getElementById("b-count");
-const garrafa = document.getElementById("pv-garrafa");
-const caneca = document.getElementById("pv-caneca");
+const bases = {
+  garrafa: document.getElementById("pv-garrafa"),
+  caneca: document.getElementById("pv-caneca"),
+  copo: document.getElementById("pv-copo"),
+};
 
 const CORES = {
   creme:   { fill: "#F3EEE4", ink: "#171512" },
@@ -44,19 +50,21 @@ const LETRAS = {
   manuscrita: { font: '"Caveat", cursive', base: 40 },
 };
 const ROTULOS = {
-  garrafa: "garrafa térmica", caneca: "caneca",
+  garrafa: "garrafa térmica", caneca: "caneca", copo: "copo térmico",
   creme: "creme", salvia: "sálvia", pessego: "pêssego", preta: "preta",
   redonda: "letra redondinha", manuscrita: "letra manuscrita",
 };
 
 function estado() {
   const d = new FormData(form);
+  const qtd = Math.min(500, Math.max(1, parseInt(d.get("qtd"), 10) || 1));
   return {
     nome: (d.get("nome") || "").trim(),
     item: d.get("item"),
     cor: d.get("cor"),
     letra: d.get("letra"),
     panda: d.get("panda") === "on",
+    qtd,
   };
 }
 
@@ -66,7 +74,7 @@ function render() {
   const cor = CORES[s.cor];
   const letra = LETRAS[s.letra];
 
-  // tamanho da fonte encolhe conforme o texto cresce
+  // a fonte encolhe conforme o texto cresce, para caber na peça
   const len = texto.length;
   const size = len <= 6 ? letra.base : Math.max(15, letra.base - (len - 6) * 1.7);
 
@@ -77,8 +85,7 @@ function render() {
   preview.dataset.cor = s.cor;
   preview.dataset.panda = s.panda ? "on" : "off";
 
-  garrafa.hidden = s.item !== "garrafa";
-  caneca.hidden = s.item !== "caneca";
+  Object.entries(bases).forEach(([k, g]) => (g.hidden = k !== s.item));
   preview.querySelectorAll(".pv-text").forEach((t) => (t.textContent = texto));
   count.textContent = s.nome.length;
 }
@@ -94,6 +101,15 @@ document.getElementById("b-send").addEventListener("click", () => {
     `• Cor: ${ROTULOS[s.cor]}\n` +
     `• Escrito: "${s.nome || "(ainda vou decidir)"}"\n` +
     `• ${ROTULOS[s.letra]}${s.panda ? ", com o pandinha" : ", sem o pandinha"}\n` +
+    `• Quantidade: ${s.qtd}\n` +
     `Pode me passar valor e prazo?`;
   window.open(waLink(msg), "_blank", "noopener");
 });
+
+/* ---------- FAQ: um aberto por vez ---------- */
+const faqs = document.querySelectorAll(".faq__item");
+faqs.forEach((d) =>
+  d.addEventListener("toggle", () => {
+    if (d.open) faqs.forEach((o) => o !== d && (o.open = false));
+  })
+);
