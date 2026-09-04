@@ -43,7 +43,10 @@
     <a class="brand" href="#inicio" aria-label="Panda Mimo — início">
       <img src="assets/logo-pill.webp" alt="Panda Mimo — itens personalizados" width="900" height="254">
     </a>
-    <nav class="nav" aria-label="Principal">
+    <button class="menu-toggle" type="button" aria-controls="nav-principal" aria-expanded="false" aria-label="Abrir menu">
+      <span class="menu-toggle__bar" aria-hidden="true"></span>
+    </button>
+    <nav class="nav" id="nav-principal" aria-label="Principal">
       <a href="#produtos">Produtos</a>
       <a href="#monte">Monte seu mimo</a>
       <a href="#ocasioes">Ocasiões</a>
@@ -103,10 +106,10 @@
   <!-- ======================= CONFIANÇA ======================= -->
   <section class="trust" aria-label="Garantias">
     <div class="wrap trust__in">
-      <div class="trust__item"><img src="assets/badge-frete.webp" alt="Frete grátis: consulte seu CEP" width="820" height="340" loading="lazy"><div><h3>Frete grátis</h3><p>Para algumas regiões. Consulte seu CEP no pedido.</p></div></div>
-      <div class="trust__item"><img src="assets/badge-seguro.webp" alt="Compra 100% segura" width="832" height="324" loading="lazy"><div><h3>Compra 100% segura</h3><p>Pix ou cartão por link seguro. Você só paga depois de aprovar a prévia.</p></div></div>
-      <div class="trust__item"><img src="assets/badge-qualidade.webp" alt="Qualidade garantida" width="832" height="312" loading="lazy"><div><h3>Qualidade garantida</h3><p>Chegou com defeito? A gente refaz sem custo. É só avisar em até 7 dias.</p></div></div>
-      <div class="trust__item"><img src="assets/badge-envio.webp" alt="Envio para todo o Brasil" width="828" height="312" loading="lazy"><div><h3>Envio para todo o Brasil</h3><p>Correios ou transportadora, com código de rastreio no WhatsApp.</p></div></div>
+      <div class="trust__item"><img src="assets/badge-frete.webp" alt="Frete grátis: consulte seu CEP" width="820" height="340" loading="lazy" decoding="async"><div><h3>Frete grátis</h3><p>Para algumas regiões. Consulte seu CEP no pedido.</p></div></div>
+      <div class="trust__item"><img src="assets/badge-seguro.webp" alt="Compra 100% segura" width="832" height="324" loading="lazy" decoding="async"><div><h3>Compra 100% segura</h3><p>Pix ou cartão por link seguro. Você só paga depois de aprovar a prévia.</p></div></div>
+      <div class="trust__item"><img src="assets/badge-qualidade.webp" alt="Qualidade garantida" width="832" height="312" loading="lazy" decoding="async"><div><h3>Qualidade garantida</h3><p>Chegou com defeito? A gente refaz sem custo. É só avisar em até 7 dias.</p></div></div>
+      <div class="trust__item"><img src="assets/badge-envio.webp" alt="Envio para todo o Brasil" width="828" height="312" loading="lazy" decoding="async"><div><h3>Envio para todo o Brasil</h3><p>Correios ou transportadora, com código de rastreio no WhatsApp.</p></div></div>
     </div>
   </section>
 
@@ -116,7 +119,7 @@
   <section class="section" id="produtos">
     <div class="wrap">
       <header class="section__head">
-        <img class="ribbon" src="assets/faixa-amor.webp" alt="Personalizados com amor" width="900" height="179" loading="lazy">
+        <img class="ribbon" src="assets/faixa-amor.webp" alt="Personalizados com amor" width="900" height="179" loading="lazy" decoding="async">
         <h2 class="display">Um mimo pra cada momento</h2>
         <p class="lede">Escolha a base, conte o que quer escrever e a gente cuida do resto.</p>
       </header>
@@ -189,7 +192,7 @@
   <section class="section section--sand" id="monte">
     <div class="wrap">
       <header class="section__head section__head--sticker">
-        <img src="assets/coracao-jeito.webp" alt="Coração pontilhado: personalizado do seu jeito" width="900" height="764" loading="lazy">
+        <img src="assets/coracao-jeito.webp" alt="Coração pontilhado: personalizado do seu jeito" width="900" height="764" loading="lazy" decoding="async">
         <p class="eyebrow"><span class="eyebrow__dot"></span> Experimente <span class="eyebrow__dot"></span></p>
         <h2 class="display">Monte seu mimo</h2>
         <p class="lede">Escreva um nome, escolha a base e a cor. É só uma prévia: a arte final a gente faz juntos.</p>
@@ -237,7 +240,8 @@
             </div>
             <div class="field field--qty">
               <label for="b-qtd">Quantidade</label>
-              <input id="b-qtd" name="qtd" type="number" min="1" max="500" value="1" inputmode="numeric">
+              <input id="b-qtd" name="qtd" type="number" min="1" max="500" step="1" value="1" inputmode="numeric" aria-describedby="b-qtd-hint">
+              <small class="field__hint" id="b-qtd-hint">De 1 a 500</small>
             </div>
           </div>
 
@@ -310,7 +314,7 @@
             </g>
           </svg>
           <div class="builder__foot">
-            <img src="assets/panda-joinha.webp" alt="" width="848" height="824" loading="lazy">
+            <img src="assets/panda-joinha.webp" alt="" width="848" height="824" loading="lazy" decoding="async">
             <p class="builder__note"><span class="hand">Só uma prévia, tá?</span> Cores e proporções finais variam com a peça.</p>
           </div>
         </div>
@@ -323,14 +327,14 @@
     <div class="wrap">
       <div class="occasions__head">
         <div class="occasions__copy">
-          <img class="ribbon ribbon--left" src="assets/faixa-momentos.webp" alt="Para momentos especiais" width="900" height="212" loading="lazy">
+          <img class="ribbon ribbon--left" src="assets/faixa-momentos.webp" alt="Para momentos especiais" width="900" height="212" loading="lazy" decoding="async">
           <h2 class="display">Um presente que diz <span class="hand">"pensei em você"</span></h2>
           <p class="lede">Não sabe por onde começar? A gente já separou sugestões pelas ocasiões que mais chegam por aqui. É só clicar e a conversa começa com a ideia pronta.</p>
         </div>
         <div class="occasions__art">
-          <img class="occasions__leaf" src="assets/folha.webp" alt="" width="240" height="288" loading="lazy">
-          <img src="assets/panda-presente-2.webp" alt="Mascote Panda Mimo abrindo uma caixa de presente com laço" width="628" height="900" loading="lazy">
-          <img class="occasions__flower" src="assets/flor.webp" alt="" width="276" height="264" loading="lazy">
+          <img class="occasions__leaf" src="assets/folha.webp" alt="" width="240" height="288" loading="lazy" decoding="async">
+          <img src="assets/panda-presente-2.webp" alt="Mascote Panda Mimo abrindo uma caixa de presente com laço" width="628" height="900" loading="lazy" decoding="async">
+          <img class="occasions__flower" src="assets/flor.webp" alt="" width="276" height="264" loading="lazy" decoding="async">
         </div>
       </div>
 
@@ -378,7 +382,7 @@
   <!-- ======================= PEDIDOS EM QUANTIDADE ======================= -->
   <section class="section section--sand" id="empresas">
     <div class="wrap bulk">
-      <img class="bulk__art" src="assets/panda-carrinho.webp" alt="Mascote Panda Mimo dentro de um carrinho de compras" width="759" height="900" loading="lazy">
+      <img class="bulk__art" src="assets/panda-carrinho.webp" alt="Mascote Panda Mimo dentro de um carrinho de compras" width="759" height="900" loading="lazy" decoding="async">
       <div class="bulk__copy">
         <p class="eyebrow"><span class="eyebrow__dot"></span> Pedidos em quantidade <span class="eyebrow__dot"></span></p>
         <h2 class="display">Pra turma toda, pro time inteiro</h2>
@@ -406,25 +410,25 @@
       <ol class="steps">
         <li class="step">
           <span class="step__n">1</span>
-          <img class="step__sticker step__sticker--icon" src="assets/ic-sacola.webp" alt="" width="296" height="296" loading="lazy">
+          <img class="step__sticker step__sticker--icon" src="assets/ic-sacola.webp" alt="" width="296" height="296" loading="lazy" decoding="async">
           <h3>Escolha a base</h3>
           <p>Garrafa, caneca, copo, tag ou um kit. Diga a cor e quantas unidades.</p>
         </li>
         <li class="step">
           <span class="step__n">2</span>
-          <img class="step__sticker step__sticker--icon" src="assets/ic-camera.webp" alt="" width="288" height="288" loading="lazy">
+          <img class="step__sticker step__sticker--icon" src="assets/ic-camera.webp" alt="" width="288" height="288" loading="lazy" decoding="async">
           <h3>Conte a ideia</h3>
           <p>Nome, frase, data ou desenho. Pode mandar foto de referência ou só descrever.</p>
         </li>
         <li class="step">
           <span class="step__n">3</span>
-          <img class="step__sticker" src="assets/panda-joinha.webp" alt="" width="848" height="824" loading="lazy">
+          <img class="step__sticker" src="assets/panda-joinha.webp" alt="" width="848" height="824" loading="lazy" decoding="async">
           <h3>Aprove a prévia</h3>
           <p>Enviamos a arte montada na peça. Só produzimos depois do seu "pode fazer".</p>
         </li>
         <li class="step">
           <span class="step__n">4</span>
-          <img class="step__sticker" src="assets/panda-caixa.webp" alt="" width="900" height="847" loading="lazy">
+          <img class="step__sticker" src="assets/panda-caixa.webp" alt="" width="900" height="847" loading="lazy" decoding="async">
           <h3>Receba em casa</h3>
           <p>Embalado em caixa kraft com bilhetinho, pronto pra dar de presente (ou ficar pra você).</p>
         </li>
@@ -444,27 +448,27 @@
 
       <ul class="promises">
         <li class="promise">
-          <img class="promise__icon" src="assets/ic-presente.webp" alt="" width="300" height="300" loading="lazy">
+          <img class="promise__icon" src="assets/ic-presente.webp" alt="" width="300" height="300" loading="lazy" decoding="async">
           <h3>Produtos personalizados</h3>
           <p>Nome, frase, data, desenho. Se cabe na peça, cabe no pedido. Uma unidade já é pedido.</p>
         </li>
         <li class="promise">
-          <img class="promise__icon" src="assets/ic-coracao.webp" alt="" width="296" height="296" loading="lazy">
+          <img class="promise__icon" src="assets/ic-coracao.webp" alt="" width="296" height="296" loading="lazy" decoding="async">
           <h3>Feito com carinho</h3>
           <p>Cada peça passa pelas nossas mãos, uma de cada vez. Nada sai sem conferência.</p>
         </li>
         <li class="promise">
-          <img class="promise__icon" src="assets/ic-ideia.webp" alt="" width="292" height="296" loading="lazy">
+          <img class="promise__icon" src="assets/ic-ideia.webp" alt="" width="292" height="296" loading="lazy" decoding="async">
           <h3>Ideias que encantam</h3>
           <p>Não sabe o que escrever? A gente sugere. Já ajudamos a resolver muito presente de última hora.</p>
         </li>
         <li class="promise">
-          <img class="promise__icon" src="assets/ic-caminhao.webp" alt="" width="296" height="296" loading="lazy">
+          <img class="promise__icon" src="assets/ic-caminhao.webp" alt="" width="296" height="296" loading="lazy" decoding="async">
           <h3>Envio para todo o Brasil</h3>
           <p>Caixa kraft, proteção interna e o bilhetinho por cima. Código de rastreio no WhatsApp.</p>
         </li>
         <li class="promise">
-          <img class="promise__icon" src="assets/ic-escudo.webp" alt="" width="300" height="296" loading="lazy">
+          <img class="promise__icon" src="assets/ic-escudo.webp" alt="" width="300" height="296" loading="lazy" decoding="async">
           <h3>Qualidade garantida</h3>
           <p>Inox que não amassa no primeiro tombo, cerâmica que aguenta a máquina, impressão que não sai na lavagem.</p>
         </li>
@@ -476,7 +480,7 @@
   <section class="section" id="cuidados">
     <div class="wrap">
       <header class="section__head">
-        <img class="ribbon" src="assets/faixa-carinho.webp" alt="Feito com carinho" width="900" height="161" loading="lazy">
+        <img class="ribbon" src="assets/faixa-carinho.webp" alt="Feito com carinho" width="900" height="161" loading="lazy" decoding="async">
         <h2 class="display">Como cuidar do seu mimo</h2>
         <p class="lede">Um mimo bem cuidado dura anos. Três regrinhas por peça e pronto.</p>
       </header>
@@ -532,7 +536,7 @@
   <section class="section" id="duvidas">
     <div class="wrap faq">
       <aside class="faq__side">
-        <img src="assets/balao-duvidas.webp" alt="Balão de fala: tire suas dúvidas, estamos aqui para te ajudar" width="900" height="687" loading="lazy">
+        <img src="assets/balao-duvidas.webp" alt="Balão de fala: tire suas dúvidas, estamos aqui para te ajudar" width="900" height="687" loading="lazy" decoding="async">
         <p class="eyebrow"><span class="eyebrow__dot"></span> Dúvidas frequentes <span class="eyebrow__dot"></span></p>
         <h2 class="display">Tire suas dúvidas</h2>
         <p class="lede">Não achou a sua? Manda no WhatsApp que a gente responde de verdade, sem robô.</p>
@@ -579,15 +583,15 @@
   <!-- ======================= SIGA ======================= -->
   <section class="section section--dark" id="siga">
     <div class="wrap follow">
-      <img class="follow__art" src="assets/celular-siga.webp" alt="Celular com o mascote Panda Mimo e os ícones do Instagram, TikTok e WhatsApp" width="632" height="900" loading="lazy">
+      <img class="follow__art" src="assets/celular-siga.webp" alt="Celular com o mascote Panda Mimo e os ícones do Instagram, TikTok e WhatsApp" width="632" height="900" loading="lazy" decoding="async">
       <div class="follow__copy">
         <p class="eyebrow eyebrow--light"><span class="eyebrow__dot"></span> Nos acompanhe <span class="eyebrow__dot"></span></p>
         <h2 class="display">Bastidores, novidades e <span class="hand hand--peach">muito panda</span></h2>
         <p class="lede">Mostramos as peças saindo do forno, ideias de frases e os lançamentos antes de todo mundo.</p>
         <div class="follow__links">
-          <a class="social js-ig" href="#" target="_blank" rel="noopener"><img src="assets/rede-instagram.webp" alt="" width="272" height="272" loading="lazy"> Instagram</a>
-          <a class="social js-tt" href="#" target="_blank" rel="noopener"><img src="assets/rede-tiktok.webp" alt="" width="276" height="276" loading="lazy"> TikTok</a>
-          <a class="social js-wa" href="#" data-msg="Oi, Panda Mimo! Quero receber as novidades por aqui 🐼"><img src="assets/rede-whatsapp.webp" alt="" width="272" height="272" loading="lazy"> Lista de novidades</a>
+          <a class="social js-ig" href="#" target="_blank" rel="noopener"><img src="assets/rede-instagram.webp" alt="" width="272" height="272" loading="lazy" decoding="async"> Instagram</a>
+          <a class="social js-tt" href="#" target="_blank" rel="noopener"><img src="assets/rede-tiktok.webp" alt="" width="276" height="276" loading="lazy" decoding="async"> TikTok</a>
+          <a class="social js-wa" href="#" data-msg="Oi, Panda Mimo! Quero receber as novidades por aqui 🐼"><img src="assets/rede-whatsapp.webp" alt="" width="272" height="272" loading="lazy" decoding="async"> Lista de novidades</a>
         </div>
       </div>
     </div>
@@ -616,9 +620,9 @@
         </dl>
       </div>
       <div class="contact__art">
-        <img class="contact__bow" src="assets/laco.webp" alt="" width="612" height="524" loading="lazy">
-        <img class="contact__logo" src="assets/logo-redondo.webp" alt="Selo redondo Panda Mimo — itens personalizados" width="866" height="900" loading="lazy">
-        <img class="contact__bubble" src="assets/balao-frase.webp" alt="Balão de fala: feito com carinho, feito pra você!" width="775" height="900" loading="lazy">
+        <img class="contact__bow" src="assets/laco.webp" alt="" width="612" height="524" loading="lazy" decoding="async">
+        <img class="contact__logo" src="assets/logo-redondo.webp" alt="Selo redondo Panda Mimo — itens personalizados" width="866" height="900" loading="lazy" decoding="async">
+        <img class="contact__bubble" src="assets/balao-frase.webp" alt="Balão de fala: feito com carinho, feito pra você!" width="775" height="900" loading="lazy" decoding="async">
       </div>
     </div>
   </section>
@@ -627,12 +631,12 @@
 
 <footer class="footer">
   <div class="stitch stitch--footer" aria-hidden="true">
-    <img class="footer__sleep" src="assets/panda-dormindo.webp" alt="" width="900" height="562" loading="lazy">
-    <img class="footer__paw footer__paw--a" src="assets/pata-rosa.webp" alt="" width="212" height="224" loading="lazy">
-    <img class="footer__paw footer__paw--b" src="assets/pata-preta.webp" alt="" width="208" height="216" loading="lazy">
+    <img class="footer__sleep" src="assets/panda-dormindo.webp" alt="" width="900" height="562" loading="lazy" decoding="async">
+    <img class="footer__paw footer__paw--a" src="assets/pata-rosa.webp" alt="" width="212" height="224" loading="lazy" decoding="async">
+    <img class="footer__paw footer__paw--b" src="assets/pata-preta.webp" alt="" width="208" height="216" loading="lazy" decoding="async">
   </div>
   <div class="wrap footer__in">
-    <img class="footer__brand" src="assets/logo-empilhado.webp" alt="Panda Mimo — itens personalizados" width="900" height="571" loading="lazy">
+    <img class="footer__brand" src="assets/logo-empilhado.webp" alt="Panda Mimo — itens personalizados" width="900" height="571" loading="lazy" decoding="async">
     <p class="footer__tag hand">Feito com carinho, feito pra você.</p>
     <nav class="footer__nav" aria-label="Rodapé">
       <a href="#produtos">Produtos</a>

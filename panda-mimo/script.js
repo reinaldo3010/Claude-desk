@@ -86,12 +86,30 @@ function render() {
   preview.dataset.panda = s.panda ? "on" : "off";
 
   Object.entries(bases).forEach(([k, g]) => (g.hidden = k !== s.item));
-  preview.querySelectorAll(".pv-text").forEach((t) => (t.textContent = texto));
+  preview.querySelectorAll(".pv-text").forEach((t) => {
+    t.textContent = texto;
+    t.style.fontSize = "";
+  });
+  // se o texto ainda não cabe na largura da peça, encolhe a fonte até caber
+  const larguraPeca = { garrafa: 84, caneca: 120, copo: 92 }[s.item];
+  const el = bases[s.item].querySelector(".pv-text");
+  if (el && el.getComputedTextLength) {
+    let fs = size;
+    for (let i = 0; i < 12 && el.getComputedTextLength() > larguraPeca && fs > 9; i++) {
+      fs = Math.max(9, fs * 0.9);
+      el.style.fontSize = `${fs}px`;
+    }
+  }
   count.textContent = s.nome.length;
 }
 
+const qtdInput = document.getElementById("b-qtd");
+qtdInput.addEventListener("change", () => { qtdInput.value = estado().qtd; render(); });
+qtdInput.addEventListener("blur", () => { qtdInput.value = estado().qtd; });
+
 form.addEventListener("input", render);
 render();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(render); // reajusta quando as fontes chegam
 
 document.getElementById("b-send").addEventListener("click", () => {
   const s = estado();
@@ -106,10 +124,43 @@ document.getElementById("b-send").addEventListener("click", () => {
   window.open(waLink(msg), "_blank", "noopener");
 });
 
-/* ---------- FAQ: um aberto por vez ---------- */
+/* ---------- FAQ: um aberto por vez, com aria-expanded ---------- */
 const faqs = document.querySelectorAll(".faq__item");
+const syncFaq = () => faqs.forEach((d) => d.querySelector("summary").setAttribute("aria-expanded", String(d.open)));
 faqs.forEach((d) =>
   d.addEventListener("toggle", () => {
     if (d.open) faqs.forEach((o) => o !== d && (o.open = false));
+    syncFaq();
   })
 );
+syncFaq();
+
+/* ---------- menu do celular ---------- */
+const topbar = document.querySelector(".topbar");
+const toggle = document.querySelector(".menu-toggle");
+const nav = document.getElementById("nav-principal");
+const setMenu = (open) => {
+  topbar.classList.toggle("is-open", open);
+  toggle.setAttribute("aria-expanded", String(open));
+  toggle.setAttribute("aria-label", open ? "Fechar menu" : "Abrir menu");
+};
+toggle.addEventListener("click", () => setMenu(!topbar.classList.contains("is-open")));
+nav.addEventListener("click", (e) => e.target.closest("a") && setMenu(false));
+document.addEventListener("keydown", (e) => e.key === "Escape" && topbar.classList.contains("is-open") && (setMenu(false), toggle.focus()));
+document.addEventListener("click", (e) => topbar.classList.contains("is-open") && !topbar.contains(e.target) && setMenu(false));
+
+/* ---------- botão flutuante: sai do caminho quando cobriria um CTA ou o teclado está aberto ---------- */
+const fab = document.querySelector(".fab");
+const blockers = [document.getElementById("contato"), document.querySelector(".builder__form"), document.querySelector(".follow__links")].filter(Boolean);
+const visiveis = new Set();
+let teclado = false;
+const updateFab = () => fab.classList.toggle("is-hidden", teclado || visiveis.size > 0);
+if ("IntersectionObserver" in window) {
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((en) => (en.isIntersecting ? visiveis.add(en.target) : visiveis.delete(en.target)));
+    updateFab();
+  }, { threshold: 0.15 });
+  blockers.forEach((b) => io.observe(b));
+}
+document.addEventListener("focusin", (e) => { if (e.target.matches("input, textarea")) { teclado = true; updateFab(); } });
+document.addEventListener("focusout", (e) => { if (e.target.matches("input, textarea")) { teclado = false; updateFab(); } });
