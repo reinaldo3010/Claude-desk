@@ -648,7 +648,7 @@ h2 .hand { font-size: 1.15em; }
 .promise__icon { width: 80px; height: 80px; object-fit: contain; margin-bottom: .3rem; filter: drop-shadow(0 10px 16px rgba(0,0,0,.5)); }
 
 /* ---------- cuidados ---------- */
-.care { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.2rem; }
+.care { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1.2rem; }
 @media (max-width: 860px) { .care { grid-template-columns: 1fr; } }
 .care__card { padding: 1.5rem 1.4rem; background: var(--cream); border: 1.5px solid var(--sand); border-radius: var(--r-md); display: grid; gap: .9rem; align-content: start; }
 .care__card h3 { font-family: var(--f-display); font-weight: 600; font-size: 1.15rem; }
@@ -805,4 +805,29 @@ h2 .hand { font-size: 1.15em; }
   .btn { padding: .8rem 1.1rem; font-size: .98rem; }
   .field--row { grid-template-columns: 1fr; }
   .announce__in { font-size: .8rem; }
+}
+
+
+/* ---------- "novidades em breve": faixa que fecha a grade de produtos ---------- */
+@media (min-width: 521px) {
+  .product--soon {
+    grid-column: 1 / -1;
+    grid-template-columns: 150px minmax(0, 1fr) auto;
+    grid-template-rows: auto;
+    align-items: center;
+    gap: 1.4rem;
+    padding: 1.1rem 1.3rem;
+  }
+  .product--soon::before { display: none; }
+  .product--soon .product__photo { margin-top: 0; }
+  .product--soon .product__body { padding: 0; }
+  .product--soon .product__cta {
+    margin: 0;
+    padding: .8rem 1.3rem;
+    border-top: 0;
+    border-radius: 999px;
+    background: var(--sand-soft);
+    gap: .6rem;
+  }
+  .product--soon .product__cta:hover { background: var(--peach); }
 }

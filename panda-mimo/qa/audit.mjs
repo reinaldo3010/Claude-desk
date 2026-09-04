@@ -77,8 +77,15 @@ for (const [w, h] of viewports) {
         if (Math.abs(ratioAttr - ratioReal) / ratioReal > 0.03) out.push(`width/height fora da proporção real: ${img.getAttribute('src').slice(0, 50)}`);
       }
       const r = img.getBoundingClientRect();
-      if (r.width > 120 && r.width * 2 > img.naturalWidth * 2.0) out.push(`imagem ampliada demais (${(r.width * 2 / img.naturalWidth).toFixed(1)}x retina): ${img.getAttribute('src').slice(0, 50)}`);
-      else if (r.width > 120 && r.width * 2 > img.naturalWidth * 1.25) warns.push(`imagem ampliada ${(r.width * 2 / img.naturalWidth).toFixed(1)}x em retina: ${img.getAttribute('src').slice(0, 50)}`);
+      // tamanho realmente desenhado na tela: com contain/cover a imagem não ocupa a caixa inteira
+      const fit = getComputedStyle(img).objectFit;
+      let drawn = r.width;
+      if (fit === 'contain') drawn = img.naturalWidth * Math.min(r.width / img.naturalWidth, r.height / img.naturalHeight);
+      else if (fit === 'cover') drawn = img.naturalWidth * Math.max(r.width / img.naturalWidth, r.height / img.naturalHeight);
+      else if (fit === 'none') drawn = img.naturalWidth;
+      const zoom = drawn * 2 / img.naturalWidth; // 2x = tela de alta densidade
+      if (drawn > 120 && zoom > 2.0) out.push(`imagem ampliada demais (${zoom.toFixed(1)}x retina): ${img.getAttribute('src').slice(0, 50)}`);
+      else if (drawn > 120 && zoom > 1.25) warns.push(`imagem ampliada ${zoom.toFixed(1)}x em retina: ${img.getAttribute('src').slice(0, 50)}`);
       const p = img.parentElement, pr = p.getBoundingClientRect();
       if (getComputedStyle(img).objectFit === 'cover' && Math.abs(r.width / r.height - img.naturalWidth / img.naturalHeight) > 0.08) (img.closest('.product, .gallery, .hero') ? out : warns).push(`imagem recortada por object-fit: cover: ${img.getAttribute('src').slice(0, 50)}`);
       if (getComputedStyle(p).overflow === 'hidden' && (r.left < pr.left - 1 || r.right > pr.right + 1 || r.top < pr.top - 1 || r.bottom > pr.bottom + 1)) out.push(`imagem cortada pelo contêiner: ${img.getAttribute('src').slice(0, 50)}`);
