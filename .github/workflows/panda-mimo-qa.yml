@@ -1,0 +1,31 @@
+name: Panda Mimo · guardião de qualidade
+
+on:
+  pull_request:
+    paths: ["panda-mimo/**"]
+  push:
+    branches: [main]
+    paths: ["panda-mimo/**"]
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: panda-mimo
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: Auditoria visual e funcional (390, 768 e 1280 px)
+        run: npm test
+      - name: Publica as capturas por seção
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: capturas-panda-mimo
+          path: panda-mimo/qa/shots
+          retention-days: 14

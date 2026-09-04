@@ -29,6 +29,23 @@ Aviso de frete · Hero · Selos de confiança · Produtos · Monte seu mimo (sim
 Pedidos em quantidade · Como funciona · Diferenciais · Cuidados com a peça · Galeria ·
 Dúvidas frequentes · Redes sociais · Contato · Rodapé · Botão flutuante do WhatsApp.
 
+## Guardião de qualidade
+
+Antes de publicar qualquer mudança, rode o auditor. Ele abre a página em 390, 768 e 1280 px e falha se
+encontrar rolagem lateral, elemento fora da tela, imagem que não carregou ou ampliada demais, texto cortado,
+sobreposição entre cartões, elemento fixo em tela estreita, âncora quebrada, link de WhatsApp inválido,
+erro de console, simulador ou FAQ sem reagir. Também salva capturas por seção em `qa/shots/` para conferência visual.
+
+```
+npm install
+npx playwright install chromium
+npm test          # auditoria completa
+npm run shots     # só as capturas
+```
+
+O mesmo auditor roda no GitHub Actions em todo pull request que toque em `panda-mimo/`
+(`.github/workflows/panda-mimo-qa.yml`), com as capturas anexadas ao resultado.
+
 ## Estrutura
 
 ```
@@ -36,6 +53,8 @@ panda-mimo/
 ├── index.html   página única
 ├── styles.css   estilos (paleta e tipografia da marca)
 ├── script.js    links de WhatsApp e o simulador "Monte seu mimo"
+├── qa/audit.mjs guardião: auditoria visual e funcional com Playwright
+├── package.json scripts do guardião (npm test)
 └── assets/      logo, mascote, adesivos, mockups e ícones extraídos das folhas transparentes da marca (WebP)
 ```
 
