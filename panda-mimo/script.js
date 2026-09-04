@@ -94,10 +94,16 @@ function render() {
   const larguraPeca = { garrafa: 84, caneca: 120, copo: 92 }[s.item];
   const el = bases[s.item].querySelector(".pv-text");
   if (el && el.getComputedTextLength) {
-    let fs = size;
-    for (let i = 0; i < 12 && el.getComputedTextLength() > larguraPeca && fs > 9; i++) {
-      fs = Math.max(9, fs * 0.9);
+    el.removeAttribute("textLength"); el.removeAttribute("lengthAdjust");
+    const medida = el.getComputedTextLength();
+    if (medida > larguraPeca) {
+      // reduz a fonte na proporção exata (com piso de 10px); se ainda assim não couber, comprime o texto
+      const fs = Math.max(10, size * (larguraPeca / medida) * 0.98);
       el.style.fontSize = `${fs}px`;
+      if (el.getComputedTextLength() > larguraPeca) {
+        el.setAttribute("textLength", larguraPeca);
+        el.setAttribute("lengthAdjust", "spacingAndGlyphs");
+      }
     }
   }
   count.textContent = s.nome.length;
