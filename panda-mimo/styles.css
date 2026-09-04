@@ -398,10 +398,8 @@ h2 .hand { font-size: 1.15em; }
 .swatches input:checked + label::before { box-shadow: 0 0 0 3px var(--ink); transform: scale(1.06); }
 .swatches input:focus-visible + label::before { box-shadow: 0 0 0 3px var(--peach-deep); }
 
-.builder__stage {
-  display: grid; justify-items: center; gap: .8rem;
-  position: sticky; top: 92px;
-}
+.builder__stage { display: grid; justify-items: center; gap: .8rem; }
+@media (min-width: 861px) { .builder__stage { position: sticky; top: 92px; } }
 .preview {
   width: min(100%, 380px);
   aspect-ratio: 260 / 320;
@@ -662,7 +660,8 @@ h2 .hand { font-size: 1.15em; }
 /* ---------- dúvidas ---------- */
 .faq { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: clamp(1.5rem, 5vw, 4rem); align-items: start; }
 @media (max-width: 860px) { .faq { grid-template-columns: 1fr; } .faq__side { position: static; } }
-.faq__side { display: grid; gap: .9rem; justify-items: start; position: sticky; top: 92px; }
+.faq__side { display: grid; gap: .9rem; justify-items: start; }
+@media (min-width: 861px) { .faq__side { position: sticky; top: 92px; } }
 .faq__side img { width: 190px; height: auto; margin-bottom: .4rem; rotate: -3deg; }
 .faq__list { display: grid; gap: .6rem; }
 .faq__item { background: var(--white); border: 1.5px solid var(--sand); border-radius: var(--r-md); padding: 0 1.2rem; transition: border-color .15s; }
