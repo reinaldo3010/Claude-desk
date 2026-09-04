@@ -80,7 +80,7 @@ for (const [w, h] of viewports) {
       if (r.width > 120 && r.width * 2 > img.naturalWidth * 2.0) out.push(`imagem ampliada demais (${(r.width * 2 / img.naturalWidth).toFixed(1)}x retina): ${img.getAttribute('src').slice(0, 50)}`);
       else if (r.width > 120 && r.width * 2 > img.naturalWidth * 1.25) warns.push(`imagem ampliada ${(r.width * 2 / img.naturalWidth).toFixed(1)}x em retina: ${img.getAttribute('src').slice(0, 50)}`);
       const p = img.parentElement, pr = p.getBoundingClientRect();
-      if (getComputedStyle(img).objectFit === 'cover' && Math.abs(r.width / r.height - img.naturalWidth / img.naturalHeight) > 0.08) warns.push(`imagem recortada por object-fit: cover: ${img.getAttribute('src').slice(0, 50)}`);
+      if (getComputedStyle(img).objectFit === 'cover' && Math.abs(r.width / r.height - img.naturalWidth / img.naturalHeight) > 0.08) (img.closest('.product, .gallery, .hero') ? out : warns).push(`imagem recortada por object-fit: cover: ${img.getAttribute('src').slice(0, 50)}`);
       if (getComputedStyle(p).overflow === 'hidden' && (r.left < pr.left - 1 || r.right > pr.right + 1 || r.top < pr.top - 1 || r.bottom > pr.bottom + 1)) out.push(`imagem cortada pelo contêiner: ${img.getAttribute('src').slice(0, 50)}`);
     }
     for (const el of document.querySelectorAll('h1,h2,h3,p,a,button,summary,li,dd,dt,label,legend,span,small')) {
