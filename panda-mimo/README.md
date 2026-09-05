@@ -128,7 +128,8 @@ O catálogo do site sai do banco de dados, e quem manda nele é o painel em **`a
 
 - criar, editar, publicar, tirar do ar, reordenar e excluir produtos;
 - marcar uma peça como **lançamento em teste**: ela aparece no site com o selo "Em breve", uma pose do
-  Pandinha no lugar da foto e o botão "Me avise"; cada clique é medido com o nome da peça na aba Métricas;
+  Pandinha (ou um adesivo da marca) no lugar da foto e o botão "Me avise"; os lançamentos aparecem agrupados
+  sob "Você escolhe o que sai primeiro" e cada clique é medido com o nome da peça na aba Métricas;
 - subir fotos, reordenar, escrever a descrição de cada uma e apagar;
 - mudar o WhatsApp, o Instagram, o TikTok e o aviso da barra do topo;
 - baixar a cópia de segurança do catálogo (`produtos.js`).

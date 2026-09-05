@@ -138,7 +138,19 @@ function montaProdutos(produtos) {
   const nova = assinatura(produtos);
   if (lista.dataset.assinatura === nova) return false;
   lista.dataset.assinatura = nova;
-  lista.innerHTML = produtos.map(produtoHTML).join("\n");
+  /* os lançamentos em teste ganham um título de grupo, que explica a mecânica do "Me avise" */
+  const divisorHTML = `<div class="products__divisor">
+      <p class="eyebrow"><span class="eyebrow__dot"></span> Em teste <span class="eyebrow__dot"></span></p>
+      <h3>Você escolhe <span class="hand">o que sai primeiro.</span></h3>
+      <p>Estas peças ainda estão no forno. Clique em "Me avise" na que você quer: a que tiver mais pedidos sai antes, e você fica sabendo primeiro.</p>
+    </div>`;
+  const partes = [];
+  let divisorPosto = false;
+  for (const p of produtos) {
+    if (p.lancamento && !divisorPosto) { partes.push(divisorHTML); divisorPosto = true; }
+    partes.push(produtoHTML(p));
+  }
+  lista.innerHTML = partes.join("\n");
   aplicaContatos(lista);
   iniciaCarrosseis(lista);
   return true;

@@ -252,6 +252,24 @@ for (const [w, h] of viewports) {
     }
   }
 
+  // o grupo de lançamentos tem título próprio, entre a última peça e o primeiro lançamento
+  {
+    const nLanc = (await page.$$('.product--lancamento')).length;
+    const divisores = (await page.$$('.products__divisor')).length;
+    if (nLanc && divisores !== 1) fail(w, `há ${nLanc} lançamento(s) e ${divisores} título(s) de grupo "Você escolhe o que sai primeiro"`);
+    if (!nLanc && divisores) fail(w, 'título do grupo de lançamentos aparece sem nenhum lançamento');
+    if (nLanc && divisores === 1) {
+      const pos = await page.evaluate(() => {
+        const d = document.querySelector('.products__divisor').getBoundingClientRect();
+        const pecas = [...document.querySelectorAll('.product:not(.product--lancamento):not(.product--soon)')].map((e) => e.getBoundingClientRect().bottom);
+        const lanc = [...document.querySelectorAll('.product--lancamento')].map((e) => e.getBoundingClientRect().top);
+        return { topo: d.top, base: d.bottom, ultimaPeca: Math.max(...pecas), primeiroLanc: Math.min(...lanc), texto: (document.querySelector('.products__divisor h3')?.textContent || '').replace(/\s+/g, ' ').trim() };
+      });
+      if (!(pos.topo >= pos.ultimaPeca - 1 && pos.base <= pos.primeiroLanc + 1)) fail(w, 'o título do grupo de lançamentos não está entre a última peça e o primeiro lançamento');
+      if (!/Você escolhe/.test(pos.texto)) fail(w, `título do grupo de lançamentos inesperado: "${pos.texto}"`);
+    }
+  }
+
   // âncoras chegam abaixo do cabeçalho fixo
   const topH = await page.$eval('.topbar', (t) => t.getBoundingClientRect().height);
   for (const href of ['#produtos', '#monte', '#ocasioes', '#como-funciona', '#duvidas', '#contato', '#empresas', '#cuidados']) {

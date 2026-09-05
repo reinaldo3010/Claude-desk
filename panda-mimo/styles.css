@@ -597,6 +597,17 @@ h2 .hand { font-size: 1.15em; }
 }
 .product--lancamento .carousel .carousel__slide img { cursor: default; }
 .product--lancamento .product__cta { color: var(--ink-soft); }
+/* título do grupo de lançamentos, ocupando a linha inteira da grade */
+.products__divisor {
+  grid-column: 1 / -1;
+  display: grid; gap: .35rem; justify-items: start;
+  padding: 1.5rem 0 .1rem;
+  margin-top: .3rem;
+  border-top: 1.5px dashed var(--sand);
+}
+.products__divisor h3 { font-family: var(--f-display); font-weight: 600; font-size: clamp(1.45rem, 1.15rem + 1vw, 2rem); line-height: 1.1; text-wrap: balance; }
+.products__divisor h3 .hand { font-size: 1.1em; }
+.products__divisor p:not(.eyebrow) { color: var(--ink-soft); max-width: 62ch; }
 
 /* ---------- cabeçalho de seção com adesivo ---------- */
 .section__head--sticker img { width: 120px; height: auto; margin-bottom: -.4rem; rotate: -6deg; }

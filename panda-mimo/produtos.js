@@ -300,6 +300,56 @@ window.PANDA_PRODUTOS = [
     "detalhes": ""
   },
   {
+    "slug": "xicaras-com-pires",
+    "nome": "Xícaras com pires",
+    "descricao": "Pro café que acorda a casa: xícara de café (80 ml) ou de chá (200 ml), com pires e o nome de quem bebe. Em par, vira presente pra dois.",
+    "etiquetas": [
+      "Café ou chá",
+      "Com pires",
+      "Par pra dois"
+    ],
+    "mensagem": "Oi, Panda Mimo! Me avisa quando as xícaras saírem? 🐼",
+    "rotulo_botao": "Me avise",
+    "em_breve": false,
+    "lancamento": true,
+    "fotos": [
+      {
+        "url": "assets/lanc-xicaras.webp",
+        "alt": "Pandinha dormindo, antes do café: ilustração do lançamento xícaras com pires",
+        "largura": 760,
+        "altura": 760
+      }
+    ],
+    "ordem": 9,
+    "preco_texto": "",
+    "detalhes": ""
+  },
+  {
+    "slug": "topo-de-bolo",
+    "nome": "Topo de bolo",
+    "descricao": "Nome e idade recortados em acrílico, pra coroar o bolo e sair lindo na foto. Combina com a tag das lembrancinhas da mesma festa.",
+    "etiquetas": [
+      "Acrílico",
+      "Nome e idade",
+      "Pra festa toda"
+    ],
+    "mensagem": "Oi, Panda Mimo! Me avisa quando o topo de bolo sair? 🐼",
+    "rotulo_botao": "Me avise",
+    "em_breve": false,
+    "lancamento": true,
+    "fotos": [
+      {
+        "url": "assets/lanc-topo-de-bolo.webp",
+        "alt": "Pandinha segurando um presente: ilustração do lançamento topo de bolo",
+        "largura": 760,
+        "altura": 760
+      }
+    ],
+    "ordem": 10,
+    "preco_texto": "",
+    "detalhes": ""
+  },
+  {
     "slug": "kit-padrinhos",
     "nome": "Kit padrinhos",
     "descricao": "Caixa kraft, a peça com o nome de cada padrinho e a tag com a pergunta que importa: quer ser meu padrinho? Você escolhe copo, taça ou caneca.",
@@ -320,7 +370,132 @@ window.PANDA_PRODUTOS = [
         "altura": 760
       }
     ],
-    "ordem": 9,
+    "ordem": 11,
+    "preco_texto": "",
+    "detalhes": ""
+  },
+  {
+    "slug": "kit-bebe",
+    "nome": "Kit bebê",
+    "descricao": "Body, toalhinha e tag com o nome, na caixa kraft com bilhete. Pra chá de bebê, maternidade ou o primeiro presente da vida.",
+    "etiquetas": [
+      "Body e toalhinha",
+      "Caixa kraft",
+      "Chá de bebê"
+    ],
+    "mensagem": "Oi, Panda Mimo! Me avisa quando o kit bebê sair? 🐼",
+    "rotulo_botao": "Me avise",
+    "em_breve": false,
+    "lancamento": true,
+    "fotos": [
+      {
+        "url": "assets/lanc-kit-bebe.webp",
+        "alt": "Carinha do Pandinha: ilustração do lançamento kit bebê",
+        "largura": 760,
+        "altura": 760
+      }
+    ],
+    "ordem": 12,
+    "preco_texto": "",
+    "detalhes": ""
+  },
+  {
+    "slug": "avental",
+    "nome": "Avental",
+    "descricao": "Pra quem cozinha com amor, adulto ou mini chef: algodão cru, bolso na frente e o nome bordado. Presente certo pra mãe, pai e avó.",
+    "etiquetas": [
+      "Adulto e infantil",
+      "Algodão cru",
+      "Bolso na frente"
+    ],
+    "mensagem": "Oi, Panda Mimo! Me avisa quando o avental sair? 🐼",
+    "rotulo_botao": "Me avise",
+    "em_breve": false,
+    "lancamento": true,
+    "fotos": [
+      {
+        "url": "assets/lanc-avental.webp",
+        "alt": "Pandinha fazendo joinha: ilustração do lançamento avental",
+        "largura": 760,
+        "altura": 760
+      }
+    ],
+    "ordem": 13,
+    "preco_texto": "",
+    "detalhes": ""
+  },
+  {
+    "slug": "azulejo-com-frase",
+    "nome": "Azulejo com frase",
+    "descricao": "Um azulejo de 15 cm com a frase de vocês e um cavalete pra ficar de pé na estante. Pra mãe, pra professora, pra casa nova.",
+    "etiquetas": [
+      "15 × 15 cm",
+      "Com cavalete",
+      "Sua frase"
+    ],
+    "mensagem": "Oi, Panda Mimo! Me avisa quando o azulejo com frase sair? 🐼",
+    "rotulo_botao": "Me avise",
+    "em_breve": false,
+    "lancamento": true,
+    "fotos": [
+      {
+        "url": "assets/lanc-azulejo.webp",
+        "alt": "Balão de fala: feito com carinho, feito pra você. Ilustração do lançamento azulejo com frase",
+        "largura": 760,
+        "altura": 760
+      }
+    ],
+    "ordem": 14,
+    "preco_texto": "",
+    "detalhes": ""
+  },
+  {
+    "slug": "vela-com-nome",
+    "nome": "Vela com nome",
+    "descricao": "Vela em pote de vidro, com o nome e uma frase pra quem merece um respiro. Aroma suave, pra acender sem pressa.",
+    "etiquetas": [
+      "Pote de vidro",
+      "Nome e frase",
+      "Aroma suave"
+    ],
+    "mensagem": "Oi, Panda Mimo! Me avisa quando a vela sair? 🐼",
+    "rotulo_botao": "Me avise",
+    "em_breve": false,
+    "lancamento": true,
+    "fotos": [
+      {
+        "url": "assets/lanc-vela.webp",
+        "alt": "Flor da marca: ilustração do lançamento vela com nome",
+        "largura": 760,
+        "altura": 760
+      }
+    ],
+    "ordem": 15,
+    "preco_texto": "",
+    "detalhes": ""
+  },
+  {
+    "slug": "mimos-pro-pet",
+    "nome": "Mimos pro pet",
+    "descricao": "Tigela com o nome e bandana combinando. Porque quem faz parte da família também merece um mimo.",
+    "etiquetas": [
+      "Tigela com nome",
+      "Bandana",
+      "Cães e gatos"
+    ],
+    "mensagem": "Oi, Panda Mimo! Me avisa quando os mimos pro pet saírem? 🐼",
+    "rotulo_botao": "Me avise",
+    "em_breve": false,
+    "lancamento": true,
+    "fotos": [
+      {
+        "url": "assets/lanc-pet.webp",
+        "alt": "Duas patinhas, uma rosa e uma preta: ilustração do lançamento mimos pro pet",
+        "largura": 760,
+        "altura": 760
+      }
+    ],
+    "ordem": 16,
     "preco_texto": "",
     "detalhes": ""
   },
@@ -345,17 +520,17 @@ window.PANDA_PRODUTOS = [
         "altura": 760
       }
     ],
-    "ordem": 10,
+    "ordem": 17,
     "preco_texto": "",
     "detalhes": ""
   },
   {
     "slug": "novidades-em-breve",
     "nome": "Novidades em breve",
-    "descricao": "Estamos testando peças novas. Quer ser avisado quando saírem? A gente manda uma mensagem, sem spam.",
+    "descricao": "Quer saber de tudo que sair, sem escolher peça por peça? Entra na lista, sem spam. E se a peça que você imaginou não está aqui, conta pra gente: se der pra fazer com carinho, a gente faz.",
     "etiquetas": [
       "Lista de espera",
-      "Sem compromisso"
+      "Sua ideia também"
     ],
     "mensagem": "Oi, Panda Mimo! Quero entrar na lista pra saber das novidades 🐼",
     "rotulo_botao": "Me avise",
@@ -368,7 +543,7 @@ window.PANDA_PRODUTOS = [
         "altura": 900
       }
     ],
-    "ordem": 11,
+    "ordem": 18,
     "preco_texto": "",
     "detalhes": "",
     "lancamento": false
