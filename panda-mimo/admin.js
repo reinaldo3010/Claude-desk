@@ -127,7 +127,7 @@ let produtos = [];
 let editando = null;   // produto em edição (null = nenhum)
 let fotosEditor = [];  // [{url, alt, largura, altura}]
 
-const CAMPOS = "id,slug,nome,descricao,detalhes,preco_texto,etiquetas,mensagem,rotulo_botao,ordem,publicado,em_breve,lancamento,pm_produto_fotos(id,url,alt,ordem,largura,altura)";
+const CAMPOS = "id,slug,nome,descricao,detalhes,preco_texto,etiquetas,mensagem,rotulo_botao,ordem,publicado,em_breve,lancamento,tema,pm_produto_fotos(id,url,url_2x,alt,ordem,largura,altura)";
 
 async function carregaProdutos() {
   try {
@@ -214,6 +214,7 @@ function abreEditor(p) {
   $("#p-publicado").checked = p ? p.publicado : true;
   $("#p-embreve").checked = p ? p.em_breve : false;
   $("#p-lancamento").checked = p ? !!p.lancamento : false;
+  $("#p-tema").value = p ? (p.tema || "") : "";
   $("#excluir").hidden = !p;
   recado("#recado-editor", "");
   desenhaFotos();
@@ -275,6 +276,7 @@ $("#salvar").addEventListener("click", async () => {
     publicado: $("#p-publicado").checked,
     em_breve: $("#p-embreve").checked,
     lancamento: $("#p-lancamento").checked,
+    tema: $("#p-tema").value || null,
   };
   recado("#recado-editor", "Salvando...");
   try {
@@ -297,7 +299,7 @@ $("#salvar").addEventListener("click", async () => {
         method: "POST",
         body: JSON.stringify(fotosEditor.map((f, i) => ({
           produto_id: id, url: f.url, alt: f.alt.trim(), ordem: i,
-          largura: f.largura || 760, altura: f.altura || 760,
+          url_2x: f.url_2x || null, largura: f.largura || 760, altura: f.altura || 760,
         }))),
       });
     fechaEditor();
@@ -326,7 +328,7 @@ $("#excluir").addEventListener("click", async () => {
    Toda foto vira um quadro quadrado de 760px com fundo
    transparente e a peça inteira, com folga nas bordas.
 --------------------------------------------------------- */
-const LADO = 760, FOLGA = 0.07, LIMITE_ALFA = 12;
+const LADO = 760, LADO_2X = 1520, FOLGA = 0.07, LIMITE_ALFA = 12;
 
 function temTransparencia(img) {
   const d = img.data;
@@ -416,7 +418,7 @@ function pareceRetangulo(dados, lado) {
 
 async function preparaFoto(arquivo, { remover, tolerancia }) {
   const bmp = await createImageBitmap(arquivo);
-  const MAX = 1400;
+  const MAX = 3200; // guarda o máximo de resolução para gerar também o quadro 2x
   const e = Math.min(1, MAX / Math.max(bmp.width, bmp.height));
   const w = Math.round(bmp.width * e), h = Math.round(bmp.height * e);
   const c = document.createElement("canvas");
@@ -457,8 +459,16 @@ async function preparaFoto(arquivo, { remover, tolerancia }) {
   if (pareceRetangulo(q, LADO))
     return { erro: "Isto continua sendo uma foto retangular com fundo. Aumente a força do recorte ou envie um PNG sem fundo." };
 
+  // versão 2x (1520 px) para telas de alta densidade, do mesmo recorte
+  const quadro2x = document.createElement("canvas");
+  quadro2x.width = quadro2x.height = LADO_2X;
+  const q2 = quadro2x.getContext("2d");
+  q2.imageSmoothingQuality = "high";
+  q2.drawImage(c, cx.x0, cx.y0, cw, ch, Math.round((LADO_2X - dw * 2) / 2), Math.round((LADO_2X - dh * 2) / 2), dw * 2, dh * 2);
+
   const blob = await new Promise((r) => quadro.toBlob(r, "image/webp", 0.9));
-  return { blob, url: quadro.toDataURL("image/webp", 0.85), largura: LADO, altura: LADO };
+  const blob2x = await new Promise((r) => quadro2x.toBlob(r, "image/webp", 0.88));
+  return { blob, blob2x, url: quadro.toDataURL("image/webp", 0.85), largura: LADO, altura: LADO };
 }
 
 /* ---------- diálogo de preparo ---------- */
@@ -531,8 +541,16 @@ $("#usar-foto").addEventListener("click", async () => {
       body: preparada.blob,
     });
     if (!r.ok) throw new Error((await r.text()).slice(0, 160));
+    const caminho2x = caminho.replace(/\.webp$/, "@2x.webp");
+    const r2 = await fetch(`${CFG.URL}/storage/v1/object/${CFG.BUCKET}/${caminho2x}`, {
+      method: "POST",
+      headers: { apikey: CFG.CHAVE, Authorization: `Bearer ${sessao.token}`, "Content-Type": "image/webp", "x-upsert": "true" },
+      body: preparada.blob2x,
+    });
+    if (!r2.ok) throw new Error("versão 2x: " + (await r2.text()).slice(0, 160));
     fotosEditor.push({
       url: `${CFG.URL}/storage/v1/object/public/${CFG.BUCKET}/${caminho}`,
+      url_2x: `${CFG.URL}/storage/v1/object/public/${CFG.BUCKET}/${caminho2x}`,
       alt: "", largura: preparada.largura, altura: preparada.altura,
     });
     desenhaFotos();
@@ -584,8 +602,8 @@ $("#salvar-config").addEventListener("click", async () => {
 $("#baixar-copia").addEventListener("click", () => {
   const copia = produtos.filter((p) => p.publicado).map((p) => ({
     slug: p.slug, nome: p.nome, descricao: p.descricao, detalhes: p.detalhes || "", preco_texto: p.preco_texto || "", etiquetas: p.etiquetas,
-    mensagem: p.mensagem, rotulo_botao: p.rotulo_botao, em_breve: p.em_breve, lancamento: !!p.lancamento,
-    fotos: p.fotos.map((f) => ({ url: f.url, alt: f.alt, largura: f.largura, altura: f.altura })),
+    mensagem: p.mensagem, rotulo_botao: p.rotulo_botao, em_breve: p.em_breve, lancamento: !!p.lancamento, tema: p.tema || null,
+    fotos: p.fotos.map((f) => ({ url: f.url, url_2x: f.url_2x || null, alt: f.alt, largura: f.largura, altura: f.altura })),
     ordem: p.ordem,
   }));
   const texto = `/* Cópia do catálogo que vem junto com o site.

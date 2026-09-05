@@ -57,6 +57,13 @@ Aviso de frete · Hero · Selos de confiança · Produtos · Monte seu mimo (sim
 Pedidos em quantidade · Como funciona · Diferenciais · Cuidados com a peça · Galeria ·
 Dúvidas frequentes · Redes sociais · Contato · Rodapé · Botão flutuante do WhatsApp.
 
+### Busca e filtros
+
+Acima da grade há uma busca (sem acento, sem maiúscula, procura em nome, descrição, etiquetas e tema) e
+chips de filtro: Tudo, Pra pedir agora, Em teste e um chip por tema presente no catálogo (Bebidas, Escola
+e rotina, Casa e cozinha, Festa e padrinhos, Bebê, Pet, Presentear). O tema de cada peça é escolhido no
+painel. Sem resultado, aparece um convite para perguntar no WhatsApp. Buscas e filtros são medidos.
+
 ### Tela de detalhe do produto
 
 Clicar na foto de um cartão ou em **Ver detalhes** abre uma janela com a foto grande, as miniaturas do
@@ -107,7 +114,9 @@ Duas travas cuidam especificamente das fotos de produto, lendo os pixels de cada
   isso indica produto cortado ou pedaço de uma peça vizinha que entrou no recorte.
 
 Toda foto de produto precisa ser um **quadro quadrado com fundo transparente**, com a peça inteira e folga
-em volta. As duas travas foram testadas plantando erros de propósito, e reprovaram como esperado.
+em volta, **em dois tamanhos: 760 px e 1520 px (@2x)**. O site monta o `srcset` e as telas de alta densidade
+recebem a 2x; o guardião mede cada imagem em 1280 px @2x e 390 px @3x e reprova o que aparecer ampliado
+acima de 10%. As duas travas foram testadas plantando erros de propósito, e reprovaram como esperado.
 
 ```
 npm install
@@ -127,6 +136,7 @@ O catálogo do site sai do banco de dados, e quem manda nele é o painel em **`a
 (`seusite.com.br/admin.html`). Lá dá para:
 
 - criar, editar, publicar, tirar do ar, reordenar e excluir produtos;
+- escolher o **tema** da peça (vira o chip de filtro no site);
 - marcar uma peça como **lançamento em teste**: ela aparece no site com o selo "Em breve", uma pose do
   Pandinha (ou um adesivo da marca) no lugar da foto e o botão "Me avise"; os lançamentos aparecem agrupados
   sob "Você escolhe o que sai primeiro" e cada clique é medido com o nome da peça na aba Métricas;
@@ -162,7 +172,7 @@ mandar um PNG que já venha com fundo transparente.
 | Tabela | Para que serve |
 |---|---|
 | `pm_produtos` | um registro por produto: nome, descrição, texto de detalhe, preço, etiquetas, mensagem do WhatsApp, ordem, publicado, lançamento em teste |
-| `pm_produto_fotos` | as fotos de cada produto, na ordem em que aparecem no carrossel |
+| `pm_produto_fotos` | as fotos de cada produto, na ordem em que aparecem no carrossel, com a versão 2x (`url_2x`) |
 | `pm_config` | WhatsApp, Instagram, TikTok e o aviso do topo |
 | `pm_eventos` | medição própria: visitas, cliques e uso do simulador (lida pela função `pm_metricas`) |
 | `pm_admins` | os e-mails que podem alterar o catálogo |
@@ -193,7 +203,8 @@ panda-mimo/
 ├── admin.css    estilo do painel
 ├── qa/audit.mjs guardião: auditoria visual e funcional com Playwright
 ├── package.json scripts do guardião (npm test)
-├── robots.txt / sitemap.xml   trocar SEU-DOMINIO antes de publicar
+├── 404.html     página de "não encontrado" no tom da marca (o GitHub Pages usa automaticamente)
+├── robots.txt / sitemap.xml   apontam para o endereço publicado
 └── assets/      logo, mascote, adesivos, mockups (WebP), ícones PNG, apple-touch-icon e og.jpg 1200x630
 ```
 

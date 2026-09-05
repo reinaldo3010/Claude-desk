@@ -90,6 +90,19 @@
             <input id="p-preco" type="text" maxlength="40" placeholder="A partir de R$ 49">
             <small>Vazio mostra "Valor sob consulta" na tela de detalhe.</small>
           </div>
+          <div class="campo">
+            <label for="p-tema">Tema (vira o chip de filtro no site)</label>
+            <select id="p-tema">
+              <option value="">Sem tema</option>
+              <option value="bebidas">Bebidas</option>
+              <option value="escola">Escola e rotina</option>
+              <option value="casa">Casa e cozinha</option>
+              <option value="festa">Festa e padrinhos</option>
+              <option value="bebe">Bebê</option>
+              <option value="pet">Pet</option>
+              <option value="presente">Presentear</option>
+            </select>
+          </div>
         </div>
         <div class="campo">
           <label for="p-detalhes">Texto da tela de detalhe (opcional)</label>
@@ -114,7 +127,7 @@
 
         <div class="campo">
           <span class="rotulo">Fotos</span>
-          <small>Cada foto vira um quadro quadrado com fundo transparente. A primeira é a que aparece no cartão.</small>
+          <small>Cada foto vira um quadro quadrado com fundo transparente, em dois tamanhos (760 e 1520 px, para telas de alta densidade). A primeira é a que aparece no cartão. Mande a foto na maior resolução que tiver.</small>
           <div class="adm-fotos" id="fotos"></div>
           <div class="solta" id="solta" tabindex="0" role="button">
             <strong>Clique ou arraste as fotos aqui</strong><br>

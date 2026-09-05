@@ -108,7 +108,7 @@
         <img class="heart-img" src="assets/coracao-costura.webp" alt="" width="804" height="704" aria-hidden="true">
         <span class="heart heart--b" aria-hidden="true"></span>
         <span class="heart heart--c" aria-hidden="true"></span>
-        <img class="hero__mascot" src="assets/mascote-hero.webp" alt="Mascote da Panda Mimo: um panda sorridente abraçando uma garrafa térmica personalizada" width="707" height="900" fetchpriority="high">
+        <img class="hero__mascot" src="assets/mascote-hero.webp" srcset="assets/mascote-hero.webp 1x, assets/mascote-hero@2x.webp 2x" alt="Mascote da Panda Mimo: um panda sorridente abraçando uma garrafa térmica personalizada" width="707" height="900" fetchpriority="high">
         <img class="hero__tag" src="assets/tag-especial.webp" alt="Etiqueta: feito especialmente para você!" width="482" height="900">
       </figure>
     </div>
@@ -135,7 +135,24 @@
         <p class="lede">Escolha a base, conte o que quer escrever e a gente cuida do resto.</p>
       </header>
 
+      <div class="catalogo-busca">
+        <label class="busca" for="busca-pecas">
+          <span class="sr-only">Procurar peça</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input type="search" id="busca-pecas" placeholder="Procurar peça, ocasião ou material" autocomplete="off" enterkeyhint="search" spellcheck="false">
+        </label>
+        <div class="filtros" id="filtros-pecas" role="group" aria-label="Filtrar peças"></div>
+        <p class="catalogo-resultado" id="catalogo-resultado" aria-live="polite"></p>
+      </div>
       <div class="products" id="lista-produtos"></div>
+      <div class="catalogo-vazio" id="catalogo-vazio" hidden>
+        <img src="assets/panda-dormindo.webp" alt="" width="900" height="562" loading="lazy" decoding="async">
+        <p><strong>Nada com esse nome por aqui.</strong> Manda no WhatsApp: se der pra fazer com carinho, a gente faz.</p>
+        <div class="catalogo-vazio__acoes">
+          <a class="btn btn--dark js-wa" href="#contato" data-msg="Oi, Panda Mimo! Tenho uma ideia de peça que não está no site 🐼">Perguntar no WhatsApp</a>
+          <button type="button" class="link-limpo" id="limpar-busca">Limpar busca</button>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -207,7 +224,7 @@
             <input type="radio" name="modo" id="m-foto" value="foto"><label for="m-foto">Foto real</label>
           </div>
           <div class="foto-real" id="foto-real" hidden>
-            <img id="foto-real-img" src="assets/prod-caneca.webp" alt="Foto real do produto com o nome escolhido" width="760" height="760" decoding="async">
+            <img id="foto-real-img" src="assets/prod-caneca.webp" srcset="assets/prod-caneca.webp 1x, assets/prod-caneca@2x.webp 2x" alt="Foto real do produto com o nome escolhido" width="760" height="760" decoding="async">
             <div class="foto-real__placa" id="foto-real-placa" aria-hidden="true"><span id="foto-real-nome">Malu</span></div>
           </div>
           <svg class="preview" viewBox="0 0 260 320" role="img" aria-labelledby="preview-title">
@@ -490,12 +507,12 @@
         <h2 class="display">Coisas que a gente ama fazer</h2>
       </header>
       <div class="gallery">
-        <figure><img src="assets/uso-ecobag.webp" alt="Pessoa carregando a ecobag personalizada Panda Mimo na rua" loading="lazy" decoding="async" width="900" height="739"></figure>
-        <figure><img src="assets/uso-caneca-cafe.webp" alt="Caneca Panda Mimo com café sobre uma mesa de trabalho" loading="lazy" decoding="async" width="764" height="508"></figure>
-        <figure><img src="assets/uso-copo.webp" alt="Mão segurando o copo térmico Panda Mimo" loading="lazy" decoding="async" width="900" height="655"></figure>
-        <figure><img src="assets/foto-garrafas.webp" alt="Duas garrafas térmicas Panda Mimo, uma creme e uma sálvia, com tag de papel" loading="lazy" decoding="async" width="700" height="679"></figure>
-        <figure><img src="assets/foto-caneca.webp" alt="Caneca Panda Mimo sobre uma base de madeira" loading="lazy" decoding="async" width="700" height="734"></figure>
-        <figure><img src="assets/foto-caixa.webp" alt="Caixa kraft Panda Mimo com fita" loading="lazy" decoding="async" width="700" height="671"></figure>
+        <figure><img src="assets/uso-ecobag.webp" srcset="assets/uso-ecobag.webp 1x, assets/uso-ecobag@2x.webp 2x" alt="Pessoa carregando a ecobag personalizada Panda Mimo na rua" loading="lazy" decoding="async" width="900" height="739"></figure>
+        <figure><img src="assets/uso-caneca-cafe.webp" srcset="assets/uso-caneca-cafe.webp 1x, assets/uso-caneca-cafe@2x.webp 2x" alt="Caneca Panda Mimo com café sobre uma mesa de trabalho" loading="lazy" decoding="async" width="764" height="508"></figure>
+        <figure><img src="assets/uso-copo.webp" srcset="assets/uso-copo.webp 1x, assets/uso-copo@2x.webp 2x" alt="Mão segurando o copo térmico Panda Mimo" loading="lazy" decoding="async" width="900" height="655"></figure>
+        <figure><img src="assets/foto-garrafas.webp" srcset="assets/foto-garrafas.webp 1x, assets/foto-garrafas@2x.webp 2x" alt="Duas garrafas térmicas Panda Mimo, uma creme e uma sálvia, com tag de papel" loading="lazy" decoding="async" width="700" height="679"></figure>
+        <figure><img src="assets/foto-caneca.webp" srcset="assets/foto-caneca.webp 1x, assets/foto-caneca@2x.webp 2x" alt="Caneca Panda Mimo sobre uma base de madeira" loading="lazy" decoding="async" width="700" height="734"></figure>
+        <figure><img src="assets/foto-caixa.webp" srcset="assets/foto-caixa.webp 1x, assets/foto-caixa@2x.webp 2x" alt="Caixa kraft Panda Mimo com fita" loading="lazy" decoding="async" width="700" height="671"></figure>
         <figure class="gallery__mascot"><img src="assets/panda-presente.webp" alt="Mascote Panda Mimo segurando uma caixa de presente" loading="lazy" decoding="async" width="737" height="900"></figure>
         <figure class="gallery__mascot"><img src="assets/panda-coracao.webp" alt="Mascote Panda Mimo abraçando um coração" loading="lazy" decoding="async" width="790" height="900"></figure>
       </div>
@@ -591,7 +608,7 @@
       </div>
       <div class="contact__art">
         <img class="contact__bow" src="assets/laco.webp" alt="" width="612" height="524" loading="lazy" decoding="async">
-        <img class="contact__logo" src="assets/logo-redondo.webp" alt="Selo redondo Panda Mimo — itens personalizados" width="866" height="900" loading="lazy" decoding="async">
+        <img class="contact__logo" src="assets/logo-redondo.webp" srcset="assets/logo-redondo.webp 1x, assets/logo-redondo@2x.webp 2x" alt="Selo redondo Panda Mimo — itens personalizados" width="866" height="900" loading="lazy" decoding="async">
         <img class="contact__bubble" src="assets/balao-frase.webp" alt="Balão de fala: feito com carinho, feito pra você!" width="775" height="900" loading="lazy" decoding="async">
       </div>
     </div>

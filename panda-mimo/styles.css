@@ -609,6 +609,42 @@ h2 .hand { font-size: 1.15em; }
 .products__divisor h3 .hand { font-size: 1.1em; }
 .products__divisor p:not(.eyebrow) { color: var(--ink-soft); max-width: 62ch; }
 
+/* ---------- busca e filtros do catálogo ---------- */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.catalogo-busca { display: grid; gap: .8rem; margin: 0 0 1.4rem; }
+.busca { position: relative; display: block; width: min(100%, 520px); margin-inline: auto; }
+.busca svg { position: absolute; left: 1rem; top: 50%; translate: 0 -50%; width: 20px; height: 20px; color: var(--ink-soft); pointer-events: none; }
+.busca input {
+  width: 100%; padding: .85rem 1rem .85rem 2.8rem;
+  border: 2px solid var(--sand); border-radius: 999px;
+  background: var(--white); font: inherit; font-size: 1rem; color: var(--ink);
+  transition: border-color .15s;
+}
+.busca input:focus { border-color: var(--peach-deep); outline: none; }
+.busca input::placeholder { color: var(--ink-soft); opacity: .85; }
+.filtros { display: flex; flex-wrap: wrap; gap: .4rem; justify-content: center; }
+.filtro {
+  padding: .5rem .95rem; border: 2px solid var(--sand); border-radius: 999px;
+  background: transparent; cursor: pointer; color: var(--ink);
+  font-family: var(--f-display); font-weight: 600; font-size: .92rem;
+  transition: background-color .15s, border-color .15s;
+}
+.filtro:hover { border-color: var(--ink); }
+.filtro[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.filtro:focus-visible { outline: 3px solid var(--peach-deep); outline-offset: 2px; }
+.catalogo-resultado { text-align: center; font-size: var(--fs-s); color: var(--ink-soft); min-height: 1.4em; }
+.catalogo-vazio {
+  margin-top: 1rem; padding: 1.6rem;
+  border: 2px dashed var(--sand); border-radius: var(--r-lg); background: var(--cream);
+  display: grid; justify-items: center; gap: .8rem; text-align: center;
+}
+.catalogo-vazio img { width: 150px; height: auto; }
+.catalogo-vazio p { max-width: 42ch; color: var(--ink-soft); }
+.catalogo-vazio strong { display: block; margin-bottom: .2rem; color: var(--ink); font-family: var(--f-display); font-weight: 600; font-size: 1.15rem; }
+.catalogo-vazio__acoes { display: flex; gap: .8rem; flex-wrap: wrap; justify-content: center; align-items: center; }
+.link-limpo { background: none; border: 0; padding: .5rem .3rem; cursor: pointer; font: inherit; font-weight: 700; color: var(--peach-ink); border-bottom: 2px solid var(--sand); }
+.link-limpo:hover { color: var(--ink); border-color: var(--peach); }
+
 /* ---------- cabeçalho de seção com adesivo ---------- */
 .section__head--sticker img { width: 120px; height: auto; margin-bottom: -.4rem; rotate: -6deg; }
 

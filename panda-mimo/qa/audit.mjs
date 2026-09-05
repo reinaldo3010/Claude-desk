@@ -103,9 +103,11 @@ for (const [w, h] of viewports) {
       if (fit === 'contain') drawn = img.naturalWidth * Math.min(r.width / img.naturalWidth, r.height / img.naturalHeight);
       else if (fit === 'cover') drawn = img.naturalWidth * Math.max(r.width / img.naturalWidth, r.height / img.naturalHeight);
       else if (fit === 'none') drawn = img.naturalWidth;
-      const zoom = drawn * 2 / img.naturalWidth; // 2x = tela de alta densidade
-      if (drawn > 120 && zoom > 2.0) out.push(`imagem ampliada demais (${zoom.toFixed(1)}x retina): ${img.getAttribute('src').slice(0, 50)}`);
-      else if (drawn > 120 && zoom > 1.25) warns.push(`imagem ampliada ${zoom.toFixed(1)}x em retina: ${img.getAttribute('src').slice(0, 50)}`);
+      // imagem com srcset é medida na passada de nitidez (2x e 3x); as demais precisam aguentar 2x sozinhas
+      if (!img.srcset) {
+        const zoom = drawn * 2 / img.naturalWidth;
+        if (drawn > 120 && zoom > 1.1) out.push(`imagem macia em tela 2x (${zoom.toFixed(2)}x): ${img.getAttribute('src').slice(0, 50)}; gere a versão @2x ou reduza o tamanho exibido`);
+      }
       const p = img.parentElement, pr = p.getBoundingClientRect();
       if (getComputedStyle(img).objectFit === 'cover' && Math.abs(r.width / r.height - img.naturalWidth / img.naturalHeight) > 0.08) (img.closest('.product, .gallery, .hero') ? out : warns).push(`imagem recortada por object-fit: cover: ${img.getAttribute('src').slice(0, 50)}`);
       if (getComputedStyle(p).overflow === 'hidden' && (r.left < pr.left - 1 || r.right > pr.right + 1 || r.top < pr.top - 1 || r.bottom > pr.bottom + 1)) out.push(`imagem cortada pelo contêiner: ${img.getAttribute('src').slice(0, 50)}`);
@@ -268,6 +270,37 @@ for (const [w, h] of viewports) {
       if (!(pos.topo >= pos.ultimaPeca - 1 && pos.base <= pos.primeiroLanc + 1)) fail(w, 'o título do grupo de lançamentos não está entre a última peça e o primeiro lançamento');
       if (!/Você escolhe/.test(pos.texto)) fail(w, `título do grupo de lançamentos inesperado: "${pos.texto}"`);
     }
+  }
+
+  // busca e filtros do catálogo
+  if (!(await page.$('#busca-pecas'))) fail(w, 'catálogo sem campo de busca');
+  else {
+    const visiveis = () => page.evaluate(() => [...document.querySelectorAll('#lista-produtos .product')].filter((e) => !e.hidden));
+    const total = await page.$$eval('#lista-produtos .product:not([data-tipo="aviso"])', (l) => l.length);
+    await page.fill('#busca-pecas', 'Caneca'); await page.waitForTimeout(80);
+    const r1 = await page.evaluate(() => { const vis = [...document.querySelectorAll('#lista-produtos .product')].filter((e) => !e.hidden); return { n: vis.length, ok: vis.every((e) => (e.dataset.busca || '').includes('caneca')), txt: document.getElementById('catalogo-resultado').textContent }; });
+    if (!r1.n || !r1.ok) fail(w, `busca "Caneca" mostrou ${r1.n} cartão(ões), nem todos com caneca`);
+    if (!/^\d+ peças?/.test(r1.txt) || !r1.txt.includes('"Caneca"')) fail(w, `texto do resultado da busca inesperado: "${r1.txt}"`);
+    await page.fill('#busca-pecas', 'xyzqw'); await page.waitForTimeout(80);
+    const r2 = await page.evaluate(() => ({ vis: [...document.querySelectorAll('#lista-produtos .product')].filter((e) => !e.hidden).length, vazio: !document.getElementById('catalogo-vazio').hidden, zap: document.querySelector('#catalogo-vazio .js-wa')?.href || '', divisor: document.querySelector('.products__divisor')?.hidden, txt: document.getElementById('catalogo-resultado').textContent }));
+    if (r2.vis !== 0 || !r2.vazio) fail(w, 'busca sem resultado não mostrou o estado vazio');
+    if (!/wa\.me/.test(r2.zap) || !decodeURIComponent(r2.zap).includes('xyzqw')) fail(w, 'o WhatsApp do estado vazio não leva o que a pessoa procurou');
+    if (r2.divisor !== true) fail(w, 'título do grupo de lançamentos continua aparecendo com a busca sem resultado');
+    if (!/^Nenhuma peça/.test(r2.txt)) fail(w, `resultado vazio com texto inesperado: "${r2.txt}"`);
+    await page.$eval('#limpar-busca', (b) => b.click()); await page.waitForTimeout(80);
+    if ((await visiveis()).length < total) fail(w, '"Limpar busca" não devolveu o catálogo inteiro');
+    for (const filtro of ['peca', 'lancamento', 'tema:pet']) {
+      const chip = await page.$(`.filtro[data-filtro="${filtro}"]`);
+      if (!chip) { fail(w, `chip de filtro ${filtro} não existe`); continue; }
+      await chip.click(); await page.waitForTimeout(80);
+      const r = await page.evaluate(() => { const vis = [...document.querySelectorAll('#lista-produtos .product')].filter((e) => !e.hidden); const div = document.querySelector('.products__divisor'); return { n: vis.length, pressed: document.querySelectorAll('.filtro[aria-pressed="true"]').length, tipos: vis.map((e) => e.dataset.tipo), temas: vis.map((e) => e.dataset.tema), divisorHidden: div ? div.hidden : true }; });
+      if (r.pressed !== 1) fail(w, `filtro ${filtro}: ${r.pressed} chips marcados ao mesmo tempo`);
+      if (filtro === 'peca' && (r.tipos.some((t) => t !== 'peca') || !r.divisorHidden)) fail(w, 'filtro "Pra pedir agora" deixou lançamento, aviso ou o título do grupo visível');
+      if (filtro === 'lancamento' && (r.tipos.some((t) => t === 'peca') || r.divisorHidden || !r.n)) fail(w, 'filtro "Em teste" mostrou peça pronta ou escondeu o título do grupo');
+      if (filtro === 'tema:pet' && (!r.n || r.temas.some((t) => t !== 'pet'))) fail(w, `filtro Pet mostrou ${r.n} cartão(ões), nem todos do tema pet`);
+    }
+    await page.$eval('.filtro[data-filtro="tudo"]', (b) => b.click()); await page.waitForTimeout(80);
+    if ((await visiveis()).length < total) fail(w, 'filtro "Tudo" não devolveu o catálogo inteiro');
   }
 
   // âncoras chegam abaixo do cabeçalho fixo
@@ -477,7 +510,7 @@ for (const [w, h] of viewports) {
   if (cab.twitter !== 'summary_large_image') failures.push('[cabeçalho] falta twitter:card summary_large_image');
   if (!/^https?:\/\//.test(cab.og)) warnings.push('[antes de ir ao ar] og:image ainda é relativo; WhatsApp e Facebook exigem o endereço completo');
   if (!cab.canonical) warnings.push('[antes de ir ao ar] falta <link rel="canonical"> com o domínio final');
-  for (const f of ['robots.txt', 'sitemap.xml', 'assets/og.jpg', 'assets/apple-touch-icon.png', 'assets/favicon-32.png'])
+  for (const f of ['robots.txt', 'sitemap.xml', '404.html', 'assets/og.jpg', 'assets/apple-touch-icon.png', 'assets/favicon-32.png'])
     if (!fs.existsSync(path.resolve(here, '..', f))) failures.push(`[lançamento] falta o arquivo ${f}`);
   if (fs.existsSync(path.resolve(here, '..', 'sitemap.xml')) && fs.readFileSync(path.resolve(here, '..', 'sitemap.xml'), 'utf8').includes('SEU-DOMINIO'))
     warnings.push('[antes de ir ao ar] sitemap.xml e robots.txt ainda têm SEU-DOMINIO no lugar do endereço');
@@ -490,7 +523,18 @@ for (const [w, h] of viewports) {
     if (/^https?:\/\//.test(cab.og) && !cab.og.startsWith(base)) failures.push(`[cabeçalho] og:image aponta para outro endereço (${cab.og}) que não o canonical (${base})`);
     if (!robots.includes(`Sitemap: ${base}sitemap.xml`)) failures.push(`[lançamento] robots.txt não aponta para ${base}sitemap.xml`);
     if (!sitemap.includes(`<loc>${cab.canonical}</loc>`)) failures.push(`[lançamento] sitemap.xml não tem <loc>${cab.canonical}</loc>`);
+    // a página 404 usa endereços absolutos (o Pages a mostra em qualquer caminho) e eles têm de ser os do canonical
+    const p404 = path.resolve(here, '..', '404.html');
+    if (fs.existsSync(p404)) {
+      const t = fs.readFileSync(p404, 'utf8');
+      if (!t.includes(`href="${base}styles.css"`) || !t.includes(`href="${base}"`)) failures.push(`[lançamento] 404.html não aponta para ${base} (estilo e link de volta)`);
+      if (!/<title>[^<]*Panda Mimo/.test(t) || !/Voltar pro início/.test(t)) failures.push('[lançamento] 404.html sem título da marca ou sem o caminho de volta');
+    }
   }
+  // WhatsApp de reserva: o site funciona, mas nenhum clique chega a ninguém
+  const scriptFonte = fs.readFileSync(path.resolve(here, '..', 'script.js'), 'utf8');
+  const zapReserva = scriptFonte.match(/whatsapp:\s*"(\d+)"/);
+  if (zapReserva && /^55(\d)\1{8,}$/.test(zapReserva[1])) warnings.push(`[antes de ir ao ar] o WhatsApp do site ainda é o número de reserva (${zapReserva[1]}); troque pelo painel ou em script.js`);
 
   // link direto para um produto abre o detalhe
   await page.goto(page_url + '#produto/canecas', { waitUntil: 'load' });
@@ -498,6 +542,42 @@ for (const [w, h] of viewports) {
   await page.waitForTimeout(300);
   const direto = await page.evaluate(() => ({ aberto: document.getElementById('detalhe').open, titulo: document.getElementById('detalhe-titulo').textContent.trim() }));
   if (!direto.aberto || direto.titulo !== 'Canecas') failures.push(`[detalhe] o endereço #produto/canecas não abriu o detalhe certo (${JSON.stringify(direto)})`);
+  await page.close();
+}
+
+// ---- nitidez: em telas 2x e 3x nenhuma imagem pode aparecer ampliada acima de 10% ----
+for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
+  const page = await browser.newPage({ viewport: { width: w, height: h }, deviceScaleFactor: dpr });
+  await page.goto(page_url, { waitUntil: 'load' });
+  await page.addStyleTag({ content: 'html{scroll-behavior:auto!important}' });
+  await page.evaluate(() => { window.PANDA_REVELA_TUDO && window.PANDA_REVELA_TUDO(); document.querySelectorAll('img[loading="lazy"]').forEach((i) => { i.loading = 'eager'; }); });
+  await page.evaluate(async () => { const passo = innerHeight * .8; for (let y = 0; y < document.documentElement.scrollHeight; y += passo) { scrollTo(0, y); await new Promise((r) => setTimeout(r, 30)); } scrollTo(0, 0); });
+  // detalhe e foto real também entram na medição
+  await page.$eval('.product[data-slug="canecas"] .product__ver', (b) => b.click()).catch(() => {});
+  await page.waitForTimeout(150);
+  await page.$eval('label[for="i-caneca"]', (l) => l.click()).catch(() => {});
+  await page.$eval('label[for="m-foto"]', (l) => l.click()).catch(() => {});
+  await page.waitForTimeout(200);
+  await page.evaluate(() => Promise.all([...document.images].map((i) => (i.complete && i.naturalWidth > 0) ? null : new Promise((r) => { i.onload = i.onerror = r; setTimeout(r, 5000); }))));
+  const macias = await page.evaluate((dpr) => {
+    const out = [];
+    for (const img of document.querySelectorAll('img')) {
+      const cs = getComputedStyle(img); if (cs.display === 'none' || cs.visibility === 'hidden') continue;
+      const r = img.getBoundingClientRect(); if (r.width < 100) continue;
+      if (!img.naturalWidth) { out.push(`não carregou em ${dpr}x: ${(img.currentSrc || img.src).split('/').pop().slice(0, 50)}`); continue; }
+      let drawn = r.width;
+      if (cs.objectFit === 'contain') drawn = img.naturalWidth * Math.min(r.width / img.naturalWidth, r.height / img.naturalHeight);
+      // com srcset, naturalWidth já vem dividido pela densidade escolhida; recupera os pixels de verdade
+      let dens = 1;
+      if (img.srcset) for (const c of img.srcset.split(',')) { const [u, d] = c.trim().split(/\s+/); if (img.currentSrc.endsWith(u.split('/').pop()) && d && d.endsWith('x')) dens = parseFloat(d); }
+      const pixels = img.naturalWidth * dens;
+      const precisa = drawn * dpr, razao = precisa / pixels;
+      if (razao > 1.1) out.push(`imagem macia em ${dpr}x (${razao.toFixed(2)}x, precisa ${Math.round(precisa)} px e tem ${pixels}): ${(img.currentSrc || img.src).split('/').pop().slice(0, 50)}`);
+      if (img.closest('.carousel') && !/@2x\./.test(img.currentSrc)) out.push(`foto de produto sem versão 2x em tela ${dpr}x: ${img.currentSrc.split('/').pop().slice(0, 50)}`);
+    }
+    return out;
+  }, dpr);
+  macias.forEach((m) => failures.push(`[nitidez ${w}px@${dpr}x] ${m}`));
   await page.close();
 }
 
@@ -524,6 +604,11 @@ for (const [w, h] of viewports) {
     const ev = eventos.filter((e) => e.evento === 'clique_whatsapp').pop();
     if (!ev || ev.rotulo !== `Me avise · ${nomeLanc}`) failures.push(`[medição] o "Me avise" de ${nomeLanc} não foi registrado com o nome da peça (veio "${ev && ev.rotulo}")`);
   }
+  // a busca é medida (depois de uma pausa, para não registrar letra por letra) e o filtro também
+  await page.fill('#busca-pecas', 'garrafa'); await page.waitForTimeout(1200);
+  if (!eventos.some((e) => e.evento === 'busca' && e.rotulo === 'garrafa')) failures.push('[medição] a busca "garrafa" não foi registrada');
+  await page.$eval('.filtro[data-filtro="tema:pet"]', (b) => b.click()).catch(() => {}); await page.waitForTimeout(300);
+  if (!eventos.some((e) => e.evento === 'filtro' && e.rotulo === 'Pet')) failures.push('[medição] o filtro Pet não foi registrado');
   await page.close();
 }
 

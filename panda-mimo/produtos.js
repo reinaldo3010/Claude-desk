@@ -19,31 +19,36 @@ window.PANDA_PRODUTOS = [
         "url": "assets/prod-garrafa.webp",
         "alt": "Garrafa térmica Panda Mimo de 1 litro, frente com o logo",
         "largura": 760,
-        "altura": 760
+        "altura": 760,
+        "url_2x": "assets/prod-garrafa@2x.webp"
       },
       {
         "url": "assets/prod-garrafa-frase.webp",
         "alt": "Garrafa térmica com a frase: mais que um presente, um mimo",
         "largura": 760,
-        "altura": 760
+        "altura": 760,
+        "url_2x": "assets/prod-garrafa-frase@2x.webp"
       },
       {
         "url": "assets/prod-garrafa-panda.webp",
         "alt": "Garrafa térmica com o mascote panda segurando uma garrafinha",
         "largura": 760,
-        "altura": 760
+        "altura": 760,
+        "url_2x": "assets/prod-garrafa-panda@2x.webp"
       },
       {
         "url": "assets/prod-garrafa-interior.webp",
         "alt": "Garrafa térmica aberta, mostrando o interior em aço inox",
         "largura": 760,
-        "altura": 760
+        "altura": 760,
+        "url_2x": "assets/prod-garrafa-interior@2x.webp"
       }
     ],
     "ordem": 0,
     "preco_texto": "",
     "detalhes": "",
-    "lancamento": false
+    "lancamento": false,
+    "tema": "bebidas"
   },
   {
     "slug": "canecas",
@@ -62,31 +67,36 @@ window.PANDA_PRODUTOS = [
         "url": "assets/prod-caneca.webp",
         "alt": "Caneca de porcelana branca personalizada com o nome Malu",
         "largura": 760,
-        "altura": 760
+        "altura": 760,
+        "url_2x": "assets/prod-caneca@2x.webp"
       },
       {
         "url": "assets/prod-caneca-rosa.webp",
         "alt": "Caneca com interior e alça rosa sobre uma tábua de madeira",
         "largura": 760,
-        "altura": 760
+        "altura": 760,
+        "url_2x": "assets/prod-caneca-rosa@2x.webp"
       },
       {
         "url": "assets/prod-caneca-lado.webp",
         "alt": "Caneca inclinada, mostrando a estampa lateral",
         "largura": 760,
-        "altura": 760
+        "altura": 760,
+        "url_2x": "assets/prod-caneca-lado@2x.webp"
       },
       {
         "url": "assets/prod-caneca-nomes.webp",
         "alt": "Três canecas personalizadas com os nomes Lívia, Carlos e Ana",
         "largura": 760,
-        "altura": 760
+        "altura": 760,
+        "url_2x": "assets/prod-caneca-nomes@2x.webp"
       }
     ],
     "ordem": 1,
     "preco_texto": "",
     "detalhes": "",
-    "lancamento": false
+    "lancamento": false,
+    "tema": "bebidas"
   },
   {
     "slug": "copos-termicos",
@@ -105,31 +115,36 @@ window.PANDA_PRODUTOS = [
         "url": "assets/prod-copo.webp",
         "alt": "Copo térmico Panda Mimo de 850 ml, frente com o logo",
         "largura": 760,
-        "altura": 760
+        "altura": 760,
+        "url_2x": "assets/prod-copo@2x.webp"
       },
       {
         "url": "assets/prod-copo-lado.webp",
         "alt": "Copo térmico visto de lado, com a estampa de flores",
         "largura": 760,
-        "altura": 760
+        "altura": 760,
+        "url_2x": "assets/prod-copo-lado@2x.webp"
       },
       {
         "url": "assets/prod-copo-costas.webp",
         "alt": "Copo térmico com a frase: feito com carinho, feito pra você",
         "largura": 760,
-        "altura": 760
+        "altura": 760,
+        "url_2x": "assets/prod-copo-costas@2x.webp"
       },
       {
         "url": "assets/prod-copo-nomes.webp",
         "alt": "Três copos térmicos personalizados com nomes diferentes",
         "largura": 760,
-        "altura": 760
+        "altura": 760,
+        "url_2x": "assets/prod-copo-nomes@2x.webp"
       }
     ],
     "ordem": 2,
     "preco_texto": "",
     "detalhes": "",
-    "lancamento": false
+    "lancamento": false,
+    "tema": "bebidas"
   },
   {
     "slug": "ecobags",
@@ -148,19 +163,22 @@ window.PANDA_PRODUTOS = [
         "url": "assets/prod-ecobag-costas.webp",
         "alt": "Ecobag de algodão com a frase: mais que um presente, um mimo",
         "largura": 760,
-        "altura": 760
+        "altura": 760,
+        "url_2x": "assets/prod-ecobag-costas@2x.webp"
       },
       {
         "url": "assets/prod-ecobag-lado.webp",
         "alt": "Ecobag de algodão vista de lado, com a estampa do panda",
         "largura": 760,
-        "altura": 760
+        "altura": 760,
+        "url_2x": "assets/prod-ecobag-lado@2x.webp"
       }
     ],
     "ordem": 3,
     "preco_texto": "",
     "detalhes": "",
-    "lancamento": false
+    "lancamento": false,
+    "tema": "escola"
   },
   {
     "slug": "tags-e-chaveiros",
@@ -179,13 +197,15 @@ window.PANDA_PRODUTOS = [
         "url": "assets/prod-tag.webp",
         "alt": "Tag redonda de MDF com cordão e o logo Panda Mimo",
         "largura": 760,
-        "altura": 760
+        "altura": 760,
+        "url_2x": "assets/prod-tag@2x.webp"
       }
     ],
     "ordem": 4,
     "preco_texto": "",
     "detalhes": "",
-    "lancamento": false
+    "lancamento": false,
+    "tema": "festa"
   },
   {
     "slug": "kits-presenteaveis",
@@ -204,25 +224,29 @@ window.PANDA_PRODUTOS = [
         "url": "assets/prod-kit.webp",
         "alt": "Caixa de presente com fita e caneca personalizada Panda Mimo",
         "largura": 760,
-        "altura": 760
+        "altura": 760,
+        "url_2x": "assets/prod-kit@2x.webp"
       },
       {
         "url": "assets/prod-kit-kraft.webp",
         "alt": "Caixa kraft com fita e o logo Panda Mimo",
         "largura": 760,
-        "altura": 760
+        "altura": 760,
+        "url_2x": "assets/prod-kit-kraft@2x.webp"
       },
       {
         "url": "assets/prod-kit-caixa.webp",
         "alt": "Caixa individual da garrafa térmica Panda Mimo",
         "largura": 760,
-        "altura": 760
+        "altura": 760,
+        "url_2x": "assets/prod-kit-caixa@2x.webp"
       }
     ],
     "ordem": 5,
     "preco_texto": "",
     "detalhes": "",
-    "lancamento": false
+    "lancamento": false,
+    "tema": "presente"
   },
   {
     "slug": "garrafa-da-escola",
@@ -242,12 +266,14 @@ window.PANDA_PRODUTOS = [
         "url": "assets/lanc-garrafa-escola.webp",
         "alt": "Pandinha abraçando uma garrafinha: ilustração do lançamento garrafa da escola",
         "largura": 760,
-        "altura": 760
+        "altura": 760,
+        "url_2x": "assets/lanc-garrafa-escola@2x.webp"
       }
     ],
     "ordem": 6,
     "preco_texto": "",
-    "detalhes": ""
+    "detalhes": "",
+    "tema": "escola"
   },
   {
     "slug": "lancheira-e-necessaire",
@@ -267,12 +293,14 @@ window.PANDA_PRODUTOS = [
         "url": "assets/lanc-lancheira-necessaire.webp",
         "alt": "Pandinha espiando de dentro de uma caixa: ilustração do lançamento lancheira e necessaire",
         "largura": 760,
-        "altura": 760
+        "altura": 760,
+        "url_2x": "assets/lanc-lancheira-necessaire@2x.webp"
       }
     ],
     "ordem": 7,
     "preco_texto": "",
-    "detalhes": ""
+    "detalhes": "",
+    "tema": "escola"
   },
   {
     "slug": "caneca-de-cha",
@@ -292,12 +320,14 @@ window.PANDA_PRODUTOS = [
         "url": "assets/lanc-caneca-cha.webp",
         "alt": "Pandinha segurando um copo: ilustração do lançamento caneca de chá",
         "largura": 760,
-        "altura": 760
+        "altura": 760,
+        "url_2x": "assets/lanc-caneca-cha@2x.webp"
       }
     ],
     "ordem": 8,
     "preco_texto": "",
-    "detalhes": ""
+    "detalhes": "",
+    "tema": "bebidas"
   },
   {
     "slug": "xicaras-com-pires",
@@ -317,12 +347,14 @@ window.PANDA_PRODUTOS = [
         "url": "assets/lanc-xicaras.webp",
         "alt": "Pandinha dormindo, antes do café: ilustração do lançamento xícaras com pires",
         "largura": 760,
-        "altura": 760
+        "altura": 760,
+        "url_2x": "assets/lanc-xicaras@2x.webp"
       }
     ],
     "ordem": 9,
     "preco_texto": "",
-    "detalhes": ""
+    "detalhes": "",
+    "tema": "bebidas"
   },
   {
     "slug": "topo-de-bolo",
@@ -342,12 +374,14 @@ window.PANDA_PRODUTOS = [
         "url": "assets/lanc-topo-de-bolo.webp",
         "alt": "Pandinha segurando um presente: ilustração do lançamento topo de bolo",
         "largura": 760,
-        "altura": 760
+        "altura": 760,
+        "url_2x": "assets/lanc-topo-de-bolo@2x.webp"
       }
     ],
     "ordem": 10,
     "preco_texto": "",
-    "detalhes": ""
+    "detalhes": "",
+    "tema": "festa"
   },
   {
     "slug": "kit-padrinhos",
@@ -367,12 +401,14 @@ window.PANDA_PRODUTOS = [
         "url": "assets/lanc-kit-padrinhos.webp",
         "alt": "Pandinha abrindo uma caixa de presente com laço: ilustração do lançamento kit padrinhos",
         "largura": 760,
-        "altura": 760
+        "altura": 760,
+        "url_2x": "assets/lanc-kit-padrinhos@2x.webp"
       }
     ],
     "ordem": 11,
     "preco_texto": "",
-    "detalhes": ""
+    "detalhes": "",
+    "tema": "festa"
   },
   {
     "slug": "kit-bebe",
@@ -392,12 +428,14 @@ window.PANDA_PRODUTOS = [
         "url": "assets/lanc-kit-bebe.webp",
         "alt": "Carinha do Pandinha: ilustração do lançamento kit bebê",
         "largura": 760,
-        "altura": 760
+        "altura": 760,
+        "url_2x": "assets/lanc-kit-bebe@2x.webp"
       }
     ],
     "ordem": 12,
     "preco_texto": "",
-    "detalhes": ""
+    "detalhes": "",
+    "tema": "bebe"
   },
   {
     "slug": "avental",
@@ -417,12 +455,14 @@ window.PANDA_PRODUTOS = [
         "url": "assets/lanc-avental.webp",
         "alt": "Pandinha fazendo joinha: ilustração do lançamento avental",
         "largura": 760,
-        "altura": 760
+        "altura": 760,
+        "url_2x": "assets/lanc-avental@2x.webp"
       }
     ],
     "ordem": 13,
     "preco_texto": "",
-    "detalhes": ""
+    "detalhes": "",
+    "tema": "casa"
   },
   {
     "slug": "azulejo-com-frase",
@@ -442,12 +482,14 @@ window.PANDA_PRODUTOS = [
         "url": "assets/lanc-azulejo.webp",
         "alt": "Balão de fala: feito com carinho, feito pra você. Ilustração do lançamento azulejo com frase",
         "largura": 760,
-        "altura": 760
+        "altura": 760,
+        "url_2x": "assets/lanc-azulejo@2x.webp"
       }
     ],
     "ordem": 14,
     "preco_texto": "",
-    "detalhes": ""
+    "detalhes": "",
+    "tema": "casa"
   },
   {
     "slug": "vela-com-nome",
@@ -467,12 +509,14 @@ window.PANDA_PRODUTOS = [
         "url": "assets/lanc-vela.webp",
         "alt": "Flor da marca: ilustração do lançamento vela com nome",
         "largura": 760,
-        "altura": 760
+        "altura": 760,
+        "url_2x": "assets/lanc-vela@2x.webp"
       }
     ],
     "ordem": 15,
     "preco_texto": "",
-    "detalhes": ""
+    "detalhes": "",
+    "tema": "casa"
   },
   {
     "slug": "mimos-pro-pet",
@@ -492,12 +536,14 @@ window.PANDA_PRODUTOS = [
         "url": "assets/lanc-pet.webp",
         "alt": "Duas patinhas, uma rosa e uma preta: ilustração do lançamento mimos pro pet",
         "largura": 760,
-        "altura": 760
+        "altura": 760,
+        "url_2x": "assets/lanc-pet@2x.webp"
       }
     ],
     "ordem": 16,
     "preco_texto": "",
-    "detalhes": ""
+    "detalhes": "",
+    "tema": "pet"
   },
   {
     "slug": "vale-mimo",
@@ -517,12 +563,14 @@ window.PANDA_PRODUTOS = [
         "url": "assets/lanc-vale-mimo.webp",
         "alt": "Pandinha abraçando um coração: ilustração do lançamento vale-mimo",
         "largura": 760,
-        "altura": 760
+        "altura": 760,
+        "url_2x": "assets/lanc-vale-mimo@2x.webp"
       }
     ],
     "ordem": 17,
     "preco_texto": "",
-    "detalhes": ""
+    "detalhes": "",
+    "tema": "presente"
   },
   {
     "slug": "novidades-em-breve",
@@ -540,12 +588,14 @@ window.PANDA_PRODUTOS = [
         "url": "assets/panda-novidades.webp",
         "alt": "Mascote Panda Mimo segurando uma placa: novidades em breve",
         "largura": 805,
-        "altura": 900
+        "altura": 900,
+        "url_2x": null
       }
     ],
     "ordem": 18,
     "preco_texto": "",
     "detalhes": "",
-    "lancamento": false
+    "lancamento": false,
+    "tema": null
   }
 ];

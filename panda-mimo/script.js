@@ -78,8 +78,14 @@ document.addEventListener("click", (e) => {
 const lista = document.getElementById("lista-produtos");
 let produtosNaTela = [];
 
+/* temas do catálogo: viram os chips de filtro; o nome de cada um é regra do manual (4.5) */
+const TEMAS = { bebidas: "Bebidas", escola: "Escola e rotina", casa: "Casa e cozinha", festa: "Festa e padrinhos", bebe: "Bebê", pet: "Pet", presente: "Presentear" };
+const normaliza = (t) => String(t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+
 function fotoHTML(f) {
-  return `<img src="${esc(f.url)}" alt="${esc(f.alt)}" loading="lazy" decoding="async" width="${f.largura || 760}" height="${f.altura || 760}">`;
+  /* telas de alta densidade recebem a versão 2x (1520 px) quando ela existe */
+  const srcset = f.url_2x ? ` srcset="${esc(f.url)} 1x, ${esc(f.url_2x)} 2x"` : "";
+  return `<img src="${esc(f.url)}"${srcset} alt="${esc(f.alt)}" loading="lazy" decoding="async" width="${f.largura || 760}" height="${f.altura || 760}">`;
 }
 
 function vitrineHTML(p) {
@@ -109,7 +115,9 @@ function produtoHTML(p) {
   const rotulo = p.rotulo_botao || (p.lancamento ? "Me avise" : "Quero essa");
   const classes = ["product", p.em_breve ? "product--soon" : "", p.lancamento ? "product--lancamento" : ""].filter(Boolean).join(" ");
   const semDetalhe = p.em_breve || p.lancamento; // aviso e lançamento não têm tela de detalhe
-  return `<article class="${classes}" data-slug="${esc(p.slug)}">
+  const tipo = p.em_breve ? "aviso" : p.lancamento ? "lancamento" : "peca";
+  const busca = normaliza([p.nome, p.descricao, ...(p.etiquetas || []), TEMAS[p.tema] || "", p.tema || ""].join(" "));
+  return `<article class="${classes}" data-slug="${esc(p.slug)}" data-tipo="${tipo}" data-tema="${esc(p.tema || "")}" data-busca="${esc(busca)}">
       ${vitrineHTML(p)}
       <div class="product__body">
         <h3>${esc(p.nome)}</h3>
@@ -127,8 +135,8 @@ function produtoHTML(p) {
    no carrossel e perderia a posição da rolagem. */
 function assinatura(produtos) {
   return JSON.stringify(produtos.map((p) => [
-    p.nome, p.descricao, p.detalhes || "", p.preco_texto || "", p.rotulo_botao, p.mensagem, p.em_breve, !!p.lancamento,
-    p.etiquetas || [], (p.fotos || []).map((f) => [f.url, f.alt]),
+    p.nome, p.descricao, p.detalhes || "", p.preco_texto || "", p.rotulo_botao, p.mensagem, p.em_breve, !!p.lancamento, p.tema || "",
+    p.etiquetas || [], (p.fotos || []).map((f) => [f.url, f.url_2x || "", f.alt]),
   ]));
 }
 
@@ -153,6 +161,8 @@ function montaProdutos(produtos) {
   lista.innerHTML = partes.join("\n");
   aplicaContatos(lista);
   iniciaCarrosseis(lista);
+  montaFiltros(produtos);
+  aplicaFiltro();
   return true;
 }
 
@@ -215,6 +225,7 @@ function abreDetalhe(slug, gatilho) {
   const minis = document.getElementById("detalhe-miniaturas");
   const mostra = (i) => {
     const f = fotos[i]; if (!f) return;
+    grande.srcset = f.url_2x ? `${f.url} 1x, ${f.url_2x} 2x` : "";
     grande.src = f.url; grande.alt = f.alt || p.nome;
     grande.width = f.largura || 760; grande.height = f.altura || 760;
     [...minis.children].forEach((b, k) => (k === i ? b.setAttribute("aria-current", "true") : b.removeAttribute("aria-current")));
@@ -278,6 +289,92 @@ function abrePeloEndereco() {
 }
 window.addEventListener("hashchange", abrePeloEndereco);
 
+
+/* =========================================================
+   Busca e filtros do catálogo
+   Chips fixos (Tudo, Pra pedir agora, Em teste) + um chip por tema
+   presente nas peças. A busca ignora acento e maiúscula.
+   ========================================================= */
+const buscaInput = document.getElementById("busca-pecas");
+const filtrosEl = document.getElementById("filtros-pecas");
+const resultadoEl = document.getElementById("catalogo-resultado");
+const vazioEl = document.getElementById("catalogo-vazio");
+const FILTROS_FIXOS = [["tudo", "Tudo"], ["peca", "Pra pedir agora"], ["lancamento", "Em teste"]];
+let filtroAtual = "tudo";
+
+function montaFiltros(produtos) {
+  if (!filtrosEl) return;
+  const ordem = Object.keys(TEMAS);
+  const temas = [...new Set(produtos.map((p) => p.tema).filter((t) => t && TEMAS[t]))].sort((a, b) => ordem.indexOf(a) - ordem.indexOf(b));
+  const todos = [...FILTROS_FIXOS, ...temas.map((t) => [`tema:${t}`, TEMAS[t]])];
+  if (!todos.some(([v]) => v === filtroAtual)) filtroAtual = "tudo";
+  filtrosEl.innerHTML = todos.map(([v, r]) => `<button type="button" class="filtro" data-filtro="${esc(v)}" aria-pressed="${v === filtroAtual}">${esc(r)}</button>`).join("");
+}
+
+function aplicaFiltro() {
+  if (!lista) return;
+  const bruto = buscaInput ? buscaInput.value.trim() : "";
+  const termos = normaliza(bruto).split(" ").filter(Boolean);
+  const tema = filtroAtual.startsWith("tema:") ? filtroAtual.slice(5) : "";
+  let visiveis = 0, lancVisiveis = 0, total = 0;
+  lista.querySelectorAll(".product").forEach((el) => {
+    const tipo = el.dataset.tipo || "peca";
+    let ok = true;
+    if (tipo === "aviso") {
+      ok = !termos.length && (filtroAtual === "tudo" || filtroAtual === "lancamento");
+    } else {
+      total++;
+      if (filtroAtual === "peca") ok = tipo === "peca";
+      else if (filtroAtual === "lancamento") ok = tipo === "lancamento";
+      else if (tema) ok = el.dataset.tema === tema;
+      if (ok && termos.length) ok = termos.every((t) => (el.dataset.busca || "").includes(t));
+      if (ok) { visiveis++; if (tipo === "lancamento") lancVisiveis++; }
+    }
+    el.hidden = !ok;
+  });
+  const divisor = lista.querySelector(".products__divisor");
+  if (divisor) divisor.hidden = lancVisiveis === 0;
+  if (vazioEl) {
+    vazioEl.hidden = visiveis > 0;
+    const zap = vazioEl.querySelector(".js-wa");
+    if (zap) {
+      zap.dataset.msg = bruto ? `Oi, Panda Mimo! Procurei "${bruto}" no site e não achei. Dá pra fazer? 🐼` : "Oi, Panda Mimo! Tenho uma ideia de peça que não está no site 🐼";
+      aplicaContatos(vazioEl);
+    }
+  }
+  if (resultadoEl) {
+    const chip = filtrosEl && filtrosEl.querySelector(`[data-filtro="${filtroAtual}"]`);
+    const onde = filtroAtual === "tudo" || !chip ? "" : ` em ${chip.textContent}`;
+    const com = bruto ? ` com "${bruto}"` : "";
+    resultadoEl.textContent = !bruto && filtroAtual === "tudo" ? `${total} peças no catálogo`
+      : visiveis === 0 ? `Nenhuma peça${onde}${com}`
+      : `${visiveis} ${visiveis === 1 ? "peça" : "peças"}${onde}${com}`;
+  }
+}
+
+if (filtrosEl) filtrosEl.addEventListener("click", (e) => {
+  const b = e.target.closest(".filtro"); if (!b) return;
+  filtroAtual = b.dataset.filtro;
+  filtrosEl.querySelectorAll(".filtro").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+  aplicaFiltro();
+  medir("filtro", b.textContent.trim());
+});
+let esperaBusca;
+if (buscaInput) buscaInput.addEventListener("input", () => {
+  aplicaFiltro();
+  clearTimeout(esperaBusca);
+  const v = buscaInput.value.trim();
+  if (v.length >= 2) esperaBusca = setTimeout(() => medir("busca", v), 900);
+});
+const limparBusca = document.getElementById("limpar-busca");
+if (limparBusca) limparBusca.addEventListener("click", () => {
+  if (buscaInput) buscaInput.value = "";
+  filtroAtual = "tudo";
+  montaFiltros(produtosNaTela);
+  aplicaFiltro();
+  if (buscaInput) buscaInput.focus();
+});
+
 /* ---------- primeiro a cópia local, depois o banco ---------- */
 montaProdutos(window.PANDA_PRODUTOS);
 aplicaContatos();
@@ -290,7 +387,7 @@ async function carregaDoBanco() {
   const parar = AbortSignal.timeout ? AbortSignal.timeout(6000) : undefined;
   try {
     const [rp, rc] = await Promise.all([
-      fetch(`${cfg.URL}/rest/v1/pm_produtos?select=slug,nome,descricao,detalhes,preco_texto,etiquetas,mensagem,rotulo_botao,em_breve,lancamento,pm_produto_fotos(url,alt,ordem,largura,altura)&publicado=eq.true&order=ordem`, { headers: cabecalho, signal: parar }),
+      fetch(`${cfg.URL}/rest/v1/pm_produtos?select=slug,nome,descricao,detalhes,preco_texto,etiquetas,mensagem,rotulo_botao,em_breve,lancamento,tema,pm_produto_fotos(url,url_2x,alt,ordem,largura,altura)&publicado=eq.true&order=ordem`, { headers: cabecalho, signal: parar }),
       fetch(`${cfg.URL}/rest/v1/pm_config?select=whatsapp,instagram,tiktok,aviso_topo&limit=1`, { headers: cabecalho, signal: parar }),
     ]);
     if (rc.ok) {
@@ -405,6 +502,8 @@ function render() {
 
   if (s.foto) {
     const f = FOTO_REAL[s.item] || FOTO_REAL.caneca;
+    const srcset2 = `${f.src} 1x, ${f.src.replace(/\.webp$/, "@2x.webp")} 2x`;
+    if (fotoRealImg.getAttribute("srcset") !== srcset2) fotoRealImg.srcset = srcset2;
     if (fotoRealImg.getAttribute("src") !== f.src) fotoRealImg.src = f.src;
     const [x, y, w, h] = f.placa;
     fotoRealPlaca.style.setProperty("--px", `${x}%`);

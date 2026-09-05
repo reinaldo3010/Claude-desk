@@ -1,6 +1,6 @@
 # Manual da marca Panda Mimo
 
-Versão 1.3 · setembro de 2026 · documento vivo
+Versão 1.4 · setembro de 2026 · documento vivo
 
 Este é o brand book da **Panda Mimo**, marca de itens personalizados. Ele registra o que a marca é,
 como fala, como se veste e como se comporta em cada ponto de contato. Foi escrito a partir da
@@ -191,7 +191,17 @@ que explica a mecânica em uma frase: a peça com mais "Me avise" sai antes. É 
 clique, sem formulário. Quando a peça for fotografada e entrar em produção, o cartão
 vira peça normal: foto real, "Quero essa", detalhe.
 
-### 4.5 Ocasiões (vocabulário fixo)
+### 4.5 Busca e filtros do catálogo
+O catálogo tem uma busca ("Procurar peça, ocasião ou material") e chips de filtro. Os chips fixos são
+**Tudo · Pra pedir agora · Em teste**; os demais vêm do **tema** de cada peça, sempre com estes nomes:
+Bebidas · Escola e rotina · Casa e cozinha · Festa e padrinhos · Bebê · Pet · Presentear. Cada peça tem
+um tema só, escolhido no painel. A busca ignora acento e maiúscula e procura no nome, na descrição, nas
+etiquetas e no tema. Quando nada é encontrado, a resposta segue o tom da marca e abre porta para o
+WhatsApp: "Nada com esse nome por aqui. Manda no WhatsApp: se der pra fazer com carinho, a gente faz."
+Buscas e filtros são medidos (eventos `busca` e `filtro`), o que mostra o que as pessoas procuram e
+ainda não existe.
+
+### 4.6 Ocasiões (vocabulário fixo)
 Dia das Mães e dos Pais · Aniversário · Professores · Padrinhos e casamento · Empresas e eventos ·
 Escola e rotina. Cada ocasião tem um manuscrito próprio: *pra mãe, pro pai · parabéns! · obrigado,
 prof · quer ser meu padrinho? · bem-vindo ao time · de volta às aulas*.
@@ -399,7 +409,10 @@ transparente. Ícones novos seguem esse desenho; não misturar com bibliotecas d
 ## 10. Fotografia e imagem de produto
 
 ### 10.1 Foto de catálogo (`prod-*.webp`)
-- **Quadro quadrado de 760 px, fundo transparente, peça inteira, com folga de 7% em volta.**
+- **Quadro quadrado de 760 px, fundo transparente, peça inteira, com folga de 7% em volta**, sempre
+  acompanhado da versão **@2x de 1520 px** (`prod-caneca@2x.webp`). O site serve a 2x em telas de alta
+  densidade (celulares e notebooks retina); sem ela a foto fica macia. O painel gera as duas ao subir uma
+  foto, e o guardião reprova imagem que apareça ampliada acima de 10% em tela 2x ou 3x.
   É uma regra dura: o painel recusa e o guardião do site reprova qualquer foto com canto opaco,
   peça encostando na borda ou retângulo de fundo.
 - Ângulo 3/4 ou frontal, peça em pé, luz suave e difusa, sem reflexo forte.
@@ -560,6 +573,7 @@ adereço pequeno no Pandinha em datas comemorativas, com aprovação prévia (6.
 | Data | Versão | O que mudou |
 |---|---|---|
 | set/2026 | 1.0 | Primeira edição, consolidando a identidade aplicada no site (paleta, tipografia, logo, mascote, tom de voz, aplicações, governança). |
+| set/2026 | 1.4 | Nitidez: toda foto de catálogo tem versão @2x (1520 px) e o site a serve em telas de alta densidade; mascote do hero e fotos da galeria também. Catálogo ganha busca e filtros por tema (4.5), com estado vazio no tom da marca. Página 404 própria. |
 | set/2026 | 1.3 | Lançamentos em teste ganham o grupo "Você escolhe o que sai primeiro" e podem ser ilustrados por adesivo do acervo; entram sete: xícaras com pires, topo de bolo, kit bebê, avental, azulejo com frase, vela com nome e mimos pro pet. A faixa "Novidades em breve" passa a receber também ideias de peça. |
 | set/2026 | 1.2 | Lançamentos em teste (4.4): cartão com selo "Em breve", ilustração do Pandinha e botão "Me avise" medido por peça; entram os cinco primeiros (garrafa da escola, lancheira e necessaire, caneca de chá, kit padrinhos, vale-mimo). |
 | set/2026 | 1.1 | Dono aprova todas as propostas da 1.0: propósito, público, posicionamento, nome oficial do mascote (Pandinha), saudação do WhatsApp, bio e hashtags, rituais de pós-venda, impressos. Seção 14 vira registro de decisões e pendências operacionais. |
