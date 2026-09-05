@@ -1,6 +1,6 @@
 # Manual da marca Panda Mimo
 
-Versão 1.4 · setembro de 2026 · documento vivo
+Versão 1.5 · setembro de 2026 · documento vivo
 
 Este é o brand book da **Panda Mimo**, marca de itens personalizados. Ele registra o que a marca é,
 como fala, como se veste e como se comporta em cada ponto de contato. Foi escrito a partir da
@@ -463,6 +463,20 @@ Caveat + lede) e passa pelo guardião de qualidade antes de publicar.
   canto. Texto em Fredoka ou Nunito; manuscrito só como sticker.
 - Hashtags: #pandamimo #feitocomcarinho #presentepersonalizado #garrafapersonalizada
   #canecapersonalizada. No máximo cinco.
+- **Tamanhos:** post e carrossel 1080 × 1350 (4:5); story e capa de Reel 1080 × 1920, com o conteúdo
+  nos 1350 px centrais (área segura); foto de perfil 1080 × 1080 com o selo redondo ocupando o
+  círculo inteiro; capas de destaque em círculo pêssego com ícone da marca sobre creme.
+- **Destaques fixos, nesta ordem:** Peças · Como funciona · Bastidores · Mimos entregues · Envio e dúvidas.
+- **Chamada única:** "Pede no WhatsApp · link na bio". Nunca preço no post (preço é conversa no
+  WhatsApp). Um manuscrito em Caveat por peça, nunca o título inteiro. Emoji só 🐼 e 💕, no máximo
+  dois por legenda.
+- **Carrossel padrão "Do pedido ao presente em 4 passos":** capa em papel com o Pandinha, passos em
+  cartões brancos sobre areia suave com numeração em pêssego, último slide com selo e chamada.
+- **Reel:** capa em nanquim com a peça no centro e título em Fredoka creme, trecho em Caveat pêssego.
+  Story de lançamento em papel, com o Pandinha dormindo e botão "Me avise 🐼".
+- A identidade completa, com os modelos editáveis (perfil, foto de perfil, destaques, três posts,
+  carrossel, story, capa de Reel e a página de regras do feed), está no canvas "Instagram Panda Mimo"
+  (Claude Design); a fonte dos modelos segue as regras deste manual.
 
 ### 11.4 Embalagem
 - **Caixa kraft** natural, com **fita pêssego** e o **selo redondo** como adesivo de fechamento.
@@ -573,6 +587,7 @@ adereço pequeno no Pandinha em datas comemorativas, com aprovação prévia (6.
 | Data | Versão | O que mudou |
 |---|---|---|
 | set/2026 | 1.0 | Primeira edição, consolidando a identidade aplicada no site (paleta, tipografia, logo, mascote, tom de voz, aplicações, governança). |
+| set/2026 | 1.5 | Instagram (11.3): tamanhos por formato, área segura do Reel, destaques fixos, chamada única, regras de emoji e de preço, carrossel e Reel padrão; modelos editáveis no canvas "Instagram Panda Mimo". |
 | set/2026 | 1.4 | Nitidez: toda foto de catálogo tem versão @2x (1520 px) e o site a serve em telas de alta densidade; mascote do hero e fotos da galeria também. Catálogo ganha busca e filtros por tema (4.5), com estado vazio no tom da marca. Página 404 própria. |
 | set/2026 | 1.3 | Lançamentos em teste ganham o grupo "Você escolhe o que sai primeiro" e podem ser ilustrados por adesivo do acervo; entram sete: xícaras com pires, topo de bolo, kit bebê, avental, azulejo com frase, vela com nome e mimos pro pet. A faixa "Novidades em breve" passa a receber também ideias de peça. |
 | set/2026 | 1.2 | Lançamentos em teste (4.4): cartão com selo "Em breve", ilustração do Pandinha e botão "Me avise" medido por peça; entram os cinco primeiros (garrafa da escola, lancheira e necessaire, caneca de chá, kit padrinhos, vale-mimo). |
