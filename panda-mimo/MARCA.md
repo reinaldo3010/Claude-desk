@@ -1,6 +1,6 @@
 # Manual da marca Panda Mimo
 
-Versão 1.5 · setembro de 2026 · documento vivo
+Versão 1.6 · setembro de 2026 · documento vivo
 
 Este é o brand book da **Panda Mimo**, marca de itens personalizados. Ele registra o que a marca é,
 como fala, como se veste e como se comporta em cada ponto de contato. Foi escrito a partir da
@@ -566,6 +566,26 @@ registre no histórico.
 Cite a seção. "Quero um post de Dia dos Professores" → seções 3.5, 4.5, 11.3. "Quero uma cor nova de
 peça" → 7.4 e 10.3. "Quero mudar a assinatura" → 4.3, e é decisão do dono, com registro no histórico.
 
+### 13.5 Kit da marca e produção com IA
+A pasta **`marca/kit/`** é a fonte de qualquer arte fora do site: os 56 elementos ilustrados
+(logos, Pandinha, adesivos, selos e ícones) em **SVG**, as três fontes em TTF com licença, um gerador
+de PNG em qualquer tamanho (`gera-png.mjs`) e o **prompt de marca** (`prompt-de-marca.md`) para colar
+em geradores de imagem. O `LEIAME.md` da pasta explica cada item.
+
+Regras de produção:
+- **A IA nunca desenha o logo, o Pandinha nem texto da marca.** Ela gera cena, fundo, mockup ou pose
+  nova; logo, nome do cliente e frases entram depois, como camada, com os arquivos do kit e as fontes
+  instaladas. Logo dentro de imagem gerada só com o PNG oficial anexado como referência e conferido.
+- Para orientar uma IA, usa-se o prompt de marca, nunca o PDF do manual (geradores de imagem o leem
+  como inspiração e redesenham logo e tipografia).
+- Arte para impressão sai do kit em 300 dpi no tamanho final (uma arte de 20 cm pede 2400 px ou mais).
+- Os vetores do kit são traçados fiéis das ilustrações originais (estilo inflado, sombra contínua):
+  idênticos em impressão e em tamanho normal, com relevo em degraus finos quando ampliados ao extremo.
+  Um redesenho vetorial do logo, com poucas formas e versão chapada, é pendência da seção 14 e, quando
+  aprovado, entra no kit ao lado dos traçados, sem substituí-los.
+- Pose nova do Pandinha gerada por IA passa por aprovação do dono, é vetorizada com o mesmo processo
+  e entra no acervo (6.3) e no kit; nada é apagado.
+
 ---
 
 ## 14. Decisões tomadas e pendências operacionais
@@ -577,6 +597,7 @@ adereço pequeno no Pandinha em datas comemorativas, com aprovação prévia (6.
 
 **Pendências operacionais (fora do manual, mas necessárias):**
 - Registro da marca no INPI (nome e logo) e reserva de `pandamimo` nas redes e no domínio.
+- Redesenho vetorial do logo por designer, sobre os traçados do kit, com versão chapada monocromática (13.5).
 - Fornecedor de embalagem (caixa kraft, fita pêssego, tag e bilhete) alinhado à seção 11.4.
 - Prova impressa das cores (7.1) antes de qualquer material gráfico.
 - Configurar no WhatsApp Business a saudação da seção 3.5 e o catálogo da seção 11.2.
@@ -587,6 +608,7 @@ adereço pequeno no Pandinha em datas comemorativas, com aprovação prévia (6.
 | Data | Versão | O que mudou |
 |---|---|---|
 | set/2026 | 1.0 | Primeira edição, consolidando a identidade aplicada no site (paleta, tipografia, logo, mascote, tom de voz, aplicações, governança). |
+| set/2026 | 1.6 | Kit da marca (13.5): 56 ilustrações do site vetorizadas em `marca/kit/svg/`, fontes TTF, gerador de PNG e prompt de marca; regra de produção com IA (logo, Pandinha e texto nunca gerados); redesenho vetorial do logo entra nas pendências. |
 | set/2026 | 1.5 | Instagram (11.3): tamanhos por formato, área segura do Reel, destaques fixos, chamada única, regras de emoji e de preço, carrossel e Reel padrão; modelos editáveis no canvas "Instagram Panda Mimo". |
 | set/2026 | 1.4 | Nitidez: toda foto de catálogo tem versão @2x (1520 px) e o site a serve em telas de alta densidade; mascote do hero e fotos da galeria também. Catálogo ganha busca e filtros por tema (4.5), com estado vazio no tom da marca. Página 404 própria. |
 | set/2026 | 1.3 | Lançamentos em teste ganham o grupo "Você escolhe o que sai primeiro" e podem ser ilustrados por adesivo do acervo; entram sete: xícaras com pires, topo de bolo, kit bebê, avental, azulejo com frase, vela com nome e mimos pro pet. A faixa "Novidades em breve" passa a receber também ideias de peça. |

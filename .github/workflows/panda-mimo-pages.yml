@@ -45,7 +45,7 @@ jobs:
       - name: Prepara a pasta publicada (sem testes nem dependências)
         run: |
           mkdir -p _site
-          rsync -a --exclude node_modules --exclude qa --exclude package.json --exclude package-lock.json --exclude README.md --exclude MARCA.md panda-mimo/ _site/
+          rsync -a --exclude node_modules --exclude qa --exclude package.json --exclude package-lock.json --exclude README.md --exclude MARCA.md --exclude marca/kit panda-mimo/ _site/
       - uses: actions/configure-pages@v5
         with:
           enablement: true
