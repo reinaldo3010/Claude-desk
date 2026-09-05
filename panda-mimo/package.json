@@ -1,0 +1,13 @@
+{
+  "name": "panda-mimo-site",
+  "private": true,
+  "description": "Site da Panda Mimo (itens personalizados) e seu guardião de qualidade",
+  "type": "module",
+  "scripts": {
+    "test": "node qa/audit.mjs",
+    "shots": "node qa/audit.mjs --shots"
+  },
+  "devDependencies": {
+    "playwright": "1.55.0"
+  }
+}

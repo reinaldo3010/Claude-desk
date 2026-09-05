@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panda Mimo</title>
+  <meta name="description" content="Panda Mimo — itens personalizados feitos com carinho: garrafas térmicas, canecas, copos, ecobags, tags e kits presenteáveis com o seu nome, a sua frase, o seu jeito. Envio para todo o Brasil.">
+  <meta name="theme-color" content="#FBF6EF">
+  <meta property="og:title" content="Panda Mimo · Itens personalizados">
+  <meta property="og:description" content="Feito com carinho, feito pra você. Garrafas, canecas, copos, ecobags, tags e kits personalizados.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://reinaldo3010.github.io/Claude-desk/">
+  <meta property="og:image" content="https://reinaldo3010.github.io/Claude-desk/assets/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://reinaldo3010.github.io/Claude-desk/assets/og.jpg">
+  <link rel="canonical" href="https://reinaldo3010.github.io/Claude-desk/">
+  <!-- endereço do GitHub Pages. Ao mudar para um domínio próprio, troque as quatro linhas acima,
+       o robots.txt e o sitemap.xml (o guardião avisa se ficar inconsistente) -->
+  <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="assets/icone-192.png" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Caveat:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap">
+  <link rel="stylesheet" href="styles.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "Panda Mimo",
+    "description": "Itens personalizados feitos com carinho: garrafas térmicas, canecas, copos, ecobags, tags e kits presenteáveis.",
+    "slogan": "Feito com carinho, feito pra você.",
+    "areaServed": "BR",
+    "priceRange": "$$"
+  }
+  </script>
+</head>
+<body>
+
+<a class="skip" href="#produtos">Ir para os produtos</a>
+
+<!-- ======================= AVISO ======================= -->
+<div class="announce" role="region" aria-label="Avisos">
+  <div class="wrap announce__in">
+    <img src="assets/sino.webp" alt="" width="552" height="640">
+    <p><strong>Frete grátis</strong> para algumas regiões: consulte seu CEP no pedido. Enviamos para <strong>todo o Brasil</strong>.</p>
+  </div>
+</div>
+
+<header class="topbar">
+  <div class="wrap topbar__in">
+    <a class="brand" href="#inicio" aria-label="Panda Mimo — início">
+      <img src="assets/logo-pill.webp" alt="Panda Mimo — itens personalizados" width="900" height="254">
+    </a>
+    <button class="menu-toggle" type="button" aria-controls="nav-principal" aria-expanded="false" aria-label="Abrir menu">
+      <span class="menu-toggle__bar" aria-hidden="true"></span>
+    </button>
+    <nav class="nav" id="nav-principal" aria-label="Principal">
+      <a href="#produtos">Produtos</a>
+      <a href="#monte">Monte seu mimo</a>
+      <a href="#ocasioes">Ocasiões</a>
+      <a href="#como-funciona">Como funciona</a>
+      <a href="#duvidas">Dúvidas</a>
+      <a href="#contato">Contato</a>
+    </nav>
+    <a class="btn btn--dark btn--sm js-wa" href="#contato" data-msg="Oi, Panda Mimo! Quero fazer um pedido personalizado 🐼">
+      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-wa"/></svg>
+      <span>Pedir no WhatsApp</span>
+    </a>
+  </div>
+</header>
+
+<!-- ícones reutilizados -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="ic-wa" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.6.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.8-1.4.1-.2 0-.3 0-.5l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.1.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .1-1.3c0-.1-.2-.2-.5-.4Z"/></symbol>
+  <symbol id="ic-ig" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.3" cy="6.7" r="1.2" fill="currentColor"/></symbol>
+  <symbol id="ic-tt" viewBox="0 0 24 24"><path fill="currentColor" d="M16.5 3c.3 2.3 1.7 3.8 4 4v3.2c-1.5 0-2.9-.5-4-1.3v6.6a5.6 5.6 0 1 1-4.8-5.6v3.3a2.4 2.4 0 1 0 1.6 2.3V3h3.2Z"/></symbol>
+</svg>
+
+<main id="inicio">
+
+  <!-- ======================= HERO ======================= -->
+  <section class="hero">
+    <div class="wrap hero__grid">
+      <div class="hero__copy">
+        <p class="eyebrow"><span class="eyebrow__dot"></span> Itens personalizados <span class="eyebrow__dot"></span></p>
+        <h1 class="display">
+          Feito com carinho,<br>
+          <span class="hand">feito pra você.</span>
+        </h1>
+        <p class="lede">
+          Garrafas, canecas, copos, ecobags, tags e kits presenteáveis com o seu nome,
+          a sua frase, o seu jeito. Cada peça é feita uma a uma e embalada como o mimo que é.
+        </p>
+        <div class="hero__actions">
+          <a class="btn btn--peach js-wa" href="#contato" data-msg="Oi, Panda Mimo! Quero fazer um pedido personalizado 🐼">Pedir o meu mimo</a>
+          <a class="btn btn--ghost" href="#monte">Ver como fica com meu nome</a>
+        </div>
+        <ul class="hero__facts" aria-label="Resumo">
+          <li><strong>1 unidade</strong> já é pedido</li>
+          <li><strong>Prévia</strong> antes de produzir</li>
+          <li><strong>Embalagem</strong> pronta pra presentear</li>
+        </ul>
+      </div>
+      <figure class="hero__art">
+        <img class="heart-img" src="assets/coracao-costura.webp" alt="" width="804" height="704" aria-hidden="true">
+        <span class="heart heart--b" aria-hidden="true"></span>
+        <span class="heart heart--c" aria-hidden="true"></span>
+        <img class="hero__mascot" src="assets/mascote-hero.webp" srcset="assets/mascote-hero.webp 1x, assets/mascote-hero@2x.webp 2x" alt="Mascote da Panda Mimo: um panda sorridente abraçando uma garrafa térmica personalizada" width="707" height="900" fetchpriority="high">
+        <img class="hero__tag" src="assets/tag-especial.webp" alt="Etiqueta: feito especialmente para você!" width="482" height="900">
+      </figure>
+    </div>
+  </section>
+
+  <!-- ======================= CONFIANÇA ======================= -->
+  <section class="trust" aria-label="Garantias">
+    <div class="wrap trust__in">
+      <div class="trust__item"><img src="assets/badge-frete.webp" alt="Frete grátis: consulte seu CEP" width="820" height="340" loading="lazy" decoding="async"><div><h3>Frete grátis</h3><p>Para algumas regiões. Consulte seu CEP no pedido.</p></div></div>
+      <div class="trust__item"><img src="assets/badge-seguro.webp" alt="Compra 100% segura" width="832" height="324" loading="lazy" decoding="async"><div><h3>Compra 100% segura</h3><p>Pix ou cartão por link seguro. Você só paga depois de aprovar a prévia.</p></div></div>
+      <div class="trust__item"><img src="assets/badge-qualidade.webp" alt="Qualidade garantida" width="832" height="312" loading="lazy" decoding="async"><div><h3>Qualidade garantida</h3><p>Chegou com defeito? A gente refaz sem custo. É só avisar em até 7 dias.</p></div></div>
+      <div class="trust__item"><img src="assets/badge-envio.webp" alt="Envio para todo o Brasil" width="828" height="312" loading="lazy" decoding="async"><div><h3>Envio para todo o Brasil</h3><p>Correios ou transportadora, com código de rastreio no WhatsApp.</p></div></div>
+    </div>
+  </section>
+
+  <div class="stitch" aria-hidden="true"></div>
+
+  <!-- ======================= PRODUTOS ======================= -->
+  <section class="section" id="produtos">
+    <div class="wrap">
+      <header class="section__head">
+        <img class="ribbon" src="assets/faixa-amor.webp" alt="Personalizados com amor" width="900" height="179" loading="lazy" decoding="async">
+        <h2 class="display">Um mimo pra cada momento</h2>
+        <p class="lede">Escolha a base, conte o que quer escrever e a gente cuida do resto.</p>
+      </header>
+
+      <div class="catalogo-busca">
+        <label class="busca" for="busca-pecas">
+          <span class="sr-only">Procurar peça</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input type="search" id="busca-pecas" placeholder="Procurar peça, ocasião ou material" autocomplete="off" enterkeyhint="search" spellcheck="false">
+        </label>
+        <div class="filtros" id="filtros-pecas" role="group" aria-label="Filtrar peças"></div>
+        <p class="catalogo-resultado" id="catalogo-resultado" aria-live="polite"></p>
+      </div>
+      <div class="products" id="lista-produtos"></div>
+      <div class="catalogo-vazio" id="catalogo-vazio" hidden>
+        <img src="assets/panda-dormindo.webp" alt="" width="900" height="562" loading="lazy" decoding="async">
+        <p><strong>Nada com esse nome por aqui.</strong> Manda no WhatsApp: se der pra fazer com carinho, a gente faz.</p>
+        <div class="catalogo-vazio__acoes">
+          <a class="btn btn--dark js-wa" href="#contato" data-msg="Oi, Panda Mimo! Tenho uma ideia de peça que não está no site 🐼">Perguntar no WhatsApp</a>
+          <button type="button" class="link-limpo" id="limpar-busca">Limpar busca</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= MONTE SEU MIMO ======================= -->
+  <section class="section section--sand" id="monte">
+    <div class="wrap">
+      <header class="section__head section__head--sticker">
+        <img src="assets/coracao-jeito.webp" alt="Coração pontilhado: personalizado do seu jeito" width="900" height="764" loading="lazy" decoding="async">
+        <p class="eyebrow"><span class="eyebrow__dot"></span> Experimente <span class="eyebrow__dot"></span></p>
+        <h2 class="display">Monte seu mimo</h2>
+        <p class="lede">Escreva um nome, escolha a base e a cor. É só uma prévia: a arte final a gente faz juntos.</p>
+      </header>
+
+      <div class="builder">
+        <form class="builder__form" id="builder" autocomplete="off">
+          <div class="field">
+            <label for="b-nome">O que vai escrito?</label>
+            <input id="b-nome" name="nome" type="text" maxlength="18" value="Malu" placeholder="Um nome, um apelido, uma palavra">
+            <small class="field__hint"><span id="b-count">4</span>/18 caracteres</small>
+          </div>
+
+          <fieldset class="field">
+            <legend>Base</legend>
+            <div class="seg">
+              <input type="radio" name="item" id="i-garrafa" value="garrafa" checked><label for="i-garrafa">Garrafa</label>
+              <input type="radio" name="item" id="i-caneca" value="caneca"><label for="i-caneca">Caneca</label>
+              <input type="radio" name="item" id="i-copo" value="copo"><label for="i-copo">Copo</label>
+            </div>
+          </fieldset>
+
+          <fieldset class="field">
+            <legend>Cor da peça</legend>
+            <div class="swatches">
+              <input type="radio" name="cor" id="c-creme" value="creme" checked><label for="c-creme" style="--sw:#F3EEE4">Creme</label>
+              <input type="radio" name="cor" id="c-salvia" value="salvia"><label for="c-salvia" style="--sw:#A8C5A2">Sálvia</label>
+              <input type="radio" name="cor" id="c-pessego" value="pessego"><label for="c-pessego" style="--sw:#FFB59C">Pêssego</label>
+              <input type="radio" name="cor" id="c-preta" value="preta"><label for="c-preta" style="--sw:#1F1D1A">Preta</label>
+            </div>
+            <small class="field__hint" id="dica-foto" hidden>Na foto real a peça aparece em creme. A cor certa você escolhe no pedido.</small>
+          </fieldset>
+
+          <fieldset class="field">
+            <legend>Letra</legend>
+            <div class="seg">
+              <input type="radio" name="letra" id="l-redonda" value="redonda" checked><label for="l-redonda" class="f-redonda">Redondinha</label>
+              <input type="radio" name="letra" id="l-manuscrita" value="manuscrita"><label for="l-manuscrita" class="f-manuscrita">Manuscrita</label>
+            </div>
+          </fieldset>
+
+          <div class="field field--row">
+            <div class="field field--check">
+              <input type="checkbox" id="b-panda" name="panda" checked>
+              <label for="b-panda">Com o pandinha</label>
+            </div>
+            <div class="field field--qty">
+              <label for="b-qtd">Quantidade</label>
+              <input id="b-qtd" name="qtd" type="number" min="1" max="500" step="1" value="1" inputmode="numeric" aria-describedby="b-qtd-hint">
+              <small class="field__hint" id="b-qtd-hint">De 1 a 500</small>
+            </div>
+          </div>
+
+          <button type="button" class="btn btn--dark" id="b-send">Enviar essa ideia no WhatsApp</button>
+          <p class="field__hint">Abre uma conversa já com as suas escolhas escritas. Nada é cobrado aqui.</p>
+        </form>
+
+        <div class="builder__stage" aria-live="polite">
+          <div class="seg seg--modo" role="group" aria-label="Como ver a prévia">
+            <input type="radio" name="modo" id="m-desenho" value="desenho" checked><label for="m-desenho">Desenho</label>
+            <input type="radio" name="modo" id="m-foto" value="foto"><label for="m-foto">Foto real</label>
+          </div>
+          <div class="foto-real" id="foto-real" hidden>
+            <img id="foto-real-img" src="assets/prod-caneca.webp" srcset="assets/prod-caneca.webp 1x, assets/prod-caneca@2x.webp 2x" alt="Foto real do produto com o nome escolhido" width="760" height="760" decoding="async">
+            <div class="foto-real__placa" id="foto-real-placa" aria-hidden="true"><span id="foto-real-nome">Malu</span></div>
+          </div>
+          <svg class="preview" viewBox="0 0 260 320" role="img" aria-labelledby="preview-title">
+            <title id="preview-title">Prévia do item personalizado</title>
+            <defs>
+              <linearGradient id="sheen" x1="0" x2="1">
+                <stop offset="0" stop-color="#fff" stop-opacity=".28"/>
+                <stop offset=".45" stop-color="#fff" stop-opacity="0"/>
+                <stop offset="1" stop-color="#000" stop-opacity=".10"/>
+              </linearGradient>
+              <g id="panda-face">
+                <circle cx="-15" cy="-15" r="8" fill="#171512"/>
+                <circle cx="15" cy="-15" r="8" fill="#171512"/>
+                <ellipse cx="0" cy="0" rx="22" ry="19" fill="#FFFDF8" stroke="#171512" stroke-width="1.6"/>
+                <ellipse cx="-9" cy="-2" rx="6.5" ry="7.5" fill="#171512" transform="rotate(-15 -9 -2)"/>
+                <ellipse cx="9" cy="-2" rx="6.5" ry="7.5" fill="#171512" transform="rotate(15 9 -2)"/>
+                <circle cx="-8" cy="-2" r="2.4" fill="#fff"/>
+                <circle cx="10" cy="-2" r="2.4" fill="#fff"/>
+                <circle cx="-7.3" cy="-2.7" r=".9" fill="#171512"/>
+                <circle cx="10.7" cy="-2.7" r=".9" fill="#171512"/>
+                <ellipse cx="0" cy="6" rx="2.6" ry="1.8" fill="#171512"/>
+                <path d="M-3 9q3 3 6 0" fill="none" stroke="#171512" stroke-width="1.4" stroke-linecap="round"/>
+                <circle cx="-15" cy="6" r="3" fill="#FFB59C" opacity=".8"/>
+                <circle cx="15" cy="6" r="3" fill="#FFB59C" opacity=".8"/>
+              </g>
+            </defs>
+
+            <ellipse cx="130" cy="300" rx="70" ry="9" fill="#171512" opacity=".10"/>
+
+            <!-- GARRAFA -->
+            <g id="pv-garrafa">
+              <rect x="105" y="26" width="50" height="14" rx="6" fill="#171512"/>
+              <path d="M112 26 q0 -16 18 -16 q18 0 18 16" fill="none" stroke="#171512" stroke-width="7" stroke-linecap="round"/>
+              <rect x="92" y="38" width="76" height="22" rx="8" fill="#2A2724"/>
+              <rect x="82" y="56" width="96" height="232" rx="26" class="pv-body"/>
+              <rect x="82" y="56" width="96" height="232" rx="26" fill="url(#sheen)"/>
+              <use href="#panda-face" x="130" y="120" class="pv-panda"/>
+              <text x="130" y="205" text-anchor="middle" class="pv-text">Malu</text>
+              <path class="pv-heart" d="M130 240c-7-4.5-10.5-9-10.5-13.5a5 5 0 0 1 10.5-2.5 5 5 0 0 1 10.5 2.5c0 4.5-3.5 9-10.5 13.5z"/>
+            </g>
+
+            <!-- CANECA -->
+            <g id="pv-caneca" hidden>
+              <path d="M186 130 h22 a30 30 0 0 1 0 60 h-22" fill="none" stroke="#171512" stroke-width="16" stroke-linecap="round"/>
+              <path d="M186 130 h22 a30 30 0 0 1 0 60 h-22" fill="none" stroke="#3a3632" stroke-width="7" stroke-linecap="round"/>
+              <rect x="56" y="82" width="136" height="200" rx="18" class="pv-body"/>
+              <rect x="56" y="82" width="136" height="200" rx="18" fill="url(#sheen)"/>
+              <ellipse cx="124" cy="84" rx="68" ry="12" fill="#171512"/>
+              <ellipse cx="124" cy="84" rx="60" ry="8" fill="#2E2A26"/>
+              <use href="#panda-face" x="124" y="140" class="pv-panda"/>
+              <text x="124" y="222" text-anchor="middle" class="pv-text">Malu</text>
+            </g>
+
+            <!-- COPO -->
+            <g id="pv-copo" hidden>
+              <path d="M168 44 l24 -30" stroke="#FFB59C" stroke-width="8" stroke-linecap="round"/>
+              <rect x="78" y="40" width="104" height="26" rx="10" fill="#2A2724"/>
+              <rect x="72" y="62" width="116" height="12" rx="6" fill="#171512"/>
+              <path d="M78 74 h104 l-9 206 a12 12 0 0 1 -12 10 h-62 a12 12 0 0 1 -12 -10 z" class="pv-body"/>
+              <path d="M78 74 h104 l-9 206 a12 12 0 0 1 -12 10 h-62 a12 12 0 0 1 -12 -10 z" fill="url(#sheen)"/>
+              <use href="#panda-face" x="130" y="130" class="pv-panda"/>
+              <text x="130" y="212" text-anchor="middle" class="pv-text">Malu</text>
+              <path class="pv-heart" d="M130 246c-7-4.5-10.5-9-10.5-13.5a5 5 0 0 1 10.5-2.5 5 5 0 0 1 10.5 2.5c0 4.5-3.5 9-10.5 13.5z"/>
+            </g>
+          </svg>
+          <div class="builder__foot">
+            <img src="assets/panda-joinha.webp" alt="" width="848" height="824" loading="lazy" decoding="async">
+            <p class="builder__note"><span class="hand">Só uma prévia, tá?</span> Cores e proporções finais variam com a peça.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= OCASIÕES ======================= -->
+  <section class="section" id="ocasioes">
+    <div class="wrap">
+      <div class="occasions__head">
+        <div class="occasions__copy">
+          <img class="ribbon ribbon--left" src="assets/faixa-momentos.webp" alt="Para momentos especiais" width="900" height="212" loading="lazy" decoding="async">
+          <h2 class="display">Um presente que diz <span class="hand">"pensei em você"</span></h2>
+          <p class="lede">Não sabe por onde começar? A gente já separou sugestões pelas ocasiões que mais chegam por aqui. É só clicar e a conversa começa com a ideia pronta.</p>
+        </div>
+        <div class="occasions__art">
+          <img class="occasions__leaf" src="assets/folha.webp" alt="" width="240" height="288" loading="lazy" decoding="async">
+          <img src="assets/panda-presente-2.webp" alt="Mascote Panda Mimo abrindo uma caixa de presente com laço" width="628" height="900" loading="lazy" decoding="async">
+          <img class="occasions__flower" src="assets/flor.webp" alt="" width="276" height="264" loading="lazy" decoding="async">
+        </div>
+      </div>
+
+      <ul class="occasions">
+        <li class="occasion">
+          <span class="occasion__hand hand">pra mãe, pro pai</span>
+          <h3>Dia das Mães e dos Pais</h3>
+          <p>Caneca com a frase que só vocês entendem, ou a garrafa pro passeio de domingo.</p>
+          <a class="occasion__link js-wa" href="#contato" data-msg="Oi, Panda Mimo! Quero um mimo pro Dia das Mães / dos Pais 🐼">Ver ideias <span aria-hidden="true">›</span></a>
+        </li>
+        <li class="occasion">
+          <span class="occasion__hand hand">parabéns!</span>
+          <h3>Aniversário</h3>
+          <p>Nome, data e um desenho que lembre a pessoa. Vai em caixa kraft com bilhetinho escrito à mão.</p>
+          <a class="occasion__link js-wa" href="#contato" data-msg="Oi, Panda Mimo! Quero um mimo de aniversário 🐼">Ver ideias <span aria-hidden="true">›</span></a>
+        </li>
+        <li class="occasion">
+          <span class="occasion__hand hand">obrigado, prof</span>
+          <h3>Professores</h3>
+          <p>Caneca ou garrafa com o nome e a matéria. Pra turma toda, tags com o nome de cada aluno.</p>
+          <a class="occasion__link js-wa" href="#contato" data-msg="Oi, Panda Mimo! Quero um mimo pra professor(a) 🐼">Ver ideias <span aria-hidden="true">›</span></a>
+        </li>
+        <li class="occasion">
+          <span class="occasion__hand hand">quer ser meu padrinho?</span>
+          <h3>Padrinhos e casamento</h3>
+          <p>Convite-caneca ou copo com o nome de cada padrinho. Kits combinando pro casal.</p>
+          <a class="occasion__link js-wa" href="#contato" data-msg="Oi, Panda Mimo! Quero mimos pra padrinhos / casamento 🐼">Ver ideias <span aria-hidden="true">›</span></a>
+        </li>
+        <li class="occasion">
+          <span class="occasion__hand hand">bem-vindo ao time</span>
+          <h3>Empresas e eventos</h3>
+          <p>Kit de boas-vindas, brinde de evento ou presente de fim de ano com a logo da empresa.</p>
+          <a class="occasion__link js-wa" href="#contato" data-msg="Oi, Panda Mimo! Quero um orçamento de brindes pra empresa / evento 🐼">Ver ideias <span aria-hidden="true">›</span></a>
+        </li>
+        <li class="occasion">
+          <span class="occasion__hand hand">de volta às aulas</span>
+          <h3>Escola e rotina</h3>
+          <p>Garrafa com o nome pra não perder na escola e tag na mochila. Resolve a manhã inteira.</p>
+          <a class="occasion__link js-wa" href="#contato" data-msg="Oi, Panda Mimo! Quero uma garrafa e tag pra escola 🐼">Ver ideias <span aria-hidden="true">›</span></a>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ======================= PEDIDOS EM QUANTIDADE ======================= -->
+  <section class="section section--sand" id="empresas">
+    <div class="wrap bulk">
+      <img class="bulk__art" src="assets/panda-carrinho.webp" alt="Mascote Panda Mimo dentro de um carrinho de compras" width="759" height="900" loading="lazy" decoding="async">
+      <div class="bulk__copy">
+        <p class="eyebrow"><span class="eyebrow__dot"></span> Pedidos em quantidade <span class="eyebrow__dot"></span></p>
+        <h2 class="display">Pra turma toda, pro time inteiro</h2>
+        <p class="lede">Lembrancinhas de festa, brindes corporativos, presente de formatura. A partir de 10 unidades o valor por peça cai, e a gente cuida da arte de cada nome.</p>
+        <ul class="bulk__list">
+          <li><strong>Nomes diferentes em cada peça</strong> sem custo extra: você manda a lista, a gente monta.</li>
+          <li><strong>Logo da empresa</strong> aplicada na peça e no bilhetinho, se quiser.</li>
+          <li><strong>Prévia de tudo</strong> antes de produzir, num único arquivo pra você aprovar.</li>
+          <li><strong>Entrega em um endereço só</strong> ou separada por pessoa, combinada no orçamento.</li>
+        </ul>
+        <a class="btn btn--dark js-wa" href="#contato" data-msg="Oi, Panda Mimo! Quero um orçamento para pedido em quantidade 🐼 (quantas unidades: ___ )">Pedir orçamento em quantidade</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= COMO FUNCIONA ======================= -->
+  <section class="section" id="como-funciona">
+    <div class="wrap">
+      <header class="section__head">
+        <p class="eyebrow"><span class="eyebrow__dot"></span> Do pedido ao presente <span class="eyebrow__dot"></span></p>
+        <h2 class="display">Como funciona</h2>
+        <p class="lede">Quatro passos, sempre nessa ordem. Você acompanha tudo pelo WhatsApp.</p>
+      </header>
+
+      <ol class="steps">
+        <li class="step">
+          <span class="step__n">1</span>
+          <img class="step__sticker step__sticker--icon" src="assets/ic-sacola.webp" alt="" width="296" height="296" loading="lazy" decoding="async">
+          <h3>Escolha a base</h3>
+          <p>Garrafa, caneca, copo, ecobag, tag ou um kit. Diga a cor e quantas unidades.</p>
+        </li>
+        <li class="step">
+          <span class="step__n">2</span>
+          <img class="step__sticker step__sticker--icon" src="assets/ic-camera.webp" alt="" width="288" height="288" loading="lazy" decoding="async">
+          <h3>Conte a ideia</h3>
+          <p>Nome, frase, data ou desenho. Pode mandar foto de referência ou só descrever.</p>
+        </li>
+        <li class="step">
+          <span class="step__n">3</span>
+          <img class="step__sticker" src="assets/panda-joinha.webp" alt="" width="848" height="824" loading="lazy" decoding="async">
+          <h3>Aprove a prévia</h3>
+          <p>Enviamos a arte montada na peça. Só produzimos depois do seu "pode fazer".</p>
+        </li>
+        <li class="step">
+          <span class="step__n">4</span>
+          <img class="step__sticker" src="assets/panda-caixa.webp" alt="" width="900" height="847" loading="lazy" decoding="async">
+          <h3>Receba em casa</h3>
+          <p>Embalado em caixa kraft com bilhetinho, pronto pra dar de presente (ou ficar pra você).</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <div class="stitch" aria-hidden="true"></div>
+
+  <!-- ======================= DIFERENCIAIS ======================= -->
+  <section class="section section--dark" id="diferenciais">
+    <div class="wrap">
+      <header class="section__head section__head--left">
+        <p class="eyebrow eyebrow--light"><span class="eyebrow__dot"></span> Por que Panda Mimo <span class="eyebrow__dot"></span></p>
+        <h2 class="display">Mais que um presente, <span class="hand hand--peach">um mimo.</span></h2>
+      </header>
+
+      <ul class="promises">
+        <li class="promise">
+          <img class="promise__icon" src="assets/ic-presente.webp" alt="" width="300" height="300" loading="lazy" decoding="async">
+          <h3>Produtos personalizados</h3>
+          <p>Nome, frase, data, desenho. Se cabe na peça, cabe no pedido. Uma unidade já é pedido.</p>
+        </li>
+        <li class="promise">
+          <img class="promise__icon" src="assets/ic-coracao.webp" alt="" width="296" height="296" loading="lazy" decoding="async">
+          <h3>Feito com carinho</h3>
+          <p>Cada peça passa pelas nossas mãos, uma de cada vez. Nada sai sem conferência.</p>
+        </li>
+        <li class="promise">
+          <img class="promise__icon" src="assets/ic-ideia.webp" alt="" width="292" height="296" loading="lazy" decoding="async">
+          <h3>Ideias que encantam</h3>
+          <p>Não sabe o que escrever? A gente sugere. Já ajudamos a resolver muito presente de última hora.</p>
+        </li>
+        <li class="promise">
+          <img class="promise__icon" src="assets/ic-caminhao.webp" alt="" width="296" height="296" loading="lazy" decoding="async">
+          <h3>Envio para todo o Brasil</h3>
+          <p>Caixa kraft, proteção interna e o bilhetinho por cima. Código de rastreio no WhatsApp.</p>
+        </li>
+        <li class="promise">
+          <img class="promise__icon" src="assets/ic-escudo.webp" alt="" width="300" height="296" loading="lazy" decoding="async">
+          <h3>Qualidade garantida</h3>
+          <p>Inox que não amassa no primeiro tombo, cerâmica que aguenta a máquina, impressão que não sai na lavagem.</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ======================= CUIDADOS ======================= -->
+  <section class="section" id="cuidados">
+    <div class="wrap">
+      <header class="section__head">
+        <img class="ribbon" src="assets/faixa-carinho.webp" alt="Feito com carinho" width="900" height="161" loading="lazy" decoding="async">
+        <h2 class="display">Como cuidar do seu mimo</h2>
+        <p class="lede">Um mimo bem cuidado dura anos. Três regrinhas por peça e pronto.</p>
+      </header>
+
+      <div class="care">
+        <article class="care__card">
+          <h3>Garrafas e copos térmicos</h3>
+          <ul class="care__list">
+            <li class="ok">Lave à mão com esponja macia e detergente neutro.</li>
+            <li class="ok">Deixe secar aberto, de boca pra baixo.</li>
+            <li class="no">Não vai na lava-louças nem no congelador.</li>
+          </ul>
+        </article>
+        <article class="care__card">
+          <h3>Canecas</h3>
+          <ul class="care__list">
+            <li class="ok">Pode ir na lava-louças e no micro-ondas.</li>
+            <li class="ok">Guarde com a alça pra fora pra não lascar.</li>
+            <li class="no">Evite palha de aço e esponja abrasiva na arte.</li>
+          </ul>
+        </article>
+        <article class="care__card">
+          <h3>Ecobags</h3>
+          <ul class="care__list">
+            <li class="ok">Lave à mão ou em ciclo delicado, com água fria.</li>
+            <li class="ok">Seque à sombra: a estampa dura muito mais.</li>
+            <li class="no">Não passe ferro sobre a estampa nem use alvejante.</li>
+          </ul>
+        </article>
+        <article class="care__card">
+          <h3>Tags e chaveiros</h3>
+          <ul class="care__list">
+            <li class="ok">Limpe com pano seco ou levemente úmido.</li>
+            <li class="ok">Troque o cordão quando desfiar: a gente manda de graça.</li>
+            <li class="no">Não deixe de molho nem exposto ao sol por muito tempo.</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= GALERIA ======================= -->
+  <section class="section section--sand" id="galeria">
+    <div class="wrap">
+      <header class="section__head">
+        <p class="eyebrow"><span class="eyebrow__dot"></span> Um pouco do nosso universo <span class="eyebrow__dot"></span></p>
+        <h2 class="display">Coisas que a gente ama fazer</h2>
+      </header>
+      <div class="gallery">
+        <figure><img src="assets/uso-ecobag.webp" srcset="assets/uso-ecobag.webp 1x, assets/uso-ecobag@2x.webp 2x" alt="Pessoa carregando a ecobag personalizada Panda Mimo na rua" loading="lazy" decoding="async" width="900" height="739"></figure>
+        <figure><img src="assets/uso-caneca-cafe.webp" srcset="assets/uso-caneca-cafe.webp 1x, assets/uso-caneca-cafe@2x.webp 2x" alt="Caneca Panda Mimo com café sobre uma mesa de trabalho" loading="lazy" decoding="async" width="764" height="508"></figure>
+        <figure><img src="assets/uso-copo.webp" srcset="assets/uso-copo.webp 1x, assets/uso-copo@2x.webp 2x" alt="Mão segurando o copo térmico Panda Mimo" loading="lazy" decoding="async" width="900" height="655"></figure>
+        <figure><img src="assets/foto-garrafas.webp" srcset="assets/foto-garrafas.webp 1x, assets/foto-garrafas@2x.webp 2x" alt="Duas garrafas térmicas Panda Mimo, uma creme e uma sálvia, com tag de papel" loading="lazy" decoding="async" width="700" height="679"></figure>
+        <figure><img src="assets/foto-caneca.webp" srcset="assets/foto-caneca.webp 1x, assets/foto-caneca@2x.webp 2x" alt="Caneca Panda Mimo sobre uma base de madeira" loading="lazy" decoding="async" width="700" height="734"></figure>
+        <figure><img src="assets/foto-caixa.webp" srcset="assets/foto-caixa.webp 1x, assets/foto-caixa@2x.webp 2x" alt="Caixa kraft Panda Mimo com fita" loading="lazy" decoding="async" width="700" height="671"></figure>
+        <figure class="gallery__mascot"><img src="assets/panda-presente.webp" alt="Mascote Panda Mimo segurando uma caixa de presente" loading="lazy" decoding="async" width="737" height="900"></figure>
+        <figure class="gallery__mascot"><img src="assets/panda-coracao.webp" alt="Mascote Panda Mimo abraçando um coração" loading="lazy" decoding="async" width="790" height="900"></figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= DÚVIDAS ======================= -->
+  <section class="section" id="duvidas">
+    <div class="wrap faq">
+      <aside class="faq__side">
+        <img src="assets/balao-duvidas.webp" alt="Balão de fala: tire suas dúvidas, estamos aqui para te ajudar" width="900" height="687" loading="lazy" decoding="async">
+        <p class="eyebrow"><span class="eyebrow__dot"></span> Dúvidas frequentes <span class="eyebrow__dot"></span></p>
+        <h2 class="display">Tire suas dúvidas</h2>
+        <p class="lede">Não achou a sua? Manda no WhatsApp que a gente responde de verdade, sem robô.</p>
+        <a class="btn btn--ghost js-wa" href="#contato" data-msg="Oi, Panda Mimo! Tenho uma dúvida: ">Perguntar no WhatsApp</a>
+      </aside>
+
+      <div class="faq__list">
+        <details class="faq__item" open>
+          <summary>Qual é o prazo de produção e entrega?</summary>
+          <p>A produção leva de 3 a 5 dias úteis depois que você aprova a prévia. O envio depende do seu CEP: a gente informa o prazo dos Correios ou da transportadora junto com o orçamento.</p>
+        </details>
+        <details class="faq__item">
+          <summary>Tem pedido mínimo?</summary>
+          <p>Não. Uma garrafa, uma caneca ou um copo já é pedido. Só as tags e chaveiros saem a partir de 10 unidades, porque são produzidas em lote.</p>
+        </details>
+        <details class="faq__item">
+          <summary>Posso mandar minha própria arte ou logo?</summary>
+          <p>Pode, e a gente adora. Mande em PNG, PDF ou o arquivo original (AI, CDR, SVG). Se só tiver uma foto ou um rabisco, também serve: montamos a arte e você aprova.</p>
+        </details>
+        <details class="faq__item">
+          <summary>Como funciona a prévia?</summary>
+          <p>Antes de produzir, você recebe uma imagem da arte aplicada na peça, com cor e posição. Pode pedir ajustes quantas vezes precisar. Só começamos depois do seu "pode fazer".</p>
+        </details>
+        <details class="faq__item">
+          <summary>Como é o pagamento?</summary>
+          <p>Pix ou cartão de crédito por link seguro. Pedidos até 10 unidades: pagamento após aprovar a prévia. Pedidos maiores: 50% na aprovação e 50% antes do envio.</p>
+        </details>
+        <details class="faq__item">
+          <summary>A personalização sai na lavagem?</summary>
+          <p>Não. Usamos técnicas feitas para o material de cada peça, e testamos antes de enviar. Seguindo os cuidados da seção acima, a arte dura a vida útil do produto.</p>
+        </details>
+        <details class="faq__item">
+          <summary>E se chegar com defeito ou errado?</summary>
+          <p>A gente refaz sem custo, incluindo o frete. É só mandar uma foto em até 7 dias após o recebimento. Como a peça é personalizada, não fazemos troca por arrependimento, e por isso a prévia é tão importante.</p>
+        </details>
+        <details class="faq__item">
+          <summary>Vem embalado pra presente?</summary>
+          <p>Sempre. Caixa kraft, proteção interna e um bilhetinho. Se for presente, escreva a mensagem no pedido e a gente coloca no bilhete, sem mostrar valor na caixa.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= SIGA ======================= -->
+  <section class="section section--dark" id="siga">
+    <div class="wrap follow">
+      <img class="follow__art" src="assets/celular-siga.webp" alt="Celular com o mascote Panda Mimo e os ícones do Instagram, TikTok e WhatsApp" width="632" height="900" loading="lazy" decoding="async">
+      <div class="follow__copy">
+        <p class="eyebrow eyebrow--light"><span class="eyebrow__dot"></span> Nos acompanhe <span class="eyebrow__dot"></span></p>
+        <h2 class="display">Bastidores, novidades e <span class="hand hand--peach">muito panda</span></h2>
+        <p class="lede">Mostramos as peças saindo do forno, ideias de frases e os lançamentos antes de todo mundo.</p>
+        <div class="follow__links">
+          <a class="social js-ig" href="#" target="_blank" rel="noopener"><img src="assets/rede-instagram.webp" alt="" width="272" height="272" loading="lazy" decoding="async"> Instagram</a>
+          <a class="social js-tt" href="#" target="_blank" rel="noopener"><img src="assets/rede-tiktok.webp" alt="" width="276" height="276" loading="lazy" decoding="async"> TikTok</a>
+          <a class="social js-wa" href="#" data-msg="Oi, Panda Mimo! Quero receber as novidades por aqui 🐼"><img src="assets/rede-whatsapp.webp" alt="" width="272" height="272" loading="lazy" decoding="async"> Lista de novidades</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= CONTATO ======================= -->
+  <section class="section section--peach" id="contato">
+    <div class="wrap contact">
+      <div class="contact__copy">
+        <h2 class="display">Vamos fazer o seu?</h2>
+        <p class="lede">Manda um oi. Respondemos com carinho e sem pressa de vender: primeiro a gente entende a ideia.</p>
+        <div class="contact__actions">
+          <a class="btn btn--dark js-wa" href="#" data-msg="Oi, Panda Mimo! Quero fazer um pedido personalizado 🐼">
+            <svg width="18" height="18" aria-hidden="true"><use href="#ic-wa"/></svg>
+            Conversar no WhatsApp
+          </a>
+          <a class="btn btn--ghost btn--ghost-dark js-ig" href="#" target="_blank" rel="noopener">
+            <svg width="18" height="18" aria-hidden="true"><use href="#ic-ig"/></svg>
+            Ver no Instagram
+          </a>
+        </div>
+        <dl class="contact__meta">
+          <div><dt>Atendimento</dt><dd>Segunda a sexta, 9h às 18h</dd></div>
+          <div><dt>Produção</dt><dd>3 a 5 dias úteis após aprovar a prévia</dd></div>
+          <div><dt>Envio</dt><dd>Para todo o Brasil, com rastreio</dd></div>
+        </dl>
+      </div>
+      <div class="contact__art">
+        <img class="contact__bow" src="assets/laco.webp" alt="" width="612" height="524" loading="lazy" decoding="async">
+        <img class="contact__logo" src="assets/logo-redondo.webp" srcset="assets/logo-redondo.webp 1x, assets/logo-redondo@2x.webp 2x" alt="Selo redondo Panda Mimo — itens personalizados" width="866" height="900" loading="lazy" decoding="async">
+        <img class="contact__bubble" src="assets/balao-frase.webp" alt="Balão de fala: feito com carinho, feito pra você!" width="775" height="900" loading="lazy" decoding="async">
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="stitch stitch--footer" aria-hidden="true">
+    <img class="footer__sleep" src="assets/panda-dormindo.webp" alt="" width="900" height="562" loading="lazy" decoding="async">
+    <img class="footer__paw footer__paw--a" src="assets/pata-rosa.webp" alt="" width="212" height="224" loading="lazy" decoding="async">
+    <img class="footer__paw footer__paw--b" src="assets/pata-preta.webp" alt="" width="208" height="216" loading="lazy" decoding="async">
+  </div>
+  <div class="wrap footer__in">
+    <img class="footer__brand" src="assets/logo-empilhado.webp" alt="Panda Mimo — itens personalizados" width="900" height="571" loading="lazy" decoding="async">
+    <p class="footer__tag hand">Feito com carinho, feito pra você.</p>
+    <nav class="footer__nav" aria-label="Rodapé">
+      <a href="#produtos">Produtos</a>
+      <a href="#monte">Monte seu mimo</a>
+      <a href="#ocasioes">Ocasiões</a>
+      <a href="#empresas">Empresas</a>
+      <a href="#cuidados">Cuidados</a>
+      <a href="#duvidas">Dúvidas</a>
+      <a href="#contato">Contato</a>
+    </nav>
+    <p class="footer__legal">© <span id="ano">2026</span> Panda Mimo · Itens personalizados</p>
+  </div>
+</footer>
+
+<a class="fab js-wa" href="#contato" data-msg="Oi, Panda Mimo! Quero fazer um pedido personalizado 🐼" aria-label="Conversar no WhatsApp">
+  <img src="assets/rede-whatsapp.webp" alt="" width="272" height="272">
+</a>
+
+<dialog class="detalhe" id="detalhe" aria-labelledby="detalhe-titulo">
+  <div class="detalhe__in">
+    <button class="detalhe__fechar" type="button" aria-label="Fechar">×</button>
+    <div class="detalhe__galeria">
+      <div class="detalhe__foto"><img id="detalhe-foto" src="assets/prod-caneca.webp" alt="" width="760" height="760" decoding="async"></div>
+      <div class="detalhe__miniaturas" id="detalhe-miniaturas" role="group" aria-label="Fotos do produto"></div>
+    </div>
+    <div class="detalhe__info">
+      <p class="eyebrow"><span class="eyebrow__dot"></span> Produto <span class="eyebrow__dot"></span></p>
+      <h2 class="display" id="detalhe-titulo">Produto</h2>
+      <p class="detalhe__preco" id="detalhe-preco"></p>
+      <p class="detalhe__texto" id="detalhe-texto"></p>
+      <ul class="chips" id="detalhe-chips"></ul>
+      <div class="detalhe__acoes">
+        <a class="btn btn--peach js-wa" id="detalhe-zap" href="#contato" data-msg="Oi, Panda Mimo!">Quero essa</a>
+        <a class="btn btn--ghost" id="detalhe-personalizar" href="#monte">Ver com meu nome</a>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<script src="config.js"></script>
+<script src="produtos.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

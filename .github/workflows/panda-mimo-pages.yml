@@ -1,0 +1,56 @@
+name: Panda Mimo · publicar no GitHub Pages
+
+on:
+  push:
+    branches: [main, claude/custom-items-brand-site-vi3ru8]
+    paths: ["panda-mimo/**", ".github/workflows/panda-mimo-pages.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# só uma publicação por vez; a mais nova espera a anterior terminar
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  guardiao:
+    name: Guardião antes de publicar
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: panda-mimo
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: Auditoria rápida (390 e 1280 px)
+        run: QA_VIEWPORTS=390,1280 npm test
+
+  publicar:
+    name: Publicar
+    needs: guardiao
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepara a pasta publicada (sem testes nem dependências)
+        run: |
+          mkdir -p _site
+          rsync -a --exclude node_modules --exclude qa --exclude package.json --exclude package-lock.json --exclude README.md --exclude MARCA.md panda-mimo/ _site/
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deploy
+        uses: actions/deploy-pages@v4

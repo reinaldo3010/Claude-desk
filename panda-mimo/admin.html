@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Painel · Panda Mimo</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="assets/panda-carinha.webp" type="image/webp">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Caveat:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<!-- ======================= ENTRADA ======================= -->
+<section class="adm-login" id="tela-login">
+  <img src="assets/logo-pill.webp" alt="Panda Mimo" width="428" height="121">
+  <h1>Painel da loja</h1>
+  <form id="form-login" autocomplete="on">
+    <div class="campo">
+      <label for="email">E-mail</label>
+      <input id="email" name="email" type="email" required autocomplete="username">
+    </div>
+    <div class="campo" style="margin-top:.8rem">
+      <label for="senha">Senha</label>
+      <input id="senha" name="senha" type="password" required autocomplete="current-password">
+    </div>
+    <button class="btn btn--dark" type="submit" style="margin-top:1rem;width:100%">Entrar</button>
+  </form>
+  <p class="aviso aviso--erro" id="erro-login"></p>
+  <p class="campo"><small>Só quem está na lista de administradores consegue alterar o catálogo. Esqueceu a senha? Dá para redefinir no painel do Supabase.</small></p>
+</section>
+
+<!-- ======================= PAINEL ======================= -->
+<div id="painel" hidden>
+  <header class="adm-topo">
+    <div class="wrap adm-topo__in">
+      <img src="assets/logo-pill.webp" alt="Panda Mimo" width="428" height="121">
+      <div class="adm-topo__dir">
+        <span id="quem"></span>
+        <a class="mini" href="index.html" target="_blank" rel="noopener">Ver o site</a>
+        <button class="mini" type="button" id="sair">Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="adm-abas" role="tablist">
+      <button class="adm-aba" role="tab" id="aba-produtos" aria-selected="true" aria-controls="secao-produtos">Produtos</button>
+      <button class="adm-aba" role="tab" id="aba-config" aria-selected="false" aria-controls="secao-config">Configurações</button>
+      <button class="adm-aba" role="tab" id="aba-metricas" aria-selected="false" aria-controls="secao-metricas">Métricas</button>
+    </div>
+
+    <!-- ---------- PRODUTOS ---------- -->
+    <section class="adm-secao" id="secao-produtos" role="tabpanel" aria-labelledby="aba-produtos">
+      <div class="adm-cabecalho">
+        <h2>Produtos</h2>
+        <button class="btn btn--peach btn--sm" type="button" id="novo">+ Novo produto</button>
+      </div>
+      <p class="aviso" id="recado-produtos"></p>
+      <div class="adm-lista" id="lista"></div>
+    </section>
+
+    <!-- ---------- EDITOR ---------- -->
+    <section class="adm-secao" id="secao-editor" hidden>
+      <div class="adm-editor">
+        <h3 id="titulo-editor">Novo produto</h3>
+
+        <div class="linha">
+          <div class="campo">
+            <label for="p-nome">Nome</label>
+            <input id="p-nome" type="text" maxlength="60" placeholder="Garrafas térmicas">
+          </div>
+          <div class="campo">
+            <label for="p-botao">Texto do botão</label>
+            <input id="p-botao" type="text" maxlength="30" placeholder="Quero essa">
+          </div>
+        </div>
+
+        <div class="campo">
+          <label for="p-descricao">Descrição</label>
+          <textarea id="p-descricao" maxlength="400" placeholder="Aço inox 304 com tampa rosqueável e alça..."></textarea>
+        </div>
+
+        <div class="linha">
+          <div class="campo">
+            <label for="p-preco">Preço (como aparece no site)</label>
+            <input id="p-preco" type="text" maxlength="40" placeholder="A partir de R$ 49">
+            <small>Vazio mostra "Valor sob consulta" na tela de detalhe.</small>
+          </div>
+          <div class="campo">
+            <label for="p-tema">Tema (vira o chip de filtro no site)</label>
+            <select id="p-tema">
+              <option value="">Sem tema</option>
+              <option value="bebidas">Bebidas</option>
+              <option value="escola">Escola e rotina</option>
+              <option value="casa">Casa e cozinha</option>
+              <option value="festa">Festa e padrinhos</option>
+              <option value="bebe">Bebê</option>
+              <option value="pet">Pet</option>
+              <option value="presente">Presentear</option>
+            </select>
+          </div>
+        </div>
+        <div class="campo">
+          <label for="p-detalhes">Texto da tela de detalhe (opcional)</label>
+          <textarea id="p-detalhes" maxlength="900" placeholder="Um texto maior, com mais informações. Se ficar vazio, o site usa a descrição curta."></textarea>
+        </div>
+        <div class="campo">
+          <label for="p-etiquetas">Etiquetas</label>
+          <textarea id="p-etiquetas" placeholder="1 litro&#10;24h gelada · 12h quente&#10;Livre de BPA"></textarea>
+          <small>Uma por linha. São aquelas bolinhas cinza embaixo da descrição.</small>
+        </div>
+
+        <div class="campo">
+          <label for="p-mensagem">Mensagem que abre no WhatsApp</label>
+          <input id="p-mensagem" type="text" maxlength="200" placeholder="Oi, Panda Mimo! Quero uma garrafa térmica personalizada 🐼">
+        </div>
+
+        <div class="adm-rodape">
+          <label class="chave"><input type="checkbox" id="p-publicado" checked> Aparecer no site</label>
+          <label class="chave"><input type="checkbox" id="p-embreve"> É o aviso de "novidades em breve"</label>
+          <label class="chave"><input type="checkbox" id="p-lancamento"> Lançamento em teste (selo "Em breve" e botão "Me avise")</label>
+        </div>
+
+        <div class="campo">
+          <span class="rotulo">Fotos</span>
+          <small>Cada foto vira um quadro quadrado com fundo transparente, em dois tamanhos (760 e 1520 px, para telas de alta densidade). A primeira é a que aparece no cartão. Mande a foto na maior resolução que tiver.</small>
+          <div class="adm-fotos" id="fotos"></div>
+          <div class="solta" id="solta" tabindex="0" role="button">
+            <strong>Clique ou arraste as fotos aqui</strong><br>
+            <small>JPG, PNG ou WebP. Se o PNG já vier com fundo transparente, melhor ainda.</small>
+          </div>
+          <input type="file" id="arquivo" accept="image/*" multiple hidden>
+        </div>
+
+        <p class="aviso" id="recado-editor"></p>
+
+        <div class="adm-rodape">
+          <button class="btn btn--dark" type="button" id="salvar">Salvar produto</button>
+          <button class="mini" type="button" id="cancelar">Cancelar</button>
+          <button class="mini mini--perigo" type="button" id="excluir" hidden>Excluir produto</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- CONFIGURAÇÕES ---------- -->
+    <section class="adm-secao" id="secao-config" role="tabpanel" aria-labelledby="aba-config" hidden>
+      <div class="adm-cabecalho"><h2>Configurações</h2></div>
+      <div class="adm-editor">
+        <div class="linha">
+          <div class="campo">
+            <label for="c-whatsapp">WhatsApp</label>
+            <input id="c-whatsapp" type="text" inputmode="numeric" placeholder="5511999998888">
+            <small>Só números, com o 55 do Brasil e o DDD.</small>
+          </div>
+          <div class="campo">
+            <label for="c-instagram">Instagram</label>
+            <input id="c-instagram" type="text" placeholder="pandamimo">
+            <small>Só o nome do perfil, sem o arroba.</small>
+          </div>
+        </div>
+        <div class="linha">
+          <div class="campo">
+            <label for="c-tiktok">TikTok</label>
+            <input id="c-tiktok" type="text" placeholder="pandamimo">
+          </div>
+          <div class="campo">
+            <label for="c-aviso">Aviso da barra do topo</label>
+            <input id="c-aviso" type="text" maxlength="160" placeholder="Frete grátis para algumas regiões...">
+          </div>
+        </div>
+        <p class="aviso" id="recado-config"></p>
+        <div class="adm-rodape">
+          <button class="btn btn--dark" type="button" id="salvar-config">Salvar configurações</button>
+        </div>
+      </div>
+
+      <div class="adm-editor" style="margin-top:1rem">
+        <h3>Cópia de segurança</h3>
+        <p style="font-size:var(--fs-s);color:var(--ink-soft)">
+          O site guarda uma cópia do catálogo no arquivo <code>produtos.js</code>, usada quando o banco não
+          responde. Depois de mexer bastante nos produtos, baixe a cópia nova e substitua esse arquivo no site.
+        </p>
+        <div class="adm-rodape">
+          <button class="btn btn--peach btn--sm" type="button" id="baixar-copia">Baixar produtos.js</button>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- ---------- MÉTRICAS ---------- -->
+    <section class="adm-secao" id="secao-metricas" role="tabpanel" aria-labelledby="aba-metricas" hidden>
+      <div class="adm-cabecalho">
+        <h2>Métricas</h2>
+        <div class="seg" role="group" aria-label="Período">
+          <input type="radio" name="periodo" id="per-7" value="7"><label for="per-7">7 dias</label>
+          <input type="radio" name="periodo" id="per-30" value="30" checked><label for="per-30">30 dias</label>
+          <input type="radio" name="periodo" id="per-90" value="90"><label for="per-90">90 dias</label>
+        </div>
+      </div>
+      <p class="aviso" id="recado-metricas"></p>
+      <div class="met-numeros">
+        <div class="met-numero"><strong id="met-visitas">–</strong><span>visitas</span></div>
+        <div class="met-numero"><strong id="met-pageviews">–</strong><span>páginas vistas</span></div>
+        <div class="met-numero"><strong id="met-zap">–</strong><span>cliques no WhatsApp</span></div>
+        <div class="met-numero"><strong id="met-celular">–</strong><span>no celular</span></div>
+      </div>
+      <div class="linha" style="margin-top:1rem">
+        <div class="adm-editor"><h3>Visitas por dia</h3><ol class="met-lista" id="met-dias"></ol></div>
+        <div class="adm-editor"><h3>O que mais clicam</h3><ol class="met-lista" id="met-cliques"></ol></div>
+      </div>
+      <div class="adm-editor" style="margin-top:1rem"><h3>De onde vêm</h3><ol class="met-lista" id="met-origens"></ol></div>
+      <p class="campo" style="margin-top:.8rem"><small>Medição própria, sem cookie e sem rastrear pessoas: cada visita ganha um número aleatório que morre quando a aba fecha. Quem ativa "não rastrear" no navegador não entra na conta.</small></p>
+    </section>
+
+<!-- ---------- preparo da foto ---------- -->
+<dialog id="dialogo-foto">
+  <form method="dialog" class="preparo" style="max-width:min(92vw,640px);padding:1.2rem;border:0">
+    <h3 style="font-family:var(--f-display);font-weight:600;font-size:1.15rem">Preparar a foto</h3>
+    <div class="preparo__previa">
+      <div>
+        <div class="preparo__quadro preparo__quadro--xadrez"><img id="previa" alt="Prévia da foto preparada"></div>
+        <small style="color:var(--ink-soft)">Como o arquivo fica</small>
+      </div>
+      <div>
+        <div class="preparo__quadro"><img id="previa-site" alt="Prévia de como a foto aparece no site"></div>
+        <small style="color:var(--ink-soft)">Como aparece no site</small>
+      </div>
+    </div>
+    <label class="chave"><input type="checkbox" id="remover-fundo" checked> Remover o fundo automaticamente</label>
+    <div class="campo" id="bloco-tolerancia">
+      <label for="tolerancia">Força do recorte</label>
+      <input type="range" id="tolerancia" min="6" max="90" value="30">
+      <small>Se sobrou fundo, aumente. Se comeu pedaço do produto, diminua.</small>
+    </div>
+    <p class="aviso" id="recado-foto"></p>
+    <div class="adm-rodape">
+      <button class="btn btn--dark btn--sm" type="button" id="usar-foto">Usar esta foto</button>
+      <button class="mini" type="button" id="descartar-foto">Descartar</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="config.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>
