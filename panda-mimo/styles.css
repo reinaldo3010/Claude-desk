@@ -586,6 +586,18 @@ h2 .hand { font-size: 1.15em; }
 .product--soon { background: var(--cream); box-shadow: none; border: 2px dashed var(--sand); }
 .product--soon .product__cta { color: var(--ink-soft); }
 
+/* ---------- lançamentos em teste: cartão de peça com o selo "Em breve" sobre a ilustração ---------- */
+.product__selo {
+  position: absolute; top: .7rem; left: .7rem; z-index: 2;
+  padding: .3rem .7rem; border-radius: 999px;
+  background: var(--peach); color: var(--ink);
+  font-family: var(--f-body); font-weight: 800; font-size: var(--fs-xs);
+  letter-spacing: .08em; text-transform: uppercase; line-height: 1.2;
+  box-shadow: 0 2px 6px -2px rgba(23,21,18,.25);
+}
+.product--lancamento .carousel .carousel__slide img { cursor: default; }
+.product--lancamento .product__cta { color: var(--ink-soft); }
+
 /* ---------- cabeçalho de seção com adesivo ---------- */
 .section__head--sticker img { width: 120px; height: auto; margin-bottom: -.4rem; rotate: -6deg; }
 

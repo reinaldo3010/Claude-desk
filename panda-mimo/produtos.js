@@ -42,7 +42,8 @@ window.PANDA_PRODUTOS = [
     ],
     "ordem": 0,
     "preco_texto": "",
-    "detalhes": ""
+    "detalhes": "",
+    "lancamento": false
   },
   {
     "slug": "canecas",
@@ -84,7 +85,8 @@ window.PANDA_PRODUTOS = [
     ],
     "ordem": 1,
     "preco_texto": "",
-    "detalhes": ""
+    "detalhes": "",
+    "lancamento": false
   },
   {
     "slug": "copos-termicos",
@@ -126,7 +128,8 @@ window.PANDA_PRODUTOS = [
     ],
     "ordem": 2,
     "preco_texto": "",
-    "detalhes": ""
+    "detalhes": "",
+    "lancamento": false
   },
   {
     "slug": "ecobags",
@@ -156,7 +159,8 @@ window.PANDA_PRODUTOS = [
     ],
     "ordem": 3,
     "preco_texto": "",
-    "detalhes": ""
+    "detalhes": "",
+    "lancamento": false
   },
   {
     "slug": "tags-e-chaveiros",
@@ -180,7 +184,8 @@ window.PANDA_PRODUTOS = [
     ],
     "ordem": 4,
     "preco_texto": "",
-    "detalhes": ""
+    "detalhes": "",
+    "lancamento": false
   },
   {
     "slug": "kits-presenteaveis",
@@ -216,6 +221,132 @@ window.PANDA_PRODUTOS = [
     ],
     "ordem": 5,
     "preco_texto": "",
+    "detalhes": "",
+    "lancamento": false
+  },
+  {
+    "slug": "garrafa-da-escola",
+    "nome": "Garrafa da escola",
+    "descricao": "A irmã menor da garrafa térmica: 500 ml, inox, tampa fácil de abrir e o nome bem grande, pra não trocar na hora do lanche.",
+    "etiquetas": [
+      "500 ml",
+      "Inox",
+      "Nome bem grande"
+    ],
+    "mensagem": "Oi, Panda Mimo! Me avisa quando a garrafa da escola sair? 🐼",
+    "rotulo_botao": "Me avise",
+    "em_breve": false,
+    "lancamento": true,
+    "fotos": [
+      {
+        "url": "assets/lanc-garrafa-escola.webp",
+        "alt": "Pandinha abraçando uma garrafinha: ilustração do lançamento garrafa da escola",
+        "largura": 760,
+        "altura": 760
+      }
+    ],
+    "ordem": 6,
+    "preco_texto": "",
+    "detalhes": ""
+  },
+  {
+    "slug": "lancheira-e-necessaire",
+    "nome": "Lancheira e necessaire",
+    "descricao": "Do mesmo tecido cru da ecobag: uma lancheira térmica pra escola e uma necessaire pra bolsa, mala ou presente de madrinha. Com o nome bordado.",
+    "etiquetas": [
+      "Algodão cru",
+      "Forro térmico",
+      "Nome bordado"
+    ],
+    "mensagem": "Oi, Panda Mimo! Me avisa quando a lancheira e a necessaire saírem? 🐼",
+    "rotulo_botao": "Me avise",
+    "em_breve": false,
+    "lancamento": true,
+    "fotos": [
+      {
+        "url": "assets/lanc-lancheira-necessaire.webp",
+        "alt": "Pandinha espiando de dentro de uma caixa: ilustração do lançamento lancheira e necessaire",
+        "largura": 760,
+        "altura": 760
+      }
+    ],
+    "ordem": 7,
+    "preco_texto": "",
+    "detalhes": ""
+  },
+  {
+    "slug": "caneca-de-cha",
+    "nome": "Caneca de chá com infusor",
+    "descricao": "Porcelana com tampa e infusor de inox, pra quem prefere chá. Um cantinho de calma pra professora, pra mãe, pra você.",
+    "etiquetas": [
+      "Com tampa",
+      "Infusor de inox",
+      "Nome ou frase"
+    ],
+    "mensagem": "Oi, Panda Mimo! Me avisa quando a caneca de chá sair? 🐼",
+    "rotulo_botao": "Me avise",
+    "em_breve": false,
+    "lancamento": true,
+    "fotos": [
+      {
+        "url": "assets/lanc-caneca-cha.webp",
+        "alt": "Pandinha segurando um copo: ilustração do lançamento caneca de chá",
+        "largura": 760,
+        "altura": 760
+      }
+    ],
+    "ordem": 8,
+    "preco_texto": "",
+    "detalhes": ""
+  },
+  {
+    "slug": "kit-padrinhos",
+    "nome": "Kit padrinhos",
+    "descricao": "Caixa kraft, a peça com o nome de cada padrinho e a tag com a pergunta que importa: quer ser meu padrinho? Você escolhe copo, taça ou caneca.",
+    "etiquetas": [
+      "A partir de 4 unidades",
+      "Caixa kraft",
+      "Copo, taça ou caneca"
+    ],
+    "mensagem": "Oi, Panda Mimo! Me avisa quando o kit padrinhos sair? 🐼",
+    "rotulo_botao": "Me avise",
+    "em_breve": false,
+    "lancamento": true,
+    "fotos": [
+      {
+        "url": "assets/lanc-kit-padrinhos.webp",
+        "alt": "Pandinha abrindo uma caixa de presente com laço: ilustração do lançamento kit padrinhos",
+        "largura": 760,
+        "altura": 760
+      }
+    ],
+    "ordem": 9,
+    "preco_texto": "",
+    "detalhes": ""
+  },
+  {
+    "slug": "vale-mimo",
+    "nome": "Vale-mimo",
+    "descricao": "Um cartão em papel creme, com o Pandinha, pra presentear quando você sabe a pessoa mas não sabe a peça. Quem recebe escolhe e monta com a gente.",
+    "etiquetas": [
+      "Você escolhe o valor",
+      "Impresso ou digital",
+      "Vale qualquer peça"
+    ],
+    "mensagem": "Oi, Panda Mimo! Me avisa quando o vale-mimo sair? 🐼",
+    "rotulo_botao": "Me avise",
+    "em_breve": false,
+    "lancamento": true,
+    "fotos": [
+      {
+        "url": "assets/lanc-vale-mimo.webp",
+        "alt": "Pandinha abraçando um coração: ilustração do lançamento vale-mimo",
+        "largura": 760,
+        "altura": 760
+      }
+    ],
+    "ordem": 10,
+    "preco_texto": "",
     "detalhes": ""
   },
   {
@@ -237,8 +368,9 @@ window.PANDA_PRODUTOS = [
         "altura": 900
       }
     ],
-    "ordem": 6,
+    "ordem": 11,
     "preco_texto": "",
-    "detalhes": ""
+    "detalhes": "",
+    "lancamento": false
   }
 ];

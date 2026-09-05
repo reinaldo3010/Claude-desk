@@ -127,7 +127,7 @@ let produtos = [];
 let editando = null;   // produto em edição (null = nenhum)
 let fotosEditor = [];  // [{url, alt, largura, altura}]
 
-const CAMPOS = "id,slug,nome,descricao,detalhes,preco_texto,etiquetas,mensagem,rotulo_botao,ordem,publicado,em_breve,pm_produto_fotos(id,url,alt,ordem,largura,altura)";
+const CAMPOS = "id,slug,nome,descricao,detalhes,preco_texto,etiquetas,mensagem,rotulo_botao,ordem,publicado,em_breve,lancamento,pm_produto_fotos(id,url,alt,ordem,largura,altura)";
 
 async function carregaProdutos() {
   try {
@@ -153,7 +153,7 @@ function desenhaLista() {
         <div class="adm-item__nome"></div>
         <div class="adm-item__meta">
           <span class="selo ${p.publicado ? "selo--no-ar" : "selo--rascunho"}">${p.publicado ? "no ar" : "rascunho"}</span>
-          ${p.fotos.length} foto(s)${p.em_breve ? " · aviso de novidades" : ""}
+          ${p.fotos.length} foto(s)${p.em_breve ? " · aviso de novidades" : ""}${p.lancamento ? " · lançamento em teste" : ""}
         </div>
       </div>
       <div class="adm-item__acoes">
@@ -213,6 +213,7 @@ function abreEditor(p) {
   $("#p-botao").value = p ? p.rotulo_botao : "Quero essa";
   $("#p-publicado").checked = p ? p.publicado : true;
   $("#p-embreve").checked = p ? p.em_breve : false;
+  $("#p-lancamento").checked = p ? !!p.lancamento : false;
   $("#excluir").hidden = !p;
   recado("#recado-editor", "");
   desenhaFotos();
@@ -273,6 +274,7 @@ $("#salvar").addEventListener("click", async () => {
     rotulo_botao: $("#p-botao").value.trim() || "Quero essa",
     publicado: $("#p-publicado").checked,
     em_breve: $("#p-embreve").checked,
+    lancamento: $("#p-lancamento").checked,
   };
   recado("#recado-editor", "Salvando...");
   try {
@@ -582,7 +584,7 @@ $("#salvar-config").addEventListener("click", async () => {
 $("#baixar-copia").addEventListener("click", () => {
   const copia = produtos.filter((p) => p.publicado).map((p) => ({
     slug: p.slug, nome: p.nome, descricao: p.descricao, detalhes: p.detalhes || "", preco_texto: p.preco_texto || "", etiquetas: p.etiquetas,
-    mensagem: p.mensagem, rotulo_botao: p.rotulo_botao, em_breve: p.em_breve,
+    mensagem: p.mensagem, rotulo_botao: p.rotulo_botao, em_breve: p.em_breve, lancamento: !!p.lancamento,
     fotos: p.fotos.map((f) => ({ url: f.url, alt: f.alt, largura: f.largura, altura: f.altura })),
     ordem: p.ordem,
   }));
@@ -644,3 +646,10 @@ if (sessao.token) {
     $("#painel").hidden = true;
   });
 }
+
+/* lançamento em teste: o botão vira "Me avise" sozinho (e volta se desmarcar) */
+$("#p-lancamento").addEventListener("change", (e) => {
+  const botao = $("#p-botao");
+  if (e.target.checked && (!botao.value.trim() || /^quero ess[ae]$/i.test(botao.value.trim()))) botao.value = "Me avise";
+  if (!e.target.checked && /^me avise$/i.test(botao.value.trim())) botao.value = "Quero essa";
+});

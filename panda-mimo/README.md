@@ -127,6 +127,8 @@ O catálogo do site sai do banco de dados, e quem manda nele é o painel em **`a
 (`seusite.com.br/admin.html`). Lá dá para:
 
 - criar, editar, publicar, tirar do ar, reordenar e excluir produtos;
+- marcar uma peça como **lançamento em teste**: ela aparece no site com o selo "Em breve", uma pose do
+  Pandinha no lugar da foto e o botão "Me avise"; cada clique é medido com o nome da peça na aba Métricas;
 - subir fotos, reordenar, escrever a descrição de cada uma e apagar;
 - mudar o WhatsApp, o Instagram, o TikTok e o aviso da barra do topo;
 - baixar a cópia de segurança do catálogo (`produtos.js`).
@@ -158,7 +160,7 @@ mandar um PNG que já venha com fundo transparente.
 
 | Tabela | Para que serve |
 |---|---|
-| `pm_produtos` | um registro por produto: nome, descrição, texto de detalhe, preço, etiquetas, mensagem do WhatsApp, ordem, publicado |
+| `pm_produtos` | um registro por produto: nome, descrição, texto de detalhe, preço, etiquetas, mensagem do WhatsApp, ordem, publicado, lançamento em teste |
 | `pm_produto_fotos` | as fotos de cada produto, na ordem em que aparecem no carrossel |
 | `pm_config` | WhatsApp, Instagram, TikTok e o aviso do topo |
 | `pm_eventos` | medição própria: visitas, cliques e uso do simulador (lida pela função `pm_metricas`) |

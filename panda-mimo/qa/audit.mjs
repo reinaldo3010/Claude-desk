@@ -224,6 +224,34 @@ for (const [w, h] of viewports) {
     if (st0 !== `Foto 1 de ${n}`) fail(w, `${rotulo}: não voltou (status "${st0}")`);
   }
 
+  // lançamentos em teste: selo "Em breve" no quadro, ilustração, "Me avise" medido por peça, sem tela de detalhe
+  for (const card of await page.$$('.product--lancamento')) {
+    const r = await card.evaluate((el) => {
+      const selo = el.querySelector('.product__selo'); const cta = el.querySelector('.product__cta');
+      const rs = selo && selo.getBoundingClientRect(), rf = el.querySelector('.product__photo')?.getBoundingClientRect();
+      return {
+        nome: el.querySelector('h3')?.textContent.trim() || el.dataset.slug,
+        selo: selo ? selo.textContent.trim() : '', seloVisivel: !!rs && rs.width > 0 && getComputedStyle(selo).visibility !== 'hidden',
+        seloDentro: !!rs && !!rf && rs.left >= rf.left && rs.top >= rf.top && rs.right <= rf.right && rs.bottom <= rf.bottom,
+        temDetalhe: !!el.querySelector('.product__ver'), temPreco: !!el.querySelector('.product__preco'),
+        cta: cta ? cta.textContent.trim() : '', href: cta ? cta.href : '', rotulo: cta ? cta.dataset.rotulo || '' : '',
+        temFoto: !!el.querySelector('.carousel img'),
+      };
+    });
+    if (r.selo !== 'Em breve' || !r.seloVisivel) fail(w, `${r.nome}: lançamento sem o selo "Em breve"`);
+    else if (!r.seloDentro) fail(w, `${r.nome}: selo "Em breve" fora do quadro da ilustração`);
+    if (r.temDetalhe || r.temPreco) fail(w, `${r.nome}: lançamento não pode ter "Ver detalhes" nem preço`);
+    if (!r.cta.startsWith('Me avise')) fail(w, `${r.nome}: o botão do lançamento deveria ser "Me avise" (está "${r.cta}")`);
+    if (!/wa\.me/.test(r.href) || !/avisa/i.test(decodeURIComponent(r.href))) fail(w, `${r.nome}: o "Me avise" não abre o WhatsApp pedindo aviso do lançamento`);
+    if (!r.rotulo.includes(r.nome)) fail(w, `${r.nome}: o clique não seria medido com o nome da peça (rótulo "${r.rotulo}")`);
+    if (!r.temFoto) fail(w, `${r.nome}: lançamento sem ilustração no quadro`);
+    else {
+      await card.$eval('.carousel img', (i) => i.click());
+      await page.waitForTimeout(150);
+      if (await page.$eval('#detalhe', (d) => d.open)) { fail(w, `${r.nome}: clicar na ilustração de um lançamento abriu a tela de detalhe`); await page.$eval('#detalhe', (d) => d.close()); }
+    }
+  }
+
   // âncoras chegam abaixo do cabeçalho fixo
   const topH = await page.$eval('.topbar', (t) => t.getBoundingClientRect().height);
   for (const href of ['#produtos', '#monte', '#ocasioes', '#como-funciona', '#duvidas', '#contato', '#empresas', '#cuidados']) {
@@ -469,6 +497,15 @@ for (const [w, h] of viewports) {
   if (!tipos.includes('clique_whatsapp')) failures.push(`[medição] o clique no WhatsApp não foi registrado (eventos: ${tipos.join(', ') || 'nenhum'})`);
   const pv = eventos.find((e) => e.evento === 'pageview');
   if (pv && (!pv.sessao || pv.largura !== 390)) failures.push('[medição] a visita veio sem sessão ou sem a largura da tela');
+  // o "Me avise" de um lançamento chega com o nome da peça, para a aba Métricas separar o interesse por produto
+  const nomeLanc = await page.$eval('.product--lancamento h3', (h) => h.textContent.trim()).catch(() => '');
+  if (!nomeLanc) failures.push('[medição] não há lançamento em teste na cópia local para medir');
+  else {
+    await page.$eval('.product--lancamento .product__cta', (a) => { a.addEventListener('click', (e) => e.preventDefault(), { once: true }); a.click(); });
+    await page.waitForTimeout(400);
+    const ev = eventos.filter((e) => e.evento === 'clique_whatsapp').pop();
+    if (!ev || ev.rotulo !== `Me avise · ${nomeLanc}`) failures.push(`[medição] o "Me avise" de ${nomeLanc} não foi registrado com o nome da peça (veio "${ev && ev.rotulo}")`);
+  }
   await page.close();
 }
 
@@ -480,8 +517,12 @@ for (const [w, h] of viewports) {
     .map((p) => ({ ...p, pm_produto_fotos: p.fotos.map((f, i) => ({ ...f, ordem: i })) }));
   const produtoFalso = [{
     slug: 'produto-de-teste', nome: 'Produto de teste', descricao: 'Veio do banco.',
-    etiquetas: ['etiqueta'], mensagem: 'Oi!', rotulo_botao: 'Quero', em_breve: false,
+    etiquetas: ['etiqueta'], mensagem: 'Oi!', rotulo_botao: 'Quero', em_breve: false, lancamento: false,
     pm_produto_fotos: [{ url: 'assets/prod-tag.webp', alt: 'foto', ordem: 0, largura: 760, altura: 760 }],
+  }, {
+    slug: 'lancamento-de-teste', nome: 'Lançamento de teste', descricao: 'Ainda em teste.',
+    etiquetas: ['em teste'], mensagem: 'Oi! Me avisa?', rotulo_botao: 'Me avise', em_breve: false, lancamento: true,
+    pm_produto_fotos: [{ url: 'assets/lanc-vale-mimo.webp', alt: 'ilustração', ordem: 0, largura: 760, altura: 760 }],
   }];
   await page.route('**/rest/v1/pm_produtos*', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(produtoFalso) }));
   await page.route('**/rest/v1/pm_config*', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ whatsapp: '5511988887777', instagram: 'teste_ig', tiktok: 'teste_tt', aviso_topo: 'Aviso vindo do banco.' }]) }));
@@ -493,8 +534,10 @@ for (const [w, h] of viewports) {
     zap: document.querySelector('#lista-produtos .product__cta')?.href || '',
     aviso: document.querySelector('.announce__in p')?.textContent,
     insta: document.querySelector('.js-ig')?.href || '',
+    selo: document.querySelector('#lista-produtos .product--lancamento .product__selo')?.textContent.trim() || '',
   }));
-  if (r.quantos !== 1 || r.nome !== 'Produto de teste') failures.push(`[banco] catálogo do banco não substituiu a cópia local (${r.quantos} produto(s), "${r.nome}")`);
+  if (r.quantos !== 2 || r.nome !== 'Produto de teste') failures.push(`[banco] catálogo do banco não substituiu a cópia local (${r.quantos} produto(s), "${r.nome}")`);
+  if (r.selo !== 'Em breve') failures.push('[banco] um lançamento em teste vindo do banco não ganhou o selo "Em breve"');
   if (!r.zap.includes('5511988887777')) failures.push('[banco] o número de WhatsApp do banco não foi aplicado aos botões');
   if (r.aviso !== 'Aviso vindo do banco.') failures.push('[banco] o aviso do topo não veio do banco');
   if (!r.insta.includes('teste_ig')) failures.push('[banco] o Instagram do banco não foi aplicado');

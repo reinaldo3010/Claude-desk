@@ -1,6 +1,6 @@
 # Manual da marca Panda Mimo
 
-Versão 1.1 · setembro de 2026 · documento vivo
+Versão 1.2 · setembro de 2026 · documento vivo
 
 Este é o brand book da **Panda Mimo**, marca de itens personalizados. Ele registra o que a marca é,
 como fala, como se veste e como se comporta em cada ponto de contato. Foi escrito a partir da
@@ -178,6 +178,15 @@ Tags e chaveiros · Kits presenteáveis**, mais a faixa **Novidades em breve** (
 Nome de categoria no plural, em Fredoka; etiquetas curtas de especificação embaixo (1 litro ·
 24h gelada · 12h quente · Livre de BPA). Botão de cada peça: "Quero essa" (feminino) ou "Quero esse"
 (copo, kit), conforme o gênero da palavra.
+
+**Lançamentos em teste.** Uma peça nova entra no catálogo antes de existir, para medir interesse. O cartão
+é igual ao das peças, com três diferenças: o selo **Em breve** sobre o quadro; a ilustração é uma pose do
+Pandinha, nunca a foto de outra peça (para não parecer que o produto já existe); e o botão é **Me avise**,
+que abre o WhatsApp pedindo aviso do lançamento. Não tem preço nem tela de detalhe. O texto diz, no tom da
+marca, o que a peça vai ser, e as etiquetas trazem as especificações previstas. Cada clique é medido com
+o nome da peça (aba Métricas do painel: "Me avise · Garrafa da escola"). Lançamentos ficam depois das
+peças e antes da faixa "Novidades em breve". Quando a peça for fotografada e entrar em produção, o cartão
+vira peça normal: foto real, "Quero essa", detalhe.
 
 ### 4.5 Ocasiões (vocabulário fixo)
 Dia das Mães e dos Pais · Aniversário · Professores · Padrinhos e casamento · Empresas e eventos ·
@@ -548,4 +557,5 @@ adereço pequeno no Pandinha em datas comemorativas, com aprovação prévia (6.
 | Data | Versão | O que mudou |
 |---|---|---|
 | set/2026 | 1.0 | Primeira edição, consolidando a identidade aplicada no site (paleta, tipografia, logo, mascote, tom de voz, aplicações, governança). |
+| set/2026 | 1.2 | Lançamentos em teste (4.4): cartão com selo "Em breve", ilustração do Pandinha e botão "Me avise" medido por peça; entram os cinco primeiros (garrafa da escola, lancheira e necessaire, caneca de chá, kit padrinhos, vale-mimo). |
 | set/2026 | 1.1 | Dono aprova todas as propostas da 1.0: propósito, público, posicionamento, nome oficial do mascote (Pandinha), saudação do WhatsApp, bio e hashtags, rituais de pós-venda, impressos. Seção 14 vira registro de decisões e pendências operacionais. |

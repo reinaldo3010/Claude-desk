@@ -67,7 +67,7 @@ const medir = (() => {
 medir("pageview");
 document.addEventListener("click", (e) => {
   const zap = e.target.closest(".js-wa");
-  if (zap) medir("clique_whatsapp", zap.textContent || zap.getAttribute("aria-label") || "whatsapp");
+  if (zap) medir("clique_whatsapp", zap.dataset.rotulo || zap.textContent || zap.getAttribute("aria-label") || "whatsapp");
   const nav = e.target.closest(".carousel__nav, .carousel__dot");
   if (nav) medir("carrossel", nav.closest("[data-carousel]")?.getAttribute("aria-label") || "");
 });
@@ -84,16 +84,18 @@ function fotoHTML(f) {
 
 function vitrineHTML(p) {
   const fotos = p.fotos || [];
-  if (!fotos.length) return '<div class="product__photo carousel carousel--unica"></div>';
+  /* lançamento em teste: o selo "Em breve" fica sobre o quadro, lido antes da ilustração */
+  const selo = p.lancamento ? '<span class="product__selo">Em breve</span>' : "";
+  if (!fotos.length) return `<div class="product__photo carousel carousel--unica">${selo}</div>`;
   if (p.em_breve) return `<div class="product__photo product__photo--sticker">${fotoHTML(fotos[0])}</div>`;
   if (fotos.length === 1)
-    return `<div class="product__photo carousel carousel--unica"><ul class="carousel__track"><li class="carousel__slide">${fotoHTML(fotos[0])}</li></ul></div>`;
+    return `<div class="product__photo carousel carousel--unica">${selo}<ul class="carousel__track"><li class="carousel__slide">${fotoHTML(fotos[0])}</li></ul></div>`;
 
   const slides = fotos.map((f) => `<li class="carousel__slide">${fotoHTML(f)}</li>`).join("");
   const bolinhas = fotos
     .map((_, i) => `<button type="button" class="carousel__dot" aria-label="Ver a foto ${i + 1} de ${fotos.length}"${i === 0 ? ' aria-current="true"' : ""}></button>`)
     .join("");
-  return `<div class="product__photo carousel" data-carousel role="group" aria-label="Fotos: ${esc(p.nome)}">
+  return `<div class="product__photo carousel" data-carousel role="group" aria-label="Fotos: ${esc(p.nome)}">${selo}
       <ul class="carousel__track">${slides}</ul>
       <button type="button" class="carousel__nav carousel__nav--prev" aria-label="Foto anterior">‹</button>
       <button type="button" class="carousel__nav carousel__nav--next" aria-label="Próxima foto">›</button>
@@ -104,16 +106,19 @@ function vitrineHTML(p) {
 
 function produtoHTML(p) {
   const etiquetas = (p.etiquetas || []).map((e) => `<li>${esc(e)}</li>`).join("");
-  return `<article class="product${p.em_breve ? " product--soon" : ""}" data-slug="${esc(p.slug)}">
+  const rotulo = p.rotulo_botao || (p.lancamento ? "Me avise" : "Quero essa");
+  const classes = ["product", p.em_breve ? "product--soon" : "", p.lancamento ? "product--lancamento" : ""].filter(Boolean).join(" ");
+  const semDetalhe = p.em_breve || p.lancamento; // aviso e lançamento não têm tela de detalhe
+  return `<article class="${classes}" data-slug="${esc(p.slug)}">
       ${vitrineHTML(p)}
       <div class="product__body">
         <h3>${esc(p.nome)}</h3>
-        ${p.preco_texto ? `<p class="product__preco">${esc(p.preco_texto)}</p>` : ""}
+        ${p.preco_texto && !p.lancamento ? `<p class="product__preco">${esc(p.preco_texto)}</p>` : ""}
         <p>${esc(p.descricao)}</p>
         <ul class="chips">${etiquetas}</ul>
-        ${p.em_breve ? "" : '<button class="product__ver" type="button">Ver detalhes</button>'}
+        ${semDetalhe ? "" : '<button class="product__ver" type="button">Ver detalhes</button>'}
       </div>
-      <a class="product__cta js-wa" href="#contato" data-msg="${esc(p.mensagem)}">${esc(p.rotulo_botao || "Quero essa")} <span aria-hidden="true">›</span></a>
+      <a class="product__cta js-wa" href="#contato" data-msg="${esc(p.mensagem)}" data-rotulo="${esc(rotulo)} · ${esc(p.nome)}">${esc(rotulo)} <span aria-hidden="true">›</span></a>
     </article>`;
 }
 
@@ -122,7 +127,7 @@ function produtoHTML(p) {
    no carrossel e perderia a posição da rolagem. */
 function assinatura(produtos) {
   return JSON.stringify(produtos.map((p) => [
-    p.nome, p.descricao, p.detalhes || "", p.preco_texto || "", p.rotulo_botao, p.mensagem, p.em_breve,
+    p.nome, p.descricao, p.detalhes || "", p.preco_texto || "", p.rotulo_botao, p.mensagem, p.em_breve, !!p.lancamento,
     p.etiquetas || [], (p.fotos || []).map((f) => [f.url, f.alt]),
   ]));
 }
@@ -185,7 +190,7 @@ const baseDoProduto = (p) => {
 
 function abreDetalhe(slug, gatilho) {
   const p = produtosNaTela.find((x) => x.slug === slug);
-  if (!p || p.em_breve) return;
+  if (!p || p.em_breve || p.lancamento) return;
   voltarFocoPara = gatilho && gatilho.focus ? gatilho : null;
 
   document.getElementById("detalhe-titulo").textContent = p.nome;
@@ -211,6 +216,7 @@ function abreDetalhe(slug, gatilho) {
   const zap = document.getElementById("detalhe-zap");
   zap.dataset.msg = p.mensagem || `Oi, Panda Mimo! Quero ${p.nome} 🐼`;
   zap.textContent = p.rotulo_botao || "Quero essa";
+  zap.dataset.rotulo = `${p.rotulo_botao || "Quero essa"} · ${p.nome} · detalhe`;
   aplicaContatos(detalhe);
 
   const pers = document.getElementById("detalhe-personalizar");
@@ -248,7 +254,7 @@ document.getElementById("detalhe-personalizar").addEventListener("click", (e) =>
 
 lista.addEventListener("click", (e) => {
   const art = e.target.closest(".product");
-  if (!art || art.classList.contains("product--soon")) return;
+  if (!art || art.classList.contains("product--soon") || art.classList.contains("product--lancamento")) return;
   const botao = e.target.closest(".product__ver");
   const foto = e.target.closest(".carousel__slide img");
   if (botao || foto) abreDetalhe(art.dataset.slug, botao || foto);
@@ -272,7 +278,7 @@ async function carregaDoBanco() {
   const parar = AbortSignal.timeout ? AbortSignal.timeout(6000) : undefined;
   try {
     const [rp, rc] = await Promise.all([
-      fetch(`${cfg.URL}/rest/v1/pm_produtos?select=slug,nome,descricao,detalhes,preco_texto,etiquetas,mensagem,rotulo_botao,em_breve,pm_produto_fotos(url,alt,ordem,largura,altura)&publicado=eq.true&order=ordem`, { headers: cabecalho, signal: parar }),
+      fetch(`${cfg.URL}/rest/v1/pm_produtos?select=slug,nome,descricao,detalhes,preco_texto,etiquetas,mensagem,rotulo_botao,em_breve,lancamento,pm_produto_fotos(url,alt,ordem,largura,altura)&publicado=eq.true&order=ordem`, { headers: cabecalho, signal: parar }),
       fetch(`${cfg.URL}/rest/v1/pm_config?select=whatsapp,instagram,tiktok,aviso_topo&limit=1`, { headers: cabecalho, signal: parar }),
     ]);
     if (rc.ok) {
