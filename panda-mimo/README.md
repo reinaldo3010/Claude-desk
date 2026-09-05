@@ -37,6 +37,9 @@ A marca tem um brand book próprio, escrito a partir da identidade aprovada no s
   cores com HEX/RGB/CMYK, tipografia, elementos, fotografia, aplicações, governança e histórico).
 - **`marca/index.html`**: a versão visual, com amostras de cor, tipo, logo, mascote e aplicações.
   Não é indexada nem linkada no site; abra direto no navegador.
+- **`marca/manual-da-marca-panda-mimo.pdf`**: a mesma versão visual em PDF (A4, 20 páginas, fontes
+  embutidas), para mandar a quem não abre o site. Para gerar de novo depois de uma mudança: abra
+  `marca/index.html` no Chrome e imprima em PDF, A4, com "gráficos de fundo" ligados.
 
 Regra da casa: qualquer evolução do site ou de material da marca começa consultando o manual, e
 qualquer mudança de regra é registrada no histórico dele. O `CLAUDE.md` na raiz do repositório

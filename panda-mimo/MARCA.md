@@ -1,6 +1,6 @@
 # Manual da marca Panda Mimo
 
-Versão 1.0 · setembro de 2026 · documento vivo
+Versão 1.1 · setembro de 2026 · documento vivo
 
 Este é o brand book da **Panda Mimo**, marca de itens personalizados. Ele registra o que a marca é,
 como fala, como se veste e como se comporta em cada ponto de contato. Foi escrito a partir da
@@ -11,8 +11,9 @@ protege a que existe.
 manual discordarem, o manual está certo e o site precisa ser corrigido (ou o manual, atualizado de
 propósito, com registro no histórico ao final).
 
-Itens marcados com **(proposta)** são recomendações estratégicas ainda não validadas pelo dono.
-Todo o resto descreve o que já está em uso.
+Tudo o que está aqui foi validado pelo dono da marca (as propostas estratégicas da primeira edição
+foram aprovadas em setembro de 2026). Quando algo novo entrar como sugestão, virá marcado como
+"proposta" até ser aprovado.
 
 A versão visual deste manual, com amostras de cor, tipo, logo e mascote, está em `marca/index.html`.
 
@@ -28,7 +29,7 @@ A versão visual deste manual, com amostras de cor, tipo, logo e mascote, está 
 | **Assinatura** | *Feito com carinho, feito pra você.* |
 | **Ideia central** | Um **mimo** é mais que um presente: é a prova de que alguém pensou em você. A Panda Mimo transforma objetos do dia a dia nessa prova. |
 | **Personalidade** | Carinhosa, caprichosa, próxima, leve. |
-| **Mascote** | O Pandinha: um panda fofo, de aparência macia, que abraça a peça e fala pelo cliente. |
+| **Mascote** | Pandinha: um panda fofo, de aparência macia, que abraça a peça e fala pelo cliente. |
 | **Cores** | Creme de papel, pêssego como acento, nanquim quente para texto, sálvia e areia como apoio. |
 | **Tipografia** | Fredoka (títulos), Caveat (manuscrito), Nunito (texto). |
 | **Tom** | Fala como uma pessoa querida que sabe fazer bem feito: "a gente", "pra", frases curtas, promessa concreta. |
@@ -37,7 +38,7 @@ A versão visual deste manual, com amostras de cor, tipo, logo e mascote, está 
 
 ## 2. Estratégia
 
-### 2.1 Propósito (proposta)
+### 2.1 Propósito
 Fazer com que gestos pequenos de afeto ganhem forma e durem: um nome numa garrafa que vai para a
 escola todo dia diz "pensei em você" todas as manhãs.
 
@@ -50,7 +51,7 @@ nenhuma peça de comunicação pode contradizer:
 3. **Embalado como presente, sempre.** Caixa kraft, proteção e bilhetinho, sem valor na caixa.
 4. **Se vier errado, a gente refaz.** Sem custo, com frete, em até 7 dias após o recebimento.
 
-### 2.3 Para quem (proposta)
+### 2.3 Para quem
 - **Quem presenteia com intenção:** mães, pais, madrinhas, amigas, alunos e pais de alunos, noivos.
   Querem um presente que pareça pensado, não comprado às pressas. Preço não é o primeiro filtro; o
   cuidado é.
@@ -59,7 +60,7 @@ nenhuma peça de comunicação pode contradizer:
 - **Empresas, escolas e eventos:** brindes e lembrancinhas em quantidade, com arte por nome e prazo
   confiável. Entram pelo mesmo cuidado, com preço por volume.
 
-### 2.4 Posicionamento (proposta)
+### 2.4 Posicionamento
 Entre a papelaria personalizada de bairro (rápida, sem prévia, sem embalagem) e as lojas de
 presentes premium (bonitas, impessoais), a Panda Mimo é a **marca de presentes personalizados que
 trata cada peça como um mimo**: prévia, arte por nome, embalagem de presente e um mascote que
@@ -122,7 +123,7 @@ adultos que presenteiam), não é luxo frio. Não fala em "produto", fala em **p
 > Um mimo pra cada momento
 > Escolha a base, conte o que quer escrever e a gente cuida do resto.
 
-**WhatsApp (saudação automática, proposta)**
+**WhatsApp (saudação automática)**
 > Oi! Aqui é a Panda Mimo 🐼 Que bom te ver por aqui. Me conta a ideia: pra quem é o mimo e o que
 > você quer escrever nele? Se já souber a peça (garrafa, caneca, copo, ecobag ou tag), melhor ainda.
 
@@ -235,7 +236,8 @@ orelhas e almofadinhas das patas em rosa-pêssego, olhos grandes e brilhantes, u
 cabeça. Acabamento macio e volumoso, como pelúcia ou adesivo inflado. Ele é **o cuidado da marca em
 forma de personagem**: quem embala, quem entrega, quem diz "feito pra você".
 
-Nome de tratamento: **Pandinha** (proposta). É como o site já o chama no simulador ("Com o pandinha").
+Nome oficial: **Pandinha**. É como o site já o chama no simulador ("Com o pandinha") e como a marca
+se refere a ele em qualquer canal.
 
 ### 6.2 Papel na comunicação
 - Ele **acompanha**, nunca compete com a peça. Segura, abraça, entrega, espia, aponta.
@@ -264,8 +266,9 @@ Nome de tratamento: **Pandinha** (proposta). É como o site já o chama no simul
 - Expressões: alegre, curioso, sonolento, apaixonado. Nunca triste, bravo, sarcástico, assustado.
 - Não redesenhar em outro estilo (flat, realista, pixel, 3D duro). Poses novas devem sair do mesmo
   traço e do mesmo acabamento, e entram no acervo com nome `panda-<pose>.webp`.
-- Não vestir com roupas de marca, uniformes ou temas fora do universo da Panda Mimo (proposta: datas
-  comemorativas podem ganhar um adereço pequeno, como um laço ou um chapéu de festa, com aprovação).
+- Não vestir com roupas de marca, uniformes ou temas fora do universo da Panda Mimo. Em datas
+  comemorativas ele pode ganhar um adereço pequeno (um laço, um chapéu de festa), sempre no mesmo traço
+  e com aprovação do dono antes de publicar.
 
 ---
 
@@ -423,17 +426,17 @@ Caveat + lede) e passa pelo guardião de qualidade antes de publicar.
   entendendo a ideia, não pedindo CEP.
 - Roteiro em 4 passos, igual ao site: **Escolha a base → Conte a ideia → Aprove a prévia → Receba em
   casa.** A cada passo, uma mensagem curta, com o Pandinha só na saudação e na entrega da prévia.
-- Catálogo do WhatsApp Business (proposta): mesmas fotos `prod-*`, mesmas descrições do site.
+- Catálogo do WhatsApp Business: mesmas fotos `prod-*`, mesmas descrições do site.
 
 ### 11.3 Instagram e TikTok
-- Avatar: selo redondo. Nome: Panda Mimo. Bio (proposta): "Garrafas, canecas, copos e ecobags com o
+- Avatar: selo redondo. Nome: Panda Mimo. Bio: "Garrafas, canecas, copos e ecobags com o
   seu nome 🐼 Feito com carinho, feito pra você. Pedidos no WhatsApp ↓".
 - Grade em três tipos de post, alternados: **peça** (foto de catálogo sobre papel com pontilhado, nome
   da peça em Fredoka), **em uso** (foto de contexto, sem texto), **bastidores** (peça "saindo do forno",
   embalagem, bilhete, com um manuscrito em Caveat).
 - Stories: fundo papel ou areia suave, adesivos do acervo (faixas, corações, patas), Pandinha em um
   canto. Texto em Fredoka ou Nunito; manuscrito só como sticker.
-- Hashtags (proposta): #pandamimo #feitocomcarinho #presentepersonalizado #garrafapersonalizada
+- Hashtags: #pandamimo #feitocomcarinho #presentepersonalizado #garrafapersonalizada
   #canecapersonalizada. No máximo cinco.
 
 ### 11.4 Embalagem
@@ -460,7 +463,7 @@ A peça é do cliente: o logo dele vai na frente, no tamanho que ele quiser. A P
 tag, na caixa ou em gravação pequena no fundo da peça. Em gravação monocromática (laser, silk), usa-se
 o logo empilhado em uma cor: nanquim sobre peça clara, papel sobre peça escura.
 
-### 11.8 Impressos e materiais de feira (proposta)
+### 11.8 Impressos e materiais de feira
 Cartão de visita 9×5 cm em papel creme texturizado: frente com a pílula, verso com o QR do WhatsApp e
 "Vamos fazer o seu?". Banner: hero do site em pé (mascote + assinatura + três peças).
 
@@ -479,7 +482,7 @@ Cartão de visita 9×5 cm em papel creme texturizado: frente com a pílula, vers
 Prévia antes de produzir · embalagem de presente inclusa · refazer sem custo em 7 dias · atendimento
 humano · sem pedido mínimo (exceto tags/chaveiros, 10 unidades).
 
-### 12.3 Rituais (proposta)
+### 12.3 Rituais
 - **"Saindo do forno":** foto da peça pronta enviada ao cliente antes do envio, com o Pandinha do joinha.
 - **Bilhete sempre escrito**, mesmo quando o cliente não manda mensagem.
 - **Pós-venda em 7 dias:** uma mensagem perguntando se chegou bem e lembrando os cuidados da peça.
@@ -526,14 +529,18 @@ peça" → 7.4 e 10.3. "Quero mudar a assinatura" → 4.3, e é decisão do dono
 
 ---
 
-## 14. Pendências para o dono validar
-- Propósito, público e posicionamento (2.1, 2.3, 2.4) como estão escritos.
-- Nome do mascote: **Pandinha**.
-- Bio e hashtags das redes (11.3); saudação automática do WhatsApp (3.5).
-- Rituais de pós-venda (12.3).
+## 14. Decisões tomadas e pendências operacionais
+
+**Aprovado pelo dono em setembro de 2026:** propósito, público e posicionamento (2.1, 2.3, 2.4); o nome
+**Pandinha** para o mascote (6.1); saudação automática do WhatsApp (3.5); catálogo do WhatsApp Business
+(11.2); bio e hashtags das redes (11.3); impressos de feira (11.8); rituais de pós-venda (12.3);
+adereço pequeno no Pandinha em datas comemorativas, com aprovação prévia (6.4).
+
+**Pendências operacionais (fora do manual, mas necessárias):**
 - Registro da marca no INPI (nome e logo) e reserva de `pandamimo` nas redes e no domínio.
 - Fornecedor de embalagem (caixa kraft, fita pêssego, tag e bilhete) alinhado à seção 11.4.
 - Prova impressa das cores (7.1) antes de qualquer material gráfico.
+- Configurar no WhatsApp Business a saudação da seção 3.5 e o catálogo da seção 11.2.
 
 ---
 
@@ -541,3 +548,4 @@ peça" → 7.4 e 10.3. "Quero mudar a assinatura" → 4.3, e é decisão do dono
 | Data | Versão | O que mudou |
 |---|---|---|
 | set/2026 | 1.0 | Primeira edição, consolidando a identidade aplicada no site (paleta, tipografia, logo, mascote, tom de voz, aplicações, governança). |
+| set/2026 | 1.1 | Dono aprova todas as propostas da 1.0: propósito, público, posicionamento, nome oficial do mascote (Pandinha), saudação do WhatsApp, bio e hashtags, rituais de pós-venda, impressos. Seção 14 vira registro de decisões e pendências operacionais. |
