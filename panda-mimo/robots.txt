@@ -1,6 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /admin.html
+Disallow: /marca/
 
-# troque SEU-DOMINIO pelo endereço final do site
-Sitemap: https://SEU-DOMINIO/sitemap.xml
+Sitemap: https://reinaldo3010.github.io/Claude-desk/sitemap.xml

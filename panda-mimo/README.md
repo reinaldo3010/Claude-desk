@@ -12,12 +12,15 @@ Aponte para a pasta `panda-mimo/` (o arquivo de entrada é `index.html`).
 WhatsApp, Instagram, TikTok e o aviso do topo se mudam pelo **painel** (`admin.html`), sem mexer em código.
 O `CONTATO` em `script.js` é só o valor de reserva usado enquanto o banco não responde.
 
-Coisas que dependem do domínio final e por isso ficaram marcadas (o guardião avisa enquanto não forem feitas):
+O site é publicado automaticamente no **GitHub Pages**, em
+`https://reinaldo3010.github.io/Claude-desk/`, pelo fluxo `.github/workflows/panda-mimo-pages.yml`:
+a cada mudança na branch publicada, o guardião roda (390 e 1280 px) e, se passar, a pasta `panda-mimo/`
+vai ao ar sem os arquivos de teste. O `canonical`, o `og:url`, a `og:image`, o `robots.txt` e o
+`sitemap.xml` já apontam para esse endereço, e o guardião reprova se algum deles divergir.
 
-- Em `index.html`, troque a `og:image` relativa por um endereço completo
-  (`https://seudominio.com.br/assets/og.jpg`). WhatsApp e Facebook não aceitam caminho relativo.
-- Ainda no `<head>`, acrescente `<link rel="canonical" href="https://seudominio.com.br/">`.
-- Em `robots.txt` e `sitemap.xml`, substitua `SEU-DOMINIO` pelo endereço final.
+Para mudar para um domínio próprio: configure o domínio em Settings → Pages, troque as quatro linhas
+do `<head>` (`og:url`, `og:image`, `twitter:image`, `canonical`), o `Sitemap:` do `robots.txt` e o
+`<loc>` do `sitemap.xml`, e rode o guardião.
 
 Em `index.html`, revise também os textos que são propostas:
 

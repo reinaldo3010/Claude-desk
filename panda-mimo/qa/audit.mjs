@@ -418,7 +418,8 @@ for (const [w, h] of viewports) {
     return {
       faviconPng: !!q('link[rel="icon"][type="image/png"]'),
       apple: !!q('link[rel="apple-touch-icon"]'),
-      og, ogDim: /\.(jpe?g|png)$/i.test(og) ? await mede(og) : null,
+      og, ogDim: /\.(jpe?g|png)$/i.test(og) ? await mede(og.includes('assets/') ? og.slice(og.indexOf('assets/')) : og) : null,
+      ogUrl: q('meta[property="og:url"]')?.content || '',
       twitter: q('meta[name="twitter:card"]')?.content || '',
       canonical: q('link[rel="canonical"]')?.href || '',
     };
@@ -434,6 +435,16 @@ for (const [w, h] of viewports) {
     if (!fs.existsSync(path.resolve(here, '..', f))) failures.push(`[lançamento] falta o arquivo ${f}`);
   if (fs.existsSync(path.resolve(here, '..', 'sitemap.xml')) && fs.readFileSync(path.resolve(here, '..', 'sitemap.xml'), 'utf8').includes('SEU-DOMINIO'))
     warnings.push('[antes de ir ao ar] sitemap.xml e robots.txt ainda têm SEU-DOMINIO no lugar do endereço');
+  // canonical, og:url, og:image, robots e sitemap precisam apontar para o mesmo endereço
+  if (/^https?:\/\//.test(cab.canonical)) {
+    const base = cab.canonical.replace(/[^/]*$/, '');
+    const robots = fs.existsSync(path.resolve(here, '..', 'robots.txt')) ? fs.readFileSync(path.resolve(here, '..', 'robots.txt'), 'utf8') : '';
+    const sitemap = fs.existsSync(path.resolve(here, '..', 'sitemap.xml')) ? fs.readFileSync(path.resolve(here, '..', 'sitemap.xml'), 'utf8') : '';
+    if (cab.ogUrl && cab.ogUrl !== cab.canonical) failures.push(`[cabeçalho] og:url (${cab.ogUrl}) diferente do canonical (${cab.canonical})`);
+    if (/^https?:\/\//.test(cab.og) && !cab.og.startsWith(base)) failures.push(`[cabeçalho] og:image aponta para outro endereço (${cab.og}) que não o canonical (${base})`);
+    if (!robots.includes(`Sitemap: ${base}sitemap.xml`)) failures.push(`[lançamento] robots.txt não aponta para ${base}sitemap.xml`);
+    if (!sitemap.includes(`<loc>${cab.canonical}</loc>`)) failures.push(`[lançamento] sitemap.xml não tem <loc>${cab.canonical}</loc>`);
+  }
 
   // link direto para um produto abre o detalhe
   await page.goto(page_url + '#produto/canecas', { waitUntil: 'load' });
