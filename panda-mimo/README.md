@@ -60,6 +60,58 @@ node qa/audit.mjs --links         # lista todos os links e botões testados
 O mesmo auditor roda no GitHub Actions em todo pull request que toque em `panda-mimo/`
 (`.github/workflows/panda-mimo-qa.yml`), com as capturas anexadas ao resultado.
 
+## Painel de administração
+
+O catálogo do site sai do banco de dados, e quem manda nele é o painel em **`admin.html`**
+(`seusite.com.br/admin.html`). Lá dá para:
+
+- criar, editar, publicar, tirar do ar, reordenar e excluir produtos;
+- subir fotos, reordenar, escrever a descrição de cada uma e apagar;
+- mudar o WhatsApp, o Instagram, o TikTok e o aviso da barra do topo;
+- baixar a cópia de segurança do catálogo (`produtos.js`).
+
+### Primeiro acesso
+
+1. No painel do Supabase, em **Authentication → Users → Add user**, crie o usuário com o
+   e-mail que já está na tabela `pm_admins` e marque para confirmar automaticamente.
+2. Abra `admin.html` no navegador e entre com esse e-mail e a senha.
+
+Para liberar outra pessoa, basta acrescentar o e-mail dela em `pm_admins`.
+
+### Como as fotos são tratadas
+
+Toda foto enviada pelo painel é preparada no próprio navegador antes de subir: ela é
+reduzida, tem o fundo removido, é recortada no contorno da peça e centralizada num quadro
+quadrado de 760 px com fundo transparente. Antes de aceitar, o painel confere as mesmas
+regras que o guardião cobra do site e recusa a foto explicando o motivo quando:
+
+- o fundo não saiu (canto opaco);
+- a peça ficou encostando na borda (risco de estar cortada);
+- o resultado é um retângulo de foto em vez da peça recortada;
+- o recorte comeu quase tudo e sobrou só um pedacinho.
+
+Se o recorte automático não der conta, há um controle de força e a saída sempre disponível:
+mandar um PNG que já venha com fundo transparente.
+
+### Estrutura no banco
+
+| Tabela | Para que serve |
+|---|---|
+| `pm_produtos` | um registro por produto: nome, descrição, etiquetas, mensagem do WhatsApp, ordem, publicado |
+| `pm_produto_fotos` | as fotos de cada produto, na ordem em que aparecem no carrossel |
+| `pm_config` | WhatsApp, Instagram, TikTok e o aviso do topo |
+| `pm_admins` | os e-mails que podem alterar o catálogo |
+
+As regras de acesso ficam no próprio banco: qualquer visitante lê o que está publicado,
+mas gravar exige estar na lista de administradores. Por isso a chave que aparece em
+`config.js` pode ficar visível no site sem risco.
+
+### Se o banco não responder
+
+O site nunca fica sem catálogo: ele nasce com a cópia de `produtos.js` e só troca pelo que
+vem do banco quando a resposta chega. Depois de mexer bastante nos produtos, baixe a cópia
+nova pelo painel e substitua esse arquivo no site.
+
 ## Estrutura
 
 ```
@@ -67,6 +119,11 @@ panda-mimo/
 ├── index.html   página única
 ├── styles.css   estilos (paleta e tipografia da marca)
 ├── script.js    links de WhatsApp e o simulador "Monte seu mimo"
+├── produtos.js  cópia do catálogo, usada quando o banco não responde
+├── config.js    endereço e chave pública do banco
+├── admin.html   painel de administração
+├── admin.js     conversa com o banco e prepara as fotos
+├── admin.css    estilo do painel
 ├── qa/audit.mjs guardião: auditoria visual e funcional com Playwright
 ├── package.json scripts do guardião (npm test)
 └── assets/      logo, mascote, adesivos, mockups e ícones extraídos das folhas transparentes da marca (WebP)

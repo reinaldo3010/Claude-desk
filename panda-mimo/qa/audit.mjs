@@ -15,6 +15,9 @@
       quantidade 1/maior/inválida; texto que não cabe na peça; mensagem sem algum dado
     - FAQ: só um aberto por vez, aria-expanded coerente, resposta não cortada
     - carrossel: bolinhas na quantidade certa, avança e volta, status coerente
+    - catálogo do banco substituindo a cópia local (com o banco simulado)
+    - painel (admin.html): carrega sem erro, exige login, e o preparo de foto
+      recusa fundo sólido e entrega quadro quadrado transparente
     - foto de produto que não seja um quadro quadrado transparente: fundo retangular
       aparecendo nos cantos, ou peça encostando na borda (risco de estar cortada)
     - erro de console; requisição local falhando (404 etc.)
@@ -57,9 +60,10 @@ for (const [w, h] of viewports) {
   const page = await browser.newPage({ viewport: { width: w, height: h }, deviceScaleFactor: 1 });
   const consoleErrors = [], netFailures = [];
   page.on('pageerror', (e) => consoleErrors.push(e.message));
-  page.on('console', (m) => m.type() === 'error' && !/fonts\.g|net::ERR_CONNECTION|ERR_NAME|ERR_INTERNET/.test(m.text()) && consoleErrors.push(m.text()));
-  page.on('requestfailed', (r) => !/fonts\.g|gstatic/.test(r.url()) && netFailures.push(`${r.url().slice(0, 80)} ${r.failure()?.errorText}`));
-  page.on('response', (r) => r.status() >= 400 && netFailures.push(`${r.status()} ${r.url().slice(0, 80)}`));
+  page.on('console', (m) => m.type() === 'error' && !/fonts\.g|Failed to load resource|net::ERR_/.test(m.text()) && consoleErrors.push(m.text()));
+  const externo = (u) => !u.startsWith('file://');
+  page.on('requestfailed', (r) => !externo(r.url()) && netFailures.push(`${r.url().slice(0, 80)} ${r.failure()?.errorText}`));
+  page.on('response', (r) => r.status() >= 400 && !externo(r.url()) && netFailures.push(`${r.status()} ${r.url().slice(0, 80)}`));
   await page.goto(page_url, { waitUntil: 'load' });
   await loadImages(page);
   await page.addStyleTag({ content: 'html{scroll-behavior:auto!important}' });
@@ -123,6 +127,17 @@ for (const [w, h] of viewports) {
     }
     for (const a of document.querySelectorAll('a, button')) if (visible(a) && !a.textContent.trim() && !a.getAttribute('aria-label')) out.push(`link/botão sem texto nem aria-label: ${a.className}`);
     for (const inp of document.querySelectorAll('input')) if (!document.querySelector(`label[for="${inp.id}"]`) && !inp.getAttribute('aria-label')) out.push(`campo sem label: #${inp.id}`);
+
+    // o catálogo é montado a partir dos dados: sem ele a seção fica vazia
+    const cartoes = document.querySelectorAll('#lista-produtos .product');
+    if (cartoes.length < 2) out.push(`catálogo com só ${cartoes.length} produto(s) na tela`);
+    cartoes.forEach((c, i) => {
+      if (!c.querySelector('h3')?.textContent.trim()) out.push(`produto ${i + 1} sem nome`);
+      if (!c.querySelector('.product__body p')?.textContent.trim()) out.push(`produto ${i + 1} sem descrição`);
+      if (!c.querySelector('img')) out.push(`produto ${i + 1} sem foto`);
+      const cta = c.querySelector('.product__cta');
+      if (!cta || !/^https:\/\/wa\.me\/\d{8,}/.test(cta.href)) out.push(`produto ${i + 1} sem botão de WhatsApp válido`);
+    });
     return out;
   }, w);
   report.forEach((r) => fail(w, r));
@@ -162,6 +177,20 @@ for (const [w, h] of viewports) {
           if (al(N - 1 - m, i) > LIMITE) toca.add('direita');
         }
         if (toca.size) out.push(`peça encostando na borda da foto (${[...toca].join(', ')}), risco de corte: ${nome}`);
+        // foto retangular colada no quadro: as quatro bordas da caixa vêm cheias
+        let x0 = N, y0 = N, x1 = -1, y1 = -1;
+        for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (al(x, y) > LIMITE) {
+          if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+        }
+        if (x1 >= 0) {
+          const frac = (pts) => pts.filter(([x, y]) => al(x, y) > LIMITE).length / pts.length;
+          const cols = [], lins = [];
+          for (let x = x0; x <= x1; x++) cols.push(x);
+          for (let y = y0; y <= y1; y++) lins.push(y);
+          const bordas = [frac(cols.map((x) => [x, y0])), frac(cols.map((x) => [x, y1])),
+                          frac(lins.map((y) => [x0, y])), frac(lins.map((y) => [x1, y]))];
+          if (Math.min(...bordas) > 0.8) out.push(`foto de produto é um retângulo de foto, não a peça recortada: ${nome}`);
+        }
       }
       return out;
     });
@@ -295,6 +324,114 @@ for (const [w, h] of viewports) {
   }
   await page.close();
 }
+// ---- o catálogo vindo do banco substitui a cópia local ----
+{
+  const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  const produtoFalso = [{
+    slug: 'produto-de-teste', nome: 'Produto de teste', descricao: 'Veio do banco.',
+    etiquetas: ['etiqueta'], mensagem: 'Oi!', rotulo_botao: 'Quero', em_breve: false,
+    pm_produto_fotos: [{ url: 'assets/prod-tag.webp', alt: 'foto', ordem: 0, largura: 760, altura: 760 }],
+  }];
+  await page.route('**/rest/v1/pm_produtos*', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(produtoFalso) }));
+  await page.route('**/rest/v1/pm_config*', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ whatsapp: '5511988887777', instagram: 'teste_ig', tiktok: 'teste_tt', aviso_topo: 'Aviso vindo do banco.' }]) }));
+  await page.goto(page_url, { waitUntil: 'load' });
+  await page.waitForTimeout(1200);
+  const r = await page.evaluate(() => ({
+    quantos: document.querySelectorAll('#lista-produtos .product').length,
+    nome: document.querySelector('#lista-produtos h3')?.textContent,
+    zap: document.querySelector('#lista-produtos .product__cta')?.href || '',
+    aviso: document.querySelector('.announce__in p')?.textContent,
+    insta: document.querySelector('.js-ig')?.href || '',
+  }));
+  if (r.quantos !== 1 || r.nome !== 'Produto de teste') failures.push(`[banco] catálogo do banco não substituiu a cópia local (${r.quantos} produto(s), "${r.nome}")`);
+  if (!r.zap.includes('5511988887777')) failures.push('[banco] o número de WhatsApp do banco não foi aplicado aos botões');
+  if (r.aviso !== 'Aviso vindo do banco.') failures.push('[banco] o aviso do topo não veio do banco');
+  if (!r.insta.includes('teste_ig')) failures.push('[banco] o Instagram do banco não foi aplicado');
+  await page.close();
+}
+
+// ---- painel: carrega limpo e o preparo de foto segue as mesmas regras ----
+{
+  const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  const errosPainel = [];
+  page.on('pageerror', (e) => errosPainel.push(e.message));
+  page.on('console', (m) => m.type() === 'error' && !/Failed to load resource|net::ERR_/.test(m.text()) && errosPainel.push(m.text()));
+  await page.goto('file://' + path.resolve(here, '..', 'admin.html'), { waitUntil: 'load' });
+  await page.waitForTimeout(300);
+
+  // depois de entrar, a tela de login não pode continuar aparecendo
+  const escondeMesmo = await page.evaluate(() => {
+    const sobrando = [];
+    document.getElementById('tela-login').hidden = true;
+    document.getElementById('painel').hidden = false;
+    for (const el of document.querySelectorAll('[hidden]'))
+      if (getComputedStyle(el).display !== 'none') sobrando.push(el.id || el.className);
+    document.getElementById('tela-login').hidden = false;
+    document.getElementById('painel').hidden = true;
+    return sobrando;
+  });
+  escondeMesmo.forEach((x) => failures.push(`[painel] "${x}" continua aparecendo mesmo marcado como escondido`));
+
+  const estrutura = await page.evaluate(() => ({
+    login: !!document.querySelector('#form-login'),
+    escondido: document.getElementById('painel').hidden,
+    robots: document.querySelector('meta[name=robots]')?.content || '',
+    semRotulo: [...document.querySelectorAll('input')]
+      .filter((i) => i.type !== 'hidden' && i.type !== 'file' && !document.querySelector(`label[for="${i.id}"]`) && !i.getAttribute('aria-label') && !i.closest('label'))
+      .map((i) => i.id || i.type),
+    temPreparo: typeof window.preparaFoto === 'function',
+  }));
+  if (!estrutura.login) failures.push('[painel] não achei o formulário de entrada');
+  if (!estrutura.escondido) failures.push('[painel] o painel aparece sem login');
+  if (!/noindex/.test(estrutura.robots)) failures.push('[painel] falta noindex: o painel não pode ir para o Google');
+  if (estrutura.semRotulo.length) failures.push(`[painel] campo sem rótulo: ${estrutura.semRotulo.join(', ')}`);
+  if (!estrutura.temPreparo) failures.push('[painel] o preparo de foto não está disponível');
+
+  if (estrutura.temPreparo) {
+    const provas = await page.evaluate(async () => {
+      // desenha uma foto de estúdio de mentira: fundo creme e uma peça escura no meio
+      const faz = (fundo) => new Promise((ok) => {
+        const c = document.createElement('canvas'); c.width = 600; c.height = 800;
+        const x = c.getContext('2d');
+        if (fundo) { x.fillStyle = '#F6F1E9'; x.fillRect(0, 0, 600, 800); }
+        x.fillStyle = '#2B2B2B'; x.beginPath(); x.ellipse(300, 400, 150, 260, 0, 0, 7); x.fill();
+        c.toBlob((b) => ok(new File([b], 'teste.png', { type: 'image/png' })), 'image/png');
+      });
+      const confere = async (r) => {
+        if (r.erro) return { erro: r.erro };
+        const bmp = await createImageBitmap(r.blob);
+        const c = document.createElement('canvas'); c.width = bmp.width; c.height = bmp.height;
+        const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(bmp, 0, 0);
+        const d = x.getImageData(0, 0, c.width, c.height).data;
+        const al = (px, py) => d[(py * c.width + px) * 4 + 3];
+        const N = c.width;
+        const cantos = [[2, 2], [N - 3, 2], [2, N - 3], [N - 3, N - 3]].some(([px, py]) => al(px, py) > 12);
+        let borda = false;
+        for (let i = 0; i < N; i++) for (let m = 0; m < 3; m++)
+          if (al(i, m) > 12 || al(i, N - 1 - m) > 12 || al(m, i) > 12 || al(N - 1 - m, i) > 12) borda = true;
+        return { quadrada: bmp.width === bmp.height, cantos, borda, lado: bmp.width };
+      };
+      const comFundo = await faz(true), semFundo = await faz(false);
+      return {
+        recortada: await confere(await window.preparaFoto(comFundo, { remover: true, tolerancia: 30 })),
+        mantendoFundo: await confere(await window.preparaFoto(comFundo, { remover: false, tolerancia: 30 })),
+        jaTransparente: await confere(await window.preparaFoto(semFundo, { remover: true, tolerancia: 30 })),
+      };
+    });
+    const r = provas.recortada;
+    if (r.erro) failures.push(`[painel] o preparo recusou uma foto boa: ${r.erro}`);
+    else {
+      if (!r.quadrada) failures.push('[painel] a foto preparada não saiu quadrada');
+      if (r.cantos) failures.push('[painel] a foto preparada saiu com fundo nos cantos');
+      if (r.borda) failures.push('[painel] a foto preparada saiu com a peça encostando na borda');
+    }
+    if (!provas.mantendoFundo.erro) failures.push('[painel] o preparo aceitou uma foto com fundo sólido, que é justamente o que não pode');
+    if (provas.jaTransparente.erro) failures.push(`[painel] o preparo recusou um PNG já transparente: ${provas.jaTransparente.erro}`);
+  }
+  errosPainel.forEach((e) => failures.push(`[painel] erro de console: ${e}`));
+  await page.close();
+}
+
 await browser.close();
 
 console.log(`\nInventário: ${links.size} links/botões/resumos encontrados`);
