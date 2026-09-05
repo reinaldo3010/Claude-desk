@@ -14,12 +14,16 @@
     - simulador: nome vazio/curto/longo/acentos/emoji, todas as bases, cores e letras,
       quantidade 1/maior/inválida; texto que não cabe na peça; mensagem sem algum dado
     - FAQ: só um aberto por vez, aria-expanded coerente, resposta não cortada
+    - carrossel: bolinhas na quantidade certa, avança e volta, status coerente
+    - foto de produto que não seja um quadro quadrado transparente: fundo retangular
+      aparecendo nos cantos, ou peça encostando na borda (risco de estar cortada)
     - erro de console; requisição local falhando (404 etc.)
   Também salva capturas por seção em qa/shots/<largura>/ para homologação visual
   e, com --links, imprime o inventário de todos os links/botões.
 
   Uso:  node qa/audit.mjs            (precisa de `npm i` na pasta panda-mimo)
         node qa/audit.mjs --shots    (só capturas, sem falhar)
+        QA_VIEWPORTS=390 node qa/audit.mjs   (só uma largura, para checagem rápida)
         CHROMIUM_PATH=/caminho/chrome node qa/audit.mjs   (usa um Chromium já instalado)
 */
 import { chromium } from 'playwright';
@@ -30,13 +34,16 @@ import fs from 'node:fs';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const page_url = 'file://' + path.resolve(here, '..', 'index.html');
 const onlyShots = process.argv.includes('--shots');
-const viewports = [[320, 568], [360, 800], [375, 667], [375, 812], [390, 844], [393, 852], [414, 896], [768, 1024], [820, 1180], [1024, 768], [1280, 720], [1366, 768], [1440, 900], [1920, 1080]];
+const TODAS = [[320, 568], [360, 800], [375, 667], [375, 812], [390, 844], [393, 852], [414, 896], [768, 1024], [820, 1180], [1024, 768], [1280, 720], [1366, 768], [1440, 900], [1920, 1080]];
+// QA_VIEWPORTS=390,1280 roda só essas larguras (útil para uma checagem rápida)
+const filtro = (process.env.QA_VIEWPORTS || '').split(',').filter(Boolean).map(Number);
+const viewports = filtro.length ? TODAS.filter(([w]) => filtro.includes(w)) : TODAS;
 const shotWidths = new Set([320, 390, 768, 1280, 1920]);
-const failures = []; const warnings = []; const links = new Map();
+const failures = []; const warnings = []; const links = new Map(); let quadrosConferidos = false;
 const fail = (w, msg) => failures.push(`[${w}px] ${msg}`);
 
 const exe = process.env.CHROMIUM_PATH;
-const browser = await chromium.launch(exe ? { executablePath: exe } : {});
+const browser = await chromium.launch({ ...(exe ? { executablePath: exe } : {}), args: ['--allow-file-access-from-files'] });
 
 async function loadImages(page) {
   await page.evaluate(async () => {
@@ -62,7 +69,7 @@ for (const [w, h] of viewports) {
     const vw = document.documentElement.clientWidth;
     if (document.documentElement.scrollWidth > vw) out.push(`rolagem lateral: scrollWidth ${document.documentElement.scrollWidth} > ${vw}`);
     const visible = (el) => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(el).visibility !== 'hidden'; };
-    const clipped = (el) => { for (let p = el.parentElement; p && p !== document.body; p = p.parentElement) { const o = getComputedStyle(p).overflowX; if (o === 'hidden' || o === 'clip') return true; } return false; };
+    const clipped = (el) => { for (let p = el.parentElement; p && p !== document.body; p = p.parentElement) { const o = getComputedStyle(p).overflowX; if (o === 'hidden' || o === 'clip' || o === 'auto' || o === 'scroll') return true; } return false; };
     for (const el of document.querySelectorAll('body *')) {
       if (!visible(el) || clipped(el) || getComputedStyle(el).position === 'fixed') continue;
       const r = el.getBoundingClientRect();
@@ -92,6 +99,7 @@ for (const [w, h] of viewports) {
     }
     for (const el of document.querySelectorAll('h1,h2,h3,p,a,button,summary,li,dd,dt,label,legend,span,small')) {
       if (!visible(el)) continue;
+      if (el.clientWidth <= 2 || el.clientHeight <= 2) continue; // texto só para leitor de tela
       const cs = getComputedStyle(el);
       if ((cs.overflowX === 'hidden' || cs.overflow === 'hidden' || cs.textOverflow === 'ellipsis') && el.scrollWidth > el.clientWidth + 1) out.push(`texto cortado: ${el.tagName.toLowerCase()} "${el.textContent.trim().slice(0, 40)}"`);
     }
@@ -126,6 +134,56 @@ for (const [w, h] of viewports) {
       href: e.getAttribute('href') ? e.href.slice(0, 60) : (e.id ? '#' + e.id : e.className),
     })));
     inv.forEach((i, n) => links.set(n, i));
+  }
+
+  // as fotos de produto precisam ser quadros quadrados transparentes, com a peça inteira
+  if (!quadrosConferidos) {
+    quadrosConferidos = true;
+    const tiles = await page.evaluate(() => {
+      const out = [];
+      const cv = document.createElement('canvas'); const ctx = cv.getContext('2d', { willReadFrequently: true });
+      const N = 200, LIMITE = 12;
+      for (const img of document.querySelectorAll('.carousel img')) {
+        const nome = img.getAttribute('src').slice(0, 46);
+        const [nw, nh] = [img.naturalWidth, img.naturalHeight];
+        if (!nw) { out.push(`foto de produto não carregou: ${nome}`); continue; }
+        if (Math.abs(nw - nh) > 1) { out.push(`foto de produto não é quadrada (${nw}x${nh}), pode ser cortada: ${nome}`); continue; }
+        cv.width = cv.height = N; ctx.clearRect(0, 0, N, N); ctx.drawImage(img, 0, 0, N, N);
+        let data;
+        try { data = ctx.getImageData(0, 0, N, N).data; } catch (e) { out.push(`não deu para inspecionar os pixels (${e.name}); rode o navegador com --allow-file-access-from-files`); break; }
+        const al = (x, y) => data[(y * N + x) * 4 + 3];
+        for (const [x, y, q] of [[1, 1, 'superior esquerdo'], [N - 2, 1, 'superior direito'], [1, N - 2, 'inferior esquerdo'], [N - 2, N - 2, 'inferior direito']])
+          if (al(x, y) > LIMITE) { out.push(`foto de produto com fundo retangular (canto ${q} opaco): ${nome}`); break; }
+        const borda = 3, toca = new Set();
+        for (let i = 0; i < N; i++) for (let m = 0; m < borda; m++) {
+          if (al(i, m) > LIMITE) toca.add('topo');
+          if (al(i, N - 1 - m) > LIMITE) toca.add('base');
+          if (al(m, i) > LIMITE) toca.add('esquerda');
+          if (al(N - 1 - m, i) > LIMITE) toca.add('direita');
+        }
+        if (toca.size) out.push(`peça encostando na borda da foto (${[...toca].join(', ')}), risco de corte: ${nome}`);
+      }
+      return out;
+    });
+    tiles.forEach((m) => fail(w, m));
+  }
+
+  // carrossel: avança, volta e mantém as bolinhas em dia
+  for (const car of await page.$$('[data-carousel]')) {
+    const n = (await car.$$('.carousel__slide')).length;
+    const bolinhas = (await car.$$('.carousel__dot')).length;
+    const rotulo = await car.getAttribute('aria-label');
+    if (bolinhas !== n) fail(w, `${rotulo}: ${n} fotos e ${bolinhas} bolinhas`);
+    await car.$eval('.carousel__nav--next', (b) => b.click());
+    await page.waitForTimeout(420);
+    const st = await car.$eval('.carousel__status', (e) => e.textContent);
+    if (st !== `Foto 2 de ${n}`) fail(w, `${rotulo}: não avançou (status "${st}")`);
+    const marcadas = await car.$$eval('.carousel__dot[aria-current="true"]', (l) => l.length);
+    if (marcadas !== 1) fail(w, `${rotulo}: ${marcadas} bolinhas marcadas ao mesmo tempo`);
+    await car.$eval('.carousel__nav--prev', (b) => b.click());
+    await page.waitForTimeout(420);
+    const st0 = await car.$eval('.carousel__status', (e) => e.textContent);
+    if (st0 !== `Foto 1 de ${n}`) fail(w, `${rotulo}: não voltou (status "${st0}")`);
   }
 
   // âncoras chegam abaixo do cabeçalho fixo

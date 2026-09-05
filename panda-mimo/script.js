@@ -170,3 +170,31 @@ if ("IntersectionObserver" in window) {
 }
 document.addEventListener("focusin", (e) => { if (e.target.matches("input, textarea")) { teclado = true; updateFab(); } });
 document.addEventListener("focusout", (e) => { if (e.target.matches("input, textarea")) { teclado = false; updateFab(); } });
+
+
+/* ---------- carrossel de fotos do produto ---------- */
+const semAnimacao = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+document.querySelectorAll("[data-carousel]").forEach((car) => {
+  const track = car.querySelector(".carousel__track");
+  const slides = [...track.children];
+  const dots = [...car.querySelectorAll(".carousel__dot")];
+  const status = car.querySelector(".carousel__status");
+  const atual = () => Math.max(0, Math.min(slides.length - 1, Math.round(track.scrollLeft / track.clientWidth)));
+  const irPara = (i) => track.scrollTo({ left: track.clientWidth * i, behavior: semAnimacao ? "auto" : "smooth" });
+  const sincroniza = () => {
+    const i = atual();
+    dots.forEach((d, k) => (k === i ? d.setAttribute("aria-current", "true") : d.removeAttribute("aria-current")));
+    status.textContent = `Foto ${i + 1} de ${slides.length}`;
+  };
+  dots.forEach((d, i) => d.addEventListener("click", () => irPara(i)));
+  car.querySelector(".carousel__nav--prev").addEventListener("click", () => irPara(Math.max(0, atual() - 1)));
+  car.querySelector(".carousel__nav--next").addEventListener("click", () => irPara(Math.min(slides.length - 1, atual() + 1)));
+  let t;
+  track.addEventListener("scroll", () => { clearTimeout(t); t = setTimeout(sincroniza, 70); });
+  // setas do teclado quando o trilho está em foco
+  track.tabIndex = 0;
+  track.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight") { e.preventDefault(); irPara(Math.min(slides.length - 1, atual() + 1)); }
+    if (e.key === "ArrowLeft") { e.preventDefault(); irPara(Math.max(0, atual() - 1)); }
+  });
+});

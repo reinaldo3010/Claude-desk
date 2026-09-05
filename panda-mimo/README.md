@@ -31,16 +31,30 @@ Dúvidas frequentes · Redes sociais · Contato · Rodapé · Botão flutuante d
 
 ## Guardião de qualidade
 
-Antes de publicar qualquer mudança, rode o auditor. Ele abre a página em 390, 768 e 1280 px e falha se
-encontrar rolagem lateral, elemento fora da tela, imagem que não carregou ou ampliada demais, texto cortado,
-sobreposição entre cartões, elemento fixo em tela estreita, âncora quebrada, link de WhatsApp inválido,
-erro de console, simulador ou FAQ sem reagir. Também salva capturas por seção em `qa/shots/` para conferência visual.
+Antes de publicar qualquer mudança, rode o auditor. Ele abre a página em 14 resoluções (de 320x568 a
+1920x1080) e falha se encontrar rolagem lateral, elemento fora da tela, imagem que não carregou, cortada ou
+ampliada demais, texto cortado, sobreposição entre cartões, elemento fixo em tela estreita, âncora que para
+debaixo do cabeçalho, menu do celular que não abre ou não fecha, botão flutuante cobrindo um CTA ou o teclado,
+link sem destino ou de WhatsApp inválido, campo sem rótulo, erro de console, falha de rede, e o simulador,
+o carrossel ou as dúvidas sem reagir. Também salva capturas por seção em `qa/shots/` para conferência visual.
+
+Duas travas cuidam especificamente das fotos de produto, lendo os pixels de cada imagem:
+
+- **fundo retangular**: se algum canto da foto for opaco, o auditor reprova. É o que impede aquele
+  retângulo branco aparecendo atrás da peça.
+- **peça encostando na borda**: se houver conteúdo colado na borda da imagem, o auditor reprova, porque
+  isso indica produto cortado ou pedaço de uma peça vizinha que entrou no recorte.
+
+Toda foto de produto precisa ser um **quadro quadrado com fundo transparente**, com a peça inteira e folga
+em volta. As duas travas foram testadas plantando erros de propósito, e reprovaram como esperado.
 
 ```
 npm install
 npx playwright install chromium
-npm test          # auditoria completa
-npm run shots     # só as capturas
+npm test                          # auditoria completa (14 resoluções)
+npm run shots                     # só as capturas
+QA_VIEWPORTS=390 npm test         # uma largura só, para checagem rápida
+node qa/audit.mjs --links         # lista todos os links e botões testados
 ```
 
 O mesmo auditor roda no GitHub Actions em todo pull request que toque em `panda-mimo/`
