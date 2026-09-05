@@ -40,6 +40,9 @@ A marca tem um brand book próprio, escrito a partir da identidade aprovada no s
 - **`marca/manual-da-marca-panda-mimo.pdf`**: a mesma versão visual em PDF (A4, 20 páginas, fontes
   embutidas), para mandar a quem não abre o site. Para gerar de novo depois de uma mudança: abra
   `marca/index.html` no Chrome e imprima em PDF, A4, com "gráficos de fundo" ligados.
+- **`marca/o-site-panda-mimo.pdf`**: apresentação do site em A4 paisagem, com cada seção no computador
+  e no celular, para mostrar a quem ainda não pode abrir o endereço. Refaça quando o site mudar
+  (é montado a partir das capturas do guardião, com as fontes da marca embutidas).
 
 Regra da casa: qualquer evolução do site ou de material da marca começa consultando o manual, e
 qualquer mudança de regra é registrada no histórico dele. O `CLAUDE.md` na raiz do repositório
