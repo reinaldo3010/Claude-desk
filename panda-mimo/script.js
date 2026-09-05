@@ -77,11 +77,25 @@ function produtoHTML(p) {
     </article>`;
 }
 
+/* assinatura do que está na tela: se o banco devolver o mesmo conteúdo,
+   não vale remontar — remontar apagaria a foto que a pessoa está vendo
+   no carrossel e perderia a posição da rolagem. */
+function assinatura(produtos) {
+  return JSON.stringify(produtos.map((p) => [
+    p.nome, p.descricao, p.rotulo_botao, p.mensagem, p.em_breve,
+    p.etiquetas || [], (p.fotos || []).map((f) => [f.url, f.alt]),
+  ]));
+}
+
 function montaProdutos(produtos) {
-  if (!lista || !Array.isArray(produtos) || !produtos.length) return;
+  if (!lista || !Array.isArray(produtos) || !produtos.length) return false;
+  const nova = assinatura(produtos);
+  if (lista.dataset.assinatura === nova) return false;
+  lista.dataset.assinatura = nova;
   lista.innerHTML = produtos.map(produtoHTML).join("\n");
   aplicaContatos(lista);
   iniciaCarrosseis(lista);
+  return true;
 }
 
 /* ---------- carrossel de fotos do produto ---------- */
@@ -153,7 +167,8 @@ async function carregaDoBanco() {
     /* sem banco, o site segue com a cópia local */
   }
 }
-carregaDoBanco();
+/* quem espera o catálogo ficar pronto (inclusive o guardião) usa isto */
+window.PANDA_CATALOGO = carregaDoBanco().then(() => true);
 
 /* =========================================================
    Monte seu mimo

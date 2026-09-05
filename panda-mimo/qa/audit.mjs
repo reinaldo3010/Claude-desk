@@ -49,6 +49,8 @@ const exe = process.env.CHROMIUM_PATH;
 const browser = await chromium.launch({ ...(exe ? { executablePath: exe } : {}), args: ['--allow-file-access-from-files'] });
 
 async function loadImages(page) {
+  // o catálogo pode vir do banco: espera assentar antes de conferir qualquer coisa
+  await page.evaluate(() => window.PANDA_CATALOGO || true).catch(() => {});
   await page.evaluate(async () => {
     document.querySelectorAll('img[loading]').forEach((i) => (i.loading = 'eager'));
     await Promise.all([...document.images].map((i) => (i.complete ? 0 : new Promise((r) => { i.onload = i.onerror = r; }))));
@@ -327,6 +329,9 @@ for (const [w, h] of viewports) {
 // ---- o catálogo vindo do banco substitui a cópia local ----
 {
   const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  const iguaisAoLocal = JSON.parse(fs.readFileSync(path.resolve(here, '..', 'produtos.js'), 'utf8')
+    .replace(/^[\s\S]*?window\.PANDA_PRODUTOS\s*=\s*/, '').replace(/;\s*$/, ''))
+    .map((p) => ({ ...p, pm_produto_fotos: p.fotos.map((f, i) => ({ ...f, ordem: i })) }));
   const produtoFalso = [{
     slug: 'produto-de-teste', nome: 'Produto de teste', descricao: 'Veio do banco.',
     etiquetas: ['etiqueta'], mensagem: 'Oi!', rotulo_botao: 'Quero', em_breve: false,
@@ -347,6 +352,19 @@ for (const [w, h] of viewports) {
   if (!r.zap.includes('5511988887777')) failures.push('[banco] o número de WhatsApp do banco não foi aplicado aos botões');
   if (r.aviso !== 'Aviso vindo do banco.') failures.push('[banco] o aviso do topo não veio do banco');
   if (!r.insta.includes('teste_ig')) failures.push('[banco] o Instagram do banco não foi aplicado');
+
+  // o banco devolvendo o mesmo conteúdo não pode remontar o catálogo
+  await page.unroute('**/rest/v1/pm_produtos*');
+  await page.route('**/rest/v1/pm_produtos*', (rota) => rota.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify(iguaisAoLocal),
+  }));
+  await page.goto(page_url, { waitUntil: 'load' });
+  await page.evaluate(() => { document.querySelector('#lista-produtos .product').dataset.marca = 'antes'; });
+  await page.evaluate(() => window.PANDA_CATALOGO);
+  await page.waitForTimeout(200);
+  const sobreviveu = await page.evaluate(() => !!document.querySelector('#lista-produtos .product[data-marca="antes"]'));
+  if (!sobreviveu) failures.push('[banco] o catálogo foi remontado mesmo o banco devolvendo o mesmo conteúdo');
   await page.close();
 }
 
