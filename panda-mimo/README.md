@@ -29,6 +29,19 @@ Em `index.html`, revise também os textos que são propostas:
 Os preços e o texto longo de cada produto se preenchem pelo painel (campos **Preço** e **Texto da tela de detalhe**).
 Enquanto o preço estiver vazio, a tela de detalhe mostra "Valor sob consulta".
 
+## Manual da marca
+
+A marca tem um brand book próprio, escrito a partir da identidade aprovada no site:
+
+- **`MARCA.md`**: o manual completo em texto (essência, tom de voz, nome e frases, logotipo, mascote,
+  cores com HEX/RGB/CMYK, tipografia, elementos, fotografia, aplicações, governança e histórico).
+- **`marca/index.html`**: a versão visual, com amostras de cor, tipo, logo, mascote e aplicações.
+  Não é indexada nem linkada no site; abra direto no navegador.
+
+Regra da casa: qualquer evolução do site ou de material da marca começa consultando o manual, e
+qualquer mudança de regra é registrada no histórico dele. O `CLAUDE.md` na raiz do repositório
+aponta para lá, então quem trabalhar no projeto com o Claude parte das mesmas regras.
+
 ## Seções da página
 
 Aviso de frete · Hero · Selos de confiança · Produtos · Monte seu mimo (simulador) · Ocasiões ·
@@ -160,6 +173,8 @@ panda-mimo/
 ├── styles.css   estilos (paleta e tipografia da marca)
 ├── script.js    catálogo, detalhe, simulador (desenho e foto real), medição e movimento
 ├── produtos.js  cópia do catálogo, usada quando o banco não responde
+├── MARCA.md     manual da marca (brand book) em texto
+├── marca/       manual da marca em versão visual (index.html)
 ├── config.js    endereço e chave pública do banco
 ├── admin.html   painel de administração
 ├── admin.js     conversa com o banco e prepara as fotos

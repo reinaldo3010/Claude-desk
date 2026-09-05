@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manual da Marca Panda Mimo</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Brand book da Panda Mimo: essência, voz, logotipo, mascote, cores, tipografia, elementos, fotografia, aplicações e governança.">
+<link rel="icon" href="../assets/favicon-32.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Caveat:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+  /* Este documento é a marca falando de si mesma: usa exatamente os tokens do site (styles.css). */
+  :root {
+    --ink: #171512; --ink-soft: #4A443D;
+    --paper: #FBF6EF; --cream: #F6F4EF; --sand: #E7D8C3; --sand-soft: #F1E7D8; --kraft: #C9A57E;
+    --peach: #FFB59C; --peach-deep: #E8916F; --peach-ink: #A25030; --hand-ink: #CB6B44;
+    --sage: #A8C5A2; --sage-deep: #6E8C67; --white: #FFFDF8;
+    --f-display: "Fredoka", "Nunito", system-ui, sans-serif;
+    --f-hand: "Caveat", "Segoe Script", "Bradley Hand", cursive;
+    --f-body: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --r-lg: 28px; --r-md: 18px; --r-sm: 12px;
+    --shadow: 0 14px 40px -18px rgba(23,21,18,.28), 0 2px 6px -2px rgba(23,21,18,.08);
+    --wrap: 1120px; --gutter: clamp(1.1rem, 4vw, 2.5rem);
+    --dots: radial-gradient(circle, rgba(255,181,156,.45) 1.5px, transparent 1.6px) 0 0 / 18px 18px;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body { background: var(--paper); color: var(--ink); font: 400 1rem/1.55 var(--f-body); -webkit-font-smoothing: antialiased; }
+  img { max-width: 100%; height: auto; display: block; }
+  a { color: var(--peach-ink); text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+  h1, h2, h3, h4 { font-family: var(--f-display); font-weight: 600; line-height: 1.1; text-wrap: balance; }
+  h2 { font-size: clamp(1.9rem, 1.4rem + 2vw, 3rem); }
+  h3 { font-size: 1.35rem; margin-bottom: .4rem; }
+  h4 { font-size: 1.05rem; margin-bottom: .3rem; }
+  p { max-width: 68ch; }
+  .hand { font-family: var(--f-hand); font-weight: 600; color: var(--hand-ink); }
+  .wrap { width: min(100% - 2 * var(--gutter), var(--wrap)); margin-inline: auto; }
+  .eyebrow { font-weight: 800; font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; color: var(--peach-ink); display: flex; align-items: center; gap: .55rem; }
+  .eyebrow::before, .eyebrow::after { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--peach); }
+  .lede { font-size: clamp(1.05rem, 1rem + .3vw, 1.2rem); color: var(--ink-soft); }
+  .muted { color: var(--ink-soft); }
+  .small { font-size: .875rem; }
+  .xs { font-size: .78rem; }
+  code { font: 600 .85em/1.4 ui-monospace, "SF Mono", Menlo, Consolas, monospace; background: var(--sand-soft); padding: .1em .4em; border-radius: 6px; white-space: nowrap; }
+  .num { font-variant-numeric: tabular-nums; }
+
+  /* ---------- capa ---------- */
+  .capa { padding: clamp(2.5rem, 7vw, 6rem) 0 clamp(2rem, 5vw, 4rem); border-bottom: 1.5px solid var(--sand); }
+  .capa__grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); gap: clamp(1.5rem, 4vw, 4rem); align-items: center; }
+  .capa h1 { font-size: clamp(2.4rem, 1.6rem + 3.6vw, 4.4rem); margin: .6rem 0 .8rem; }
+  .capa h1 .hand { font-size: 1.05em; }
+  .capa__meta { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.2rem; }
+  .chip { display: inline-block; padding: .3rem .8rem; border-radius: 999px; background: var(--sand-soft); border: 1.5px solid var(--sand); font-size: .78rem; font-weight: 700; }
+  .capa__selo { justify-self: center; width: min(100%, 360px); }
+
+  /* ---------- sumário ---------- */
+  .sumario { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--paper) 92%, transparent); backdrop-filter: blur(10px); border-bottom: 1.5px solid var(--sand); }
+  .sumario ol { list-style: none; padding: 0; display: flex; gap: .2rem; overflow-x: auto; scrollbar-width: none; }
+  .sumario ol::-webkit-scrollbar { display: none; }
+  @media (min-width: 900px) { .sumario ol { flex-wrap: wrap; overflow: visible; } }
+  .sumario a { display: block; padding: .8rem .7rem; white-space: nowrap; font: 600 .9rem var(--f-display); color: var(--ink); text-decoration: none; border-bottom: 2.5px solid transparent; }
+  .sumario a:hover { border-color: var(--peach); }
+
+  /* ---------- seções ---------- */
+  section.bloco { padding: clamp(2.5rem, 6vw, 5rem) 0; scroll-margin-top: 60px; }
+  section.bloco + section.bloco { border-top: 1.5px solid var(--sand); }
+  .cab { margin-bottom: clamp(1.4rem, 3vw, 2.4rem); }
+  .cab h2 { margin: .5rem 0 .6rem; }
+  .cab .num-secao { font: 600 .95rem var(--f-display); color: var(--ink-soft); }
+  .grid { display: grid; gap: 1rem; }
+  .grid--2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+  .grid--3 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); }
+  .grid--4 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); }
+  .card { background: var(--white); border: 1.5px solid var(--sand); border-radius: var(--r-md); padding: 1.2rem 1.3rem; }
+  .card--areia { background: var(--sand-soft); }
+  .card p { max-width: none; }
+  .card ul { padding-left: 1.1rem; }
+  .card li + li { margin-top: .3rem; }
+  .fig { border-radius: var(--r-md); border: 1.5px solid var(--sand); display: grid; place-items: center; padding: 1.4rem; }
+  .fig--dots { background: var(--sand-soft) var(--dots); }
+  .legenda { font-size: .78rem; color: var(--ink-soft); margin-top: .5rem; }
+  .tabela { width: 100%; border-collapse: collapse; font-size: .9rem; }
+  .tabela th, .tabela td { text-align: left; padding: .6rem .7rem; border-bottom: 1.5px solid var(--sand); vertical-align: top; }
+  .tabela th { font-family: var(--f-display); font-weight: 600; }
+  .rolagem { overflow-x: auto; }
+
+  /* essência */
+  .promessas { counter-reset: p; }
+  .promessas .card { position: relative; padding-top: 1.4rem; }
+  .promessas .card::before { counter-increment: p; content: counter(p); position: absolute; top: -14px; left: 16px; width: 30px; height: 30px; border-radius: 50%; background: var(--peach); color: var(--ink); font: 600 .95rem/30px var(--f-display); text-align: center; }
+
+  /* voz */
+  .par { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .fala { border-radius: var(--r-md); padding: 1rem 1.1rem; font-size: .95rem; }
+  .fala--sim { background: #EFF5EE; border: 1.5px solid var(--sage); }
+  .fala--nao { background: #FBEDED; border: 1.5px solid #E7C3C3; }
+  .fala b { display: block; font-family: var(--f-display); font-weight: 600; margin-bottom: .3rem; }
+  .fala--sim b { color: #2F4A2B; } .fala--nao b { color: #7A2020; }
+  .zap { background: #ECE5DD; border-radius: var(--r-md); padding: 1rem; display: grid; gap: .5rem; }
+  .zap .msg { background: var(--white); border-radius: 12px 12px 12px 4px; padding: .6rem .8rem; font-size: .9rem; max-width: 88%; box-shadow: 0 1px 1px rgba(0,0,0,.08); }
+  .zap .msg--eu { background: #DCF8C6; border-radius: 12px 12px 4px 12px; justify-self: end; }
+
+  /* logo */
+  .fundo { border-radius: var(--r-md); display: grid; place-items: center; padding: 1.4rem; min-height: 150px; border: 1.5px solid var(--sand); }
+  .fundo img { width: 70%; }
+  .fundo--ink { background: var(--ink); }
+  .fundo--peach { background: var(--peach); }
+  .fundo--sand { background: var(--sand); }
+  .fundo--paper { background: var(--paper); }
+  .respiro { position: relative; display: inline-block; padding: 12%; border: 1.5px dashed var(--peach-deep); border-radius: var(--r-sm); }
+  .respiro img { width: 100%; }
+  .respiro span { position: absolute; font: 700 .7rem var(--f-body); color: var(--peach-ink); background: var(--white); padding: 0 .3rem; }
+  .nao { position: relative; }
+  .nao::after { content: "✕"; position: absolute; top: 8px; right: 10px; width: 26px; height: 26px; border-radius: 50%; background: #A02C2C; color: var(--white); font: 800 .9rem/26px var(--f-body); text-align: center; }
+  .nao img { opacity: .9; }
+  .esticado img { transform: scaleX(1.5); }
+  .recolorido img { filter: hue-rotate(200deg) saturate(1.4); }
+  .girado img { transform: rotate(-14deg); }
+
+  /* mascote */
+  .poses { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: .8rem; }
+  .pose { background: var(--sand-soft) var(--dots); border: 1.5px solid var(--sand); border-radius: var(--r-md); padding: .8rem; display: grid; gap: .4rem; text-align: center; }
+  .pose img { width: 100%; aspect-ratio: 1; object-fit: contain; }
+  .pose b { font: 600 .9rem var(--f-display); }
+  .pose small { font-size: .72rem; color: var(--ink-soft); }
+
+  /* cores */
+  .cores { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); gap: .9rem; }
+  .cor { border-radius: var(--r-md); border: 1.5px solid var(--sand); overflow: hidden; background: var(--white); }
+  .cor__amostra { height: 96px; }
+  .cor__info { padding: .8rem .9rem; display: grid; gap: .15rem; font-size: .8rem; }
+  .cor__info b { font: 600 1rem var(--f-display); }
+  .cor__info span { color: var(--ink-soft); }
+  .proporcao { display: flex; height: 40px; border-radius: 999px; overflow: hidden; border: 1.5px solid var(--sand); }
+  .proporcao div { display: grid; place-items: center; font: 700 .78rem var(--f-body); }
+  .pares { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); gap: .8rem; }
+  .parr { border-radius: var(--r-sm); padding: .9rem 1rem; border: 1.5px solid var(--sand); font: 600 1.05rem var(--f-display); }
+  .parr small { display: block; font: 700 .7rem var(--f-body); opacity: .8; margin-top: .3rem; }
+  .pecas { display: flex; gap: 1.2rem; flex-wrap: wrap; }
+  .peca { display: grid; justify-items: center; gap: .4rem; font-size: .8rem; font-weight: 700; }
+  .peca i { width: 54px; height: 54px; border-radius: 50%; border: 3px solid var(--white); box-shadow: 0 0 0 1.5px var(--sand); }
+
+  /* tipografia */
+  .espec { display: grid; gap: 1rem; }
+  .espec .card { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: start; }
+  .espec .amostra { font-size: clamp(1.6rem, 1.2rem + 1.4vw, 2.4rem); line-height: 1.15; }
+  .espec .meta { font-size: .78rem; color: var(--ink-soft); text-align: right; white-space: nowrap; }
+  .escala { display: grid; gap: .4rem; }
+  .escala div { display: grid; grid-template-columns: 140px minmax(0, 1fr); align-items: baseline; gap: 1rem; border-bottom: 1.5px dashed var(--sand); padding: .3rem 0; }
+  .escala small { font-size: .75rem; color: var(--ink-soft); }
+  .titulo-modelo { font-family: var(--f-display); font-weight: 700; font-size: clamp(2rem, 1.5rem + 2.4vw, 3.4rem); line-height: 1.05; }
+
+  /* elementos */
+  .stickers { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: .8rem; }
+  .stickers .fig { padding: 1rem; min-height: 120px; }
+  .stickers img { max-height: 90px; width: auto; }
+  .raios { display: flex; gap: 1rem; flex-wrap: wrap; align-items: end; }
+  .raios div { width: 90px; height: 70px; background: var(--white); border: 1.5px solid var(--sand); display: grid; place-items: end center; padding-bottom: .3rem; font-size: .72rem; font-weight: 700; color: var(--ink-soft); }
+
+  /* fotografia */
+  .quadro { position: relative; aspect-ratio: 1; background: var(--sand-soft) var(--dots); border: 1.5px solid var(--sand); border-radius: var(--r-md); display: grid; place-items: center; overflow: hidden; }
+  .quadro img { width: 100%; height: 100%; object-fit: contain; }
+  .quadro .margem { position: absolute; inset: 7%; border: 1.5px dashed var(--peach-deep); border-radius: 6px; pointer-events: none; }
+  .quadro--ruim::before { content: ""; position: absolute; inset: 18% 12%; background: #fff; border-radius: 4px; }
+  .quadro--ruim img { position: relative; transform: scale(1.35) translateY(14%); }
+  .contexto { border-radius: var(--r-md); overflow: hidden; border: 1.5px solid var(--sand); aspect-ratio: 4/3; }
+  .contexto img { width: 100%; height: 100%; object-fit: cover; }
+
+  /* aplicações */
+  .caixa { background: var(--kraft); border-radius: var(--r-md); aspect-ratio: 4/3; position: relative; overflow: hidden; display: grid; place-items: center; }
+  .caixa::before { content: ""; position: absolute; inset: 0 auto 0 50%; width: 22px; transform: translateX(-50%); background: var(--peach); }
+  .caixa::after { content: ""; position: absolute; inset: 50% 0 auto 0; height: 22px; transform: translateY(-50%); background: var(--peach); }
+  .caixa img { position: relative; z-index: 1; width: 34%; filter: drop-shadow(0 6px 10px rgba(23,21,18,.25)); }
+  .bilhete { background: var(--cream); border: 1.5px solid var(--sand); border-radius: var(--r-sm); padding: 1.1rem 1.2rem; display: grid; grid-template-columns: minmax(0, 1fr) 72px; gap: .8rem; align-items: end; aspect-ratio: 4/3; }
+  .bilhete h4 { font-size: 1.15rem; }
+  .bilhete .linhas { display: grid; gap: .8rem; margin-top: .6rem; }
+  .bilhete .linhas i { display: block; border-bottom: 1.5px solid var(--sand); height: 0; }
+  .post { aspect-ratio: 1; border-radius: var(--r-md); border: 1.5px solid var(--sand); overflow: hidden; position: relative; }
+  .post--peca { background: var(--sand-soft) var(--dots); display: grid; grid-template-rows: 1fr auto; padding: 1rem; }
+  .post--peca img { width: 78%; margin: auto; }
+  .post--peca b { font: 600 1.1rem var(--f-display); }
+  .post--uso img { width: 100%; height: 100%; object-fit: cover; }
+  .post--bast { background: var(--paper); display: grid; place-items: center; padding: 1rem; text-align: center; }
+  .post--bast .hand { font-size: 1.7rem; }
+  .post--bast img { width: 46%; }
+
+  /* checklist */
+  .check { list-style: none; padding: 0; display: grid; gap: .5rem; }
+  .check li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: .6rem; align-items: start; }
+  .check li::before { content: ""; width: 18px; height: 18px; margin-top: 3px; border: 2px solid var(--ink); border-radius: 5px; }
+  .nunca { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .nunca span { padding: .35rem .8rem; border-radius: 999px; background: #FBEDED; border: 1.5px solid #E7C3C3; color: #7A2020; font-size: .82rem; font-weight: 700; }
+
+  footer { border-top: 1.5px solid var(--sand); padding: 2rem 0 3rem; color: var(--ink-soft); font-size: .875rem; }
+
+  @media (max-width: 760px) {
+    .capa__grid { grid-template-columns: 1fr; }
+    .capa__selo { order: -1; width: min(70%, 260px); }
+    .par { grid-template-columns: 1fr; }
+    .espec .card { grid-template-columns: 1fr; }
+    .espec .meta { text-align: left; white-space: normal; }
+    .escala div { grid-template-columns: 1fr; gap: .2rem; }
+  }
+  @media print {
+    .sumario { display: none; }
+    section.bloco { break-inside: avoid-page; }
+  }
+</style>
+</head>
+<body>
+
+<header class="capa">
+  <div class="wrap capa__grid">
+    <div>
+      <p class="eyebrow">Manual da marca · versão 1.0 · set/2026</p>
+      <h1>Panda Mimo, <span class="hand">feito com carinho.</span></h1>
+      <p class="lede">Este é o brand book da Panda Mimo. Ele registra o que a marca é, como fala, como se veste e como se comporta em cada ponto de contato, a partir da identidade já aprovada e aplicada no site.</p>
+      <p class="small muted" style="margin-top:.8rem">Quem manda, nesta ordem: o dono da marca, este manual, o código do site. A versão em texto, com todas as regras e tabelas, está em <code>MARCA.md</code>. Itens marcados como <strong>proposta</strong> ainda esperam validação do dono.</p>
+      <div class="capa__meta">
+        <span class="chip">Essência</span><span class="chip">Voz</span><span class="chip">Logotipo</span><span class="chip">Mascote</span><span class="chip">Cores</span><span class="chip">Tipografia</span><span class="chip">Elementos</span><span class="chip">Fotografia</span><span class="chip">Aplicações</span><span class="chip">Governança</span>
+      </div>
+    </div>
+    <img class="capa__selo" src="../assets/logo-redondo.webp" alt="Selo redondo Panda Mimo com o mascote espiando por cima do nome" width="866" height="900">
+  </div>
+</header>
+
+<nav class="sumario" aria-label="Sumário">
+  <div class="wrap">
+    <ol>
+      <li><a href="#essencia">1 Essência</a></li>
+      <li><a href="#voz">2 Voz</a></li>
+      <li><a href="#nome">3 Nome</a></li>
+      <li><a href="#logo">4 Logotipo</a></li>
+      <li><a href="#mascote">5 Mascote</a></li>
+      <li><a href="#cores">6 Cores</a></li>
+      <li><a href="#tipografia">7 Tipografia</a></li>
+      <li><a href="#elementos">8 Elementos</a></li>
+      <li><a href="#fotografia">9 Fotografia</a></li>
+      <li><a href="#aplicacoes">10 Aplicações</a></li>
+      <li><a href="#governanca">11 Governança</a></li>
+    </ol>
+  </div>
+</nav>
+
+<!-- ================= 1 ESSÊNCIA ================= -->
+<section class="bloco" id="essencia">
+  <div class="wrap">
+    <div class="cab">
+      <p class="eyebrow">Essência</p>
+      <h2>Um mimo é a prova de que <span class="hand">alguém pensou em você.</span></h2>
+      <p class="lede">A Panda Mimo transforma objetos do dia a dia nessa prova: garrafas, canecas, copos, ecobags, tags e kits com o nome, a frase e o jeito de quem recebe. Cada peça é feita uma a uma, com prévia antes de produzir e embalada como presente.</p>
+    </div>
+
+    <div class="grid grid--3" style="margin-bottom:1.6rem">
+      <div class="card"><h4>Assinatura</h4><p class="hand" style="font-size:1.6rem;line-height:1.1">Feito com carinho, feito pra você.</p><p class="xs muted" style="margin-top:.4rem">Com ponto final. Nunca abreviada, nunca alterada.</p></div>
+      <div class="card"><h4>Personalidade</h4><p>Carinhosa, caprichosa, próxima, leve. Fala como uma pessoa querida que sabe fazer bem feito.</p></div>
+      <div class="card"><h4>O que não é</h4><p>Não é loja de utilidades, não é "brindes baratos", não é infantil, não é luxo frio. Não fala em "produto": fala em peça e em mimo.</p></div>
+    </div>
+
+    <h3>A promessa em quatro compromissos</h3>
+    <p class="muted small" style="margin-bottom:1.4rem">O site já assume estes quatro. Nenhuma peça de comunicação pode contradizê-los.</p>
+    <div class="grid grid--4 promessas">
+      <div class="card"><h4>Prévia sempre</h4><p class="small">Nada é produzido antes do "pode fazer" do cliente. Ajustes quantas vezes precisar.</p></div>
+      <div class="card"><h4>Feito uma a uma</h4><p class="small">A arte de cada nome é montada e conferida por gente, não em lote cego.</p></div>
+      <div class="card"><h4>Embalado como presente</h4><p class="small">Caixa kraft, proteção e bilhetinho. Sem valor na caixa, sempre.</p></div>
+      <div class="card"><h4>Se vier errado, a gente refaz</h4><p class="small">Sem custo, com frete, em até 7 dias após o recebimento.</p></div>
+    </div>
+
+    <div class="grid grid--2" style="margin-top:1.6rem">
+      <div class="card card--areia">
+        <h4>Para quem <span class="xs muted">(proposta)</span></h4>
+        <ul class="small">
+          <li><strong>Quem presenteia com intenção:</strong> mães, pais, madrinhas, amigas, alunos e pais de alunos, noivos. O cuidado é o primeiro filtro, não o preço.</li>
+          <li><strong>Quem quer o seu, do seu jeito:</strong> quem leva garrafa e copo pra escola, academia e trabalho.</li>
+          <li><strong>Empresas, escolas e eventos:</strong> brindes em quantidade, arte por nome, prazo confiável.</li>
+        </ul>
+      </div>
+      <div class="card card--areia">
+        <h4>Posicionamento <span class="xs muted">(proposta)</span></h4>
+        <p class="small">Entre a papelaria personalizada de bairro (rápida, sem prévia, sem embalagem) e as lojas de presente premium (bonitas, impessoais), a Panda Mimo é a marca de presentes personalizados que trata cada peça como um mimo: prévia, arte por nome, embalagem de presente e um mascote que transforma a compra numa conversa.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 2 VOZ ================= -->
+<section class="bloco" id="voz">
+  <div class="wrap">
+    <div class="cab">
+      <p class="eyebrow">Tom de voz</p>
+      <h2>Fala com a pessoa, <span class="hand">não para a pessoa.</span></h2>
+      <p class="lede">"A gente", "pra", frases curtas e promessa com número. A emoção fica no manuscrito; a informação fica clara e concreta.</p>
+    </div>
+
+    <div class="rolagem" style="margin-bottom:1.6rem">
+      <table class="tabela">
+        <thead><tr><th>Traço</th><th>Como aparece</th><th>Como não aparece</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Carinhosa</strong></td><td>"Manda um oi." "Respondemos com carinho e sem pressa de vender."</td><td>Melosa, diminutivos em série, "amorzinho", "lindeza".</td></tr>
+          <tr><td><strong>Caprichosa</strong></td><td>Detalhe declarado: 3 a 5 dias úteis, inox 304, 325 ml, refaz em 7 dias.</td><td>Superlativos: "o melhor", "incrível", "perfeito".</td></tr>
+          <tr><td><strong>Próxima</strong></td><td>"A gente", "pra", "tá?", pergunta direta.</td><td>Íntima demais, gíria de internet, humor forçado.</td></tr>
+          <tr><td><strong>Leve</strong></td><td>Frases curtas, um manuscrito por bloco, um panda por tela.</td><td>Infantil, exclamações em fila, emoji a cada frase.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="par" style="margin-bottom:1.6rem">
+      <div class="fala fala--sim"><b>Diga assim</b>Que chato, isso não devia ter acontecido. Me manda uma foto da peça e a gente refaz sem custo, com o frete por nossa conta. Pode ficar tranquilo(a): resolvo hoje.</div>
+      <div class="fala fala--nao"><b>Não diga assim</b>Prezado cliente, informamos que seu pedido encontra-se em fase de análise pelo setor responsável. Pedimos desculpas por eventuais transtornos.</div>
+      <div class="fala fala--sim"><b>Diga assim</b>Um mimo pra cada momento. Escolha a base, conte o que quer escrever e a gente cuida do resto.</div>
+      <div class="fala fala--nao"><b>Não diga assim</b>APROVEITE!!! Produtos personalizados com QUALIDADE PREMIUM e o MELHOR PREÇO 😍🔥🎁</div>
+    </div>
+
+    <div class="grid grid--2">
+      <div>
+        <h3>Léxico</h3>
+        <div class="rolagem">
+          <table class="tabela">
+            <thead><tr><th>Use</th><th>Evite</th></tr></thead>
+            <tbody>
+              <tr><td>mimo, peça, presente</td><td>produto, item, mercadoria</td></tr>
+              <tr><td>prévia</td><td>mockup, prova, layout</td></tr>
+              <tr><td>a gente</td><td>nós, a empresa, a equipe</td></tr>
+              <tr><td>pra, pro</td><td>para, para o (em conversa)</td></tr>
+              <tr><td>pedido, pedir</td><td>compra, carrinho, checkout</td></tr>
+              <tr><td>nome, frase, arte</td><td>design, estampa, print</td></tr>
+              <tr><td>"pode fazer"</td><td>"aprovado", "ok"</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="small muted" style="margin-top:.8rem">Emoji só no WhatsApp e nas redes: 🐼 é a assinatura, 💕 ou 🤍 para carinho, no máximo dois por mensagem. Uma exclamação por peça de comunicação. Números com unidade: 1 L, 325 ml, 24 h, 7 dias.</p>
+      </div>
+      <div>
+        <h3>No WhatsApp</h3>
+        <div class="zap" aria-label="Exemplo de conversa">
+          <div class="msg msg--eu">Oi, Panda Mimo! Quero uma garrafa pra escola 🐼</div>
+          <div class="msg">Oi! Aqui é a Panda Mimo 🐼 Que bom te ver por aqui. Me conta a ideia: pra quem é o mimo e o que você quer escrever nele?</div>
+          <div class="msg msg--eu">É pra Malu, 7 anos. Só o nome, na cor verdinha.</div>
+          <div class="msg">Olha só como ficou a prévia da garrafa da Malu 💕 A cor é a sálvia e o nome está na letra redondinha. Se estiver do jeito que imaginou, me manda um "pode fazer" e a produção começa. Prazo: 3 a 5 dias úteis.</div>
+        </div>
+        <p class="legenda">Roteiro em quatro passos, igual ao site: escolha a base, conte a ideia, aprove a prévia, receba em casa. O Pandinha aparece só na saudação e na prévia.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 3 NOME ================= -->
+<section class="bloco" id="nome">
+  <div class="wrap">
+    <div class="cab">
+      <p class="eyebrow">Nome e frases</p>
+      <h2>Panda Mimo, <span class="hand">duas palavras.</span></h2>
+    </div>
+    <div class="grid grid--3">
+      <div class="card">
+        <h4>Grafia</h4>
+        <p class="small"><strong>Panda Mimo</strong>, iniciais maiúsculas. Nunca PandaMimo, Panda-Mimo nem panda mimo. Em redes e domínio: <code>pandamimo</code>. Gênero: "a Panda Mimo".</p>
+      </div>
+      <div class="card">
+        <h4>Descritor</h4>
+        <p class="small"><strong>Itens personalizados</strong>: aparece no logo em caixa alta e no rodapé. Na fala da marca, prefira "mimos" e "peças".</p>
+      </div>
+      <div class="card">
+        <h4>Categorias, na ordem</h4>
+        <p class="small">Garrafas térmicas · Canecas · Copos térmicos · Ecobags · Tags e chaveiros · Kits presenteáveis · Novidades em breve. Botão: "Quero essa" ou "Quero esse", conforme o gênero.</p>
+      </div>
+    </div>
+    <div class="rolagem" style="margin-top:1.2rem">
+      <table class="tabela">
+        <thead><tr><th>Papel</th><th>Frase</th><th>Onde</th></tr></thead>
+        <tbody>
+          <tr><td>Assinatura principal</td><td><strong>Feito com carinho, feito pra você.</strong></td><td>Hero, rodapé, bilhete, balão do mascote, verso da tag</td></tr>
+          <tr><td>Assinatura de produto</td><td>Mais que um presente, um mimo.</td><td>Diferenciais, embalagem, post de apresentação</td></tr>
+          <tr><td>Faixa</td><td>Personalizados com amor</td><td>Seção de produtos, sticker em stories</td></tr>
+          <tr><td>Selo</td><td>Personalizado do seu jeito</td><td>Coração pontilhado no simulador, tag</td></tr>
+          <tr><td>Etiqueta</td><td>Feito especialmente para você!</td><td>Hero, tag da embalagem</td></tr>
+          <tr><td>Faixa</td><td>Para momentos especiais</td><td>Ocasiões</td></tr>
+          <tr><td>Convite</td><td>Vamos fazer o seu?</td><td>Contato, fim de post</td></tr>
+          <tr><td>Ação</td><td>Monte seu mimo · Quero essa · Pedir no WhatsApp · Me avise</td><td>Botões, sempre nessa grafia</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="small muted" style="margin-top:.8rem">Ocasiões e seus manuscritos: Dia das Mães e dos Pais (<span class="hand">pra mãe, pro pai</span>) · Aniversário (<span class="hand">parabéns!</span>) · Professores (<span class="hand">obrigado, prof</span>) · Padrinhos e casamento (<span class="hand">quer ser meu padrinho?</span>) · Empresas e eventos (<span class="hand">bem-vindo ao time</span>) · Escola e rotina (<span class="hand">de volta às aulas</span>).</p>
+  </div>
+</section>
+
+<!-- ================= 4 LOGOTIPO ================= -->
+<section class="bloco" id="logo">
+  <div class="wrap">
+    <div class="cab">
+      <p class="eyebrow">Logotipo</p>
+      <h2>Três versões, <span class="hand">um só jeito.</span></h2>
+      <p class="lede">"Panda" em nanquim com volume macio, "Mimo" em manuscrito pêssego com um coração junto ao M, dois tracinhos de brilho e o descritor em caixa alta. Acabamento de adesivo inflado: é parte da identidade, não um efeito.</p>
+    </div>
+
+    <div class="grid grid--3">
+      <div>
+        <div class="fig fig--dots"><img src="../assets/logo-pill.webp" alt="Logo em pílula horizontal" width="900" height="254"></div>
+        <h4 style="margin-top:.7rem">Pílula (horizontal)</h4>
+        <p class="small muted">Cabeçalho do site, documentos, assinatura de e-mail, banner, etiqueta comprida. Mínimo: 120 px ou 30 mm.</p>
+      </div>
+      <div>
+        <div class="fig fig--dots"><img src="../assets/logo-empilhado.webp" alt="Logo empilhado" width="900" height="571" style="width:70%"></div>
+        <h4 style="margin-top:.7rem">Empilhado</h4>
+        <p class="small muted">Avatar quadrado, post, tag, caixa, capa. Quando não há largura para a pílula. Mínimo: 80 px ou 20 mm.</p>
+      </div>
+      <div>
+        <div class="fig fig--dots"><img src="../assets/logo-redondo.webp" alt="Selo redondo com o mascote" width="866" height="900" style="width:52%"></div>
+        <h4 style="margin-top:.7rem">Selo redondo</h4>
+        <p class="small muted">Adesivo de fechamento da caixa, carimbo, foto de perfil, verso da tag. Mínimo: 64 px ou 16 mm.</p>
+      </div>
+    </div>
+
+    <div class="grid grid--2" style="margin-top:1.6rem">
+      <div>
+        <h3>Área de respiro</h3>
+        <div class="fig" style="background:var(--white)">
+          <div class="respiro"><span style="top:-8px;left:12px">altura do "P"</span><img src="../assets/logo-empilhado.webp" alt="" width="900" height="571" style="width:200px"></div>
+        </div>
+        <p class="legenda">Nada encosta no logo: a folga mínima em volta é a altura do "P" de Panda. Abaixo do tamanho mínimo, use a carinha do Pandinha ou só o coração pêssego.</p>
+      </div>
+      <div>
+        <h3>Fundos</h3>
+        <div class="grid grid--2" style="gap:.6rem">
+          <div class="fundo fundo--paper"><img src="../assets/logo-empilhado.webp" alt="Logo sobre papel" width="900" height="571"></div>
+          <div class="fundo fundo--sand"><img src="../assets/logo-empilhado.webp" alt="Logo sobre areia" width="900" height="571"></div>
+          <div class="fundo fundo--peach"><img src="../assets/logo-pill.webp" alt="Pílula sobre pêssego" width="900" height="254"></div>
+          <div class="fundo fundo--ink"><img src="../assets/logo-pill.webp" alt="Pílula sobre nanquim" width="900" height="254"></div>
+        </div>
+        <p class="legenda">Papel, creme, areia e branco quente aceitam qualquer versão. Sobre pêssego pleno, foto movimentada ou nanquim, só a pílula ou o selo, que carregam o próprio fundo creme.</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top:1.6rem">Não fazer</h3>
+    <div class="grid grid--4">
+      <div><div class="fig nao esticado" style="background:var(--white);overflow:hidden"><img src="../assets/logo-empilhado.webp" alt="Logo esticado, uso incorreto" width="900" height="571" style="width:60%"></div><p class="legenda">Não esticar nem comprimir.</p></div>
+      <div><div class="fig nao recolorido" style="background:var(--white)"><img src="../assets/logo-empilhado.webp" alt="Logo recolorido, uso incorreto" width="900" height="571" style="width:72%"></div><p class="legenda">Não recolorir. Sem versão azul, roxa, dourada.</p></div>
+      <div><div class="fig nao girado" style="background:var(--white)"><img src="../assets/logo-empilhado.webp" alt="Logo rotacionado, uso incorreto" width="900" height="571" style="width:66%"></div><p class="legenda">Não rotacionar nem espelhar.</p></div>
+      <div><div class="fig nao" style="background:var(--white);position:relative"><img src="../assets/logo-empilhado.webp" alt="Logo com mascote colado, uso incorreto" width="900" height="571" style="width:62%"><img src="../assets/panda-carinha.webp" alt="" width="816" height="616" style="position:absolute;width:34%;right:6%;bottom:8%"></div><p class="legenda">Não colar o mascote ao logo: o selo redondo já é essa combinação.</p></div>
+    </div>
+    <p class="small muted" style="margin-top:.8rem">Também não: sombra, contorno, brilho ou gradiente extras; separar "Panda" de "Mimo"; trocar a tipografia. Redesenhar o logo é um projeto próprio, nunca um ajuste.</p>
+  </div>
+</section>
+
+<!-- ================= 5 MASCOTE ================= -->
+<section class="bloco" id="mascote">
+  <div class="wrap">
+    <div class="cab">
+      <p class="eyebrow">Mascote</p>
+      <h2>O Pandinha é o cuidado <span class="hand">em forma de personagem.</span></h2>
+      <p class="lede">Um panda bebê de cabeça grande, bochechas rosadas, orelhas e patinhas em rosa-pêssego, olhos grandes e um tufinho no topo. Acabamento macio, como pelúcia. Ele embala, entrega, espia e diz "feito pra você". Nome de tratamento: Pandinha (proposta).</p>
+    </div>
+
+    <div class="grid grid--2" style="align-items:start;margin-bottom:1.6rem">
+      <div class="fig fig--dots" style="min-height:320px"><img src="../assets/mascote-hero.webp" alt="Pandinha sentado abraçando a garrafa térmica" width="707" height="900" style="width:56%"></div>
+      <div class="grid" style="gap:.8rem">
+        <div class="card"><h4>Papel</h4><p class="small">Ele acompanha, nunca compete com a peça. Fala em balões curtos e afetuosos; em texto corrido, a marca fala como "a gente". Um Pandinha por tela ou impresso.</p></div>
+        <div class="card"><h4>Regras</h4><ul class="small"><li>Sempre inteiro. Nunca cortado por borda de cartão, foto ou tela.</li><li>Fundo transparente ou da paleta. Nunca dentro de um retângulo branco.</li><li>No site, nunca maior que a peça ao lado; em impressos, até 1/3 da área.</li><li>Expressões alegre, curiosa, sonolenta, apaixonada. Nunca triste, bravo, sarcástico.</li></ul></div>
+        <div class="card card--areia"><h4>Não fazer</h4><p class="small">Redesenhar em outro estilo (flat, realista, pixel, 3D duro). Poses novas saem do mesmo traço e entram no acervo como <code>panda-&lt;pose&gt;.webp</code>. Sem roupas de marca; adereço pequeno em datas comemorativas só com aprovação (proposta).</p></div>
+      </div>
+    </div>
+
+    <h3>Poses do acervo</h3>
+    <div class="poses">
+      <div class="pose"><img src="../assets/mascote-hero.webp" alt="" width="707" height="900"><b>Abraçando a garrafa</b><small>hero, capa</small></div>
+      <div class="pose"><img src="../assets/panda-coracao.webp" alt="" width="900" height="900"><b>Com o coração</b><small>agradecimento, bilhete</small></div>
+      <div class="pose"><img src="../assets/panda-presente.webp" alt="" width="900" height="900"><b>Com presente</b><small>embalagem, ocasiões</small></div>
+      <div class="pose"><img src="../assets/panda-presente-2.webp" alt="" width="900" height="900"><b>Abrindo a caixa</b><small>"chegou"</small></div>
+      <div class="pose"><img src="../assets/panda-caixa.webp" alt="" width="900" height="900"><b>Dentro da caixa</b><small>unboxing, envio</small></div>
+      <div class="pose"><img src="../assets/panda-carrinho.webp" alt="" width="900" height="900"><b>No carrinho</b><small>pedido</small></div>
+      <div class="pose"><img src="../assets/panda-copo.webp" alt="" width="900" height="900"><b>Com o copo</b><small>produto copo</small></div>
+      <div class="pose"><img src="../assets/panda-joinha.webp" alt="" width="900" height="900"><b>Joinha</b><small>"pode fazer"</small></div>
+      <div class="pose"><img src="../assets/panda-dormindo.webp" alt="" width="900" height="900"><b>Dormindo</b><small>em breve, fora do horário</small></div>
+      <div class="pose"><img src="../assets/panda-novidades.webp" alt="" width="900" height="900"><b>Novidades</b><small>lista de espera</small></div>
+      <div class="pose"><img src="../assets/panda-carinha.webp" alt="" width="816" height="616"><b>Carinha</b><small>favicon, marca mínima</small></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 6 CORES ================= -->
+<section class="bloco" id="cores">
+  <div class="wrap">
+    <div class="cab">
+      <p class="eyebrow">Cores</p>
+      <h2>Papel, nanquim e <span class="hand">um toque de pêssego.</span></h2>
+      <p class="lede">Creme de papel como base, nanquim quente para texto, pêssego como o único acento, sálvia e areia como apoio. CMYK é aproximação: peça prova impressa antes de rodar.</p>
+    </div>
+
+    <div class="cores">
+      <div class="cor"><div class="cor__amostra" style="background:#171512"></div><div class="cor__info"><b>Nanquim quente</b><span>texto, panda, botões escuros</span><span class="num">#171512 · RGB 23 21 18</span><span class="num">CMYK 0 9 22 91 (impressão: 40 40 40 100)</span><code>--ink</code></div></div>
+      <div class="cor"><div class="cor__amostra" style="background:#4A443D"></div><div class="cor__info"><b>Nanquim suave</b><span>texto secundário</span><span class="num">#4A443D · RGB 74 68 61</span><span class="num">CMYK 0 8 18 71</span><code>--ink-soft</code></div></div>
+      <div class="cor"><div class="cor__amostra" style="background:#FBF6EF;border-bottom:1.5px solid var(--sand)"></div><div class="cor__info"><b>Papel</b><span>fundo da página</span><span class="num">#FBF6EF · RGB 251 246 239</span><span class="num">CMYK 0 2 5 2</span><code>--paper</code></div></div>
+      <div class="cor"><div class="cor__amostra" style="background:#F6F4EF;border-bottom:1.5px solid var(--sand)"></div><div class="cor__info"><b>Creme oficial</b><span>cartões, logo</span><span class="num">#F6F4EF · RGB 246 244 239</span><span class="num">CMYK 0 1 3 4</span><code>--cream</code></div></div>
+      <div class="cor"><div class="cor__amostra" style="background:#E7D8C3"></div><div class="cor__info"><b>Areia oficial</b><span>bordas, linhas, etiquetas</span><span class="num">#E7D8C3 · RGB 231 216 195</span><span class="num">CMYK 0 6 16 9</span><code>--sand</code></div></div>
+      <div class="cor"><div class="cor__amostra" style="background:#F1E7D8"></div><div class="cor__info"><b>Areia suave</b><span>seção alternada, quadros</span><span class="num">#F1E7D8 · RGB 241 231 216</span><span class="num">CMYK 0 4 10 5</span><code>--sand-soft</code></div></div>
+      <div class="cor"><div class="cor__amostra" style="background:#C9A57E"></div><div class="cor__info"><b>Kraft</b><span>detalhes de embalagem</span><span class="num">#C9A57E · RGB 201 165 126</span><span class="num">CMYK 0 18 37 21</span><code>--kraft</code></div></div>
+      <div class="cor"><div class="cor__amostra" style="background:#FFB59C"></div><div class="cor__info"><b>Pêssego oficial</b><span>o acento: botões, faixas, corações</span><span class="num">#FFB59C · RGB 255 181 156</span><span class="num">CMYK 0 29 39 0</span><code>--peach</code></div></div>
+      <div class="cor"><div class="cor__amostra" style="background:#E8916F"></div><div class="cor__info"><b>Pêssego profundo</b><span>hover, traços, borda do logo</span><span class="num">#E8916F · RGB 232 145 111</span><span class="num">CMYK 0 37 52 9</span><code>--peach-deep</code></div></div>
+      <div class="cor"><div class="cor__amostra" style="background:#A25030"></div><div class="cor__info"><b>Pêssego tinta</b><span>texto pequeno em pêssego (AA)</span><span class="num">#A25030 · RGB 162 80 48</span><span class="num">CMYK 0 51 70 36</span><code>--peach-ink</code></div></div>
+      <div class="cor"><div class="cor__amostra" style="background:#CB6B44"></div><div class="cor__info"><b>Pêssego manuscrito</b><span>Caveat grande em títulos</span><span class="num">#CB6B44 · RGB 203 107 68</span><span class="num">CMYK 0 47 66 20</span><code>--hand-ink</code></div></div>
+      <div class="cor"><div class="cor__amostra" style="background:#A8C5A2"></div><div class="cor__info"><b>Sálvia oficial</b><span>apoio: selos, cor de peça</span><span class="num">#A8C5A2 · RGB 168 197 162</span><span class="num">CMYK 15 0 18 23</span><code>--sage</code></div></div>
+      <div class="cor"><div class="cor__amostra" style="background:#6E8C67"></div><div class="cor__info"><b>Sálvia profunda</b><span>texto sobre sálvia, ícones</span><span class="num">#6E8C67 · RGB 110 140 103</span><span class="num">CMYK 21 0 26 45</span><code>--sage-deep</code></div></div>
+      <div class="cor"><div class="cor__amostra" style="background:#FFFDF8;border-bottom:1.5px solid var(--sand)"></div><div class="cor__info"><b>Branco quente</b><span>superfícies elevadas</span><span class="num">#FFFDF8 · RGB 255 253 248</span><span class="num">CMYK 0 1 3 0</span><code>--white</code></div></div>
+    </div>
+
+    <div class="grid grid--2" style="margin-top:1.6rem">
+      <div>
+        <h3>Proporção 70 / 20 / 10</h3>
+        <div class="proporcao" aria-label="70% papel e creme, 20% nanquim e areia, 10% pêssego">
+          <div style="flex:70;background:var(--paper)">papel, creme, branco quente</div>
+          <div style="flex:20;background:var(--sand)">nanquim e areia</div>
+          <div style="flex:10;background:var(--peach)">pêssego</div>
+        </div>
+        <p class="legenda">Sálvia entra como toque, nunca como base. Uma tela inteira em pêssego ou em sálvia está errada.</p>
+        <h3 style="margin-top:1.4rem">Cores das peças</h3>
+        <div class="pecas">
+          <div class="peca"><i style="background:#F3EEE4"></i>Creme</div>
+          <div class="peca"><i style="background:#A8C5A2"></i>Sálvia</div>
+          <div class="peca"><i style="background:#FFB59C"></i>Pêssego</div>
+          <div class="peca"><i style="background:#1F1D1A"></i>Preta</div>
+        </div>
+        <p class="legenda">As quatro cores em que as peças saem, exatamente as do simulador do site. Na preta e na pêssego, a arte vai em papel; nas demais, em nanquim.</p>
+      </div>
+      <div>
+        <h3>Pares aprovados</h3>
+        <div class="pares">
+          <div class="parr" style="background:var(--paper);color:var(--ink)">Nanquim sobre papel<small>≥ 11:1 · qualquer tamanho</small></div>
+          <div class="parr" style="background:var(--ink);color:var(--paper)">Papel sobre nanquim<small>16:1 · botões, rodapé</small></div>
+          <div class="parr" style="background:var(--peach);color:var(--ink)">Nanquim sobre pêssego<small>11:1 · botão pêssego</small></div>
+          <div class="parr" style="background:var(--cream);color:var(--peach-ink)">Pêssego tinta sobre creme<small>≥ 4.5:1 · texto pequeno, eyebrows</small></div>
+          <div class="parr hand" style="background:var(--paper);font-size:1.5rem">Manuscrito sobre papel<small style="font-family:var(--f-body);color:var(--ink-soft)">≥ 3:1 · só Caveat ≥ 24 px</small></div>
+          <div class="parr" style="background:var(--paper);color:var(--sage-deep)">Sálvia profunda sobre papel<small>≥ 3:1 · ícones, texto grande</small></div>
+        </div>
+        <p class="legenda">Proibido: pêssego oficial como cor de texto em fundo claro, branco sobre pêssego, sálvia sobre areia. Sem gradientes, neon, azul, roxo, preto #000 ou branco #FFF como fundo.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 7 TIPOGRAFIA ================= -->
+<section class="bloco" id="tipografia">
+  <div class="wrap">
+    <div class="cab">
+      <p class="eyebrow">Tipografia</p>
+      <h2>Fredoka fala, Nunito explica, <span class="hand">Caveat sente.</span></h2>
+      <p class="lede">Três famílias gratuitas do Google Fonts. O padrão da marca é Fredoka com um trecho em Caveat colorido, sempre a parte emocional da frase, nunca a frase inteira.</p>
+    </div>
+
+    <div class="espec">
+      <div class="card"><div><div class="amostra" style="font-family:var(--f-display);font-weight:600">Um mimo pra cada momento</div><p class="small muted" style="margin-top:.4rem">Títulos, botões, nomes de produto, números grandes. Pesos 500, 600 e 700. Nunca em texto corrido.</p></div><div class="meta">Fredoka<br>600 · 700</div></div>
+      <div class="card"><div><div class="amostra hand" style="font-size:clamp(2rem,1.5rem + 1.8vw,3rem)">feito pra você. · "pensei em você" · um mimo.</div><p class="small muted" style="margin-top:.4rem">Manuscrito: a parte emocional de um título, legendas curtas, balões. Uma ocorrência por bloco, até 6 palavras. Nunca em parágrafo, botão, preço ou prazo.</p></div><div class="meta">Caveat<br>500 · 600 · 700</div></div>
+      <div class="card"><div><div class="amostra" style="font-size:1.15rem;line-height:1.55;font-weight:400">Escolha a base, conte o que quer escrever e a gente cuida do resto. Cada peça é feita uma a uma e embalada como o mimo que é.</div><p class="small muted" style="margin-top:.4rem">Texto corrido, etiquetas, formulários, rodapé. Corpo em 400 ou 600; eyebrows em 800, caixa alta, espaçamento .08 a .12 em.</p></div><div class="meta">Nunito<br>400 · 600 · 700 · 800</div></div>
+    </div>
+
+    <div class="grid grid--2" style="margin-top:1.6rem;align-items:start">
+      <div>
+        <h3>Escala</h3>
+        <div class="escala">
+          <div><small>Título 1 · <code>--fs-1</code></small><span style="font:600 clamp(2rem,1.5rem+2vw,3rem)/1.05 var(--f-display)">38 a 70 px</span></div>
+          <div><small>Título 2 · <code>--fs-2</code></small><span style="font:600 clamp(1.6rem,1.3rem+1.2vw,2.2rem)/1.1 var(--f-display)">30 a 48 px</span></div>
+          <div><small>Título 3 · <code>--fs-3</code></small><span style="font:600 1.35rem var(--f-display)">21,6 px</span></div>
+          <div><small>Lede · <code>--fs-lede</code></small><span style="font-size:1.15rem;color:var(--ink-soft)">16,8 a 19,2 px</span></div>
+          <div><small>Corpo · <code>--fs-0</code></small><span>16 px, entrelinha 1,55, até 65 caracteres</span></div>
+          <div><small>Pequeno · <code>--fs-s</code></small><span class="small">14 px</span></div>
+          <div><small>Micro · <code>--fs-xs</code></small><span class="xs">12,5 px, etiquetas e avisos</span></div>
+        </div>
+      </div>
+      <div>
+        <h3>Composição de título</h3>
+        <div class="card" style="display:grid;gap:1rem">
+          <div><p class="eyebrow">Produto</p><div class="titulo-modelo" style="margin-top:.4rem">Mais que um presente, <span class="hand">um mimo.</span></div></div>
+          <div class="titulo-modelo" style="font-size:clamp(1.6rem,1.2rem+1.6vw,2.4rem)">Um presente que diz <span class="hand">"pensei em você"</span></div>
+        </div>
+        <p class="legenda">Eyebrow em Nunito 800, caixa alta, pêssego tinta, entre dois pontinhos. Depois o título em Fredoka com o trecho manuscrito em pêssego #CB6B44, no fim ou no meio da frase. Depois o lede em Nunito. Para Canva, Word e gráfica: instale as três fontes; se o sistema não aceitar, use Nunito para tudo e o manuscrito só como imagem.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 8 ELEMENTOS ================= -->
+<section class="bloco" id="elementos">
+  <div class="wrap">
+    <div class="cab">
+      <p class="eyebrow">Elementos gráficos</p>
+      <h2>Adesivos, corações, patas <span class="hand">e cantos redondos.</span></h2>
+      <p class="lede">Tudo tem volume e canto arredondado. Os adesivos têm contorno creme e fundo transparente; o pontilhado pêssego sobre areia suave é a textura da marca.</p>
+    </div>
+
+    <div class="stickers">
+      <div class="fig fig--dots"><img src="../assets/faixa-carinho.webp" alt="Faixa: feito com carinho" width="900" height="300"></div>
+      <div class="fig fig--dots"><img src="../assets/faixa-amor.webp" alt="Faixa: personalizados com amor" width="900" height="300"></div>
+      <div class="fig fig--dots"><img src="../assets/faixa-momentos.webp" alt="Faixa: para momentos especiais" width="900" height="300"></div>
+      <div class="fig fig--dots"><img src="../assets/coracao-jeito.webp" alt="Coração pontilhado: personalizado do seu jeito" width="900" height="900"></div>
+      <div class="fig fig--dots"><img src="../assets/coracao-costura.webp" alt="Coração costurado" width="900" height="900"></div>
+      <div class="fig fig--dots"><img src="../assets/tag-especial.webp" alt="Etiqueta: feito especialmente para você" width="900" height="900"></div>
+      <div class="fig fig--dots"><img src="../assets/pata-preta.webp" alt="Pata preta" width="900" height="900"></div>
+      <div class="fig fig--dots"><img src="../assets/pata-rosa.webp" alt="Pata rosa" width="900" height="900"></div>
+      <div class="fig fig--dots"><img src="../assets/laco.webp" alt="Laço" width="900" height="900"></div>
+      <div class="fig fig--dots"><img src="../assets/flor.webp" alt="Flor" width="900" height="900"></div>
+      <div class="fig fig--dots"><img src="../assets/balao-frase.webp" alt="Balão de fala: feito com carinho, feito pra você" width="900" height="900"></div>
+      <div class="fig fig--dots"><img src="../assets/ic-presente.webp" alt="Ícone de presente" width="900" height="900"></div>
+    </div>
+
+    <div class="grid grid--3" style="margin-top:1.6rem;align-items:start">
+      <div class="card">
+        <h4>Cantos</h4>
+        <div class="raios">
+          <div style="border-radius:28px">28 px</div><div style="border-radius:18px">18 px</div><div style="border-radius:12px">12 px</div><div style="border-radius:999px;width:110px">999 px</div>
+        </div>
+        <p class="small muted" style="margin-top:.6rem">Cartões grandes 28, médios 18, campos 12. Botões e chips totalmente redondos. Nada com canto reto, exceto foto de contexto na galeria.</p>
+      </div>
+      <div class="card">
+        <h4>Regras de uso</h4>
+        <ul class="small">
+          <li>Um ou dois adesivos por bloco. Faixas só como rótulo de seção ou sticker de story; nunca empilhadas.</li>
+          <li>O coração é o segundo símbolo da marca e pode aparecer sozinho como marca mínima.</li>
+          <li>Patas como marcador ou detalhe de canto, nunca padrão repetido na tela inteira.</li>
+          <li>Sombra <code>0 14px 40px -18px rgba(23,21,18,.28)</code> só em cartões e diálogos. Linhas de 1,5 px em areia, nunca preto.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>Ícones</h4>
+        <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin:.4rem 0 .6rem">
+          <img src="../assets/ic-camera.webp" alt="" width="900" height="900" style="width:44px"><img src="../assets/ic-caminhao.webp" alt="" width="900" height="900" style="width:44px"><img src="../assets/ic-coracao.webp" alt="" width="900" height="900" style="width:44px"><img src="../assets/ic-escudo.webp" alt="" width="900" height="900" style="width:44px"><img src="../assets/ic-ideia.webp" alt="" width="900" height="900" style="width:44px"><img src="../assets/ic-sacola.webp" alt="" width="900" height="900" style="width:44px">
+        </div>
+        <p class="small muted">Traço arredondado, duas cores (nanquim e pêssego), fundo transparente. Ícones novos seguem esse desenho; não misturar com bibliotecas de linha fina.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 9 FOTOGRAFIA ================= -->
+<section class="bloco" id="fotografia">
+  <div class="wrap">
+    <div class="cab">
+      <p class="eyebrow">Fotografia</p>
+      <h2>A peça inteira, com folga, <span class="hand">sem retângulo.</span></h2>
+      <p class="lede">Foto de catálogo é um quadro quadrado de 760 px com fundo transparente, a peça inteira e 7% de folga em volta. É regra dura: o painel recusa e o guardião do site reprova o que foge disso.</p>
+    </div>
+
+    <div class="grid grid--4" style="align-items:start">
+      <div><div class="quadro"><img src="../assets/prod-garrafa.webp" alt="Garrafa térmica, foto de catálogo correta" width="760" height="760"><div class="margem"></div></div><p class="legenda"><strong>Certo.</strong> Quadro transparente, peça inteira, folga de 7% (linha tracejada).</p></div>
+      <div><div class="quadro"><img src="../assets/prod-caneca-lado.webp" alt="Caneca de lado, foto de catálogo correta" width="760" height="760"><div class="margem"></div></div><p class="legenda"><strong>Certo.</strong> Ângulo 3/4 ou frontal, luz suave, sem reflexo forte.</p></div>
+      <div><div class="quadro quadro--ruim nao"><img src="../assets/prod-copo.webp" alt="Copo cortado sobre retângulo branco, exemplo errado" width="760" height="760"></div><p class="legenda"><strong>Errado.</strong> Retângulo branco atrás e peça cortada pela borda.</p></div>
+      <div><div class="contexto"><img src="../assets/uso-caneca-cafe.webp" alt="Caneca com café sobre a mesa, foto de contexto" width="1200" height="900"></div><p class="legenda"><strong>Contexto.</strong> Peça em uso, luz natural, tons quentes. Só na galeria, nunca no catálogo.</p></div>
+    </div>
+
+    <div class="grid grid--3" style="margin-top:1.4rem">
+      <div class="card"><h4>Nomes de arquivo</h4><p class="small"><code>prod-&lt;produto&gt;[-&lt;vista&gt;].webp</code> para catálogo (a primeira é a foto do cartão); <code>uso-*.webp</code> e <code>foto-*.webp</code> para contexto; <code>panda-*.webp</code> para o mascote.</p></div>
+      <div class="card"><h4>Prévia real</h4><p class="small">O simulador desenha o nome na foto real da garrafa, da caneca e do copo. Trocou a foto-base? Recalibre posição e cor da placa em <code>FOTO_REAL</code> (script.js). Prévias no WhatsApp seguem o mesmo princípio: arte aplicada na peça, nunca solta.</p></div>
+      <div class="card card--areia"><h4>Não fazer</h4><p class="small">Fundo branco recortado às pressas, sombra dura, filtro colorido, peça pela metade, colagem com mais de três peças, texto sobre a foto de catálogo.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 10 APLICAÇÕES ================= -->
+<section class="bloco" id="aplicacoes">
+  <div class="wrap">
+    <div class="cab">
+      <p class="eyebrow">Aplicações</p>
+      <h2>Do WhatsApp à caixa, <span class="hand">a mesma marca.</span></h2>
+      <p class="lede">O site é a aplicação de referência. Tudo o mais deriva dele: mesmas cores, mesmas fontes, mesmo roteiro de quatro passos, mesmo Pandinha.</p>
+    </div>
+
+    <h3>Embalagem</h3>
+    <div class="grid grid--3" style="margin-bottom:1.6rem">
+      <div><div class="caixa"><img src="../assets/logo-redondo.webp" alt="Selo redondo fechando a caixa kraft com fita pêssego" width="866" height="900"></div><p class="legenda">Caixa kraft natural, fita pêssego, selo redondo como adesivo de fechamento. Proteção em seda creme ou papel picado kraft. Sem plástico-bolha à vista.</p></div>
+      <div><div class="bilhete"><div><h4>Pra você <span class="hand" style="font-size:1.3rem">com carinho</span></h4><div class="linhas"><i></i><i></i><i></i></div><p class="xs muted" style="margin-top:.8rem">Feito com carinho, feito pra você.</p></div><img src="../assets/panda-coracao.webp" alt="" width="900" height="900"></div><p class="legenda">Bilhetinho em cartão creme: título em Fredoka, espaço para a mensagem do cliente, Pandinha com o coração no canto. Nunca valor, nota ou código de barras na embalagem.</p></div>
+      <div><div class="fig fig--dots" style="aspect-ratio:4/3;padding:1rem"><img src="../assets/prod-tag.webp" alt="Tag redonda Panda Mimo com cordão" width="760" height="760" style="width:60%"></div><p class="legenda">Tag de papel creme presa à fita: frente com o logo empilhado, verso com "Feito especialmente para você!" e o nome de quem recebe. Nos produtos tag e chaveiro, a frente é do cliente.</p></div>
+    </div>
+
+    <h3>Redes sociais</h3>
+    <p class="small muted" style="margin-bottom:.8rem">Avatar: selo redondo. Grade em três tipos de post, alternados. Stories em papel ou areia suave, adesivos do acervo, Pandinha em um canto. Hashtags (proposta): #pandamimo #feitocomcarinho #presentepersonalizado #garrafapersonalizada #canecapersonalizada, no máximo cinco.</p>
+    <div class="grid grid--3" style="margin-bottom:1.6rem">
+      <div><div class="post post--peca"><img src="../assets/prod-caneca.webp" alt="" width="760" height="760"><b>Canecas · 325 ml</b></div><p class="legenda"><strong>Peça.</strong> Foto de catálogo sobre o pontilhado, nome em Fredoka.</p></div>
+      <div><div class="post post--uso"><img src="../assets/uso-ecobag.webp" alt="" width="1200" height="1200"></div><p class="legenda"><strong>Em uso.</strong> Foto de contexto, sem texto.</p></div>
+      <div><div class="post post--bast"><div><img src="../assets/panda-joinha.webp" alt="" width="900" height="900" style="margin:0 auto .4rem"><div class="hand">saindo do forno</div><p class="xs muted">garrafa da Malu, pronta pra viajar</p></div></div><p class="legenda"><strong>Bastidores.</strong> Peça pronta, embalagem, bilhete, um manuscrito.</p></div>
+    </div>
+
+    <div class="grid grid--3">
+      <div class="card"><h4>WhatsApp</h4><p class="small">Foto: selo redondo. Recado: "Itens personalizados · feito com carinho, feito pra você 🐼". Toda conversa nasce com "Oi, Panda Mimo!" e a resposta começa pela ideia, não pelo CEP. Roteiro em quatro passos.</p></div>
+      <div class="card"><h4>Orçamento e e-mail</h4><p class="small">Pílula no cabeçalho, Nunito no texto, Fredoka nos títulos, sem Caveat e sem emoji. Estrutura fixa: peça, quantidade, arte, prazo de produção, prazo de envio, valor, condições. Assinatura: nome + "Panda Mimo · Itens personalizados".</p></div>
+      <div class="card"><h4>Brindes e co-branding</h4><p class="small">A peça é do cliente: o logo dele na frente. A Panda Mimo aparece só na tag, na caixa ou em gravação pequena. Monocromático: logo empilhado em nanquim sobre peça clara, em papel sobre peça escura.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 11 GOVERNANÇA ================= -->
+<section class="bloco" id="governanca">
+  <div class="wrap">
+    <div class="cab">
+      <p class="eyebrow">Governança</p>
+      <h2>Antes de publicar, <span class="hand">confere.</span></h2>
+      <p class="lede">A identidade aprovada não se redesenha. Evoluir é acrescentar dentro destas regras, e cada mudança de regra fica registrada no histórico do <code>MARCA.md</code>.</p>
+    </div>
+
+    <div class="grid grid--2" style="align-items:start">
+      <div class="card">
+        <h4>Checklist de qualquer peça de comunicação</h4>
+        <ul class="check small" style="margin-top:.6rem">
+          <li>Só as cores da paleta, na proporção 70/20/10.</li>
+          <li>Título em Fredoka; no máximo um trecho em Caveat; corpo em Nunito.</li>
+          <li>Logo em uma das três versões, com respiro e tamanho mínimo, sobre fundo permitido.</li>
+          <li>Pandinha inteiro, no máximo um, fundo transparente, expressão positiva.</li>
+          <li>Fotos de peça inteiras, com folga, sem retângulo de fundo.</li>
+          <li>Texto em "a gente", número onde há promessa, uma exclamação no máximo, emoji só em WhatsApp e redes.</li>
+          <li>Assinatura exata: "Feito com carinho, feito pra você."</li>
+          <li>Contraste AA nos pares aprovados.</li>
+          <li>No site: guardião verde (<code>npm test</code>) antes do merge.</li>
+        </ul>
+      </div>
+      <div style="display:grid;gap:1rem">
+        <div class="card card--areia">
+          <h4>Nunca</h4>
+          <div class="nunca" style="margin-top:.5rem">
+            <span>redesenhar logo ou mascote</span><span>"modernizar" a paleta</span><span>Caveat em parágrafo</span><span>cortar o Pandinha ou uma peça</span><span>foto de produto com fundo branco</span><span>esconder layout com overflow hidden</span><span>apagar assets ao ampliar o acervo</span>
+          </div>
+        </div>
+        <div class="card">
+          <h4>Manual ↔ código</h4>
+          <div class="rolagem">
+            <table class="tabela small">
+              <tbody>
+                <tr><td>Paleta</td><td><code>styles.css</code> · <code>--ink</code>, <code>--paper</code>, <code>--peach</code>…</td></tr>
+                <tr><td>Tipografia e escala</td><td><code>--f-display</code>, <code>--f-hand</code>, <code>--f-body</code>, <code>--fs-*</code></td></tr>
+                <tr><td>Raios, sombra, largura</td><td><code>--r-lg/md/sm</code>, <code>--shadow</code>, <code>--wrap</code></td></tr>
+                <tr><td>Cores das peças</td><td><code>--sw</code> no simulador, <code>FOTO_REAL</code> em script.js</td></tr>
+                <tr><td>Regras de foto</td><td><code>preparaFoto</code> em admin.js, travas de pixel em qa/audit.mjs</td></tr>
+                <tr><td>Frases e rótulos</td><td>index.html, produtos.js, mensagens <code>data-msg</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="xs muted" style="margin-top:.6rem">Mudou o manual? Mude o token, não o valor solto. Para pedir uma evolução, cite a seção do MARCA.md.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:1.6rem">
+      <h4>Pendências para o dono validar</h4>
+      <p class="small">Propósito, público e posicionamento como escritos · nome do mascote (Pandinha) · bio e hashtags das redes · saudação automática do WhatsApp · rituais de pós-venda · registro da marca no INPI e reserva de <code>pandamimo</code> · fornecedor de embalagem · prova impressa das cores.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap" style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:center">
+    <img src="../assets/logo-pill.webp" alt="Panda Mimo" width="900" height="254" style="width:150px">
+    <p>Manual da marca · versão 1.0 · setembro de 2026 · <span class="hand" style="font-size:1.15rem">feito com carinho, feito pra você.</span></p>
+  </div>
+</footer>
+
+</body>
+</html>
