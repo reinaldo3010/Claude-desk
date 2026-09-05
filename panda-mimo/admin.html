@@ -50,6 +50,7 @@
     <div class="adm-abas" role="tablist">
       <button class="adm-aba" role="tab" id="aba-produtos" aria-selected="true" aria-controls="secao-produtos">Produtos</button>
       <button class="adm-aba" role="tab" id="aba-config" aria-selected="false" aria-controls="secao-config">Configurações</button>
+      <button class="adm-aba" role="tab" id="aba-metricas" aria-selected="false" aria-controls="secao-metricas">Métricas</button>
     </div>
 
     <!-- ---------- PRODUTOS ---------- -->
@@ -83,6 +84,17 @@
           <textarea id="p-descricao" maxlength="400" placeholder="Aço inox 304 com tampa rosqueável e alça..."></textarea>
         </div>
 
+        <div class="linha">
+          <div class="campo">
+            <label for="p-preco">Preço (como aparece no site)</label>
+            <input id="p-preco" type="text" maxlength="40" placeholder="A partir de R$ 49">
+            <small>Vazio mostra "Valor sob consulta" na tela de detalhe.</small>
+          </div>
+        </div>
+        <div class="campo">
+          <label for="p-detalhes">Texto da tela de detalhe (opcional)</label>
+          <textarea id="p-detalhes" maxlength="900" placeholder="Um texto maior, com mais informações. Se ficar vazio, o site usa a descrição curta."></textarea>
+        </div>
         <div class="campo">
           <label for="p-etiquetas">Etiquetas</label>
           <textarea id="p-etiquetas" placeholder="1 litro&#10;24h gelada · 12h quente&#10;Livre de BPA"></textarea>
@@ -165,6 +177,31 @@
     </section>
   </div>
 </div>
+
+<!-- ---------- MÉTRICAS ---------- -->
+    <section class="adm-secao" id="secao-metricas" role="tabpanel" aria-labelledby="aba-metricas" hidden>
+      <div class="adm-cabecalho">
+        <h2>Métricas</h2>
+        <div class="seg" role="group" aria-label="Período">
+          <input type="radio" name="periodo" id="per-7" value="7"><label for="per-7">7 dias</label>
+          <input type="radio" name="periodo" id="per-30" value="30" checked><label for="per-30">30 dias</label>
+          <input type="radio" name="periodo" id="per-90" value="90"><label for="per-90">90 dias</label>
+        </div>
+      </div>
+      <p class="aviso" id="recado-metricas"></p>
+      <div class="met-numeros">
+        <div class="met-numero"><strong id="met-visitas">–</strong><span>visitas</span></div>
+        <div class="met-numero"><strong id="met-pageviews">–</strong><span>páginas vistas</span></div>
+        <div class="met-numero"><strong id="met-zap">–</strong><span>cliques no WhatsApp</span></div>
+        <div class="met-numero"><strong id="met-celular">–</strong><span>no celular</span></div>
+      </div>
+      <div class="linha" style="margin-top:1rem">
+        <div class="adm-editor"><h3>Visitas por dia</h3><ol class="met-lista" id="met-dias"></ol></div>
+        <div class="adm-editor"><h3>O que mais clicam</h3><ol class="met-lista" id="met-cliques"></ol></div>
+      </div>
+      <div class="adm-editor" style="margin-top:1rem"><h3>De onde vêm</h3><ol class="met-lista" id="met-origens"></ol></div>
+      <p class="campo" style="margin-top:.8rem"><small>Medição própria, sem cookie e sem rastrear pessoas: cada visita ganha um número aleatório que morre quando a aba fecha. Quem ativa "não rastrear" no navegador não entra na conta.</small></p>
+    </section>
 
 <!-- ---------- preparo da foto ---------- -->
 <dialog id="dialogo-foto">

@@ -8,8 +8,17 @@
   <meta name="theme-color" content="#FBF6EF">
   <meta property="og:title" content="Panda Mimo · Itens personalizados">
   <meta property="og:description" content="Feito com carinho, feito pra você. Garrafas, canecas, copos, ecobags, tags e kits personalizados.">
-  <meta property="og:image" content="assets/logo-redondo.webp">
-  <link rel="icon" href="assets/panda-carinha.webp" type="image/webp">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="assets/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="assets/og.jpg">
+  <!-- antes de ir ao ar: troque os dois caminhos acima pelo endereço completo (https://seudominio/assets/og.jpg)
+       e acrescente <link rel="canonical" href="https://seudominio/"> -->
+  <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="assets/icone-192.png" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Caveat:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap">
@@ -163,6 +172,7 @@
               <input type="radio" name="cor" id="c-pessego" value="pessego"><label for="c-pessego" style="--sw:#FFB59C">Pêssego</label>
               <input type="radio" name="cor" id="c-preta" value="preta"><label for="c-preta" style="--sw:#1F1D1A">Preta</label>
             </div>
+            <small class="field__hint" id="dica-foto" hidden>Na foto real a peça aparece em creme. A cor certa você escolhe no pedido.</small>
           </fieldset>
 
           <fieldset class="field">
@@ -190,6 +200,14 @@
         </form>
 
         <div class="builder__stage" aria-live="polite">
+          <div class="seg seg--modo" role="group" aria-label="Como ver a prévia">
+            <input type="radio" name="modo" id="m-desenho" value="desenho" checked><label for="m-desenho">Desenho</label>
+            <input type="radio" name="modo" id="m-foto" value="foto"><label for="m-foto">Foto real</label>
+          </div>
+          <div class="foto-real" id="foto-real" hidden>
+            <img id="foto-real-img" src="assets/prod-caneca.webp" alt="Foto real do produto com o nome escolhido" width="760" height="760" decoding="async">
+            <div class="foto-real__placa" id="foto-real-placa" aria-hidden="true"><span id="foto-real-nome">Malu</span></div>
+          </div>
           <svg class="preview" viewBox="0 0 260 320" role="img" aria-labelledby="preview-title">
             <title id="preview-title">Prévia do item personalizado</title>
             <defs>
@@ -604,6 +622,27 @@
 <a class="fab js-wa" href="#contato" data-msg="Oi, Panda Mimo! Quero fazer um pedido personalizado 🐼" aria-label="Conversar no WhatsApp">
   <img src="assets/rede-whatsapp.webp" alt="" width="272" height="272">
 </a>
+
+<dialog class="detalhe" id="detalhe" aria-labelledby="detalhe-titulo">
+  <div class="detalhe__in">
+    <button class="detalhe__fechar" type="button" aria-label="Fechar">×</button>
+    <div class="detalhe__galeria">
+      <div class="detalhe__foto"><img id="detalhe-foto" src="assets/prod-caneca.webp" alt="" width="760" height="760" decoding="async"></div>
+      <div class="detalhe__miniaturas" id="detalhe-miniaturas" role="group" aria-label="Fotos do produto"></div>
+    </div>
+    <div class="detalhe__info">
+      <p class="eyebrow"><span class="eyebrow__dot"></span> Produto <span class="eyebrow__dot"></span></p>
+      <h2 class="display" id="detalhe-titulo">Produto</h2>
+      <p class="detalhe__preco" id="detalhe-preco"></p>
+      <p class="detalhe__texto" id="detalhe-texto"></p>
+      <ul class="chips" id="detalhe-chips"></ul>
+      <div class="detalhe__acoes">
+        <a class="btn btn--peach js-wa" id="detalhe-zap" href="#contato" data-msg="Oi, Panda Mimo!">Quero essa</a>
+        <a class="btn btn--ghost" id="detalhe-personalizar" href="#monte">Ver com meu nome</a>
+      </div>
+    </div>
+  </div>
+</dialog>
 
 <script src="config.js"></script>
 <script src="produtos.js"></script>

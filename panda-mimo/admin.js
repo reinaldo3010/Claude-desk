@@ -109,15 +109,16 @@ async function abrePainel() {
    Abas
 --------------------------------------------------------- */
 function mostraAba(qual) {
-  const prod = qual === "produtos";
-  $("#aba-produtos").setAttribute("aria-selected", String(prod));
-  $("#aba-config").setAttribute("aria-selected", String(!prod));
-  $("#secao-produtos").hidden = !prod;
-  $("#secao-config").hidden = prod;
-  if (prod === false) fechaEditor();
+  for (const nome of ["produtos", "config", "metricas"]) {
+    $(`#aba-${nome}`).setAttribute("aria-selected", String(nome === qual));
+    $(`#secao-${nome}`).hidden = nome !== qual;
+  }
+  if (qual !== "produtos") fechaEditor();
+  if (qual === "metricas") carregaMetricas();
 }
 $("#aba-produtos").addEventListener("click", () => mostraAba("produtos"));
 $("#aba-config").addEventListener("click", () => mostraAba("config"));
+$("#aba-metricas").addEventListener("click", () => mostraAba("metricas"));
 
 /* ---------------------------------------------------------
    Produtos
@@ -126,7 +127,7 @@ let produtos = [];
 let editando = null;   // produto em edição (null = nenhum)
 let fotosEditor = [];  // [{url, alt, largura, altura}]
 
-const CAMPOS = "id,slug,nome,descricao,etiquetas,mensagem,rotulo_botao,ordem,publicado,em_breve,pm_produto_fotos(id,url,alt,ordem,largura,altura)";
+const CAMPOS = "id,slug,nome,descricao,detalhes,preco_texto,etiquetas,mensagem,rotulo_botao,ordem,publicado,em_breve,pm_produto_fotos(id,url,alt,ordem,largura,altura)";
 
 async function carregaProdutos() {
   try {
@@ -205,6 +206,8 @@ function abreEditor(p) {
   $("#titulo-editor").textContent = p ? `Editando: ${p.nome}` : "Novo produto";
   $("#p-nome").value = p ? p.nome : "";
   $("#p-descricao").value = p ? p.descricao : "";
+  $("#p-detalhes").value = p ? (p.detalhes || "") : "";
+  $("#p-preco").value = p ? (p.preco_texto || "") : "";
   $("#p-etiquetas").value = p ? (p.etiquetas || []).join("\n") : "";
   $("#p-mensagem").value = p ? p.mensagem : "Oi, Panda Mimo! Quero ";
   $("#p-botao").value = p ? p.rotulo_botao : "Quero essa";
@@ -263,6 +266,8 @@ $("#salvar").addEventListener("click", async () => {
   const corpo = {
     nome,
     descricao: $("#p-descricao").value.trim(),
+    detalhes: $("#p-detalhes").value.trim(),
+    preco_texto: $("#p-preco").value.trim(),
     etiquetas: $("#p-etiquetas").value.split("\n").map((s) => s.trim()).filter(Boolean),
     mensagem: $("#p-mensagem").value.trim(),
     rotulo_botao: $("#p-botao").value.trim() || "Quero essa",
@@ -576,7 +581,7 @@ $("#salvar-config").addEventListener("click", async () => {
 
 $("#baixar-copia").addEventListener("click", () => {
   const copia = produtos.filter((p) => p.publicado).map((p) => ({
-    slug: p.slug, nome: p.nome, descricao: p.descricao, etiquetas: p.etiquetas,
+    slug: p.slug, nome: p.nome, descricao: p.descricao, detalhes: p.detalhes || "", preco_texto: p.preco_texto || "", etiquetas: p.etiquetas,
     mensagem: p.mensagem, rotulo_botao: p.rotulo_botao, em_breve: p.em_breve,
     fotos: p.fotos.map((f) => ({ url: f.url, alt: f.alt, largura: f.largura, altura: f.altura })),
     ordem: p.ordem,
@@ -592,6 +597,42 @@ window.PANDA_PRODUTOS = ${JSON.stringify(copia, null, 2)};
   a.click();
   URL.revokeObjectURL(a.href);
 });
+
+/* ---------------------------------------------------------
+   Métricas
+--------------------------------------------------------- */
+$$('input[name="periodo"]').forEach((r) => r.addEventListener("change", carregaMetricas));
+
+function lista(el, itens, rotulo, valor) {
+  const alvo = $(el);
+  alvo.innerHTML = "";
+  const max = Math.max(1, ...itens.map(valor));
+  itens.forEach((it) => {
+    const li = document.createElement("li");
+    li.innerHTML = `<div class="barra" style="--w:${Math.round((valor(it) / max) * 100)}%"><i></i><span></span></div><b>${valor(it)}</b>`;
+    li.querySelector("span").textContent = rotulo(it);
+    alvo.appendChild(li);
+  });
+}
+
+async function carregaMetricas() {
+  const dias = Number(($$('input[name="periodo"]').find((r) => r.checked) || {}).value || 30);
+  recado("#recado-metricas", "Carregando...");
+  try {
+    const m = await rest("rpc/pm_metricas", { method: "POST", body: JSON.stringify({ dias }) });
+    if (m.erro) throw new Error(m.erro);
+    $("#met-visitas").textContent = m.visitas;
+    $("#met-pageviews").textContent = m.pageviews;
+    $("#met-zap").textContent = m.cliques_whatsapp;
+    $("#met-celular").textContent = `${m.celular_pct}%`;
+    lista("#met-dias", m.por_dia, (d) => new Date(d.dia + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }), (d) => d.visitas);
+    lista("#met-cliques", m.cliques, (d) => d.rotulo, (d) => d.total);
+    lista("#met-origens", m.origens, (d) => d.origem, (d) => d.visitas);
+    recado("#recado-metricas", m.pageviews ? "" : "Ainda não há visitas registradas. Assim que o site estiver no ar, os números aparecem aqui.");
+  } catch (e) {
+    recado("#recado-metricas", `Não consegui carregar as métricas: ${e.message}`, "erro");
+  }
+}
 
 /* ---------------------------------------------------------
    Começo

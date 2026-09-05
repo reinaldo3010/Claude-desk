@@ -18,6 +18,13 @@
     - catálogo do banco substituindo a cópia local (com o banco simulado)
     - painel (admin.html): carrega sem erro, exige login, e o preparo de foto
       recusa fundo sólido e entrega quadro quadrado transparente
+    - detalhe do produto: abre pelo botão e pelo endereço (#produto/slug), mostra
+      fotos, preço e botão do WhatsApp, fecha com Escape
+    - simulador em modo foto real: o nome aparece dentro da plaquinha
+    - movimento: nada fica invisível depois de rolar até a seção
+    - ícones PNG e de toque, imagem de compartilhamento 1200x630 em JPG,
+      robots.txt e sitemap.xml; aviso quando os endereços ainda são relativos
+    - medição: a visita e o clique no WhatsApp são registrados (com o banco simulado)
     - foto de produto que não seja um quadro quadrado transparente: fundo retangular
       aparecendo nos cantos, ou peça encostando na borda (risco de estar cortada)
     - erro de console; requisição local falhando (404 etc.)
@@ -267,9 +274,11 @@ for (const [w, h] of viewports) {
         await setNome(nome);
         const r = await page.evaluate((b) => {
           const g = document.getElementById(`pv-${b}`); const t = g.querySelector('.pv-text');
-          return { hidden: g.hidden, text: t.textContent, width: t.getComputedTextLength() };
+          const outras = ['garrafa', 'caneca', 'copo'].filter((x) => x !== b).filter((x) => getComputedStyle(document.getElementById(`pv-${x}`)).display !== 'none');
+          return { hidden: getComputedStyle(g).display === 'none', outras, text: t.textContent, width: t.getComputedTextLength() };
         }, base);
-        if (r.hidden) fail(w, `base ${base} não aparece`);
+        if (r.hidden) fail(w, `base ${base} não aparece no desenho`);
+        if (r.outras.length) fail(w, `base ${base} escolhida, mas o desenho ainda mostra ${r.outras.join(' e ')}`);
         if (r.text !== (nome.trim() || 'Seu nome')) fail(w, `prévia não mostra "${nome}" em ${base}/${letra} (veio "${r.text}")`);
         if (r.width > largura[base] + 2) fail(w, `texto "${nome}" não cabe na ${base} com letra ${letra} (${Math.round(r.width)} > ${largura[base]})`);
       }
@@ -308,11 +317,83 @@ for (const [w, h] of viewports) {
   await items[0].$eval('summary', (s) => s.click());
   if (await items[1].evaluate((d) => d.open)) fail(w, 'FAQ não fecha ao abrir outra');
 
+  // detalhe do produto
+  {
+    const nomeCard = await page.$eval('#lista-produtos .product h3', (h) => h.textContent.trim());
+    await page.$eval('#lista-produtos .product .product__ver', (b) => b.click());
+    await page.waitForTimeout(200);
+    const d = await page.evaluate(() => {
+      const dlg = document.getElementById('detalhe');
+      return {
+        aberto: dlg.open, titulo: document.getElementById('detalhe-titulo').textContent.trim(),
+        minis: document.querySelectorAll('#detalhe-miniaturas button').length,
+        preco: document.getElementById('detalhe-preco').textContent.trim(),
+        zap: document.getElementById('detalhe-zap').href, hash: location.hash,
+        fotoOk: document.getElementById('detalhe-foto').naturalWidth > 0,
+        dentro: (() => { const r = dlg.getBoundingClientRect(); return r.left >= -1 && r.right <= document.documentElement.clientWidth + 1; })(),
+      };
+    });
+    if (!d.aberto) fail(w, 'detalhe do produto não abriu');
+    if (d.titulo !== nomeCard) fail(w, `detalhe abriu com título "${d.titulo}" em vez de "${nomeCard}"`);
+    if (d.minis < 1) fail(w, 'detalhe sem miniaturas');
+    if (!d.preco) fail(w, 'detalhe sem preço nem "sob consulta"');
+    if (!/^https:\/\/wa\.me\/\d{8,}/.test(d.zap)) fail(w, 'detalhe sem botão de WhatsApp válido');
+    if (!/^#produto\//.test(d.hash)) fail(w, `detalhe não atualizou o endereço (hash "${d.hash}")`);
+    if (!d.fotoOk) fail(w, 'detalhe com a foto grande vazia');
+    if (!d.dentro) fail(w, 'detalhe sai da tela');
+    await page.keyboard.press('Escape'); await page.waitForTimeout(150);
+    const depois = await page.evaluate(() => ({ aberto: document.getElementById('detalhe').open, hash: location.hash }));
+    if (depois.aberto) fail(w, 'detalhe não fecha com Escape');
+    if (/^#produto\//.test(depois.hash)) fail(w, 'detalhe fechou mas o endereço continuou apontando para o produto');
+  }
+
+  // simulador em modo foto real
+  {
+    await page.fill('#b-nome', 'Beatriz');
+    await page.$eval('label[for="m-foto"]', (l) => l.click()); await page.waitForTimeout(250);
+    const f = await page.evaluate(() => {
+      const foto = document.getElementById('foto-real'), placa = document.getElementById('foto-real-placa'), nome = document.getElementById('foto-real-nome');
+      const rp = placa.getBoundingClientRect(), rn = nome.getBoundingClientRect();
+      return {
+        fotoVisivel: !foto.hidden && getComputedStyle(foto).display !== 'none',
+        desenhoEscondido: getComputedStyle(document.querySelector('.preview')).display === 'none',
+        texto: nome.textContent, cabe: rn.left >= rp.left - 1 && rn.right <= rp.right + 1 && rn.top >= rp.top - 1 && rn.bottom <= rp.bottom + 1,
+        placaNaFoto: (() => { const ri = document.getElementById('foto-real-img').getBoundingClientRect(); return rp.left > ri.left && rp.right < ri.right && rp.top > ri.top && rp.bottom < ri.bottom; })(),
+        coresDesligadas: document.getElementById('c-creme').disabled,
+      };
+    });
+    if (!f.fotoVisivel) fail(w, 'modo foto real não mostrou a foto');
+    if (!f.desenhoEscondido) fail(w, 'modo foto real deixou o desenho aparecendo junto');
+    if (f.texto !== 'Beatriz') fail(w, `nome na foto real veio "${f.texto}"`);
+    if (!f.cabe) fail(w, 'nome na foto real saiu da plaquinha');
+    if (!f.placaNaFoto) fail(w, 'plaquinha da foto real fora da área da foto');
+    if (!f.coresDesligadas) fail(w, 'modo foto real deixou as cores ativas, mas elas não valem na foto');
+    for (const base of ['garrafa', 'copo', 'caneca']) {
+      await page.$eval(`label[for="i-${base}"]`, (l) => l.click()); await page.waitForTimeout(120);
+      const ok = await page.evaluate(() => { const rp = document.getElementById('foto-real-placa').getBoundingClientRect(), rn = document.getElementById('foto-real-nome').getBoundingClientRect(); return rn.right <= rp.right + 1 && rn.left >= rp.left - 1; });
+      if (!ok) fail(w, `nome na foto real saiu da plaquinha na base ${base}`);
+    }
+    await page.$eval('label[for="m-desenho"]', (l) => l.click()); await page.waitForTimeout(120);
+    await page.fill('#b-nome', 'Malu');
+    if (!(await page.$eval('#foto-real', (f) => f.hidden))) fail(w, 'voltar para o desenho não escondeu a foto real');
+    if (await page.$eval('#c-creme', (c) => c.disabled)) fail(w, 'voltar para o desenho não religou as cores');
+  }
+
+  // movimento: depois de rolar até uma seção ela precisa estar visível
+  {
+    await page.evaluate(() => document.getElementById('contato').scrollIntoView({ behavior: 'instant', block: 'center' }));
+    await page.waitForTimeout(450);
+    const op = await page.$eval('#contato', (s) => getComputedStyle(s).opacity);
+    if (Number(op) < 0.99) fail(w, `seção de contato ficou com opacidade ${op} depois de rolar até ela`);
+    const primeiraInvisivel = await page.evaluate(() => { window.scrollTo(0, 0); const h = document.querySelector('.hero'); return getComputedStyle(h).opacity !== '1'; });
+    if (primeiraInvisivel) fail(w, 'o hero, que já está na tela, começa invisível');
+  }
+
   consoleErrors.forEach((e) => fail(w, `erro de console: ${e}`));
   netFailures.forEach((e) => fail(w, `falha de rede: ${e}`));
 
   if (shotWidths.has(w)) {
-    await page.evaluate(() => { window.scrollTo(0, 0); document.querySelector('.topbar').style.position = 'static'; document.querySelector('.fab').style.display = 'none'; });
+    await page.evaluate(() => { window.PANDA_REVELA_TUDO && window.PANDA_REVELA_TUDO(); window.scrollTo(0, 0); document.querySelector('.topbar').style.position = 'static'; document.querySelector('.fab').style.display = 'none'; });
     const dir = path.join(here, 'shots', String(w)); fs.mkdirSync(dir, { recursive: true });
     for (const f of fs.readdirSync(dir)) fs.unlinkSync(path.join(dir, f));
     if (w < 961) { await page.$eval('.menu-toggle', (b) => b.click()); await page.screenshot({ path: path.join(dir, '01a-menu-aberto.png') }); await page.$eval('.menu-toggle', (b) => b.click()); }
@@ -326,6 +407,60 @@ for (const [w, h] of viewports) {
   }
   await page.close();
 }
+// ---- cabeçalho, ícones e arquivos de lançamento ----
+{
+  const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  await page.goto(page_url, { waitUntil: 'load' });
+  const cab = await page.evaluate(async () => {
+    const q = (s) => document.querySelector(s);
+    const og = q('meta[property="og:image"]')?.content || '';
+    const mede = (src) => new Promise((ok) => { const i = new Image(); i.onload = () => ok([i.naturalWidth, i.naturalHeight]); i.onerror = () => ok(null); i.src = src; });
+    return {
+      faviconPng: !!q('link[rel="icon"][type="image/png"]'),
+      apple: !!q('link[rel="apple-touch-icon"]'),
+      og, ogDim: /\.(jpe?g|png)$/i.test(og) ? await mede(og) : null,
+      twitter: q('meta[name="twitter:card"]')?.content || '',
+      canonical: q('link[rel="canonical"]')?.href || '',
+    };
+  });
+  if (!cab.faviconPng) failures.push('[cabeçalho] falta favicon em PNG (o Safari não aceita WebP)');
+  if (!cab.apple) failures.push('[cabeçalho] falta o ícone de toque da Apple');
+  if (!/\.(jpe?g|png)$/i.test(cab.og)) failures.push(`[cabeçalho] og:image precisa ser JPG ou PNG (está "${cab.og}")`);
+  else if (!cab.ogDim || cab.ogDim[0] !== 1200 || cab.ogDim[1] !== 630) failures.push(`[cabeçalho] og:image precisa ter 1200x630 (tem ${cab.ogDim})`);
+  if (cab.twitter !== 'summary_large_image') failures.push('[cabeçalho] falta twitter:card summary_large_image');
+  if (!/^https?:\/\//.test(cab.og)) warnings.push('[antes de ir ao ar] og:image ainda é relativo; WhatsApp e Facebook exigem o endereço completo');
+  if (!cab.canonical) warnings.push('[antes de ir ao ar] falta <link rel="canonical"> com o domínio final');
+  for (const f of ['robots.txt', 'sitemap.xml', 'assets/og.jpg', 'assets/apple-touch-icon.png', 'assets/favicon-32.png'])
+    if (!fs.existsSync(path.resolve(here, '..', f))) failures.push(`[lançamento] falta o arquivo ${f}`);
+  if (fs.existsSync(path.resolve(here, '..', 'sitemap.xml')) && fs.readFileSync(path.resolve(here, '..', 'sitemap.xml'), 'utf8').includes('SEU-DOMINIO'))
+    warnings.push('[antes de ir ao ar] sitemap.xml e robots.txt ainda têm SEU-DOMINIO no lugar do endereço');
+
+  // link direto para um produto abre o detalhe
+  await page.goto(page_url + '#produto/canecas', { waitUntil: 'load' });
+  await page.evaluate(() => window.PANDA_CATALOGO || true);
+  await page.waitForTimeout(300);
+  const direto = await page.evaluate(() => ({ aberto: document.getElementById('detalhe').open, titulo: document.getElementById('detalhe-titulo').textContent.trim() }));
+  if (!direto.aberto || direto.titulo !== 'Canecas') failures.push(`[detalhe] o endereço #produto/canecas não abriu o detalhe certo (${JSON.stringify(direto)})`);
+  await page.close();
+}
+
+// ---- medição: visita e clique chegam ao banco (simulado) ----
+{
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  const eventos = [];
+  await page.route('**/rest/v1/pm_eventos*', (r) => { try { eventos.push(JSON.parse(r.request().postData() || '{}')); } catch {} r.fulfill({ status: 201, body: '' }); });
+  await page.goto(page_url, { waitUntil: 'load' });
+  await page.waitForTimeout(400);
+  await page.$eval('.hero .js-wa', (a) => { a.addEventListener('click', (e) => e.preventDefault(), { once: true }); a.click(); });
+  await page.waitForTimeout(400);
+  const tipos = eventos.map((e) => e.evento);
+  if (!tipos.includes('pageview')) failures.push(`[medição] a visita não foi registrada (eventos: ${tipos.join(', ') || 'nenhum'})`);
+  if (!tipos.includes('clique_whatsapp')) failures.push(`[medição] o clique no WhatsApp não foi registrado (eventos: ${tipos.join(', ') || 'nenhum'})`);
+  const pv = eventos.find((e) => e.evento === 'pageview');
+  if (pv && (!pv.sessao || pv.largura !== 390)) failures.push('[medição] a visita veio sem sessão ou sem a largura da tela');
+  await page.close();
+}
+
 // ---- o catálogo vindo do banco substitui a cópia local ----
 {
   const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
@@ -404,6 +539,8 @@ for (const [w, h] of viewports) {
   if (!/noindex/.test(estrutura.robots)) failures.push('[painel] falta noindex: o painel não pode ir para o Google');
   if (estrutura.semRotulo.length) failures.push(`[painel] campo sem rótulo: ${estrutura.semRotulo.join(', ')}`);
   if (!estrutura.temPreparo) failures.push('[painel] o preparo de foto não está disponível');
+  if (!(await page.$('#aba-metricas')) || !(await page.$('#secao-metricas'))) failures.push('[painel] falta a aba de métricas');
+  if (!(await page.$('#p-preco')) || !(await page.$('#p-detalhes'))) failures.push('[painel] faltam os campos de preço e texto de detalhe');
 
   if (estrutura.temPreparo) {
     const provas = await page.evaluate(async () => {

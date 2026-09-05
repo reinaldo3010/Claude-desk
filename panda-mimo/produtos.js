@@ -40,7 +40,9 @@ window.PANDA_PRODUTOS = [
         "altura": 760
       }
     ],
-    "ordem": 0
+    "ordem": 0,
+    "preco_texto": "",
+    "detalhes": ""
   },
   {
     "slug": "canecas",
@@ -80,7 +82,9 @@ window.PANDA_PRODUTOS = [
         "altura": 760
       }
     ],
-    "ordem": 1
+    "ordem": 1,
+    "preco_texto": "",
+    "detalhes": ""
   },
   {
     "slug": "copos-termicos",
@@ -120,7 +124,9 @@ window.PANDA_PRODUTOS = [
         "altura": 760
       }
     ],
-    "ordem": 2
+    "ordem": 2,
+    "preco_texto": "",
+    "detalhes": ""
   },
   {
     "slug": "ecobags",
@@ -148,7 +154,9 @@ window.PANDA_PRODUTOS = [
         "altura": 760
       }
     ],
-    "ordem": 3
+    "ordem": 3,
+    "preco_texto": "",
+    "detalhes": ""
   },
   {
     "slug": "tags-e-chaveiros",
@@ -170,7 +178,9 @@ window.PANDA_PRODUTOS = [
         "altura": 760
       }
     ],
-    "ordem": 4
+    "ordem": 4,
+    "preco_texto": "",
+    "detalhes": ""
   },
   {
     "slug": "kits-presenteaveis",
@@ -204,7 +214,9 @@ window.PANDA_PRODUTOS = [
         "altura": 760
       }
     ],
-    "ordem": 5
+    "ordem": 5,
+    "preco_texto": "",
+    "detalhes": ""
   },
   {
     "slug": "novidades-em-breve",
@@ -225,6 +237,8 @@ window.PANDA_PRODUTOS = [
         "altura": 900
       }
     ],
-    "ordem": 6
+    "ordem": 6,
+    "preco_texto": "",
+    "detalhes": ""
   }
 ];

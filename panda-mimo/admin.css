@@ -154,3 +154,20 @@ body { background: var(--paper); }
   background-size: 18px 18px; background-position: 0 0, 9px 9px;
 }
 .preparo input[type="range"] { width: 100%; accent-color: var(--peach-deep); }
+
+
+/* ---------- métricas ---------- */
+.met-numeros { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .8rem; }
+.met-numero {
+  background: var(--white); border: 1.5px solid var(--sand); border-radius: var(--r-md);
+  padding: 1rem 1.1rem; display: grid; gap: .1rem;
+}
+.met-numero strong { font-family: var(--f-display); font-weight: 600; font-size: 1.9rem; font-variant-numeric: tabular-nums; }
+.met-numero span { font-size: var(--fs-xs); color: var(--ink-soft); font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+.met-lista { display: grid; gap: .45rem; font-size: var(--fs-s); }
+.met-lista li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .6rem; align-items: center; }
+.met-lista .barra { position: relative; height: 22px; border-radius: 6px; background: var(--sand-soft); overflow: hidden; }
+.met-lista .barra i { position: absolute; inset: 0 auto 0 0; width: var(--w); background: var(--peach); }
+.met-lista .barra span { position: relative; z-index: 1; padding-left: .5rem; line-height: 22px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.met-lista b { font-variant-numeric: tabular-nums; }
+.met-lista:empty::after { content: "Nada registrado neste período ainda."; color: var(--ink-soft); font-size: var(--fs-s); }

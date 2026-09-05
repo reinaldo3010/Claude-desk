@@ -9,25 +9,57 @@ Aponte para a pasta `panda-mimo/` (o arquivo de entrada é `index.html`).
 
 ## O que ajustar antes de ir ao ar
 
-Em `script.js`, no bloco `CONFIG`:
+WhatsApp, Instagram, TikTok e o aviso do topo se mudam pelo **painel** (`admin.html`), sem mexer em código.
+O `CONTATO` em `script.js` é só o valor de reserva usado enquanto o banco não responde.
 
-- `WHATSAPP`: número com DDI e DDD, só dígitos (ex.: `5511999998888`). Todos os botões
-  "Pedir no WhatsApp" e o "Monte seu mimo" usam esse número.
-- `INSTAGRAM` e `TIKTOK`: o @ da marca em cada rede, sem o arroba.
+Coisas que dependem do domínio final e por isso ficaram marcadas (o guardião avisa enquanto não forem feitas):
 
-Em `index.html`:
+- Em `index.html`, troque a `og:image` relativa por um endereço completo
+  (`https://seudominio.com.br/assets/og.jpg`). WhatsApp e Facebook não aceitam caminho relativo.
+- Ainda no `<head>`, acrescente `<link rel="canonical" href="https://seudominio.com.br/">`.
+- Em `robots.txt` e `sitemap.xml`, substitua `SEU-DOMINIO` pelo endereço final.
+
+Em `index.html`, revise também os textos que são propostas:
 
 - Horário de atendimento, prazo e área de envio, na seção **Contato**.
-- Tamanhos, cores e quantidades mínimas nos cartões da seção **Produtos** (são exemplos).
 - Regras de frete grátis (barra do topo e selo), forma de pagamento e política de refazer em 7 dias,
-  nos selos de confiança e nas **Dúvidas frequentes**. São propostas: confirme antes de publicar.
+  nos selos de confiança e nas **Dúvidas frequentes**.
 - Prazo de produção (3 a 5 dias úteis) e condições de pedidos em quantidade, na seção **Empresas**.
+
+Os preços e o texto longo de cada produto se preenchem pelo painel (campos **Preço** e **Texto da tela de detalhe**).
+Enquanto o preço estiver vazio, a tela de detalhe mostra "Valor sob consulta".
 
 ## Seções da página
 
 Aviso de frete · Hero · Selos de confiança · Produtos · Monte seu mimo (simulador) · Ocasiões ·
 Pedidos em quantidade · Como funciona · Diferenciais · Cuidados com a peça · Galeria ·
 Dúvidas frequentes · Redes sociais · Contato · Rodapé · Botão flutuante do WhatsApp.
+
+### Tela de detalhe do produto
+
+Clicar na foto de um cartão ou em **Ver detalhes** abre uma janela com a foto grande, as miniaturas do
+carrossel, o preço, o texto longo, as etiquetas, o botão do WhatsApp e **Ver com meu nome**, que leva ao
+simulador já com aquela base escolhida e no modo foto real. Cada produto tem endereço próprio
+(`#produto/canecas`, por exemplo), então dá para mandar o link direto de um item.
+
+### Foto real no simulador
+
+No "Monte seu mimo", a chave **Desenho / Foto real** troca a ilustração pela foto do produto com o nome
+digitado desenhado na placa da peça. A posição e a cor da placa de cada base estão em `FOTO_REAL`
+(`script.js`), em porcentagem da foto, e o nome encolhe sozinho até caber. No modo foto as cores da peça
+ficam desligadas (a foto é da peça creme) e a mensagem do WhatsApp sai com "Cor: a combinar".
+
+### Movimento
+
+Três gestos, todos discretos e respeitando a preferência "reduzir movimento" do sistema: as seções abaixo
+da dobra aparecem com um leve fade e subida de 12 px (uma vez só, ao rolar), o botão flutuante do WhatsApp
+dá um aceno após 8 e 30 segundos, e as transições de detalhe e simulador são as já existentes.
+
+### Medição
+
+O site registra visitas, cliques no WhatsApp, abertura de detalhe, uso do carrossel e envio do simulador na
+tabela `pm_eventos`, sem cookie e sem identificar pessoas (um número aleatório por aba, que morre ao fechar).
+Quem ativa "não rastrear" no navegador não é contado. Os números aparecem na aba **Métricas** do painel.
 
 ## Guardião de qualidade
 
@@ -37,6 +69,13 @@ ampliada demais, texto cortado, sobreposição entre cartões, elemento fixo em 
 debaixo do cabeçalho, menu do celular que não abre ou não fecha, botão flutuante cobrindo um CTA ou o teclado,
 link sem destino ou de WhatsApp inválido, campo sem rótulo, erro de console, falha de rede, e o simulador,
 o carrossel ou as dúvidas sem reagir. Também salva capturas por seção em `qa/shots/` para conferência visual.
+
+Nesta versão ele também cobre a tela de detalhe (abre, fecha, foca, endereço `#produto/...`), o modo foto real
+(foto aparece, desenho some, nome cabe na placa, placa dentro da foto), o movimento (seções acima da dobra
+nunca ficam invisíveis), a medição (evento de visita e de clique chegam com sessão e largura) e o `<head>`:
+favicon PNG, ícone da Apple, `og:image` em JPG ou PNG de 1200x630, cartão do Twitter, `robots.txt` e
+`sitemap.xml` presentes. Endereço relativo na `og:image`, canonical ausente e `SEU-DOMINIO` nos arquivos
+geram aviso, não reprovação, até o domínio existir.
 
 Duas travas cuidam especificamente das fotos de produto, lendo os pixels de cada imagem:
 
@@ -97,9 +136,10 @@ mandar um PNG que já venha com fundo transparente.
 
 | Tabela | Para que serve |
 |---|---|
-| `pm_produtos` | um registro por produto: nome, descrição, etiquetas, mensagem do WhatsApp, ordem, publicado |
+| `pm_produtos` | um registro por produto: nome, descrição, texto de detalhe, preço, etiquetas, mensagem do WhatsApp, ordem, publicado |
 | `pm_produto_fotos` | as fotos de cada produto, na ordem em que aparecem no carrossel |
 | `pm_config` | WhatsApp, Instagram, TikTok e o aviso do topo |
+| `pm_eventos` | medição própria: visitas, cliques e uso do simulador (lida pela função `pm_metricas`) |
 | `pm_admins` | os e-mails que podem alterar o catálogo |
 
 As regras de acesso ficam no próprio banco: qualquer visitante lê o que está publicado,
@@ -118,7 +158,7 @@ nova pelo painel e substitua esse arquivo no site.
 panda-mimo/
 ├── index.html   página única
 ├── styles.css   estilos (paleta e tipografia da marca)
-├── script.js    links de WhatsApp e o simulador "Monte seu mimo"
+├── script.js    catálogo, detalhe, simulador (desenho e foto real), medição e movimento
 ├── produtos.js  cópia do catálogo, usada quando o banco não responde
 ├── config.js    endereço e chave pública do banco
 ├── admin.html   painel de administração
@@ -126,7 +166,8 @@ panda-mimo/
 ├── admin.css    estilo do painel
 ├── qa/audit.mjs guardião: auditoria visual e funcional com Playwright
 ├── package.json scripts do guardião (npm test)
-└── assets/      logo, mascote, adesivos, mockups e ícones extraídos das folhas transparentes da marca (WebP)
+├── robots.txt / sitemap.xml   trocar SEU-DOMINIO antes de publicar
+└── assets/      logo, mascote, adesivos, mockups (WebP), ícones PNG, apple-touch-icon e og.jpg 1200x630
 ```
 
 ## Identidade aplicada

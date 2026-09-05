@@ -8,6 +8,8 @@
    quando a internet falha.
    ========================================================= */
 
+const reduzMovimento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
 /* ---------- contatos (a cópia local vale até o banco responder) ---------- */
 const CONTATO = {
   whatsapp: "5500000000000",
@@ -36,9 +38,45 @@ function aplicaContatos(escopo = document) {
 document.getElementById("ano").textContent = new Date().getFullYear();
 
 /* =========================================================
+   Medição própria: sem cookie, sem rastrear pessoas
+   Cada visita ganha um número aleatório que morre com a aba.
+   Quem pede "não rastrear" no navegador não entra na conta.
+   ========================================================= */
+const medir = (() => {
+  const cfg = window.PANDA_CONFIG;
+  if (!cfg || !cfg.URL || !cfg.CHAVE || navigator.doNotTrack === "1") return () => {};
+  let sessao = "";
+  try {
+    sessao = sessionStorage.getItem("pm_s") || Math.random().toString(36).slice(2, 12);
+    sessionStorage.setItem("pm_s", sessao);
+  } catch (e) { sessao = Math.random().toString(36).slice(2, 12); }
+  const origem = (() => { try { return document.referrer ? new URL(document.referrer).hostname : ""; } catch (e) { return ""; } })();
+  return (evento, rotulo = "") => {
+    const corpo = JSON.stringify({
+      evento, rotulo: String(rotulo).replace(/\s+/g, " ").trim().slice(0, 200),
+      pagina: (location.pathname + location.hash).slice(0, 200),
+      origem: origem.slice(0, 120), largura: window.innerWidth, sessao,
+    });
+    fetch(`${cfg.URL}/rest/v1/pm_eventos`, {
+      method: "POST", keepalive: true,
+      headers: { apikey: cfg.CHAVE, Authorization: `Bearer ${cfg.CHAVE}`, "Content-Type": "application/json", Prefer: "return=minimal" },
+      body: corpo,
+    }).catch(() => {});
+  };
+})();
+medir("pageview");
+document.addEventListener("click", (e) => {
+  const zap = e.target.closest(".js-wa");
+  if (zap) medir("clique_whatsapp", zap.textContent || zap.getAttribute("aria-label") || "whatsapp");
+  const nav = e.target.closest(".carousel__nav, .carousel__dot");
+  if (nav) medir("carrossel", nav.closest("[data-carousel]")?.getAttribute("aria-label") || "");
+});
+
+/* =========================================================
    Catálogo
    ========================================================= */
 const lista = document.getElementById("lista-produtos");
+let produtosNaTela = [];
 
 function fotoHTML(f) {
   return `<img src="${esc(f.url)}" alt="${esc(f.alt)}" loading="lazy" decoding="async" width="${f.largura || 760}" height="${f.altura || 760}">`;
@@ -66,12 +104,14 @@ function vitrineHTML(p) {
 
 function produtoHTML(p) {
   const etiquetas = (p.etiquetas || []).map((e) => `<li>${esc(e)}</li>`).join("");
-  return `<article class="product${p.em_breve ? " product--soon" : ""}">
+  return `<article class="product${p.em_breve ? " product--soon" : ""}" data-slug="${esc(p.slug)}">
       ${vitrineHTML(p)}
       <div class="product__body">
         <h3>${esc(p.nome)}</h3>
+        ${p.preco_texto ? `<p class="product__preco">${esc(p.preco_texto)}</p>` : ""}
         <p>${esc(p.descricao)}</p>
         <ul class="chips">${etiquetas}</ul>
+        ${p.em_breve ? "" : '<button class="product__ver" type="button">Ver detalhes</button>'}
       </div>
       <a class="product__cta js-wa" href="#contato" data-msg="${esc(p.mensagem)}">${esc(p.rotulo_botao || "Quero essa")} <span aria-hidden="true">›</span></a>
     </article>`;
@@ -82,13 +122,14 @@ function produtoHTML(p) {
    no carrossel e perderia a posição da rolagem. */
 function assinatura(produtos) {
   return JSON.stringify(produtos.map((p) => [
-    p.nome, p.descricao, p.rotulo_botao, p.mensagem, p.em_breve,
+    p.nome, p.descricao, p.detalhes || "", p.preco_texto || "", p.rotulo_botao, p.mensagem, p.em_breve,
     p.etiquetas || [], (p.fotos || []).map((f) => [f.url, f.alt]),
   ]));
 }
 
 function montaProdutos(produtos) {
   if (!lista || !Array.isArray(produtos) || !produtos.length) return false;
+  produtosNaTela = produtos;
   const nova = assinatura(produtos);
   if (lista.dataset.assinatura === nova) return false;
   lista.dataset.assinatura = nova;
@@ -99,8 +140,6 @@ function montaProdutos(produtos) {
 }
 
 /* ---------- carrossel de fotos do produto ---------- */
-const semAnimacao = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
 function iniciaCarrosseis(escopo = document) {
   escopo.querySelectorAll("[data-carousel]").forEach((car) => {
     if (car.dataset.pronto) return;
@@ -110,7 +149,7 @@ function iniciaCarrosseis(escopo = document) {
     const dots = [...car.querySelectorAll(".carousel__dot")];
     const status = car.querySelector(".carousel__status");
     const atual = () => Math.max(0, Math.min(slides.length - 1, Math.round(track.scrollLeft / track.clientWidth)));
-    const irPara = (i) => track.scrollTo({ left: track.clientWidth * i, behavior: semAnimacao ? "auto" : "smooth" });
+    const irPara = (i) => track.scrollTo({ left: track.clientWidth * i, behavior: reduzMovimento ? "auto" : "smooth" });
     const sincroniza = () => {
       const i = atual();
       dots.forEach((d, k) => (k === i ? d.setAttribute("aria-current", "true") : d.removeAttribute("aria-current")));
@@ -129,9 +168,102 @@ function iniciaCarrosseis(escopo = document) {
   });
 }
 
+/* =========================================================
+   Detalhe do produto
+   Abre pelo botão do cartão, pela foto, ou pelo endereço #produto/slug.
+   ========================================================= */
+const detalhe = document.getElementById("detalhe");
+let voltarFocoPara = null;
+
+const baseDoProduto = (p) => {
+  const t = `${p.slug} ${p.nome}`.toLowerCase();
+  if (t.includes("garrafa")) return "garrafa";
+  if (t.includes("caneca")) return "caneca";
+  if (t.includes("copo")) return "copo";
+  return null;
+};
+
+function abreDetalhe(slug, gatilho) {
+  const p = produtosNaTela.find((x) => x.slug === slug);
+  if (!p || p.em_breve) return;
+  voltarFocoPara = gatilho && gatilho.focus ? gatilho : null;
+
+  document.getElementById("detalhe-titulo").textContent = p.nome;
+  document.getElementById("detalhe-preco").textContent = p.preco_texto || "Valor sob consulta";
+  document.getElementById("detalhe-texto").textContent = p.detalhes || p.descricao;
+  document.getElementById("detalhe-chips").innerHTML = (p.etiquetas || []).map((e) => `<li>${esc(e)}</li>`).join("");
+
+  const fotos = p.fotos || [];
+  const grande = document.getElementById("detalhe-foto");
+  const minis = document.getElementById("detalhe-miniaturas");
+  const mostra = (i) => {
+    const f = fotos[i]; if (!f) return;
+    grande.src = f.url; grande.alt = f.alt || p.nome;
+    grande.width = f.largura || 760; grande.height = f.altura || 760;
+    [...minis.children].forEach((b, k) => (k === i ? b.setAttribute("aria-current", "true") : b.removeAttribute("aria-current")));
+  };
+  minis.innerHTML = fotos.map((f, i) =>
+    `<button type="button" class="detalhe__mini" aria-label="Ver foto ${i + 1} de ${fotos.length}"><img src="${esc(f.url)}" alt="" width="${f.largura || 760}" height="${f.altura || 760}" decoding="async"></button>`
+  ).join("");
+  [...minis.children].forEach((b, i) => b.addEventListener("click", () => mostra(i)));
+  mostra(0);
+
+  const zap = document.getElementById("detalhe-zap");
+  zap.dataset.msg = p.mensagem || `Oi, Panda Mimo! Quero ${p.nome} 🐼`;
+  zap.textContent = p.rotulo_botao || "Quero essa";
+  aplicaContatos(detalhe);
+
+  const pers = document.getElementById("detalhe-personalizar");
+  const base = baseDoProduto(p);
+  pers.hidden = !base;
+  pers.dataset.base = base || "";
+
+  if (!detalhe.open) detalhe.showModal();
+  history.replaceState(null, "", `#produto/${slug}`);
+  medir("detalhe", p.nome);
+}
+
+function fechaDetalhe() { if (detalhe.open) detalhe.close(); }
+
+detalhe.addEventListener("close", () => {
+  if (/^#produto\//.test(location.hash)) history.replaceState(null, "", "#produtos");
+  if (voltarFocoPara) voltarFocoPara.focus();
+});
+detalhe.addEventListener("click", (e) => { if (e.target === detalhe) fechaDetalhe(); });
+document.querySelector(".detalhe__fechar").addEventListener("click", fechaDetalhe);
+
+document.getElementById("detalhe-personalizar").addEventListener("click", (e) => {
+  e.preventDefault();
+  const base = e.currentTarget.dataset.base;
+  fechaDetalhe();
+  if (base) {
+    const r = document.getElementById(`i-${base}`); if (r) r.checked = true;
+    const foto = document.getElementById("m-foto"); if (foto) { foto.checked = true; }
+  }
+  render();
+  document.getElementById("monte").scrollIntoView({ behavior: reduzMovimento ? "auto" : "smooth", block: "start" });
+  history.replaceState(null, "", "#monte");
+  document.getElementById("b-nome").focus({ preventScroll: true });
+});
+
+lista.addEventListener("click", (e) => {
+  const art = e.target.closest(".product");
+  if (!art || art.classList.contains("product--soon")) return;
+  const botao = e.target.closest(".product__ver");
+  const foto = e.target.closest(".carousel__slide img");
+  if (botao || foto) abreDetalhe(art.dataset.slug, botao || foto);
+});
+
+function abrePeloEndereco() {
+  const m = location.hash.match(/^#produto\/([a-z0-9-]+)/);
+  if (m) abreDetalhe(m[1]);
+}
+window.addEventListener("hashchange", abrePeloEndereco);
+
 /* ---------- primeiro a cópia local, depois o banco ---------- */
 montaProdutos(window.PANDA_PRODUTOS);
 aplicaContatos();
+abrePeloEndereco();
 
 async function carregaDoBanco() {
   const cfg = window.PANDA_CONFIG;
@@ -140,7 +272,7 @@ async function carregaDoBanco() {
   const parar = AbortSignal.timeout ? AbortSignal.timeout(6000) : undefined;
   try {
     const [rp, rc] = await Promise.all([
-      fetch(`${cfg.URL}/rest/v1/pm_produtos?select=slug,nome,descricao,etiquetas,mensagem,rotulo_botao,em_breve,pm_produto_fotos(url,alt,ordem,largura,altura)&publicado=eq.true&order=ordem`, { headers: cabecalho, signal: parar }),
+      fetch(`${cfg.URL}/rest/v1/pm_produtos?select=slug,nome,descricao,detalhes,preco_texto,etiquetas,mensagem,rotulo_botao,em_breve,pm_produto_fotos(url,alt,ordem,largura,altura)&publicado=eq.true&order=ordem`, { headers: cabecalho, signal: parar }),
       fetch(`${cfg.URL}/rest/v1/pm_config?select=whatsapp,instagram,tiktok,aviso_topo&limit=1`, { headers: cabecalho, signal: parar }),
     ]);
     if (rc.ok) {
@@ -157,12 +289,13 @@ async function carregaDoBanco() {
     if (!rp.ok) return;
     const dados = await rp.json();
     if (!Array.isArray(dados) || !dados.length) return;
-    montaProdutos(
+    const trocou = montaProdutos(
       dados.map((p) => ({
         ...p,
         fotos: (p.pm_produto_fotos || []).slice().sort((a, b) => a.ordem - b.ordem),
       }))
     );
+    if (trocou) abrePeloEndereco();
   } catch (e) {
     /* sem banco, o site segue com a cópia local */
   }
@@ -198,16 +331,44 @@ const ROTULOS = {
   redonda: "letra redondinha", manuscrita: "letra manuscrita",
 };
 
+/* foto real de cada base e onde fica a plaquinha do nome
+   (porcentagens da largura/altura da foto: esquerda, topo, largura, altura) */
+const FOTO_REAL = {
+  garrafa: { src: "assets/prod-garrafa.webp", placa: [37.5, 61.6, 19.7, 5.8], cor: "#F4DFD1" },
+  caneca:  { src: "assets/prod-caneca.webp",  placa: [46.7, 71.7, 35.5, 12.5], cor: "#DAC9BE" },
+  copo:    { src: "assets/prod-copo.webp",    placa: [60.5, 50.5, 21.0, 5.3], cor: "#F2D6C1" },
+};
+const fotoReal = document.getElementById("foto-real");
+const fotoRealImg = document.getElementById("foto-real-img");
+const fotoRealPlaca = document.getElementById("foto-real-placa");
+const fotoRealNome = document.getElementById("foto-real-nome");
+const dicaFoto = document.getElementById("dica-foto");
+const modoFoto = () => !!document.getElementById("m-foto")?.checked;
+
+const medidor = document.createElement("canvas").getContext("2d");
+function ajustaNomeNaPlaca(texto, fonte) {
+  const r = fotoRealPlaca.getBoundingClientRect();
+  if (!r.width) return;
+  const maxW = r.width * 0.84, maxH = r.height * 0.74;
+  let fs = maxH;
+  medidor.font = `600 ${fs}px ${fonte}`;
+  const largura = medidor.measureText(texto).width || 1;
+  if (largura > maxW) fs = Math.max(7, fs * (maxW / largura));
+  fotoRealNome.style.fontFamily = fonte;
+  fotoRealNome.style.fontSize = `${fs}px`;
+}
+
 function estado() {
   const d = new FormData(form);
   const qtd = Math.min(500, Math.max(1, parseInt(d.get("qtd"), 10) || 1));
   return {
     nome: (d.get("nome") || "").trim(),
     item: d.get("item"),
-    cor: d.get("cor"),
+    cor: d.get("cor") || "creme",
     letra: d.get("letra"),
     panda: d.get("panda") === "on",
     qtd,
+    foto: modoFoto(),
   };
 }
 
@@ -216,6 +377,26 @@ function render() {
   const texto = s.nome || "Seu nome";
   const cor = CORES[s.cor];
   const letra = LETRAS[s.letra];
+
+  // na foto real a cor da peça e o pandinha não se aplicam
+  form.querySelectorAll('input[name="cor"]').forEach((r) => (r.disabled = s.foto));
+  document.getElementById("b-panda").disabled = s.foto;
+  dicaFoto.hidden = !s.foto;
+  fotoReal.hidden = !s.foto;
+  preview.toggleAttribute("hidden", s.foto); // svg não tem a propriedade .hidden
+
+  if (s.foto) {
+    const f = FOTO_REAL[s.item] || FOTO_REAL.caneca;
+    if (fotoRealImg.getAttribute("src") !== f.src) fotoRealImg.src = f.src;
+    const [x, y, w, h] = f.placa;
+    fotoRealPlaca.style.setProperty("--px", `${x}%`);
+    fotoRealPlaca.style.setProperty("--py", `${y}%`);
+    fotoRealPlaca.style.setProperty("--pw", `${w}%`);
+    fotoRealPlaca.style.setProperty("--ph", `${h}%`);
+    fotoRealPlaca.style.setProperty("--placa", f.cor);
+    fotoRealNome.textContent = texto;
+    ajustaNomeNaPlaca(texto, letra.font);
+  }
 
   // a fonte encolhe conforme o texto cresce, para caber na peça
   const len = texto.length;
@@ -228,7 +409,7 @@ function render() {
   preview.dataset.cor = s.cor;
   preview.dataset.panda = s.panda ? "on" : "off";
 
-  Object.entries(bases).forEach(([k, g]) => (g.hidden = k !== s.item));
+  Object.entries(bases).forEach(([k, g]) => g.toggleAttribute("hidden", k !== s.item)); // <g> do svg não tem .hidden
   preview.querySelectorAll(".pv-text").forEach((t) => {
     t.textContent = texto;
     t.style.fontSize = "";
@@ -236,7 +417,7 @@ function render() {
   // se o texto ainda não cabe na largura da peça, encolhe a fonte até caber
   const larguraPeca = { garrafa: 84, caneca: 120, copo: 92 }[s.item];
   const el = bases[s.item].querySelector(".pv-text");
-  if (el && el.getComputedTextLength) {
+  if (el && el.getComputedTextLength && !s.foto) {
     el.removeAttribute("textLength"); el.removeAttribute("lengthAdjust");
     const medida = el.getComputedTextLength();
     if (medida > larguraPeca) {
@@ -256,6 +437,10 @@ qtdInput.addEventListener("change", () => { qtdInput.value = estado().qtd; rende
 qtdInput.addEventListener("blur", () => { qtdInput.value = estado().qtd; });
 
 form.addEventListener("input", render);
+document.querySelectorAll('input[name="modo"]').forEach((r) => r.addEventListener("change", render));
+fotoRealImg.addEventListener("load", () => { if (modoFoto()) render(); });
+let esperaRedimensionar;
+window.addEventListener("resize", () => { clearTimeout(esperaRedimensionar); esperaRedimensionar = setTimeout(() => modoFoto() && render(), 120); });
 render();
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(render);
 
@@ -264,11 +449,12 @@ document.getElementById("b-send").addEventListener("click", () => {
   const msg =
     `Oi, Panda Mimo! Montei uma ideia no site 🐼\n` +
     `• Base: ${ROTULOS[s.item]}\n` +
-    `• Cor: ${ROTULOS[s.cor]}\n` +
+    `• Cor: ${s.foto ? "a combinar" : ROTULOS[s.cor]}\n` +
     `• Escrito: "${s.nome || "(ainda vou decidir)"}"\n` +
-    `• ${ROTULOS[s.letra]}${s.panda ? ", com o pandinha" : ", sem o pandinha"}\n` +
+    `• ${ROTULOS[s.letra]}${s.foto ? "" : s.panda ? ", com o pandinha" : ", sem o pandinha"}\n` +
     `• Quantidade: ${s.qtd}\n` +
     `Pode me passar valor e prazo?`;
+  medir("simulador", ROTULOS[s.item]);
   window.open(waLink(msg), "_blank", "noopener");
 });
 
@@ -312,3 +498,36 @@ if ("IntersectionObserver" in window) {
 }
 document.addEventListener("focusin", (e) => { if (e.target.matches("input, textarea")) { teclado = true; updateFab(); } });
 document.addEventListener("focusout", (e) => { if (e.target.matches("input, textarea")) { teclado = false; updateFab(); } });
+
+/* =========================================================
+   Movimento, com moderação
+   - as seções abaixo da primeira tela aparecem subindo 12px em 250ms,
+     uma vez só; o que já está na tela nasce visível
+   - o botão do WhatsApp acena duas vezes, aos 8s e aos 30s, e para
+   - tudo desligado para quem pede menos movimento
+   ========================================================= */
+(function movimento() {
+  const alvos = [...new Set(document.querySelectorAll("main > section, main > .trust, footer"))];
+  window.PANDA_REVELA_TUDO = () => alvos.forEach((el) => { el.classList.remove("reveal--pronto"); el.classList.add("reveal--visto"); });
+  if (reduzMovimento || !("IntersectionObserver" in window)) return;
+
+  const io = new IntersectionObserver((entradas) => {
+    entradas.forEach((en) => {
+      if (!en.isIntersecting) return;
+      en.target.classList.add("reveal--visto");
+      io.unobserve(en.target);
+    });
+  }, { threshold: 0.06 });
+  alvos.forEach((el) => {
+    if (el.getBoundingClientRect().top > window.innerHeight) {
+      el.classList.add("reveal--pronto");
+      io.observe(el);
+    }
+  });
+
+  [8000, 30000].forEach((ms) => setTimeout(() => {
+    if (fab.classList.contains("is-hidden") || document.hidden) return;
+    fab.classList.add("fab--acena");
+    setTimeout(() => fab.classList.remove("fab--acena"), 700);
+  }, ms));
+})();
