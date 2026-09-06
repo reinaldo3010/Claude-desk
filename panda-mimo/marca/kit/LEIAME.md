@@ -43,7 +43,7 @@ fotos reais em alta resolução, elas passam a ser os mestres.
 
 O logo e o Pandinha nasceram por IA em estilo "inflado", com sombra e brilho contínuos. Um vetor
 de verdade é feito de formas chapadas; então cada arquivo aqui é um **traçado fiel** (vtracer, em
-camadas de cor empilhadas) da ilustração ampliada em 2x por super-resolução. Em tamanho normal e
+camadas de cor empilhadas) da ilustração ampliada em 2x por super-resolução (Real-ESRGAN, modelo de ilustração). Em tamanho normal e
 em impressão ele é indistinguível do original e escala sem serrilhar; olhando com zoom forte,
 o relevo aparece em degraus finos de cor. Cada arquivo recebeu o traçado mais leve que ainda
 reproduz o original com fidelidade medida (renderizado de volta e comparado pixel a pixel na área
