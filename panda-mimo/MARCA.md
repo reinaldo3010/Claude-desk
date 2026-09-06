@@ -1,6 +1,6 @@
 # Manual da marca Panda Mimo
 
-Versão 1.7 · setembro de 2026 · documento vivo
+Versão 1.8 · setembro de 2026 · documento vivo
 
 Este é o brand book da **Panda Mimo**, marca de itens personalizados. Ele registra o que a marca é,
 como fala, como se veste e como se comporta em cada ponto de contato. Foi escrito a partir da
@@ -320,6 +320,21 @@ Regras dos dois planos:
    `panda3d-<pose>.png`. Xadrez desenhado na imagem não é transparência e não é aceito.
 6. No site, a versão 3D segue as mesmas regras de foto (10.1): inteiro, com folga, versão @2x.
 
+Poses em cena no acervo (`marca/kit/pandinha-3d/`, PNG com alpha, lado maior 2000 px):
+
+| Arquivo | Pose | Onde já aparece |
+|---|---|---|
+| `panda3d-garrafa.png` | abraçando a garrafa térmica | hero do site (`assets/mascote-hero-3d.webp`), imagem de compartilhamento |
+| `panda3d-dormindo.png` | dormindo, com contorno de adesivo | página 404 (`assets/panda3d-dormindo.webp`) |
+| `panda3d-coracao.png` | abraçando um coração | capa de Reel, story de agradecimento |
+| `panda3d-presente.png` | segurando a caixa de presente | campanhas de datas, story |
+| `panda3d-carrinho.png` | no carrinho de compras | campanha de pedido |
+| `panda3d-joinha.png` | em pé, fazendo joinha | story "prévia aprovada" |
+
+Os arquivos vieram do gerador com o xadrez de transparência pintado na imagem; o fundo foi removido
+por modelo de segmentação, a borda limpa e a imagem ampliada por Real-ESRGAN (modelo de foto, que
+preserva o pelo). O Pandinha adesivo do hero anterior (`mascote-hero.webp`) continua no acervo.
+
 ---
 
 ## 7. Cores
@@ -636,6 +651,7 @@ adereço pequeno no Pandinha em datas comemorativas, com aprovação prévia (6.
 | Data | Versão | O que mudou |
 |---|---|---|
 | set/2026 | 1.0 | Primeira edição, consolidando a identidade aplicada no site (paleta, tipografia, logo, mascote, tom de voz, aplicações, governança). |
+| set/2026 | 1.8 | Pandinha em cena aplicado: hero do site, imagem de compartilhamento e 404 com a versão 3D; seis poses em `marca/kit/pandinha-3d/`, com tabela de uso na 6.5. |
 | set/2026 | 1.7 | Dois planos do mascote (6.5): Pandinha adesivo segue como identidade e impressão; Pandinha em cena (3D de pelúcia) aprovado para hero, og, 404, Reel, story e campanhas, com lista fechada de lugares e regras de consistência. Pasta `marca/kit/pandinha-3d/`. |
 | set/2026 | 1.6 | Kit da marca (13.5): 56 ilustrações do site vetorizadas em `marca/kit/svg/`, fontes TTF, gerador de PNG e prompt de marca; regra de produção com IA (logo, Pandinha e texto nunca gerados); redesenho vetorial do logo entra nas pendências. |
 | set/2026 | 1.5 | Instagram (11.3): tamanhos por formato, área segura do Reel, destaques fixos, chamada única, regras de emoji e de preço, carrossel e Reel padrão; modelos editáveis no canvas "Instagram Panda Mimo". |
