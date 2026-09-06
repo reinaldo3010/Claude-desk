@@ -1,6 +1,6 @@
 # Manual da marca Panda Mimo
 
-Versão 1.8 · setembro de 2026 · documento vivo
+Versão 1.9 · setembro de 2026 · documento vivo
 
 Este é o brand book da **Panda Mimo**, marca de itens personalizados. Ele registra o que a marca é,
 como fala, como se veste e como se comporta em cada ponto de contato. Foi escrito a partir da
@@ -487,6 +487,12 @@ O site (`index.html`) é a aplicação de referência da identidade e já segue 
 seção usa os mesmos tokens (`styles.css`), a mesma estrutura de título (eyebrow + Fredoka + trecho
 Caveat + lede) e passa pelo guardião de qualidade antes de publicar.
 
+Movimento: as seções abaixo da primeira tela entram subindo 12 px em 250 ms, uma vez só. A animação é
+enfeite e o conteúdo é obrigatório: hero e selos de confiança nunca entram nela; se a tela ainda não tem
+altura confiável (navegador embutido do Instagram ou do WhatsApp carregando antes do layout) nada se
+esconde; e, aconteça o que acontecer, tudo aparece até 4 s depois do carregamento. O guardião testa
+esses cenários e também a página sem JavaScript, em que o catálogo mostra o caminho para o WhatsApp.
+
 ### 11.2 WhatsApp (canal principal de venda)
 - Foto de perfil: **selo redondo**. Nome: Panda Mimo. Recado: "Itens personalizados · feito com
   carinho, feito pra você 🐼".
@@ -651,6 +657,7 @@ adereço pequeno no Pandinha em datas comemorativas, com aprovação prévia (6.
 | Data | Versão | O que mudou |
 |---|---|---|
 | set/2026 | 1.0 | Primeira edição, consolidando a identidade aplicada no site (paleta, tipografia, logo, mascote, tom de voz, aplicações, governança). |
+| set/2026 | 1.9 | Movimento do site: a animação de entrada nunca pode esconder conteúdo. Hero e selos ficam fora dela; sem altura de tela confiável nada se esconde; rede de segurança revela tudo em 4 s. Guardião ganha o cenário de webview sem altura, sem IntersectionObserver e sem JavaScript, e o catálogo tem aviso sem JavaScript. |
 | set/2026 | 1.8 | Pandinha em cena aplicado: hero do site, imagem de compartilhamento e 404 com a versão 3D; seis poses em `marca/kit/pandinha-3d/`, com tabela de uso na 6.5. |
 | set/2026 | 1.7 | Dois planos do mascote (6.5): Pandinha adesivo segue como identidade e impressão; Pandinha em cena (3D de pelúcia) aprovado para hero, og, 404, Reel, story e campanhas, com lista fechada de lugares e regras de consistência. Pasta `marca/kit/pandinha-3d/`. |
 | set/2026 | 1.6 | Kit da marca (13.5): 56 ilustrações do site vetorizadas em `marca/kit/svg/`, fontes TTF, gerador de PNG e prompt de marca; regra de produção com IA (logo, Pandinha e texto nunca gerados); redesenho vetorial do logo entra nas pendências. |

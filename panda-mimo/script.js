@@ -625,8 +625,14 @@ document.addEventListener("focusout", (e) => { if (e.target.matches("input, text
    ========================================================= */
 (function movimento() {
   const alvos = [...new Set(document.querySelectorAll("main > section, main > .trust, footer"))];
-  window.PANDA_REVELA_TUDO = () => alvos.forEach((el) => { el.classList.remove("reveal--pronto"); el.classList.add("reveal--visto"); });
+  const revelaTudo = () => alvos.forEach((el) => { el.classList.remove("reveal--pronto"); el.classList.add("reveal--visto"); });
+  window.PANDA_REVELA_TUDO = revelaTudo;
   if (reduzMovimento || !("IntersectionObserver" in window)) return;
+
+  // Regra de ouro: a animação é enfeite, o conteúdo é obrigatório. Se a tela ainda não tem
+  // altura confiável (webview do Instagram/WhatsApp carregando antes do layout, aba em segundo
+  // plano), nada se esconde. Foi isso que deixou a página em branco no celular.
+  if (window.innerHeight < 320 || document.visibilityState !== "visible") return;
 
   const io = new IntersectionObserver((entradas) => {
     entradas.forEach((en) => {
@@ -635,12 +641,23 @@ document.addEventListener("focusout", (e) => { if (e.target.matches("input, text
       io.unobserve(en.target);
     });
   }, { threshold: 0.06 });
-  alvos.forEach((el) => {
-    if (el.getBoundingClientRect().top > window.innerHeight) {
+  // Só o que está bem abaixo da primeira tela; hero e selos de confiança nunca entram.
+  alvos.forEach((el, i) => {
+    if (i >= 2 && el.getBoundingClientRect().top > window.innerHeight * 1.05) {
       el.classList.add("reveal--pronto");
       io.observe(el);
     }
   });
+
+  // Rede de segurança, caso o observer cale: ao rolar, girar ou voltar à aba, o que já entrou
+  // na tela aparece; e 4 s depois do carregamento tudo aparece, com ou sem animação.
+  const pendentes = () => alvos.forEach((el) => {
+    if (el.classList.contains("reveal--pronto") && el.getBoundingClientRect().top < window.innerHeight + 80) {
+      el.classList.add("reveal--visto"); io.unobserve(el);
+    }
+  });
+  ["scroll", "resize", "orientationchange", "pageshow", "visibilitychange", "touchstart"].forEach((ev) => window.addEventListener(ev, pendentes, { passive: true }));
+  setTimeout(revelaTudo, 4000);
 
   [8000, 30000].forEach((ms) => setTimeout(() => {
     if (fab.classList.contains("is-hidden") || document.hidden) return;

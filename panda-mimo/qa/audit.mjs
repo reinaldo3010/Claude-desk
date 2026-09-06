@@ -22,6 +22,9 @@
       fotos, preço e botão do WhatsApp, fecha com Escape
     - simulador em modo foto real: o nome aparece dentro da plaquinha
     - movimento: nada fica invisível depois de rolar até a seção
+    - conteúdo sempre visível: página carregada num webview ainda sem altura (Instagram,
+      WhatsApp), sem IntersectionObserver e sem JavaScript; hero, selos e catálogo aparecem,
+      e nenhuma seção segue invisível 4,5 s depois do carregamento
     - ícones PNG e de toque, imagem de compartilhamento 1200x630 em JPG,
       robots.txt e sitemap.xml; aviso quando os endereços ainda são relativos
     - medição: a visita e o clique no WhatsApp são registrados (com o banco simulado)
@@ -466,6 +469,8 @@ for (const [w, h] of viewports) {
     if (Number(op) < 0.99) fail(w, `seção de contato ficou com opacidade ${op} depois de rolar até ela`);
     const primeiraInvisivel = await page.evaluate(() => { window.scrollTo(0, 0); const h = document.querySelector('.hero'); return getComputedStyle(h).opacity !== '1'; });
     if (primeiraInvisivel) fail(w, 'o hero, que já está na tela, começa invisível');
+    const selosInvisiveis = await page.$eval('.trust', (t) => getComputedStyle(t).opacity !== '1');
+    if (selosInvisiveis) fail(w, 'os selos de confiança, logo abaixo do hero, começam invisíveis');
   }
 
   consoleErrors.forEach((e) => fail(w, `erro de console: ${e}`));
@@ -543,6 +548,47 @@ for (const [w, h] of viewports) {
   const direto = await page.evaluate(() => ({ aberto: document.getElementById('detalhe').open, titulo: document.getElementById('detalhe-titulo').textContent.trim() }));
   if (!direto.aberto || direto.titulo !== 'Canecas') failures.push(`[detalhe] o endereço #produto/canecas não abriu o detalhe certo (${JSON.stringify(direto)})`);
   await page.close();
+}
+
+// ---- conteúdo sempre visível: a animação de entrada nunca pode deixar a página em branco ----
+// Cenário real: webview do Instagram/WhatsApp carrega a página antes de ter altura (innerHeight ~0);
+// tudo o que depender de "está abaixo da primeira tela" esconde a página inteira, hero incluído.
+{
+  const visivel = (page, sel) => page.$eval(sel, (el) => { const cs = getComputedStyle(el); const b = el.getBoundingClientRect(); return Number(cs.opacity) > 0.99 && cs.visibility !== 'hidden' && b.height > 0; });
+  const invisiveis = (page) => page.$$eval('main > section, main > .trust, footer', (els) => els.filter((el) => Number(getComputedStyle(el).opacity) < 0.99).map((el) => el.id || el.className.split(' ')[0]));
+  // a) carrega com 1 px de altura e só depois ganha a tela
+  {
+    const page = await browser.newPage({ viewport: { width: 390, height: 1 } });
+    await page.goto(page_url, { waitUntil: 'load' }); await page.waitForTimeout(200);
+    await page.setViewportSize({ width: 390, height: 844 }); await page.waitForTimeout(600);
+    for (const sel of ['.hero', '.trust', '#produtos'])
+      if (!(await visivel(page, sel))) failures.push(`[conteúdo] ${sel} ficou invisível quando a página carregou sem altura de tela (webview do Instagram/WhatsApp)`);
+    const prods = await page.$$eval('#lista-produtos .product', (els) => els.length);
+    if (!prods) failures.push('[conteúdo] o catálogo não montou quando a página carregou sem altura de tela');
+    await page.waitForTimeout(4000);
+    const ainda = await invisiveis(page);
+    if (ainda.length) failures.push(`[conteúdo] ${ainda.length} seção(ões) continuam invisíveis 4,5 s depois do carregamento, sem rolar: ${ainda.join(', ')}`);
+    await page.close();
+  }
+  // b) navegador sem IntersectionObserver: nada pode depender dele para aparecer
+  {
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await page.addInitScript(() => { delete window.IntersectionObserver; });
+    await page.goto(page_url, { waitUntil: 'load' }); await page.waitForTimeout(300);
+    const ainda = await invisiveis(page);
+    if (ainda.length) failures.push(`[conteúdo] sem IntersectionObserver, ${ainda.length} seção(ões) ficam invisíveis: ${ainda.join(', ')}`);
+    await page.close();
+  }
+  // c) sem JavaScript: hero legível e o catálogo explica o que fazer
+  {
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, javaScriptEnabled: false });
+    const page = await ctx.newPage();
+    await page.goto(page_url, { waitUntil: 'load' });
+    if (!(await visivel(page, '.hero h1'))) failures.push('[conteúdo] sem JavaScript o título do hero não aparece');
+    const aviso = await page.$eval('#produtos', (s) => s.innerText);
+    if (!/WhatsApp/i.test(aviso)) failures.push('[conteúdo] sem JavaScript a área de produtos fica em branco, sem caminho para o WhatsApp');
+    await ctx.close();
+  }
 }
 
 // ---- nitidez: em telas 2x e 3x nenhuma imagem pode aparecer ampliada acima de 10% ----
