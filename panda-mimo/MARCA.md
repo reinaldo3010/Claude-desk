@@ -1,6 +1,6 @@
 # Manual da marca Panda Mimo
 
-Versão 1.6 · setembro de 2026 · documento vivo
+Versão 1.7 · setembro de 2026 · documento vivo
 
 Este é o brand book da **Panda Mimo**, marca de itens personalizados. Ele registra o que a marca é,
 como fala, como se veste e como se comporta em cada ponto de contato. Foi escrito a partir da
@@ -287,10 +287,38 @@ se refere a ele em qualquer canal.
 - Tamanho: no site, nunca maior que a peça de produto ao lado; em impressos, até 1/3 da área.
 - Expressões: alegre, curioso, sonolento, apaixonado. Nunca triste, bravo, sarcástico, assustado.
 - Não redesenhar em outro estilo (flat, realista, pixel, 3D duro). Poses novas devem sair do mesmo
-  traço e do mesmo acabamento, e entram no acervo com nome `panda-<pose>.webp`.
+  traço e do mesmo acabamento, e entram no acervo com nome `panda-<pose>.webp`. A única exceção é a
+  versão em cena da seção 6.5.
 - Não vestir com roupas de marca, uniformes ou temas fora do universo da Panda Mimo. Em datas
   comemorativas ele pode ganhar um adereço pequeno (um laço, um chapéu de festa), sempre no mesmo traço
   e com aprovação do dono antes de publicar.
+
+### 6.5 Dois planos: Pandinha adesivo e Pandinha em cena (3D)
+Aprovado em setembro de 2026. O Pandinha existe em duas versões do **mesmo personagem**, cada uma com
+um papel fixo. Elas nunca concorrem.
+
+**Pandinha adesivo (6.1 a 6.4) é a identidade.** Vale para tudo o que é impresso e tudo o que
+representa a marca: logo, estampas nas peças, tags, embalagem, avatar e ícones das redes, selos,
+cartões de lançamento, kit de vetores, materiais de feira. É o que o cliente compra e o que fica na peça.
+
+**Pandinha em cena (3D de pelúcia) é o mesmo Pandinha "ganhando vida".** Pelo macio, sombra suave,
+proporções mais cheias, sem contorno. Aparece só em tela e só em momentos grandes, nesta lista fechada:
+hero do site, imagem de compartilhamento (`og`), página 404, capa de Reel, story e post de campanha,
+banner de data comemorativa. Fora dessa lista, é adesivo.
+
+Regras dos dois planos:
+1. Adesivo é o padrão; 3D é exceção com lugar fixo. Um lugar novo para o 3D entra nesta lista com
+   registro no histórico, nunca por conveniência.
+2. O 3D **nunca vai para impressão pequena nem para peça de cliente**: perde detalhe e contorno em DTF,
+   sublimação e tag.
+3. Nunca os dois lado a lado na mesma tela. O hero pode ser 3D; os cartões abaixo seguem adesivo.
+4. Toda pose 3D nasce com a imagem do Pandinha adesivo como referência, mantendo o que o identifica:
+   olho piscando, bochecha rosa, miolo rosa da orelha, almofadinhas rosa, paleta pêssego e creme,
+   expressão positiva, um Pandinha por imagem, sem roupa e sem texto ou marca desenhada na cena.
+5. O 3D não entra no kit de vetores (não é vetorizável). Os arquivos ficam em `marca/kit/pandinha-3d/`,
+   em PNG com transparência **real** (canal alpha), lado maior de pelo menos 1500 px, nome
+   `panda3d-<pose>.png`. Xadrez desenhado na imagem não é transparência e não é aceito.
+6. No site, a versão 3D segue as mesmas regras de foto (10.1): inteiro, com folga, versão @2x.
 
 ---
 
@@ -608,6 +636,7 @@ adereço pequeno no Pandinha em datas comemorativas, com aprovação prévia (6.
 | Data | Versão | O que mudou |
 |---|---|---|
 | set/2026 | 1.0 | Primeira edição, consolidando a identidade aplicada no site (paleta, tipografia, logo, mascote, tom de voz, aplicações, governança). |
+| set/2026 | 1.7 | Dois planos do mascote (6.5): Pandinha adesivo segue como identidade e impressão; Pandinha em cena (3D de pelúcia) aprovado para hero, og, 404, Reel, story e campanhas, com lista fechada de lugares e regras de consistência. Pasta `marca/kit/pandinha-3d/`. |
 | set/2026 | 1.6 | Kit da marca (13.5): 56 ilustrações do site vetorizadas em `marca/kit/svg/`, fontes TTF, gerador de PNG e prompt de marca; regra de produção com IA (logo, Pandinha e texto nunca gerados); redesenho vetorial do logo entra nas pendências. |
 | set/2026 | 1.5 | Instagram (11.3): tamanhos por formato, área segura do Reel, destaques fixos, chamada única, regras de emoji e de preço, carrossel e Reel padrão; modelos editáveis no canvas "Instagram Panda Mimo". |
 | set/2026 | 1.4 | Nitidez: toda foto de catálogo tem versão @2x (1520 px) e o site a serve em telas de alta densidade; mascote do hero e fotos da galeria também. Catálogo ganha busca e filtros por tema (4.5), com estado vazio no tom da marca. Página 404 própria. |
