@@ -47,7 +47,8 @@ camadas de cor empilhadas) da ilustração ampliada em 2x por super-resolução 
 em impressão ele é indistinguível do original e escala sem serrilhar; olhando com zoom forte,
 o relevo aparece em degraus finos de cor. Cada arquivo recebeu o traçado mais leve que ainda
 reproduz o original com fidelidade medida (renderizado de volta e comparado pixel a pixel na área
-com tinta: todos acima de 24 dB de PSNR, silhueta com mais de 98% de coincidência); os logos usam
+com tinta: todos em 24 dB de PSNR ou mais, exceto o Pandinha dormindo em 23,9; silhueta com mais de 98%
+de coincidência); os logos usam
 sempre o traçado mais fino. A borda foi endurecida antes do
 traçado (o que tinha menos de 50% de opacidade virou transparente): por isso o contorno sai firme e sem
 franja, e os poucos adesivos que tinham sombra difusa em volta (patas, sino, flor) ficam de recorte
