@@ -13,7 +13,7 @@ PNG como imagem de referência e peça para manter exatamente, sem redesenhar; c
 
 | Pasta / arquivo | O que é | Quando usar |
 |---|---|---|
-| `svg/` | 56 vetores traçados a partir das ilustrações do site (logos, Pandinha, adesivos, ícones, selos) | Illustrator, Inkscape, Canva, Figma, CorelDRAW, plotter, gráfica. Escala sem perder nitidez. |
+| `svg/` | 56 vetores traçados a partir das ilustrações do site (logos, Pandinha, adesivos, ícones, selos) | Illustrator, Inkscape, Canva, Figma, CorelDRAW, plotter, gráfica. Requer comparação visual no tamanho de uso. |
 | `gera-png.mjs` | Gera PNG com fundo transparente a partir dos SVGs, no tamanho que você pedir | Quando precisar de PNG grande (4000 px, 6000 px) para DTF, sublimação, redes ou IA. |
 | `fontes/` | Fredoka, Caveat e Nunito em TTF (variáveis) com a licença OFL | Instalar no computador antes de abrir qualquer arte; Canva e Figma aceitam upload das mesmas. |
 | `fidelidade.md` | Tabela gerada na montagem: fonte, traçado, tamanho e fidelidade medida de cada vetor | Para saber o quanto confiar em cada arquivo e o que refazer quando houver arte melhor. |
@@ -41,10 +41,9 @@ fotos reais em alta resolução, elas passam a ser os mestres.
 
 ## Como os vetores foram feitos (e o limite deles)
 
-O logo e o Pandinha nasceram por IA em estilo "inflado", com sombra e brilho contínuos. Um vetor
-de verdade é feito de formas chapadas; então cada arquivo aqui é um **traçado fiel** (vtracer, em
-camadas de cor empilhadas) da ilustração ampliada em 2x por super-resolução (Real-ESRGAN, modelo de ilustração). Em tamanho normal e
-em impressão ele é indistinguível do original e escala sem serrilhar; olhando com zoom forte,
+O logo e o Pandinha nasceram por IA em estilo "inflado", com sombra e brilho contínuos.
+Os arquivos antigos desta pasta são **traçados automáticos** (vtracer, em
+camadas de cor empilhadas) da ilustração ampliada em 2x por super-resolução (Real-ESRGAN, modelo de ilustração). A conversão pode alterar detalhes e contornos, inclusive no tamanho normal; olhando com zoom forte,
 o relevo aparece em degraus finos de cor. Cada arquivo recebeu o traçado mais leve que ainda
 reproduz o original com fidelidade medida (renderizado de volta e comparado pixel a pixel na área
 com tinta: todos em 24 dB de PSNR ou mais, exceto o Pandinha dormindo em 23,9; silhueta com mais de 98%
@@ -54,7 +53,7 @@ traçado (o que tinha menos de 50% de opacidade virou transparente): por isso o 
 franja, e os poucos adesivos que tinham sombra difusa em volta (patas, sino, flor) ficam de recorte
 limpo, como convém a um adesivo.
 
-Isso resolve nitidez e escala, mas **não substitui um redesenho vetorial do logo**, feito à mão por
+O traçado permite escalar as formas, mas não recupera detalhes ausentes na fonte e **não substitui um redesenho vetorial do logo**, feito à mão por
 designer sobre estes arquivos, com poucas formas editáveis e uma versão chapada monocromática. Esse
 redesenho é a pendência aberta na seção 14 do manual; quando existir, entra nesta pasta como
 `logo-*-vetor.svg`, sem apagar os traçados.

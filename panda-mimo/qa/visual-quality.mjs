@@ -18,12 +18,12 @@ export function inspectVisualPage() {
     if (!rgb) return null;
     return rgb.map(v => { v /= 255; return v <= .04045 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; }).reduce((s,v,i) => s + v * [.2126,.7152,.0722][i], 0);
   };
-  const textTargets = '.trust__badge h3, .trust__item > p, .promise h3, .promise p, .ribbon, .tag--text, .speech--text';
+  const textTargets = '.trust__badge h3, .trust__item > p, .promise h3, .promise p, .ribbon, .tag--text, .speech--text, .art-caption, .brand-descriptor';
   for (const e of document.querySelectorAll(textTargets)) {
     if (!visible(e)) continue;
     const s = getComputedStyle(e), b = e.getBoundingClientRect();
     if (!e.textContent.trim() || e.tagName === 'IMG') errors.push(`frase dentro de imagem: ${key(e)}`);
-    const min = e.matches('.trust__item > p, .promise p') ? 14 : e.matches('.ribbon, .trust__badge h3, .promise h3') ? 18 : 16;
+    const min = e.matches('.trust__item > p, .promise p, .brand-descriptor') ? 14 : e.matches('.ribbon, .trust__badge h3, .promise h3, .art-caption, .launch-message') ? 18 : 16;
     if (parseFloat(s.fontSize) < min) errors.push(`texto pequeno (${s.fontSize}, mínimo ${min}px): ${key(e)}`);
     if (e.scrollWidth > e.clientWidth + 1 || e.scrollHeight > e.clientHeight + 1) errors.push(`texto cortado: ${key(e)}`);
     if (b.left < -1 || b.right > document.documentElement.clientWidth + 1) errors.push(`texto fora da tela: ${key(e)}`);
@@ -37,6 +37,16 @@ export function inspectVisualPage() {
     if (a !== null && z !== null && (Math.max(a,z)+.05)/(Math.min(a,z)+.05) < 4.5) errors.push(`contraste abaixo de 4.5:1: ${key(e)}`);
   }
   // Os antigos selos com textos em curvas não podem voltar por acidente.
+  for (const selector of ['.personalization-sticker .art-caption', '.follow__phone .art-caption', '.footer .brand-descriptor', '.contact__art .brand-descriptor']) {
+    if (!document.querySelector(selector)?.textContent.trim()) errors.push(`legenda real ausente: ${selector}`);
+  }
+  for (const a of document.querySelectorAll('.follow__links .social')) {
+    if (a.querySelector('img') || !a.querySelector('svg use')) errors.push(`rede social sem símbolo vetorial: ${a.textContent.trim()}`);
+  }
+  for (const i of document.querySelectorAll('.contact__logo, .footer__brand')) {
+    const s=getComputedStyle(i);
+    if(s.filter!=='none' || s.rotate!=='none') errors.push(`logotipo com filtro ou rotação: ${i.src}`);
+  }
   for (const i of document.querySelectorAll('.trust img')) {
     if (!/-simbolo\.svg(?:[?#]|$)/.test(i.getAttribute('src') || '')) errors.push(`selo deve separar símbolo e frase: ${i.getAttribute('src')}`);
   }

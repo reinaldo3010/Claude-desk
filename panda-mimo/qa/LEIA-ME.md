@@ -21,6 +21,8 @@ efeitos desnecessários, mas a correção principal é tamanho de letra e compos
 - Letras abaixo de 18 px nos selos/faixas, 16 px em etiqueta/balões e 14 px nas descrições.
 - Contraste de texto abaixo de 4,5:1, texto cortado ou fora da tela.
 - Frases de selos/faixas voltando a ser imagens; ícones de interface voltando a raster.
+- Ausência das frases HTML do coração/celular e dos descritores dos logos; redes sem SVG.
+- Filtro ou rotação nos logos do contato/rodapé.
 - Filtros, reescala de texto, `pixelated`/`crisp-edges` nos vetores de interface.
 - SVG sem viewBox, com bitmap, recurso externo ou script incorporado.
 - Imagem que não carregou ou raster ampliado acima de 10% da sua resolução efetiva.
@@ -32,6 +34,28 @@ seção, para não cobrir o conteúdo fotografado. Não há mudança no site por
 
 Defeitos inseridos de propósito verificam que as regras realmente reprovam: letra de
 8 px, blur, baixo contraste, pixelated, selo raster e SVG com PNG embutido.
+
+O azulejo em teste tem uma apresentação HTML aprovada no lugar de `lanc-azulejo.webp`.
+Só o slug `azulejo-com-frase`, ainda em teste e usando essa única imagem antiga,
+recebe a adaptação. Há teste garantindo que foto nova, produto lançado e outro slug
+preservam sua apresentação. O auditor continua exigindo imagem nos demais cartões.
+Capturas incluem também personalização, redes, contato e rodapé.
+
+## Revisão das fontes — setembro de 2026
+
+Os 18 arquivos de catálogo em alta densidade foram vistos individualmente em uma
+galeria a 310 px de altura, além dos testes de resolução do layout. Preservados os
+produtos, ângulos e estampas. Pontos que precisam de fontes melhores:
+- `prod-copo-nomes@2x.webp`: nomes claros sobre fundo claro têm contraste insuficiente.
+- `prod-caneca-nomes@2x.webp`: três peças juntas reduzem muito os nomes e o descritor.
+- Composições `prod-kit*`: letras de etiquetas e de produtos pequenos não devem ser
+  usadas como única fonte de informação; detalhes importantes devem estar no texto.
+
+O aumento de pixels não reconstrói essas letras. Os traçados `logo-redondo.svg` e
+`logo-empilhado.svg` do kit foram comparados aos WebPs e rejeitados para o site por
+perda de detalhes e contornos mais irregulares. Mestres preservados; não confundir
+arquivo vetorial com arte mais fiel. Flores/folhas têm suavidade na própria arte;
+uma nova fonte aprovada é necessária antes de prometer definição adicional.
 
 ## Revisão humana obrigatória
 

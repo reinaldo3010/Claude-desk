@@ -1,6 +1,6 @@
 # Manual da marca Panda Mimo
 
-Versão 1.11 · setembro de 2026 · documento vivo
+Versão 1.12 · setembro de 2026 · documento vivo
 
 Este é o brand book da **Panda Mimo**, marca de itens personalizados. Ele registra o que a marca é,
 como fala, como se veste e como se comporta em cada ponto de contato. Foi escrito a partir da
@@ -628,8 +628,8 @@ Regras de produção:
 - Para orientar uma IA, usa-se o prompt de marca, nunca o PDF do manual (geradores de imagem o leem
   como inspiração e redesenham logo e tipografia).
 - Arte para impressão sai do kit em 300 dpi no tamanho final (uma arte de 20 cm pede 2400 px ou mais).
-- Os vetores do kit são traçados fiéis das ilustrações originais (estilo inflado, sombra contínua):
-  idênticos em impressão e em tamanho normal, com relevo em degraus finos quando ampliados ao extremo.
+- Os vetores antigos do kit são traçados das ilustrações originais (estilo inflado, sombra contínua).
+  A conversão pode alterar contornos e relevo; a comparação visual é obrigatória no tamanho de uso.
   Um redesenho vetorial do logo, com poucas formas e versão chapada, é pendência da seção 14 e, quando
   aprovado, entra no kit ao lado dos traçados, sem substituí-los.
 - Pose nova do Pandinha gerada por IA passa por aprovação do dono, é vetorizada com o mesmo processo
@@ -670,6 +670,17 @@ O botão flutuante usa o símbolo SVG do WhatsApp já presente no site.
 pixelada. Fotos e mascotes continuam em WebP com as versões de alta densidade quando
 necessárias; ampliar um arquivo não recupera detalhes ausentes na fonte.
 
+No simulador, o coração vetorial acompanha a frase HTML “Personalizado do seu jeito”.
+O celular da seção de redes é uma composição de CSS, Pandinha do acervo e “Siga-nos!”
+em HTML. Essas frases têm ao menos 18 px. Os links das redes usam os símbolos SVG
+já presentes no site. O azulejo em teste usa a frase HTML de sua ilustração antiga;
+uma foto nova cadastrada no painel tem prioridade e não recebe essa substituição.
+
+Contato e rodapé mantêm os logos WebP com resolução suficiente, sem rotação ou filtro,
+e repetem “Itens personalizados” em HTML a 14 px. A comparação lado a lado rejeitou
+os traçados antigos redondo e empilhado para estas aplicações: seus contornos e
+detalhes do mascote ficaram menos fiéis. A extensão SVG, sozinha, não comprova qualidade.
+
 `npm test` inclui o guardião de nitidez: sete combinações de largura/densidade
 (1x, 1.25x, 1.5x, 2x e 3x), tamanho e contraste das letras, cortes, vetores reais,
 carregamento e resolução dos rasters. A revisão visual das capturas a 100% continua
@@ -695,6 +706,7 @@ adereço pequeno no Pandinha em datas comemorativas, com aprovação prévia (6.
 | Data | Versão | O que mudou |
 |---|---|---|
 | set/2026 | 1.0 | Primeira edição, consolidando a identidade aplicada no site (paleta, tipografia, logo, mascote, tom de voz, aplicações, governança). |
+| set/2026 | 1.12 | Textos do coração, celular e azulejo passam a HTML; redes ganham símbolos SVG. Logos de contato/rodapé mantêm fontes mais fiéis, sem rotação, com descritor legível. Guardião cobre essas seções e protege fotos novas cadastradas no painel. Corrigida a promessa de fidelidade automática dos traçados antigos. |
 | set/2026 | 1.11 | Frases dos selos, faixas, etiqueta e balões passam a texto HTML legível; símbolos preservados em SVG, câmera e sacola com versões para tela, WhatsApp vetorial. Corrigida a regra que reduzia a faixa de ocasiões. Guardião passa a medir legibilidade e densidades fracionárias, com defeitos de prova (13.7). |
 | set/2026 | 1.10 | Aplicação dos 11 SVGs fornecidos pelo dono nos elementos correspondentes do site, painel e manual visual; coleção preservada no kit, com exceção tipográfica restrita à faixa pronta e sem apagar o acervo anterior (13.6). |
 | set/2026 | 1.9 | Movimento do site: a animação de entrada nunca pode esconder conteúdo. Hero e selos ficam fora dela; sem altura de tela confiável nada se esconde; rede de segurança revela tudo em 4 s. Guardião ganha o cenário de webview sem altura, sem IntersectionObserver e sem JavaScript, e o catálogo tem aviso sem JavaScript. |

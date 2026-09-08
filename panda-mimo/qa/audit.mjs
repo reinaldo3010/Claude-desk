@@ -148,7 +148,8 @@ for (const [w, h] of viewports) {
     cartoes.forEach((c, i) => {
       if (!c.querySelector('h3')?.textContent.trim()) out.push(`produto ${i + 1} sem nome`);
       if (!c.querySelector('.product__body p')?.textContent.trim()) out.push(`produto ${i + 1} sem descrição`);
-      if (!c.querySelector('img')) out.push(`produto ${i + 1} sem foto`);
+      const fraseAzulejo = c.matches('.product--lancamento[data-slug="azulejo-com-frase"]') && c.querySelector('.product__photo--message .launch-message')?.textContent.trim() === 'Feito com carinho,feito pra você!';
+      if (!c.querySelector('img') && !fraseAzulejo) out.push(`produto ${i + 1} sem foto ou apresentação aprovada`);
       const cta = c.querySelector('.product__cta');
       if (!cta || !/^https:\/\/wa\.me\/\d{8,}/.test(cta.href)) out.push(`produto ${i + 1} sem botão de WhatsApp válido`);
     });
@@ -241,6 +242,7 @@ for (const [w, h] of viewports) {
         temDetalhe: !!el.querySelector('.product__ver'), temPreco: !!el.querySelector('.product__preco'),
         cta: cta ? cta.textContent.trim() : '', href: cta ? cta.href : '', rotulo: cta ? cta.dataset.rotulo || '' : '',
         temFoto: !!el.querySelector('.carousel img'),
+        temFrase: el.dataset.slug === 'azulejo-com-frase' && el.querySelector('.product__photo--message .launch-message')?.textContent.trim() === 'Feito com carinho,feito pra você!',
       };
     });
     if (r.selo !== 'Em breve' || !r.seloVisivel) fail(w, `${r.nome}: lançamento sem o selo "Em breve"`);
@@ -249,9 +251,9 @@ for (const [w, h] of viewports) {
     if (!r.cta.startsWith('Me avise')) fail(w, `${r.nome}: o botão do lançamento deveria ser "Me avise" (está "${r.cta}")`);
     if (!/wa\.me/.test(r.href) || !/avisa/i.test(decodeURIComponent(r.href))) fail(w, `${r.nome}: o "Me avise" não abre o WhatsApp pedindo aviso do lançamento`);
     if (!r.rotulo.includes(r.nome)) fail(w, `${r.nome}: o clique não seria medido com o nome da peça (rótulo "${r.rotulo}")`);
-    if (!r.temFoto) fail(w, `${r.nome}: lançamento sem ilustração no quadro`);
+    if (!r.temFoto && !r.temFrase) fail(w, `${r.nome}: lançamento sem ilustração ou frase aprovada no quadro`);
     else {
-      await card.$eval('.carousel img', (i) => i.click());
+      await card.$eval(r.temFoto ? '.carousel img' : '.launch-message', (i) => i.click());
       await page.waitForTimeout(150);
       if (await page.$eval('#detalhe', (d) => d.open)) { fail(w, `${r.nome}: clicar na ilustração de um lançamento abriu a tela de detalhe`); await page.$eval('#detalhe', (d) => d.close()); }
     }
