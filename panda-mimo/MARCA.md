@@ -1,6 +1,6 @@
 # Manual da marca Panda Mimo
 
-Versão 1.10 · setembro de 2026 · documento vivo
+Versão 1.11 · setembro de 2026 · documento vivo
 
 Este é o brand book da **Panda Mimo**, marca de itens personalizados. Ele registra o que a marca é,
 como fala, como se veste e como se comporta em cada ponto de contato. Foi escrito a partir da
@@ -643,14 +643,37 @@ O conjunto `marca/kit/padrao-referencia/svg/` preserva os 11 SVGs fornecidos pel
 também copiados sem alteração para `assets/`: `logo-pill`, `badge-envio`, `badge-frete`,
 `badge-qualidade`, `badge-seguro`, `faixa-momentos`, `ic-caminhao`, `ic-coracao`,
 `ic-escudo`, `ic-ideia` e `ic-presente`. Apenas o nome `logo-pill (1).svg` foi
-normalizado para `logo-pill.svg`. Estes são os arquivos usados nas aplicações web
-correspondentes; os WEBPs anteriores e os traçados do kit continuam preservados.
+normalizado para `logo-pill.svg`. A adaptação para telas pequenas está na seção 13.7;
+os WEBPs anteriores e os traçados do kit continuam preservados.
 
 Esta coleção mantém os motivos e mensagens, com os contornos e gradientes do material
 enviado. A tipografia em curvas dos selos é Nunito e a da faixa é Lobster, exceção
 restrita a esta arte pronta; as fontes do layout continuam Fredoka, Caveat e Nunito.
 Não esticar as artes: preservar o `viewBox` e a proporção natural. As licenças das
 fontes estão em `marca/kit/padrao-referencia/documentacao/`.
+
+### 13.7 Legibilidade na tela
+
+Aprovado pelo dono: priorizar nitidez e leitura, separando as frases dos selos e das
+faixas em texto HTML, com os símbolos e as cores da marca. Os selos usam Fredoka a
+18 px ou mais; as descrições usam Nunito a 14 px ou mais. As três faixas também usam
+Fredoka a 18 px; etiqueta e balões usam texto real a 16 px ou mais, sem inclinação
+nem animação de suas letras. Estas são adaptações de tela, não alterações dos mestres.
+
+Os quatro `badge-*-simbolo.svg` contêm os mesmos grupos vetoriais dos selos enviados,
+reenquadrados com margem; nenhum símbolo de envio, compra ou qualidade foi trocado
+por outro. Os ícones de câmera e sacola ganharam versões `*-tela.svg` em curvas simples,
+com o medalhão da coleção. Os derivados estão em `marca/kit/tela/`.
+O botão flutuante usa o símbolo SVG do WhatsApp já presente no site.
+
+Ícones de interface são SVGs reais, sem bitmap embutido, filtros CSS ou renderização
+pixelada. Fotos e mascotes continuam em WebP com as versões de alta densidade quando
+necessárias; ampliar um arquivo não recupera detalhes ausentes na fonte.
+
+`npm test` inclui o guardião de nitidez: sete combinações de largura/densidade
+(1x, 1.25x, 1.5x, 2x e 3x), tamanho e contraste das letras, cortes, vetores reais,
+carregamento e resolução dos rasters. A revisão visual das capturas a 100% continua
+obrigatória: testes numéricos não garantem qualidade artística ou foco fotográfico.
 
 ## 14. Decisões tomadas e pendências operacionais
 
@@ -672,6 +695,7 @@ adereço pequeno no Pandinha em datas comemorativas, com aprovação prévia (6.
 | Data | Versão | O que mudou |
 |---|---|---|
 | set/2026 | 1.0 | Primeira edição, consolidando a identidade aplicada no site (paleta, tipografia, logo, mascote, tom de voz, aplicações, governança). |
+| set/2026 | 1.11 | Frases dos selos, faixas, etiqueta e balões passam a texto HTML legível; símbolos preservados em SVG, câmera e sacola com versões para tela, WhatsApp vetorial. Corrigida a regra que reduzia a faixa de ocasiões. Guardião passa a medir legibilidade e densidades fracionárias, com defeitos de prova (13.7). |
 | set/2026 | 1.10 | Aplicação dos 11 SVGs fornecidos pelo dono nos elementos correspondentes do site, painel e manual visual; coleção preservada no kit, com exceção tipográfica restrita à faixa pronta e sem apagar o acervo anterior (13.6). |
 | set/2026 | 1.9 | Movimento do site: a animação de entrada nunca pode esconder conteúdo. Hero e selos ficam fora dela; sem altura de tela confiável nada se esconde; rede de segurança revela tudo em 4 s. Guardião ganha o cenário de webview sem altura, sem IntersectionObserver e sem JavaScript, e o catálogo tem aviso sem JavaScript. |
 | set/2026 | 1.8 | Pandinha em cena aplicado: hero do site, imagem de compartilhamento e 404 com a versão 3D; seis poses em `marca/kit/pandinha-3d/`, com tabela de uso na 6.5. |

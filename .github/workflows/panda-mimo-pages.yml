@@ -32,6 +32,13 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - name: Auditoria rápida (390 e 1280 px)
         run: QA_VIEWPORTS=390,1280 npm test
+      - name: Evidências de nitidez e legibilidade
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: homologacao-nitidez
+          path: panda-mimo/qa/shots/nitidez
+          retention-days: 14
 
   publicar:
     name: Publicar
