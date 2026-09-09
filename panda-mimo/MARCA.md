@@ -1,6 +1,6 @@
 # Manual da marca Panda Mimo
 
-Versão 2.2 · setembro de 2026 · documento vivo
+Versão 2.3 · setembro de 2026 · documento vivo
 
 Este é o brand book da **Panda Mimo**, marca de itens personalizados. Ele registra o que a marca é,
 como fala, como se veste e como se comporta em cada ponto de contato. Foi escrito a partir da
@@ -409,7 +409,7 @@ escurecer o pêssego para "dar seriedade": seriedade vem do nanquim.
 
 ## 8. Tipografia
 
-### 8.1 As três famílias (Google Fonts, gratuitas)
+### 8.1 As três famílias (gratuitas, licença OFL; no site, servidas do próprio endereço)
 | Família | Papel | Pesos | Regras |
 |---|---|---|---|
 | **Fredoka** | títulos, botões, nomes de produto, números grandes | 500, 600, 700 | Títulos em 600 ou 700, caixa normal. Nunca em texto corrido. |
@@ -418,6 +418,12 @@ escurecer o pêssego para "dar seriedade": seriedade vem do nanquim.
 
 Fallbacks (já no CSS): Fredoka → Nunito → system-ui; Caveat → Segoe Script → Bradley Hand → cursive;
 Nunito → system-ui → Segoe UI.
+
+No site as três famílias não vêm do Google: são subconjuntos latinos em WOFF2 dos mestres do kit
+(`assets/fontes/`, 138 KB no total, com as licenças ao lado), declarados em `styles.css` com
+`font-display: swap` e pré-carregados no `<head>`. Nenhum pedido a terceiros (LGPD) e primeira pintura
+mais rápida. O guardião reprova se uma página pública voltar a carregar fonte externa. Em Canva, Word e
+gráfica, as mesmas fontes se instalam a partir de `marca/kit/fontes/`.
 
 ### 8.2 Escala (a do site)
 | Papel | Tamanho | Variável |
@@ -519,6 +525,24 @@ Regras de conversão (V2, setembro de 2026):
 - **Lançamentos em teste:** quatro visíveis por vez; os demais aparecem em "Ver mais ideias em teste".
 - **Privacidade:** a página `privacidade.html` explica medição, pedidos e depoimentos; o formulário
   de depoimento pede autorização expressa.
+
+Páginas de apoio (setembro de 2026), todas com o mesmo cabeçalho e rodapé do site e linkadas no rodapé
+de todas as páginas: **Sobre a Panda Mimo** (`sobre.html`: história, jeito de trabalhar, o Pandinha,
+quem faz), **Trocas, defeitos e garantia** (`trocas.html`: refazer sem custo, garantia legal de 90 dias
+do CDC, arrependimento em peça personalizada, extravio, reembolso), **Como funciona a compra**
+(`termos.html`: orçamento pelo WhatsApp, prévia como aprovação, pagamento, prazos, direitos sobre artes
+enviadas, lei aplicável) e **Privacidade e cookies** (`privacidade.html`: o site não usa cookies e não
+carrega nada de terceiros; direitos da LGPD). O rodapé traz a identificação da loja exigida pelo
+Decreto 7.962/2013 (nome empresarial, CNPJ, endereço, e-mail), preenchida no painel. As páginas usam
+a estrutura de título do site (eyebrow + Fredoka + trecho em Caveat + lede), texto em Nunito, e terminam
+com "Perguntar no WhatsApp" e "Voltar pro início". Toda promessa nelas tem de bater com a FAQ e com a
+seção 12; ao mudar uma regra de atendimento, mudam-se as duas.
+
+Descoberta (SEO técnico): `<title>` diz o que a marca vende; dados estruturados schema.org no `<head>`
+(Organization, WebSite, WebPage e FAQPage gerado das mesmas perguntas da seção Dúvidas) e o catálogo
+como ItemList de Product com preço "a partir de" (AggregateOffer), gerado pelo `script.js` do mesmo dado
+que monta os cartões; sitemap com todas as páginas; manifest para "adicionar à tela inicial". O guardião
+confere tudo isso e roda o axe-core (WCAG 2.2 AA) em todas as páginas públicas.
 
 Movimento: as seções abaixo da primeira tela entram subindo 12 px em 250 ms, uma vez só. A animação é
 enfeite e o conteúdo é obrigatório: hero e selos de confiança nunca entram nela; se a tela ainda não tem
@@ -748,6 +772,7 @@ adereço pequeno no Pandinha em datas comemorativas, com aprovação prévia (6.
 | Data | Versão | O que mudou |
 |---|---|---|
 | set/2026 | 1.0 | Primeira edição, consolidando a identidade aplicada no site (paleta, tipografia, logo, mascote, tom de voz, aplicações, governança). |
+| set/2026 | 2.3 | Homologação de loja: páginas Sobre, Trocas e garantia, Como funciona a compra e Privacidade e cookies, linkadas no rodapé com a identificação da loja (Decreto 7.962/2013) editável no painel (11.1); fontes servidas do próprio site (8.1); título comercial, dados estruturados (Organization, FAQPage, ItemList com preços), manifest e sitemap completo; FAQ cita a garantia legal de 90 dias; guardião ganha axe-core e as checagens de páginas, SEO e fontes. |
 | set/2026 | 2.2 | Etiqueta da hero volta a ser o adesivo em imagem, exceção registrada em 13.7; guardião de nitidez passa a exigir o adesivo com `alt`. |
 | set/2026 | 2.1 | Revisão das edições 1.10 a 1.12: faixa em Lobster vira referência histórica (13.6); azulejo em teste ganha ilustração própria em Caveat e a exceção de código sai; descritor “Itens personalizados” só no rodapé (13.7). Logo da pílula em SVG confirmado por comparação lado a lado no tamanho de uso. |
 | set/2026 | 2.0 | V2 de conversão: título comercial no hero com a assinatura logo abaixo (4.3), tabela de chamadas para ação (4.7), preço visível em toda peça, frete numa frase, promessas sem exagero, depoimentos reais aprovados no painel com exemplos marcados, quatro lançamentos visíveis, página de privacidade (11.1). |

@@ -4,6 +4,12 @@
    pêssego e papel kraft. Tudo pintado explicitamente.
    ========================================================= */
 
+/* Fontes da marca servidas do nosso endereço (subconjunto latino dos mestres em marca/kit/fontes, licença OFL).
+   Nada é carregado de terceiros: privacidade (LGPD) e primeira pintura mais rápida. */
+@font-face { font-family: "Fredoka"; font-style: normal; font-weight: 400 700; font-display: swap; src: url("assets/fontes/fredoka.woff2") format("woff2"); }
+@font-face { font-family: "Nunito";  font-style: normal; font-weight: 400 800; font-display: swap; src: url("assets/fontes/nunito.woff2") format("woff2"); }
+@font-face { font-family: "Caveat";  font-style: normal; font-weight: 500 700; font-display: swap; src: url("assets/fontes/caveat.woff2") format("woff2"); }
+
 :root {
   /* paleta da marca */
   --ink:        #171512;  /* nanquim quente (texto, panda) */
@@ -1141,3 +1147,20 @@ h2 .hand { font-size: 1.15em; }
 .depo--exemplo { padding-top: 2.6rem; }
 .depo-form__grid .field:has(.seg--nota) { grid-column: 1 / -1; }
 .seg--nota label { min-width: 2.4rem; padding-inline: .7rem; }
+
+/* ---------- páginas de apoio (sobre, trocas, termos, privacidade) ---------- */
+.topbar__in--pagina { justify-content: space-between; }
+.pagina { max-width: 68ch; margin: 0 auto; padding: clamp(2rem, 5vw, 4rem) 1.2rem 4rem; }
+.pagina h1 { font-size: clamp(2rem, 1.5rem + 2vw, 3rem); margin-bottom: .6rem; }
+.pagina h2 { font-family: var(--f-display); font-weight: 600; font-size: 1.3rem; margin: 2rem 0 .5rem; }
+.pagina p, .pagina li { color: var(--ink-soft); line-height: 1.6; }
+.pagina .lede { margin-bottom: .5rem; }
+.pagina ul { padding-left: 1.2rem; display: grid; gap: .5rem; margin: .4rem 0 0; }
+.pagina strong { color: var(--ink); }
+.pagina a:not(.btn) { color: var(--peach-ink); font-weight: 700; }
+.pagina__data { margin-top: 2.2rem; }
+.pagina__acoes { display: flex; flex-wrap: wrap; gap: .7rem; margin-top: 1rem; }
+.footer__nav--legal { margin-top: .4rem; }
+.footer__nav--legal a { font-weight: 600; }
+.footer__loja { font-size: var(--fs-xs); color: var(--ink-soft); margin-top: .8rem; max-width: 60ch; line-height: 1.5; }
+.footer__loja + .footer__legal { margin-top: .2rem; }

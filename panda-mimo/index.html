@@ -3,9 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Panda Mimo</title>
+  <title>Panda Mimo · Presentes personalizados com o nome de quem você ama</title>
   <meta name="description" content="Panda Mimo — itens personalizados feitos com carinho: garrafas térmicas, canecas, copos, ecobags, tags e kits presenteáveis com o seu nome, a sua frase, o seu jeito. Envio para todo o Brasil.">
   <meta name="theme-color" content="#FBF6EF">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta property="og:site_name" content="Panda Mimo">
+  <meta property="og:locale" content="pt_BR">
   <meta property="og:title" content="Panda Mimo · Itens personalizados">
   <meta property="og:description" content="Feito com carinho, feito pra você. Garrafas, canecas, copos, ecobags, tags e kits personalizados.">
   <meta property="og:type" content="website">
@@ -14,6 +17,8 @@
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Panda Mimo · Itens personalizados">
+  <meta name="twitter:description" content="Feito com carinho, feito pra você. Garrafas, canecas, copos, ecobags, tags e kits personalizados.">
   <meta name="twitter:image" content="https://reinaldo3010.github.io/Claude-desk/assets/og.jpg">
   <link rel="canonical" href="https://reinaldo3010.github.io/Claude-desk/">
   <!-- endereço do GitHub Pages. Ao mudar para um domínio próprio, troque as quatro linhas acima,
@@ -21,21 +26,147 @@
   <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
   <link rel="icon" href="assets/icone-192.png" sizes="192x192" type="image/png">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Caveat:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap">
+  <link rel="manifest" href="site.webmanifest">
+  <!-- fontes servidas daqui mesmo (assets/fontes): nenhum pedido a terceiros e primeira pintura mais rápida -->
+  <link rel="preload" href="assets/fontes/fredoka.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fontes/nunito.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="styles.css">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "LocalBusiness",
-    "name": "Panda Mimo",
-    "description": "Itens personalizados feitos com carinho: garrafas térmicas, canecas, copos, ecobags, tags e kits presenteáveis.",
-    "slogan": "Feito com carinho, feito pra você.",
-    "areaServed": "BR",
-    "priceRange": "$$"
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://reinaldo3010.github.io/Claude-desk/#org",
+        "name": "Panda Mimo",
+        "url": "https://reinaldo3010.github.io/Claude-desk/",
+        "logo": "https://reinaldo3010.github.io/Claude-desk/assets/icone-512.png",
+        "image": "https://reinaldo3010.github.io/Claude-desk/assets/og.jpg",
+        "slogan": "Feito com carinho, feito pra você.",
+        "description": "Itens personalizados feitos com carinho: garrafas térmicas, canecas, copos, ecobags, tags e kits presenteáveis com o nome de quem você ama.",
+        "areaServed": {
+          "@type": "Country",
+          "name": "Brasil"
+        },
+        "sameAs": [
+          "https://instagram.com/pandamimo",
+          "https://tiktok.com/@pandamimo"
+        ],
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "customer service",
+          "availableLanguage": "pt-BR",
+          "hoursAvailable": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday"
+            ],
+            "opens": "09:00",
+            "closes": "18:00"
+          }
+        }
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://reinaldo3010.github.io/Claude-desk/#site",
+        "url": "https://reinaldo3010.github.io/Claude-desk/",
+        "name": "Panda Mimo",
+        "inLanguage": "pt-BR",
+        "publisher": {
+          "@id": "https://reinaldo3010.github.io/Claude-desk/#org"
+        }
+      },
+      {
+        "@type": "WebPage",
+        "@id": "https://reinaldo3010.github.io/Claude-desk/",
+        "url": "https://reinaldo3010.github.io/Claude-desk/",
+        "name": "Panda Mimo · Presentes personalizados com nome",
+        "isPartOf": {
+          "@id": "https://reinaldo3010.github.io/Claude-desk/#site"
+        },
+        "about": {
+          "@id": "https://reinaldo3010.github.io/Claude-desk/#org"
+        },
+        "inLanguage": "pt-BR"
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://reinaldo3010.github.io/Claude-desk/#duvidas",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Qual é o prazo de produção e entrega?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "A produção leva de 3 a 5 dias úteis depois que você aprova a prévia. O envio depende do seu CEP: a gente informa o prazo dos Correios ou da transportadora junto com o orçamento."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Tem pedido mínimo?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Não. Uma garrafa, uma caneca ou um copo já é pedido. Só as tags e chaveiros saem a partir de 10 unidades, porque são produzidas em lote."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Posso mandar minha própria arte ou logo?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Pode, e a gente adora. Mande em PNG, PDF ou o arquivo original (AI, CDR, SVG). Se só tiver uma foto ou um rabisco, também serve: montamos a arte e você aprova."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Como funciona a prévia?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Antes de produzir, você recebe uma imagem da arte aplicada na peça, com cor e posição. Pode pedir ajustes quantas vezes precisar. Só começamos depois do seu \"pode fazer\"."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Como é o pagamento?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Pix ou cartão de crédito por link seguro. Pedidos até 10 unidades: pagamento após aprovar a prévia. Pedidos maiores: 50% na aprovação e 50% antes do envio."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "A personalização sai na lavagem?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Não. Usamos técnicas feitas para o material de cada peça, e testamos antes de enviar. Seguindo os cuidados da seção acima, a personalização foi feita para acompanhar a vida útil da peça."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "E se chegar com defeito ou errado?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "A gente refaz sem custo, incluindo o frete. É só mandar uma foto em até 7 dias após o recebimento. Como a peça é personalizada, não fazemos troca por arrependimento, e por isso a prévia é tão importante."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Vem embalado pra presente?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Sempre. Caixa kraft, proteção interna e um bilhetinho. Se for presente, escreva a mensagem no pedido e a gente coloca no bilhete, sem mostrar valor na caixa."
+            }
+          }
+        ]
+      }
+    ]
   }
   </script>
+  <!-- o catálogo (Product/Offer) entra pelo script.js a partir dos produtos publicados -->
 </head>
 <body>
 
@@ -44,7 +175,7 @@
 <!-- ======================= AVISO ======================= -->
 <div class="announce" role="region" aria-label="Avisos">
   <div class="wrap announce__in">
-    <img src="assets/sino.webp" alt="" width="552" height="640">
+    <img src="assets/sino-pequeno.webp" alt="" width="78" height="90">
     <p>Envio para <strong>todo o Brasil</strong>. Frete grátis em regiões participantes: consulte seu CEP no pedido.</p>
   </div>
 </div>
@@ -65,7 +196,7 @@
       <a href="#duvidas">Dúvidas</a>
       <a href="#contato">Contato</a>
     </nav>
-    <a class="btn btn--dark btn--sm js-wa" href="#contato" data-msg="Oi, Panda Mimo! Quero fazer um pedido personalizado 🐼">
+    <a class="btn btn--dark btn--sm js-wa" href="#contato" aria-label="Pedir no WhatsApp" data-msg="Oi, Panda Mimo! Quero fazer um pedido personalizado 🐼">
       <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-wa"/></svg>
       <span>Pedir no WhatsApp</span>
     </a>
@@ -104,17 +235,18 @@
         </ul>
       </div>
       <figure class="hero__art">
-        <img class="heart-img" src="assets/coracao-costura.webp" alt="" width="804" height="704" aria-hidden="true">
+        <img class="heart-img" src="assets/coracao-costura-pequeno.webp" alt="" width="400" height="350" aria-hidden="true">
         <span class="heart heart--b" aria-hidden="true"></span>
         <span class="heart heart--c" aria-hidden="true"></span>
-        <img class="hero__mascot" src="assets/mascote-hero-3d.webp" srcset="assets/mascote-hero-3d.webp 1x, assets/mascote-hero-3d@2x.webp 2x" alt="Pandinha, o mascote da Panda Mimo, abraçando uma garrafa térmica personalizada" width="707" height="854" fetchpriority="high">
-        <img class="hero__tag" src="assets/tag-especial.webp" alt="Etiqueta de presente: feito especialmente para você!" width="482" height="900">
+        <img class="hero__mascot" src="assets/mascote-hero-3d.webp" srcset="assets/mascote-hero-3d.webp 707w, assets/mascote-hero-3d-1000.webp 1000w, assets/mascote-hero-3d@2x.webp 1414w" sizes="(max-width: 860px) min(80vw, 380px), 460px" alt="Pandinha, o mascote da Panda Mimo, abraçando uma garrafa térmica personalizada" width="707" height="854" fetchpriority="high">
+        <img class="hero__tag" src="assets/tag-especial-pequena.webp" srcset="assets/tag-especial-pequena.webp 1x, assets/tag-especial.webp 2x" alt="Etiqueta de presente: feito especialmente para você!" width="260" height="485">
       </figure>
     </div>
   </section>
 
   <!-- ======================= CONFIANÇA ======================= -->
-  <section class="trust" aria-label="Garantias">
+  <section class="trust" aria-labelledby="garantias-titulo">
+    <h2 class="sr-only" id="garantias-titulo">Garantias</h2>
     <div class="wrap trust__in">
       <div class="trust__item"><div class="trust__badge"><img src="assets/badge-frete-simbolo.svg" alt="" width="275" height="189" loading="lazy" decoding="async"><h3>Frete grátis em regiões participantes</h3></div><p>Consulte seu CEP no pedido. Fora delas, o frete é o dos Correios ou da transportadora.</p></div>
       <div class="trust__item"><div class="trust__badge"><img src="assets/badge-seguro-simbolo.svg" alt="" width="170" height="236" loading="lazy" decoding="async"><h3>Compra 100% segura</h3></div><p>Pix ou cartão por link seguro. Até 10 unidades, você paga só depois de aprovar a prévia.</p></div>
@@ -622,7 +754,7 @@
         </details>
         <details class="faq__item">
           <summary>E se chegar com defeito ou errado?</summary>
-          <p>A gente refaz sem custo, incluindo o frete. É só mandar uma foto em até 7 dias após o recebimento. Como a peça é personalizada, não fazemos troca por arrependimento, e por isso a prévia é tão importante.</p>
+          <p>A gente refaz sem custo, incluindo o frete. Mande uma foto em até 7 dias após o recebimento e a peça nova sai na hora; a garantia legal de 90 dias contra defeito vale sempre. Como a peça é personalizada, não fazemos troca por arrependimento, e por isso a prévia é tão importante. Tudo explicado em <a href="trocas.html">trocas, defeitos e garantia</a>.</p>
         </details>
         <details class="faq__item">
           <summary>Vem embalado pra presente?</summary>
@@ -700,13 +832,23 @@
       <a href="#duvidas">Dúvidas</a>
       <a href="#contato">Contato</a>
     </nav>
-    <p class="footer__legal">© <span id="ano">2026</span> Panda Mimo · Itens personalizados · <a href="privacidade.html">Privacidade</a></p>
+    <nav class="footer__nav footer__nav--legal" aria-label="Sobre a loja e políticas">
+      <a href="sobre.html">Sobre a Panda Mimo</a>
+      <a href="trocas.html">Trocas, defeitos e garantia</a>
+      <a href="termos.html">Como funciona a compra</a>
+      <a href="privacidade.html">Privacidade e cookies</a>
+    </nav>
+    <!-- identificação da loja exigida pelo Decreto 7.962/2013 (nome empresarial, CNPJ, endereço, e-mail); preenchida no painel -->
+    <p class="footer__loja" id="loja-dados" hidden></p>
+    <p class="footer__legal">© <span id="ano">2026</span> Panda Mimo · Itens personalizados</p>
   </div>
 </footer>
 
-<a class="fab js-wa" href="#contato" data-msg="Oi, Panda Mimo! Quero fazer um pedido personalizado 🐼" aria-label="Conversar no WhatsApp">
-  <svg class="fab__icon" viewBox="0 0 24 24" width="34" height="34" aria-hidden="true"><use href="#ic-wa"/></svg>
-</a>
+<aside aria-label="Atalho para o WhatsApp">
+  <a class="fab js-wa" href="#contato" data-msg="Oi, Panda Mimo! Quero fazer um pedido personalizado 🐼" aria-label="Conversar no WhatsApp">
+    <svg class="fab__icon" viewBox="0 0 24 24" width="34" height="34" aria-hidden="true"><use href="#ic-wa"/></svg>
+  </a>
+</aside>
 
 <dialog class="detalhe" id="detalhe" aria-labelledby="detalhe-titulo">
   <div class="detalhe__in">
@@ -729,9 +871,9 @@
   </div>
 </dialog>
 
-<script src="config.js"></script>
-<script src="produtos.js"></script>
-<script src="depoimentos.js"></script>
-<script src="script.js"></script>
+<script src="config.js" defer></script>
+<script src="produtos.js" defer></script>
+<script src="depoimentos.js" defer></script>
+<script src="script.js" defer></script>
 </body>
 </html>

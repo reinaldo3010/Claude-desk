@@ -65,15 +65,17 @@ export function inspectVisualPage() {
     const b = i.getBoundingClientRect(), s = getComputedStyle(i), src = i.currentSrc || i.src;
     if (!i.complete || !i.naturalWidth) { errors.push(`imagem não carregou: ${src}`); continue; }
     const vector = /\.svg(?:[?#]|$)/.test(src);
-    let density = 1;
+    let density = 1, larguraDeclarada = 0;
     for (const candidate of (i.srcset || '').split(',')) {
       const [url, d] = candidate.trim().split(/\s+/);
       if (url && new URL(url, location.href).href === src && /x$/.test(d || '')) density = parseFloat(d);
+      // descritor de largura ("1000w"): o navegador divide naturalWidth pela densidade escolhida; a largura real é o descritor
+      if (url && new URL(url, location.href).href === src && /w$/.test(d || '')) larguraDeclarada = parseFloat(d);
     }
     let width = b.width;
     if (s.objectFit === 'contain') width = i.naturalWidth * Math.min(b.width / i.naturalWidth, b.height / i.naturalHeight);
     if (s.objectFit === 'cover') width = i.naturalWidth * Math.max(b.width / i.naturalWidth, b.height / i.naturalHeight);
-    const required = width * devicePixelRatio, pixels = i.naturalWidth * density;
+    const required = width * devicePixelRatio, pixels = larguraDeclarada || i.naturalWidth * density;
     images.push({src, vector, displayedWidth:width, requiredPixels:required, sourcePixels:vector ? null : pixels});
     if (!vector && required > pixels * 1.1) errors.push(`raster ampliado além de 10%: ${src} (${Math.ceil(required)}/${pixels}px)`);
   }

@@ -22,6 +22,16 @@ Para mudar para um domínio próprio: configure o domínio em Settings → Pages
 do `<head>` (`og:url`, `og:image`, `twitter:image`, `canonical`), o `Sitemap:` do `robots.txt` e o
 `<loc>` do `sitemap.xml`, e rode o guardião.
 
+**Dados da loja (obrigatórios pela lei do comércio eletrônico, Decreto 7.962/2013):** nome empresarial, CNPJ ou CPF,
+endereço e e-mail se preenchem no painel, em Configurações → Dados da loja, e aparecem no rodapé de todas as páginas.
+Enquanto estiverem vazios, a linha fica oculta e o site está em desacordo com a lei.
+
+**Páginas de apoio** (`sobre.html`, `trocas.html`, `termos.html`, `privacidade.html`): o texto foi escrito a partir das
+regras já publicadas na FAQ e no manual. Confirme antes de divulgar, e ajuste onde não for a sua prática:
+emissão de nota fiscal em todo pedido, orçamento válido por 7 dias, reembolso via Pix em até 2 dias úteis,
+resposta a pedidos da LGPD em até 15 dias, e o texto "Quem faz" na página Sobre, que está genérico de propósito
+até você escrever a sua história.
+
 Em `index.html`, revise também os textos que são propostas:
 
 - Horário de atendimento, prazo e área de envio, na seção **Contato**.
@@ -211,4 +221,4 @@ panda-mimo/
 ## Identidade aplicada
 
 - Cores: nanquim `#111111`, creme `#F6F4EF`, pêssego `#FFB59C`, sálvia `#A8C5A2`, areia `#E7D8C3`.
-- Tipografia (Google Fonts): Fredoka para títulos, Caveat para os trechos manuscritos, Nunito para texto.
+- Tipografia (arquivos próprios em `assets/fontes/`, mestres em `marca/kit/fontes/`): Fredoka para títulos, Caveat para os trechos manuscritos, Nunito para texto.

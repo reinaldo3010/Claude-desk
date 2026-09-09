@@ -35,6 +35,10 @@
     - foto de produto que não seja um quadro quadrado transparente: fundo retangular
       aparecendo nos cantos, ou peça encostando na borda (risco de estar cortada)
     - erro de console; requisição local falhando (404 etc.)
+    - páginas de apoio (sobre, trocas, termos, privacidade): existem, linkadas no rodapé, com canonical,
+      título e descrição, dados da loja e sitemap; fontes servidas do próprio site; manifest; <title> comercial;
+      dados estruturados (Organization, WebSite, FAQPage igual à seção Dúvidas, ItemList com preço por peça);
+      hierarquia de títulos sem saltos; axe-core (WCAG 2.2 AA) sem violação moderada, séria ou crítica
   Também salva capturas por seção em qa/shots/<largura>/ para homologação visual
   e, com --links, imprime o inventário de todos os links/botões.
 
@@ -712,7 +716,10 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
       // com srcset, naturalWidth já vem dividido pela densidade escolhida; recupera os pixels de verdade
       let dens = 1;
       if (img.srcset) for (const c of img.srcset.split(',')) { const [u, d] = c.trim().split(/\s+/); if (img.currentSrc.endsWith(u.split('/').pop()) && d && d.endsWith('x')) dens = parseFloat(d); }
-      const pixels = img.naturalWidth * dens;
+      // com descritores de largura ("1000w"), a largura real do arquivo é o próprio descritor
+      let largura = 0;
+      if (img.srcset) for (const c of img.srcset.split(',')) { const [u, d] = c.trim().split(/\s+/); if (img.currentSrc.endsWith(u.split('/').pop()) && d && d.endsWith('w')) largura = parseFloat(d); }
+      const pixels = largura || img.naturalWidth * dens;
       const precisa = drawn * dpr, razao = precisa / pixels;
       if (razao > 1.1) out.push(`imagem macia em ${dpr}x (${razao.toFixed(2)}x, precisa ${Math.round(precisa)} px e tem ${pixels}): ${(img.currentSrc || img.src).split('/').pop().slice(0, 50)}`);
       if (img.closest('.carousel') && !/@2x\./.test(img.currentSrc)) out.push(`foto de produto sem versão 2x em tela ${dpr}x: ${img.currentSrc.split('/').pop().slice(0, 50)}`);
@@ -770,7 +777,7 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     pm_produto_fotos: [{ url: 'assets/lanc-vale-mimo.webp', alt: 'ilustração', ordem: 0, largura: 760, altura: 760 }],
   }];
   await page.route('**/rest/v1/pm_produtos*', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(produtoFalso) }));
-  await page.route('**/rest/v1/pm_config*', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ whatsapp: '5511988887777', instagram: 'teste_ig', tiktok: 'teste_tt', aviso_topo: 'Aviso vindo do banco.' }]) }));
+  await page.route('**/rest/v1/pm_config*', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ whatsapp: '5511988887777', instagram: 'teste_ig', tiktok: 'teste_tt', aviso_topo: 'Aviso vindo do banco.', nome_empresarial: 'Loja de Teste LTDA', cnpj: '00.000.000/0001-00', endereco: 'Rua de Teste, 1', email: 'teste@exemplo.com' }]) }));
   await page.goto(page_url, { waitUntil: 'load' });
   await page.waitForTimeout(1200);
   const r = await page.evaluate(() => ({
@@ -778,12 +785,14 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     nome: document.querySelector('#lista-produtos h3')?.textContent,
     zap: document.querySelector('#lista-produtos .product__cta')?.href || '',
     aviso: document.querySelector('.announce__in p')?.textContent,
+    loja: document.getElementById('loja-dados')?.hidden ? '' : document.getElementById('loja-dados')?.textContent,
     insta: document.querySelector('.js-ig')?.href || '',
     selo: document.querySelector('#lista-produtos .product--lancamento .product__selo')?.textContent.trim() || '',
   }));
   if (r.quantos !== 2 || r.nome !== 'Produto de teste') failures.push(`[banco] catálogo do banco não substituiu a cópia local (${r.quantos} produto(s), "${r.nome}")`);
   if (r.selo !== 'Em breve') failures.push('[banco] um lançamento em teste vindo do banco não ganhou o selo "Em breve"');
   if (!r.zap.includes('5511988887777')) failures.push('[banco] o número de WhatsApp do banco não foi aplicado aos botões');
+  if (!/Loja de Teste LTDA · CNPJ 00\.000\.000\/0001-00 · Rua de Teste, 1 · teste@exemplo\.com/.test(r.loja || '')) failures.push(`[banco] os dados da loja do banco não chegaram ao rodapé (está "${r.loja}")`);
   if (r.aviso !== 'Aviso vindo do banco.') failures.push('[banco] o aviso do topo não veio do banco');
   if (!r.insta.includes('teste_ig')) failures.push('[banco] o Instagram do banco não foi aplicado');
 
@@ -884,6 +893,77 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
   }
   errosPainel.forEach((e) => failures.push(`[painel] erro de console: ${e}`));
   await page.close();
+}
+
+// ---- páginas de apoio, SEO técnico, fontes próprias e acessibilidade (axe-core) ----
+{
+  const raiz = path.resolve(here, '..');
+  const ler = (f) => fs.readFileSync(path.resolve(raiz, f), 'utf8');
+  const index = ler('index.html');
+  const PAGINAS = ['sobre.html', 'trocas.html', 'termos.html', 'privacidade.html'];
+  const sitemap = ler('sitemap.xml');
+  for (const pg of PAGINAS) {
+    if (!fs.existsSync(path.resolve(raiz, pg))) { failures.push(`[páginas] falta ${pg}`); continue; }
+    const t = ler(pg);
+    if (!new RegExp(`<a href="${pg}">`).test(index)) failures.push(`[páginas] o rodapé do index não tem link para ${pg}`);
+    if (!t.includes(`<link rel="canonical" href="`) || !t.includes(pg + '"')) failures.push(`[páginas] ${pg} sem canonical próprio`);
+    if (!/<title>[^<]{10,70}Panda Mimo<\/title>/.test(t)) failures.push(`[páginas] ${pg} sem <title> "… · Panda Mimo" (10 a 70 caracteres)`);
+    if (!/<meta name="description" content="[^"]{60,170}">/.test(t)) failures.push(`[páginas] ${pg} sem meta description de 60 a 170 caracteres`);
+    if (!t.includes('id="loja-dados"')) failures.push(`[páginas] ${pg} sem a linha de identificação da loja no rodapé (Decreto 7.962/2013)`);
+    if (!/href="index\.html"/.test(t)) failures.push(`[páginas] ${pg} sem caminho de volta para o início`);
+    for (const outra of PAGINAS) if (!t.includes(`href="${outra}"`)) failures.push(`[páginas] ${pg} não linka ${outra} no rodapé`);
+    if (!sitemap.includes(`<loc>https://reinaldo3010.github.io/Claude-desk/${pg}</loc>`) && !/SEU-DOMINIO/.test(sitemap)) failures.push(`[páginas] sitemap.xml não lista ${pg}`);
+  }
+  if (!/Cookies<\/h2>/.test(ler('privacidade.html'))) failures.push('[páginas] privacidade.html perdeu a seção sobre cookies');
+  if (!/90 dias/.test(ler('trocas.html'))) failures.push('[páginas] trocas.html não informa a garantia legal de 90 dias (CDC art. 26)');
+  // fontes: só arquivos nossos; nada de terceiros nas páginas públicas
+  for (const pg of ['index.html', '404.html', ...PAGINAS]) {
+    const t = ler(pg);
+    if (/fonts\.googleapis\.com|fonts\.gstatic\.com/.test(t)) failures.push(`[fontes] ${pg} ainda carrega fontes de terceiros; use assets/fontes (LGPD e primeira pintura)`);
+  }
+  for (const f of ['assets/fontes/fredoka.woff2', 'assets/fontes/nunito.woff2', 'assets/fontes/caveat.woff2', 'site.webmanifest', 'assets/icone-512.png'])
+    if (!fs.existsSync(path.resolve(raiz, f))) failures.push(`[lançamento] falta o arquivo ${f}`);
+  if (!/@font-face \{ font-family: "Fredoka"/.test(ler('styles.css'))) failures.push('[fontes] styles.css sem @font-face das fontes próprias');
+  if (!/<link rel="manifest" href="site\.webmanifest">/.test(index)) failures.push('[cabeçalho] index.html sem o manifest');
+  const titulo = (index.match(/<title>([^<]*)<\/title>/) || [])[1] || '';
+  if (titulo.length < 30 || titulo.length > 70 || !/personalizad/i.test(titulo)) failures.push(`[seo] o <title> do index precisa dizer o que a marca vende, com 30 a 70 caracteres (está "${titulo}")`);
+  for (const m of ['og:site_name', 'og:locale', 'twitter:title', 'twitter:description']) if (!index.includes(`"${m}"`)) failures.push(`[seo] index.html sem ${m}`);
+  // dados estruturados: o bloco fixo (Organization, WebSite, WebPage, FAQPage) e o catálogo gerado
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  await page.route('**/rest/v1/**', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+  await page.goto(page_url, { waitUntil: 'load' });
+  await page.waitForTimeout(600);
+  const ld = await page.evaluate(() => [...document.querySelectorAll('script[type="application/ld+json"]')].map((s) => { try { return JSON.parse(s.textContent); } catch (e) { return null; } }));
+  if (ld.some((x) => !x)) failures.push('[seo] há um bloco ld+json inválido');
+  const tipos = ld.filter(Boolean).flatMap((x) => x['@graph'] || [x]).map((x) => x['@type']);
+  for (const t of ['Organization', 'WebSite', 'FAQPage', 'ItemList']) if (!tipos.includes(t)) failures.push(`[seo] falta o dado estruturado ${t} (há: ${tipos.join(', ')})`);
+  const faq = ld.filter(Boolean).flatMap((x) => x['@graph'] || [x]).find((x) => x['@type'] === 'FAQPage');
+  const perguntasNaPagina = await page.evaluate(() => [...document.querySelectorAll('#duvidas summary')].map((s) => s.textContent.trim()));
+  if (faq && perguntasNaPagina.length && faq.mainEntity.map((q) => q.name).join('|') !== perguntasNaPagina.join('|')) failures.push('[seo] as perguntas do FAQPage (ld+json) não batem com as da seção Dúvidas; regenere o bloco');
+  const lista = ld.filter(Boolean).find((x) => x['@type'] === 'ItemList');
+  const pecas = await page.evaluate(() => document.querySelectorAll('#lista-produtos .product[data-tipo="peca"]').length);
+  if (lista && lista.itemListElement.length !== pecas) failures.push(`[seo] ItemList com ${lista.itemListElement.length} peças, mas o catálogo mostra ${pecas}`);
+  if (lista && lista.itemListElement.some((i) => !i.item.offers || !/^\d+\.\d{2}$/.test(i.item.offers.lowPrice))) failures.push('[seo] há peça no ItemList sem oferta com preço (lowPrice)');
+  // títulos em ordem: nenhum h3 direto depois do h1; nenhum salto de nível
+  const saltos = await page.evaluate(() => { let nivel = 0; const out = []; for (const h of document.querySelectorAll('main h1, main h2, main h3, main h4')) { const n = +h.tagName[1]; if (n > nivel + 1) out.push(`${h.tagName} "${h.textContent.trim().slice(0, 30)}" depois de h${nivel}`); nivel = n; } return out; });
+  if (saltos.length) failures.push(`[acessibilidade] salto na hierarquia de títulos: ${saltos.join('; ')}`);
+  await page.close();
+  // axe-core (WCAG 2.2 AA + boas práticas): nenhuma violação séria ou crítica nas páginas públicas
+  const axePath = path.resolve(raiz, 'node_modules', 'axe-core', 'axe.min.js');
+  if (!fs.existsSync(axePath)) failures.push('[acessibilidade] axe-core não instalado (npm install)');
+  else for (const pg of ['index.html', ...PAGINAS, '404.html']) {
+    const pa = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await pa.route('**/rest/v1/**', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await pa.goto('file://' + path.resolve(raiz, pg), { waitUntil: 'load' });
+    await pa.waitForTimeout(500);
+    await pa.addScriptTag({ path: axePath });
+    const r = await pa.evaluate(async () => axe.run(document, { runOnly: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa', 'best-practice'] }));
+    for (const v of r.violations) {
+      const msg = `[acessibilidade] ${pg}: ${v.id} (${v.impact}) ${v.help} · ${v.nodes.slice(0, 2).map((n) => n.html.slice(0, 90)).join(' | ')}`;
+      if (v.impact === 'serious' || v.impact === 'critical' || v.impact === 'moderate') failures.push(msg); else warnings.push(msg);
+    }
+    await pa.close();
+  }
 }
 
 await browser.close();

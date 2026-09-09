@@ -667,6 +667,10 @@ async function carregaConfig() {
     $("#c-instagram").value = c.instagram || "";
     $("#c-tiktok").value = c.tiktok || "";
     $("#c-aviso").value = c.aviso_topo || "";
+    $("#c-nome-empresarial").value = c.nome_empresarial || "";
+    $("#c-cnpj").value = c.cnpj || "";
+    $("#c-endereco").value = c.endereco || "";
+    $("#c-email").value = c.email || "";
   } catch (e) {
     recado("#recado-config", `Não consegui carregar as configurações: ${e.message}`, "erro");
   }
@@ -684,6 +688,10 @@ $("#salvar-config").addEventListener("click", async () => {
         instagram: $("#c-instagram").value.trim().replace(/^@/, ""),
         tiktok: $("#c-tiktok").value.trim().replace(/^@/, ""),
         aviso_topo: $("#c-aviso").value.trim(),
+        nome_empresarial: $("#c-nome-empresarial").value.trim(),
+        cnpj: $("#c-cnpj").value.trim(),
+        endereco: $("#c-endereco").value.trim(),
+        email: $("#c-email").value.trim(),
       }),
     });
     recado("#recado-config", "Configurações salvas. O site já usa os contatos novos.", "ok");

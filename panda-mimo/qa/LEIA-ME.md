@@ -68,3 +68,13 @@ recortes ruins já existentes na fonte exigem tratar/substituir a própria fonte
 O guardião não afirma que todas as imagens são artisticamente perfeitas e não
 substitui esta revisão. Os PDFs anteriores do manual são exportações históricas;
 a regra atual está em `MARCA.md` e no manual visual HTML.
+
+## Homologação de loja — setembro de 2026
+
+`audit.mjs` também confere as páginas de apoio (Sobre, Trocas e garantia, Como funciona a compra,
+Privacidade e cookies): existência, links no rodapé de todas as páginas, canonical, título, descrição,
+linha de identificação da loja e sitemap; fontes servidas do próprio site (nenhum pedido a
+fonts.googleapis.com); manifest; `<title>` comercial; dados estruturados válidos (Organization, WebSite,
+FAQPage igual à seção Dúvidas, ItemList com preço em toda peça); hierarquia de títulos sem saltos; e
+roda o axe-core (WCAG 2.2 AA e boas práticas) em todas as páginas públicas, reprovando violações
+moderadas, sérias ou críticas.

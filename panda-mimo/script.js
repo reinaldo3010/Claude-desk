@@ -37,6 +37,16 @@ function aplicaContatos(escopo = document) {
 
 document.getElementById("ano").textContent = new Date().getFullYear();
 
+/* Identificação da loja no rodapé (Decreto 7.962/2013): nome empresarial, CNPJ, endereço e e-mail,
+   preenchidos no painel. Enquanto estiverem vazios, a linha fica oculta. */
+function mostraDadosDaLoja(c) {
+  const el = document.getElementById("loja-dados");
+  if (!el) return;
+  const partes = [c.nome_empresarial, c.cnpj && `CNPJ ${c.cnpj}`, c.endereco, c.email].filter(Boolean);
+  el.textContent = partes.join(" · ");
+  el.hidden = !partes.length;
+}
+
 /* =========================================================
    Medição própria: sem cookie, sem rastrear pessoas
    Cada visita ganha um número aleatório que morre com a aba.
@@ -140,7 +150,31 @@ function assinatura(produtos) {
   ]));
 }
 
+/* Dados estruturados (schema.org) do catálogo: um Product com Offer por peça publicada, gerado do
+   mesmo dado que monta os cartões. Lançamentos em teste e avisos ficam de fora. */
+function publicaDadosEstruturados(produtos) {
+  const base = document.querySelector('link[rel="canonical"]')?.href || location.href.split("#")[0];
+  const abs = (u) => new URL(u, base).href;
+  const itens = produtos.filter((p) => !p.em_breve && !p.lancamento).map((p, i) => {
+    const preco = (p.preco_texto || "").replace(/\./g, "").match(/(\d+)(?:,(\d{2}))?/);
+    const item = {
+      "@type": "Product", name: p.nome, description: p.descricao, url: `${base}#produto/${p.slug}`,
+      image: (p.fotos || []).map((f) => abs(f.url_2x || f.url)).slice(0, 4),
+      brand: { "@type": "Brand", name: "Panda Mimo" },
+    };
+    if (preco) item.offers = {
+      "@type": "AggregateOffer", priceCurrency: "BRL", lowPrice: `${preco[1]}.${preco[2] || "00"}`, offerCount: 1,
+      availability: "https://schema.org/InStock", itemCondition: "https://schema.org/NewCondition", url: `${base}#produto/${p.slug}`,
+    };
+    return { "@type": "ListItem", position: i + 1, item };
+  });
+  let tag = document.getElementById("ld-catalogo");
+  if (!tag) { tag = document.createElement("script"); tag.type = "application/ld+json"; tag.id = "ld-catalogo"; document.head.appendChild(tag); }
+  tag.textContent = JSON.stringify({ "@context": "https://schema.org", "@type": "ItemList", name: "Peças personalizadas Panda Mimo", itemListElement: itens });
+}
+
 function montaProdutos(produtos) {
+  publicaDadosEstruturados(produtos);
   if (!lista || !Array.isArray(produtos) || !produtos.length) return false;
   produtosNaTela = produtos;
   const nova = assinatura(produtos);
@@ -400,7 +434,7 @@ async function carregaDoBanco() {
   try {
     const [rp, rc] = await Promise.all([
       fetch(`${cfg.URL}/rest/v1/pm_produtos?select=slug,nome,descricao,detalhes,preco_texto,etiquetas,mensagem,rotulo_botao,em_breve,lancamento,tema,pm_produto_fotos(url,url_2x,alt,ordem,largura,altura)&publicado=eq.true&order=ordem`, { headers: cabecalho, signal: parar }),
-      fetch(`${cfg.URL}/rest/v1/pm_config?select=whatsapp,instagram,tiktok,aviso_topo&limit=1`, { headers: cabecalho, signal: parar }),
+      fetch(`${cfg.URL}/rest/v1/pm_config?select=whatsapp,instagram,tiktok,aviso_topo,nome_empresarial,cnpj,endereco,email&limit=1`, { headers: cabecalho, signal: parar }),
     ]);
     if (rc.ok) {
       const [c] = await rc.json();
@@ -410,6 +444,7 @@ async function carregaDoBanco() {
         if (c.tiktok) CONTATO.tiktok = c.tiktok;
         const aviso = document.querySelector(".announce__in p");
         if (aviso && c.aviso_topo) aviso.textContent = c.aviso_topo;
+        mostraDadosDaLoja(c);
         aplicaContatos();
       }
     }

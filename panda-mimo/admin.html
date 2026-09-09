@@ -6,10 +6,7 @@
   <title>Painel · Panda Mimo</title>
   <meta name="robots" content="noindex, nofollow">
   <link rel="icon" href="assets/panda-carinha.webp" type="image/webp">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Caveat:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap">
-  <link rel="stylesheet" href="styles.css">
+      <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="admin.css">
 </head>
 <body>
@@ -170,7 +167,29 @@
           </div>
           <div class="campo">
             <label for="c-aviso">Aviso da barra do topo</label>
-            <input id="c-aviso" type="text" maxlength="160" placeholder="Frete grátis para algumas regiões...">
+            <input id="c-aviso" type="text" maxlength="160" placeholder="Envio para todo o Brasil. Frete grátis em regiões participantes...">
+          </div>
+        </div>
+        <h3 style="margin-top:1rem">Dados da loja (rodapé)</h3>
+        <p style="font-size:var(--fs-s);color:var(--ink-soft)">A lei do comércio eletrônico (Decreto 7.962/2013) pede que o site mostre nome empresarial, CNPJ (ou CPF), endereço e um e-mail de contato. Preenchidos aqui, aparecem no rodapé de todas as páginas.</p>
+        <div class="linha">
+          <div class="campo">
+            <label for="c-nome-empresarial">Nome empresarial</label>
+            <input id="c-nome-empresarial" type="text" maxlength="120" placeholder="Panda Mimo Itens Personalizados LTDA">
+          </div>
+          <div class="campo">
+            <label for="c-cnpj">CNPJ (ou CPF, se MEI ainda não saiu)</label>
+            <input id="c-cnpj" type="text" maxlength="20" placeholder="00.000.000/0001-00">
+          </div>
+        </div>
+        <div class="linha">
+          <div class="campo">
+            <label for="c-endereco">Endereço</label>
+            <input id="c-endereco" type="text" maxlength="160" placeholder="Rua, número, bairro, cidade/UF, CEP">
+          </div>
+          <div class="campo">
+            <label for="c-email">E-mail de contato</label>
+            <input id="c-email" type="email" maxlength="120" placeholder="oi@pandamimo.com.br">
           </div>
         </div>
         <p class="aviso" id="recado-config"></p>
