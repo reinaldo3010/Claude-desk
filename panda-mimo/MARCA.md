@@ -1,6 +1,6 @@
 # Manual da marca Panda Mimo
 
-Versão 1.12 · setembro de 2026 · documento vivo
+Versão 2.0 · setembro de 2026 · documento vivo
 
 Este é o brand book da **Panda Mimo**, marca de itens personalizados. Ele registra o que a marca é,
 como fala, como se veste e como se comporta em cada ponto de contato. Foi escrito a partir da
@@ -740,10 +740,10 @@ adereço pequeno no Pandinha em datas comemorativas, com aprovação prévia (6.
 | Data | Versão | O que mudou |
 |---|---|---|
 | set/2026 | 1.0 | Primeira edição, consolidando a identidade aplicada no site (paleta, tipografia, logo, mascote, tom de voz, aplicações, governança). |
+| set/2026 | 2.0 | V2 de conversão: título comercial no hero com a assinatura logo abaixo (4.3), tabela de chamadas para ação (4.7), preço visível em toda peça, frete numa frase, promessas sem exagero, depoimentos reais aprovados no painel com exemplos marcados, quatro lançamentos visíveis, página de privacidade (11.1). |
 | set/2026 | 1.12 | Textos do coração, celular e azulejo passam a HTML; redes ganham símbolos SVG. Logos de contato/rodapé mantêm fontes mais fiéis, sem rotação, com descritor legível. Guardião cobre essas seções e protege fotos novas cadastradas no painel. Corrigida a promessa de fidelidade automática dos traçados antigos. |
 | set/2026 | 1.11 | Frases dos selos, faixas, etiqueta e balões passam a texto HTML legível; símbolos preservados em SVG, câmera e sacola com versões para tela, WhatsApp vetorial. Corrigida a regra que reduzia a faixa de ocasiões. Guardião passa a medir legibilidade e densidades fracionárias, com defeitos de prova (13.7). |
 | set/2026 | 1.10 | Aplicação dos 11 SVGs fornecidos pelo dono nos elementos correspondentes do site, painel e manual visual; coleção preservada no kit, com exceção tipográfica restrita à faixa pronta e sem apagar o acervo anterior (13.6). |
-| set/2026 | 2.0 | V2 de conversão: título comercial no hero com a assinatura logo abaixo (4.3), tabela de chamadas para ação (4.7), preço visível em toda peça, frete numa frase, promessas sem exagero, depoimentos reais aprovados no painel com exemplos marcados, quatro lançamentos visíveis, página de privacidade (11.1). |
 | set/2026 | 1.9 | Movimento do site: a animação de entrada nunca pode esconder conteúdo. Hero e selos ficam fora dela; sem altura de tela confiável nada se esconde; rede de segurança revela tudo em 4 s. Guardião ganha o cenário de webview sem altura, sem IntersectionObserver e sem JavaScript, e o catálogo tem aviso sem JavaScript. |
 | set/2026 | 1.8 | Pandinha em cena aplicado: hero do site, imagem de compartilhamento e 404 com a versão 3D; seis poses em `marca/kit/pandinha-3d/`, com tabela de uso na 6.5. |
 | set/2026 | 1.7 | Dois planos do mascote (6.5): Pandinha adesivo segue como identidade e impressão; Pandinha em cena (3D de pelúcia) aprovado para hero, og, 404, Reel, story e campanhas, com lista fechada de lugares e regras de consistência. Pasta `marca/kit/pandinha-3d/`. |
