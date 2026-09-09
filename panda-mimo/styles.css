@@ -656,8 +656,6 @@ h2 .hand { font-size: 1.15em; }
 .personalization-sticker { display: grid; justify-items: center; gap: .5rem; margin-bottom: .85rem; }
 .personalization-sticker img { width: 76px; margin: 0; rotate: none; filter: none; }
 .art-caption { font: 600 1.125rem/1.4 var(--f-display); color: var(--ink); }
-.product__photo--message { position: relative; display: grid; place-items: center; padding: 3rem 1.25rem 1.25rem; }
-.product__photo--message .launch-message { font: 600 1.125rem/1.5 var(--f-display); text-align: center; }
 
 /* ---------- monte seu mimo: linha com checkbox + quantidade ---------- */
 .field--row { grid-template-columns: 1fr auto; align-items: end; gap: 1rem; }

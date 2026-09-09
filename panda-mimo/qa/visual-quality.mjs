@@ -37,7 +37,7 @@ export function inspectVisualPage() {
     if (a !== null && z !== null && (Math.max(a,z)+.05)/(Math.min(a,z)+.05) < 4.5) errors.push(`contraste abaixo de 4.5:1: ${key(e)}`);
   }
   // Os antigos selos com textos em curvas não podem voltar por acidente.
-  for (const selector of ['.personalization-sticker .art-caption', '.follow__phone .art-caption', '.footer .brand-descriptor', '.contact__art .brand-descriptor']) {
+  for (const selector of ['.personalization-sticker .art-caption', '.follow__phone .art-caption', '.footer .brand-descriptor']) {
     if (!document.querySelector(selector)?.textContent.trim()) errors.push(`legenda real ausente: ${selector}`);
   }
   for (const a of document.querySelectorAll('.follow__links .social')) {

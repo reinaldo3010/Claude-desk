@@ -92,12 +92,6 @@ function vitrineHTML(p) {
   const fotos = p.fotos || [];
   /* lançamento em teste: o selo "Em breve" fica sobre o quadro, lido antes da ilustração */
   const selo = p.lancamento ? '<span class="product__selo">Em breve</span>' : "";
-  // Só substitui a ilustração antiga deste lançamento. Foto nova enviada pelo painel
-  // e produto já lançado continuam usando o catálogo, sem sobreposição de texto.
-  if (p.lancamento && !p.em_breve && p.slug === 'azulejo-com-frase' && fotos.length === 1 &&
-      ['assets/lanc-azulejo.webp', new URL('assets/lanc-azulejo.webp', location.href).href].includes(fotos[0].url)) {
-    return `<div class="product__photo product__photo--message">${selo}<p class="speech--text launch-message">Feito com carinho,<br>feito pra você!</p></div>`;
-  }
   if (!fotos.length) return `<div class="product__photo carousel carousel--unica">${selo}</div>`;
   if (p.em_breve) return `<div class="product__photo product__photo--sticker">${fotoHTML(fotos[0])}</div>`;
   if (fotos.length === 1)

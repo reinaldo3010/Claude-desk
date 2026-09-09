@@ -479,11 +479,11 @@ window.PANDA_PRODUTOS = [
     "lancamento": true,
     "fotos": [
       {
-        "url": "assets/lanc-azulejo.webp",
-        "alt": "Balão de fala: feito com carinho, feito pra você. Ilustração do lançamento azulejo com frase",
+        "url": "assets/lanc-azulejo-frase.webp",
+        "alt": "Azulejo creme com a frase feito com carinho, feito pra você, apoiado num cavalete",
         "largura": 760,
         "altura": 760,
-        "url_2x": "assets/lanc-azulejo@2x.webp"
+        "url_2x": "assets/lanc-azulejo-frase@2x.webp"
       }
     ],
     "ordem": 14,

@@ -35,22 +35,12 @@ try {
     const captureStyle = await page.addStyleTag({content:'.topbar{position:static!important}.fab{visibility:hidden!important}'});
     // A vista padrão mostra quatro lançamentos; "Ver mais" revela o azulejo antes da captura.
     await page.$eval('#mais-lancamentos', b=>b.click()).catch(()=>{});
-    for (const [name,selector] of [['selos','.trust'],['faixa','#ocasioes'],['icones','#diferenciais'],['hero','.hero'],['redes','#siga'],['rodape','.footer'],['contato','#contato'],['personalizacao','#monte'],['azulejo','.product[data-slug=azulejo-com-frase]']]) {
+    for (const [name,selector] of [['selos','.trust'],['faixa','#ocasioes'],['icones','#diferenciais'],['hero','.hero'],['redes','#siga'],['rodape','.footer'],['contato','#contato'],['personalizacao','#monte'],['azulejo','.product[data-slug=azulejo-com-frase] .carousel']]) {
       await page.locator(selector).screenshot({path:path.join(shots,`${width}-${dpr}x-${name}.png`)});
     }
     await captureStyle.evaluate(e=>e.remove());
     console.log(`${width}px @${dpr}x: ${report.images.length} imagens, ${report.errors.length} problema(s)`);
     if (width===390 && dpr===1) {
-      const presentation = await page.evaluate(()=>{
-        const product={slug:'azulejo-com-frase',lancamento:true,fotos:[{url:'assets/lanc-azulejo.webp'}]};
-        return {
-          original:vitrineHTML(product).includes('launch-message'),
-          custom:vitrineHTML({...product,fotos:[{url:'https://example.com/minha-foto.png'}]}).includes('minha-foto.png'),
-          published:!vitrineHTML({...product,lancamento:false}).includes('launch-message'),
-          other:!vitrineHTML({...product,slug:'outro-produto'}).includes('launch-message'),
-        };
-      });
-      assert(Object.values(presentation).every(Boolean), 'A adaptação do azulejo não pode sobrescrever foto nova nem outro produto');
       // Prova de regressão: reduzir letras, borrar, trocar vetor por raster e embutir frase.
       const bad = await page.addStyleTag({content:'.trust__badge h3{font-size:8px!important;filter:blur(1px)!important;color:#eeeeee!important}.promise__icon{image-rendering:pixelated!important}'});
       const broken = await page.evaluate(inspectVisualPage);

@@ -1,6 +1,6 @@
 # Manual da marca Panda Mimo
 
-Versão 2.0 · setembro de 2026 · documento vivo
+Versão 2.1 · setembro de 2026 · documento vivo
 
 Este é o brand book da **Panda Mimo**, marca de itens personalizados. Ele registra o que a marca é,
 como fala, como se veste e como se comporta em cada ponto de contato. Foi escrito a partir da
@@ -681,8 +681,9 @@ normalizado para `logo-pill.svg`. A adaptação para telas pequenas está na se�
 os WEBPs anteriores e os traçados do kit continuam preservados.
 
 Esta coleção mantém os motivos e mensagens, com os contornos e gradientes do material
-enviado. A tipografia em curvas dos selos é Nunito e a da faixa é Lobster, exceção
-restrita a esta arte pronta; as fontes do layout continuam Fredoka, Caveat e Nunito.
+enviado. A tipografia em curvas dos selos é Nunito. A faixa em Lobster fica **só como referência
+histórica** do material recebido: não entra no site nem em arte nova, porque a marca só usa Fredoka,
+Caveat e Nunito (seção 8); qualquer faixa nova é texto em Fredoka, ou Caveat quando manuscrita.
 Não esticar as artes: preservar o `viewBox` e a proporção natural. As licenças das
 fontes estão em `marca/kit/padrao-referencia/documentacao/`.
 
@@ -707,11 +708,12 @@ necessárias; ampliar um arquivo não recupera detalhes ausentes na fonte.
 No simulador, o coração vetorial acompanha a frase HTML “Personalizado do seu jeito”.
 O celular da seção de redes é uma composição de CSS, Pandinha do acervo e “Siga-nos!”
 em HTML. Essas frases têm ao menos 18 px. Os links das redes usam os símbolos SVG
-já presentes no site. O azulejo em teste usa a frase HTML de sua ilustração antiga;
-uma foto nova cadastrada no painel tem prioridade e não recebe essa substituição.
+já presentes no site. O azulejo em teste ganhou ilustração própria (`lanc-azulejo-frase.webp`, em
+760 e 1520 px): azulejo creme com a frase em Caveat grande, legível no cartão, sem exceção de código.
 
-Contato e rodapé mantêm os logos WebP com resolução suficiente, sem rotação ou filtro,
-e repetem “Itens personalizados” em HTML a 14 px. A comparação lado a lado rejeitou
+Contato e rodapé mantêm os logos WebP com resolução suficiente, sem rotação ou filtro.
+Só o rodapé, onde o logo é pequeno, repete “Itens personalizados” em HTML a 14 px; no contato o
+selo redondo já traz a frase legível e não se duplica. A comparação lado a lado rejeitou
 os traçados antigos redondo e empilhado para estas aplicações: seus contornos e
 detalhes do mascote ficaram menos fiéis. A extensão SVG, sozinha, não comprova qualidade.
 
@@ -740,6 +742,7 @@ adereço pequeno no Pandinha em datas comemorativas, com aprovação prévia (6.
 | Data | Versão | O que mudou |
 |---|---|---|
 | set/2026 | 1.0 | Primeira edição, consolidando a identidade aplicada no site (paleta, tipografia, logo, mascote, tom de voz, aplicações, governança). |
+| set/2026 | 2.1 | Revisão das edições 1.10 a 1.12: faixa em Lobster vira referência histórica (13.6); azulejo em teste ganha ilustração própria em Caveat e a exceção de código sai; descritor “Itens personalizados” só no rodapé (13.7). Logo da pílula em SVG confirmado por comparação lado a lado no tamanho de uso. |
 | set/2026 | 2.0 | V2 de conversão: título comercial no hero com a assinatura logo abaixo (4.3), tabela de chamadas para ação (4.7), preço visível em toda peça, frete numa frase, promessas sem exagero, depoimentos reais aprovados no painel com exemplos marcados, quatro lançamentos visíveis, página de privacidade (11.1). |
 | set/2026 | 1.12 | Textos do coração, celular e azulejo passam a HTML; redes ganham símbolos SVG. Logos de contato/rodapé mantêm fontes mais fiéis, sem rotação, com descritor legível. Guardião cobre essas seções e protege fotos novas cadastradas no painel. Corrigida a promessa de fidelidade automática dos traçados antigos. |
 | set/2026 | 1.11 | Frases dos selos, faixas, etiqueta e balões passam a texto HTML legível; símbolos preservados em SVG, câmera e sacola com versões para tela, WhatsApp vetorial. Corrigida a regra que reduzia a faixa de ocasiões. Guardião passa a medir legibilidade e densidades fracionárias, com defeitos de prova (13.7). |

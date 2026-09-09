@@ -21,7 +21,7 @@ efeitos desnecessários, mas a correção principal é tamanho de letra e compos
 - Letras abaixo de 18 px nos selos/faixas, 16 px em etiqueta/balões e 14 px nas descrições.
 - Contraste de texto abaixo de 4,5:1, texto cortado ou fora da tela.
 - Frases de selos/faixas voltando a ser imagens; ícones de interface voltando a raster.
-- Ausência das frases HTML do coração/celular e dos descritores dos logos; redes sem SVG.
+- Ausência das frases HTML do coração/celular e do descritor do rodapé; redes sem SVG.
 - Filtro ou rotação nos logos do contato/rodapé.
 - Filtros, reescala de texto, `pixelated`/`crisp-edges` nos vetores de interface.
 - SVG sem viewBox, com bitmap, recurso externo ou script incorporado.
@@ -35,10 +35,8 @@ seção, para não cobrir o conteúdo fotografado. Não há mudança no site por
 Defeitos inseridos de propósito verificam que as regras realmente reprovam: letra de
 8 px, blur, baixo contraste, pixelated, selo raster e SVG com PNG embutido.
 
-O azulejo em teste tem uma apresentação HTML aprovada no lugar de `lanc-azulejo.webp`.
-Só o slug `azulejo-com-frase`, ainda em teste e usando essa única imagem antiga,
-recebe a adaptação. Há teste garantindo que foto nova, produto lançado e outro slug
-preservam sua apresentação. O auditor continua exigindo imagem nos demais cartões.
+O azulejo em teste usa a ilustração `lanc-azulejo-frase.webp` (frase em Caveat grande, legível
+no cartão), sem exceção no código do catálogo. O auditor exige imagem em todos os cartões.
 Capturas incluem também personalização, redes, contato e rodapé.
 
 ## Revisão das fontes — setembro de 2026
