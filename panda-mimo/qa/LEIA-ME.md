@@ -18,9 +18,11 @@ efeitos desnecessários, mas a correção principal é tamanho de letra e compos
 
 ## O que bloqueia a publicação
 
-- Letras abaixo de 18 px nos selos/faixas, 16 px em etiqueta/balões e 14 px nas descrições.
+- Letras abaixo de 18 px nos selos/faixas, 16 px nos balões e 14 px nas descrições.
 - Contraste de texto abaixo de 4,5:1, texto cortado ou fora da tela.
 - Frases de selos/faixas voltando a ser imagens; ícones de interface voltando a raster.
+  Exceção decidida pelo dono: a etiqueta da hero (`tag-especial.webp`) é adesivo decorativo e fica em
+  imagem, com a frase no `alt`; o guardião reprova se ela virar caixa de texto (manual 13.7).
 - Ausência das frases HTML do coração/celular e do descritor do rodapé; redes sem SVG.
 - Filtro ou rotação nos logos do contato/rodapé.
 - Filtros, reescala de texto, `pixelated`/`crisp-edges` nos vetores de interface.

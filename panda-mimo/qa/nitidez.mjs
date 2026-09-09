@@ -41,7 +41,7 @@ try {
     await captureStyle.evaluate(e=>e.remove());
     console.log(`${width}px @${dpr}x: ${report.images.length} imagens, ${report.errors.length} problema(s)`);
     if (width===390 && dpr===1) {
-      // Prova de regressão: reduzir letras, borrar, trocar vetor por raster e embutir frase.
+      // Prova de regressão: reduzir letras, borrar, trocar vetor por raster, embutir frase e trocar a etiqueta por texto.
       const bad = await page.addStyleTag({content:'.trust__badge h3{font-size:8px!important;filter:blur(1px)!important;color:#eeeeee!important}.promise__icon{image-rendering:pixelated!important}'});
       const broken = await page.evaluate(inspectVisualPage);
       assert(broken.errors.some(e=>e.includes('texto pequeno')));
@@ -53,6 +53,9 @@ try {
       const raster = await page.evaluate(inspectVisualPage);
       assert(raster.errors.some(e=>e.includes('separar símbolo')));
       assert(raster.errors.some(e=>e.includes('vetor real')));
+      await page.locator('.hero__tag').evaluate(i=>{ const t=document.createElement('p'); t.className='hero__tag'; t.textContent='Feito especialmente para você!'; i.replaceWith(t); });
+      const etiqueta = await page.evaluate(inspectVisualPage);
+      assert(etiqueta.errors.some(e=>e.includes('etiqueta da hero')));
       console.log('Defeitos inseridos de propósito: todos detectados.');
     }
     await page.close();

@@ -18,7 +18,7 @@ export function inspectVisualPage() {
     if (!rgb) return null;
     return rgb.map(v => { v /= 255; return v <= .04045 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; }).reduce((s,v,i) => s + v * [.2126,.7152,.0722][i], 0);
   };
-  const textTargets = '.trust__badge h3, .trust__item > p, .promise h3, .promise p, .ribbon, .tag--text, .speech--text, .art-caption, .brand-descriptor';
+  const textTargets = '.trust__badge h3, .trust__item > p, .promise h3, .promise p, .ribbon, .speech--text, .art-caption, .brand-descriptor';
   for (const e of document.querySelectorAll(textTargets)) {
     if (!visible(e)) continue;
     const s = getComputedStyle(e), b = e.getBoundingClientRect();
@@ -39,6 +39,10 @@ export function inspectVisualPage() {
   // Os antigos selos com textos em curvas não podem voltar por acidente.
   for (const selector of ['.personalization-sticker .art-caption', '.follow__phone .art-caption', '.footer .brand-descriptor']) {
     if (!document.querySelector(selector)?.textContent.trim()) errors.push(`legenda real ausente: ${selector}`);
+  }
+  // A etiqueta da hero é adesivo decorativo: imagem inteira, com a frase no alt (manual 13.7).
+  for (const t of document.querySelectorAll('.hero__tag')) {
+    if (t.tagName !== 'IMG' || !/tag-especial/.test(t.getAttribute('src') || '') || !t.alt.trim()) errors.push('etiqueta da hero deve ser o adesivo tag-especial com alt');
   }
   for (const a of document.querySelectorAll('.follow__links .social')) {
     if (a.querySelector('img') || !a.querySelector('svg use')) errors.push(`rede social sem símbolo vetorial: ${a.textContent.trim()}`);

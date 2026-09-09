@@ -835,15 +835,6 @@ h2 .hand { font-size: 1.15em; }
 
 /* ---------- decoração ---------- */
 .contact__bow { position: absolute; top: 0; left: 2%; width: 34%; height: auto; rotate: -12deg; z-index: 1; filter: drop-shadow(0 10px 14px rgba(23,21,18,.2)); }
-.hero__art .tag--text {
-  width: 132px; padding: 1.4rem .75rem .75rem;
-  border: 2px solid var(--peach-deep); border-radius: var(--r-md);
-  background: var(--peach); color: var(--ink);
-  font: 500 1rem/1.4 var(--f-display); text-align: center;
-  rotate: none; filter: none; animation: none;
-}
-.tag--text::before { content: ''; position: absolute; top: 8px; left: calc(50% - 4px); width: 8px; height: 8px; border-radius: 50%; background: var(--paper); }
-.tag--text span { display: block; margin-top: .3rem; color: var(--peach-ink); }
 .speech--text {
   padding: .85rem; max-width: 260px;
   background: var(--paper); border: 2px solid var(--peach); border-radius: var(--r-lg);

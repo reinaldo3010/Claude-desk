@@ -1,6 +1,6 @@
 # Manual da marca Panda Mimo
 
-Versão 2.1 · setembro de 2026 · documento vivo
+Versão 2.2 · setembro de 2026 · documento vivo
 
 Este é o brand book da **Panda Mimo**, marca de itens personalizados. Ele registra o que a marca é,
 como fala, como se veste e como se comporta em cada ponto de contato. Foi escrito a partir da
@@ -692,8 +692,14 @@ fontes estão em `marca/kit/padrao-referencia/documentacao/`.
 Aprovado pelo dono: priorizar nitidez e leitura, separando as frases dos selos e das
 faixas em texto HTML, com os símbolos e as cores da marca. Os selos usam Fredoka a
 18 px ou mais; as descrições usam Nunito a 14 px ou mais. As três faixas também usam
-Fredoka a 18 px; etiqueta e balões usam texto real a 16 px ou mais, sem inclinação
+Fredoka a 18 px; os balões usam texto real a 16 px ou mais, sem inclinação
 nem animação de suas letras. Estas são adaptações de tela, não alterações dos mestres.
+
+A etiqueta da hero (`tag-especial.webp`) é a exceção, decidida pelo dono depois de comparar as
+duas versões lado a lado: ela é adesivo decorativo, não informação. A frase já está dita em texto
+na assinatura do hero, e a versão em caixa de texto perdia o cordão, o recorte de adesivo e cobria
+a estampa da garrafa. Ela fica em imagem inteira, pendurada e balançando, com a frase no `alt`;
+o guardião de nitidez reprova se ela virar texto.
 
 Os quatro `badge-*-simbolo.svg` contêm os mesmos grupos vetoriais dos selos enviados,
 reenquadrados com margem; nenhum símbolo de envio, compra ou qualidade foi trocado
@@ -742,6 +748,7 @@ adereço pequeno no Pandinha em datas comemorativas, com aprovação prévia (6.
 | Data | Versão | O que mudou |
 |---|---|---|
 | set/2026 | 1.0 | Primeira edição, consolidando a identidade aplicada no site (paleta, tipografia, logo, mascote, tom de voz, aplicações, governança). |
+| set/2026 | 2.2 | Etiqueta da hero volta a ser o adesivo em imagem, exceção registrada em 13.7; guardião de nitidez passa a exigir o adesivo com `alt`. |
 | set/2026 | 2.1 | Revisão das edições 1.10 a 1.12: faixa em Lobster vira referência histórica (13.6); azulejo em teste ganha ilustração própria em Caveat e a exceção de código sai; descritor “Itens personalizados” só no rodapé (13.7). Logo da pílula em SVG confirmado por comparação lado a lado no tamanho de uso. |
 | set/2026 | 2.0 | V2 de conversão: título comercial no hero com a assinatura logo abaixo (4.3), tabela de chamadas para ação (4.7), preço visível em toda peça, frete numa frase, promessas sem exagero, depoimentos reais aprovados no painel com exemplos marcados, quatro lançamentos visíveis, página de privacidade (11.1). |
 | set/2026 | 1.12 | Textos do coração, celular e azulejo passam a HTML; redes ganham símbolos SVG. Logos de contato/rodapé mantêm fontes mais fiéis, sem rotação, com descritor legível. Guardião cobre essas seções e protege fotos novas cadastradas no painel. Corrigida a promessa de fidelidade automática dos traçados antigos. |
