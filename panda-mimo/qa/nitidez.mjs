@@ -33,6 +33,8 @@ try {
     errors.push(...report.errors.map(e=>`[${width}@${dpr}x] ${e}`));
     // Cabeçalho fixo e botão flutuante não devem cobrir as capturas de seção.
     const captureStyle = await page.addStyleTag({content:'.topbar{position:static!important}.fab{visibility:hidden!important}'});
+    // A vista padrão mostra quatro lançamentos; "Ver mais" revela o azulejo antes da captura.
+    await page.$eval('#mais-lancamentos', b=>b.click()).catch(()=>{});
     for (const [name,selector] of [['selos','.trust'],['faixa','#ocasioes'],['icones','#diferenciais'],['hero','.hero'],['redes','#siga'],['rodape','.footer'],['contato','#contato'],['personalizacao','#monte'],['azulejo','.product[data-slug=azulejo-com-frase]']]) {
       await page.locator(selector).screenshot({path:path.join(shots,`${width}-${dpr}x-${name}.png`)});
     }
