@@ -173,3 +173,13 @@ body { background: var(--paper); }
 .met-lista .barra span { position: relative; z-index: 1; padding-left: .5rem; line-height: 22px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
 .met-lista b { font-variant-numeric: tabular-nums; }
 .met-lista:empty::after { content: "Nada registrado neste período ainda."; color: var(--ink-soft); font-size: var(--fs-s); }
+
+/* ---------- depoimentos ---------- */
+.adm-item--texto { align-items: start; }
+.adm-item__nota { display: grid; place-items: center; color: var(--peach-deep); font-size: 1rem; letter-spacing: .05em; }
+.adm-item__texto { margin: .4rem 0 0; font-size: var(--fs-s); color: var(--ink); line-height: 1.45; }
+.adm-item__quando { margin-left: .4rem; }
+.campo--check { display: flex; align-items: center; gap: .5rem; font-weight: 600; }
+.campo--check input { width: 18px; height: 18px; accent-color: var(--peach-deep); margin: 0; }
+.adm-acoes { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: .8rem; }
+

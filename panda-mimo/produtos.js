@@ -45,7 +45,7 @@ window.PANDA_PRODUTOS = [
       }
     ],
     "ordem": 0,
-    "preco_texto": "",
+    "preco_texto": "A partir de R$ 89",
     "detalhes": "",
     "lancamento": false,
     "tema": "bebidas"
@@ -93,7 +93,7 @@ window.PANDA_PRODUTOS = [
       }
     ],
     "ordem": 1,
-    "preco_texto": "",
+    "preco_texto": "A partir de R$ 49",
     "detalhes": "",
     "lancamento": false,
     "tema": "bebidas"
@@ -141,7 +141,7 @@ window.PANDA_PRODUTOS = [
       }
     ],
     "ordem": 2,
-    "preco_texto": "",
+    "preco_texto": "A partir de R$ 79",
     "detalhes": "",
     "lancamento": false,
     "tema": "bebidas"
@@ -175,7 +175,7 @@ window.PANDA_PRODUTOS = [
       }
     ],
     "ordem": 3,
-    "preco_texto": "",
+    "preco_texto": "A partir de R$ 59",
     "detalhes": "",
     "lancamento": false,
     "tema": "escola"
@@ -202,7 +202,7 @@ window.PANDA_PRODUTOS = [
       }
     ],
     "ordem": 4,
-    "preco_texto": "",
+    "preco_texto": "R$ 15 cada · mínimo 10",
     "detalhes": "",
     "lancamento": false,
     "tema": "festa"
@@ -243,7 +243,7 @@ window.PANDA_PRODUTOS = [
       }
     ],
     "ordem": 5,
-    "preco_texto": "",
+    "preco_texto": "A partir de R$ 149",
     "detalhes": "",
     "lancamento": false,
     "tema": "presente"

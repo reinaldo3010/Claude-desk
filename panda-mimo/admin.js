@@ -109,16 +109,109 @@ async function abrePainel() {
    Abas
 --------------------------------------------------------- */
 function mostraAba(qual) {
-  for (const nome of ["produtos", "config", "metricas"]) {
+  for (const nome of ["produtos", "config", "depoimentos", "metricas"]) {
     $(`#aba-${nome}`).setAttribute("aria-selected", String(nome === qual));
     $(`#secao-${nome}`).hidden = nome !== qual;
   }
   if (qual !== "produtos") fechaEditor();
   if (qual === "metricas") carregaMetricas();
+  if (qual === "depoimentos") carregaDepoimentos();
 }
 $("#aba-produtos").addEventListener("click", () => mostraAba("produtos"));
 $("#aba-config").addEventListener("click", () => mostraAba("config"));
+$("#aba-depoimentos").addEventListener("click", () => mostraAba("depoimentos"));
 $("#aba-metricas").addEventListener("click", () => mostraAba("metricas"));
+
+/* ---------------------------------------------------------
+   Depoimentos: o que chega pelo site espera aprovação aqui
+--------------------------------------------------------- */
+let depoimentos = [];
+let depoEditando = null;
+async function carregaDepoimentos() {
+  try {
+    depoimentos = await rest("pm_depoimentos?select=*&order=aprovado.asc,criado_em.desc");
+    desenhaDepoimentos();
+    recado("#recado-depoimentos", "");
+  } catch (e) {
+    recado("#recado-depoimentos", `Não consegui carregar os depoimentos: ${e.message}`, "erro");
+  }
+}
+function desenhaDepoimentos() {
+  const alvo = $("#lista-depo");
+  alvo.innerHTML = "";
+  if (!depoimentos.length) { alvo.innerHTML = '<p class="campo"><small>Nenhum depoimento ainda. Quando alguém enviar pelo site, ele aparece aqui.</small></p>'; return; }
+  depoimentos.forEach((d) => {
+    const el = document.createElement("div");
+    el.className = "adm-item adm-item--texto";
+    el.innerHTML = `
+      <div class="adm-item__foto adm-item__nota">${"★".repeat(Math.min(5, Math.max(1, d.nota || 5)))}</div>
+      <div>
+        <div class="adm-item__nome"></div>
+        <div class="adm-item__meta">
+          <span class="selo ${d.aprovado ? "selo--no-ar" : "selo--rascunho"}">${d.aprovado ? "no ar" : "aguardando"}</span>
+          ${d.exemplo ? '<span class="selo selo--rascunho">exemplo</span>' : ""}
+          <span class="adm-item__quando"></span>
+        </div>
+        <p class="adm-item__texto"></p>
+      </div>
+      <div class="adm-item__acoes">
+        <button class="mini" data-acao="publica">${d.aprovado ? "Tirar do ar" : "Publicar"}</button>
+        <button class="mini" data-acao="edita">Editar</button>
+      </div>`;
+    el.querySelector(".adm-item__nome").textContent = [d.nome, d.cidade, d.peca].filter(Boolean).join(" · ");
+    el.querySelector(".adm-item__quando").textContent = new Date(d.criado_em).toLocaleDateString("pt-BR");
+    el.querySelector(".adm-item__texto").textContent = d.texto;
+    el.querySelector('[data-acao="publica"]').addEventListener("click", async () => {
+      try { await rest(`pm_depoimentos?id=eq.${d.id}`, { method: "PATCH", body: JSON.stringify({ aprovado: !d.aprovado }) }); await carregaDepoimentos(); }
+      catch (e) { recado("#recado-depoimentos", `Não consegui salvar: ${e.message}`, "erro"); }
+    });
+    el.querySelector('[data-acao="edita"]').addEventListener("click", () => abreEditorDepo(d));
+    alvo.appendChild(el);
+  });
+}
+function abreEditorDepo(d) {
+  depoEditando = d;
+  $("#titulo-depo").textContent = d ? "Editar depoimento" : "Novo depoimento";
+  $("#d-adm-nome").value = d ? d.nome : "";
+  $("#d-adm-cidade").value = d ? d.cidade || "" : "";
+  $("#d-adm-peca").value = d ? d.peca || "" : "";
+  $("#d-adm-nota").value = d ? d.nota || 5 : 5;
+  $("#d-adm-texto").value = d ? d.texto : "";
+  $("#d-adm-aprovado").checked = d ? !!d.aprovado : true;
+  $("#d-adm-exemplo").checked = d ? !!d.exemplo : false;
+  $("#apagar-depo").hidden = !d;
+  $("#editor-depo").hidden = false;
+  $("#d-adm-nome").focus();
+}
+$("#novo-depo").addEventListener("click", () => abreEditorDepo(null));
+$("#cancelar-depo").addEventListener("click", () => { $("#editor-depo").hidden = true; depoEditando = null; });
+$("#salvar-depo").addEventListener("click", async () => {
+  const dados = {
+    nome: $("#d-adm-nome").value.trim(), cidade: $("#d-adm-cidade").value.trim(), peca: $("#d-adm-peca").value.trim(),
+    nota: Math.min(5, Math.max(1, Number($("#d-adm-nota").value) || 5)), texto: $("#d-adm-texto").value.trim(),
+    aprovado: $("#d-adm-aprovado").checked, exemplo: $("#d-adm-exemplo").checked,
+  };
+  if (dados.nome.length < 2 || dados.texto.length < 10) return recado("#recado-depoimentos", "Nome e depoimento são obrigatórios (o depoimento com pelo menos 10 letras).", "erro");
+  try {
+    if (depoEditando) await rest(`pm_depoimentos?id=eq.${depoEditando.id}`, { method: "PATCH", body: JSON.stringify(dados) });
+    else await rest("pm_depoimentos", { method: "POST", body: JSON.stringify(dados) });
+    $("#editor-depo").hidden = true; depoEditando = null;
+    await carregaDepoimentos();
+    recado("#recado-depoimentos", "Depoimento salvo. O site mostra os publicados na próxima visita.", "ok");
+  } catch (e) {
+    recado("#recado-depoimentos", `Não consegui salvar: ${e.message}`, "erro");
+  }
+});
+$("#apagar-depo").addEventListener("click", async () => {
+  if (!depoEditando || !confirm("Apagar este depoimento? Não dá para desfazer.")) return;
+  try {
+    await rest(`pm_depoimentos?id=eq.${depoEditando.id}`, { method: "DELETE" });
+    $("#editor-depo").hidden = true; depoEditando = null;
+    await carregaDepoimentos();
+  } catch (e) {
+    recado("#recado-depoimentos", `Não consegui apagar: ${e.message}`, "erro");
+  }
+});
 
 /* ---------------------------------------------------------
    Produtos

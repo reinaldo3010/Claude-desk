@@ -50,6 +50,7 @@
     <div class="adm-abas" role="tablist">
       <button class="adm-aba" role="tab" id="aba-produtos" aria-selected="true" aria-controls="secao-produtos">Produtos</button>
       <button class="adm-aba" role="tab" id="aba-config" aria-selected="false" aria-controls="secao-config">Configurações</button>
+      <button class="adm-aba" role="tab" id="aba-depoimentos" aria-selected="false" aria-controls="secao-depoimentos">Depoimentos</button>
       <button class="adm-aba" role="tab" id="aba-metricas" aria-selected="false" aria-controls="secao-metricas">Métricas</button>
     </div>
 
@@ -193,6 +194,37 @@
 </div>
 
 <!-- ---------- MÉTRICAS ---------- -->
+    <section class="adm-secao" id="secao-depoimentos" role="tabpanel" aria-labelledby="aba-depoimentos" hidden>
+      <div class="adm-cabecalho">
+        <h2>Depoimentos</h2>
+        <button class="btn btn--peach btn--sm" type="button" id="novo-depo">+ Novo depoimento</button>
+      </div>
+      <p class="campo"><small>O que chega pelo site entra como <strong>aguardando</strong>. Leia, ajuste se precisar e clique em Publicar. Os marcados como <strong>exemplo</strong> aparecem no site com essa etiqueta; tire a marca (ou apague) quando os reais chegarem.</small></p>
+      <p class="aviso" id="recado-depoimentos"></p>
+      <div class="adm-lista" id="lista-depo"></div>
+      <div class="adm-editor" id="editor-depo" hidden style="margin-top:1rem">
+        <h3 id="titulo-depo">Novo depoimento</h3>
+        <div class="linha">
+          <div class="campo"><label for="d-adm-nome">Nome (como aparece)</label><input id="d-adm-nome" type="text" maxlength="60" placeholder="Malu S."></div>
+          <div class="campo"><label for="d-adm-cidade">Cidade/UF</label><input id="d-adm-cidade" type="text" maxlength="60" placeholder="Campinas/SP"></div>
+        </div>
+        <div class="linha">
+          <div class="campo"><label for="d-adm-peca">Peça</label><input id="d-adm-peca" type="text" maxlength="60" placeholder="Garrafa térmica"></div>
+          <div class="campo"><label for="d-adm-nota">Nota (1 a 5)</label><input id="d-adm-nota" type="number" min="1" max="5" value="5"></div>
+        </div>
+        <div class="campo"><label for="d-adm-texto">Depoimento</label><textarea id="d-adm-texto" rows="4" maxlength="400"></textarea></div>
+        <div class="linha">
+          <label class="campo campo--check"><input type="checkbox" id="d-adm-aprovado"> Publicado no site</label>
+          <label class="campo campo--check"><input type="checkbox" id="d-adm-exemplo"> É um exemplo (aparece com a etiqueta "exemplo")</label>
+        </div>
+        <div class="adm-acoes">
+          <button class="btn btn--dark btn--sm" type="button" id="salvar-depo">Salvar</button>
+          <button class="btn btn--ghost btn--sm" type="button" id="cancelar-depo">Cancelar</button>
+          <button class="btn btn--ghost btn--sm" type="button" id="apagar-depo" hidden>Apagar</button>
+        </div>
+      </div>
+    </section>
+
     <section class="adm-secao" id="secao-metricas" role="tabpanel" aria-labelledby="aba-metricas" hidden>
       <div class="adm-cabecalho">
         <h2>Métricas</h2>

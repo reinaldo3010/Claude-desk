@@ -1096,3 +1096,59 @@ h2 .hand { font-size: 1.15em; }
   .reveal--pronto { opacity: 1; transform: none; }
   .fab--acena { animation: none; }
 }
+
+/* =========================================================
+   V2 de conversão: hero, garantia, depoimentos, lançamentos
+   ========================================================= */
+.hero__assinatura { font-size: clamp(1.5rem, 1.2rem + 1vw, 2.1rem); color: var(--hand-ink); line-height: 1.1; margin: -.2rem 0 .2rem; }
+.hero__facts li:nth-child(4) { display: list-item; }
+.builder__garantia { font-size: var(--fs-s); color: var(--ink-soft); margin: .4rem 0 0; }
+
+.depoimentos { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.2rem; }
+.depo {
+  position: relative; margin: 0; padding: 1.4rem 1.4rem 1.2rem;
+  background: var(--white); border: 1.5px solid var(--sand); border-radius: var(--r-md);
+  display: grid; gap: .9rem; align-content: start;
+}
+.depo blockquote { margin: 0; }
+.depo blockquote p { font-size: 1.02rem; line-height: 1.55; color: var(--ink); }
+.depo blockquote p::before { content: "\201C"; font-family: var(--f-display); color: var(--peach-deep); font-size: 1.6em; line-height: 0; vertical-align: -.35em; margin-right: .1em; }
+.depo figcaption { display: grid; gap: .15rem; font-size: var(--fs-s); color: var(--ink-soft); }
+.depo figcaption strong { color: var(--ink); font-family: var(--f-display); font-weight: 600; font-size: 1rem; }
+.depo__estrelas { color: var(--peach-deep); letter-spacing: .08em; font-size: 1rem; }
+.depo--exemplo::after {
+  content: "exemplo"; position: absolute; top: .7rem; right: .8rem;
+  font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; font-weight: 700;
+  color: var(--peach-ink); background: var(--sand-soft); border-radius: 999px; padding: .15rem .55rem;
+}
+.depoimentos__nota { text-align: center; font-size: var(--fs-s); color: var(--ink-soft); margin: 1rem auto 0; max-width: 60ch; }
+
+.depo-form { margin: 2rem auto 0; max-width: 760px; background: var(--white); border: 1.5px solid var(--sand); border-radius: var(--r-md); padding: 0 1.4rem; }
+.depo-form[open] { border-color: var(--peach); }
+.depo-form summary { cursor: pointer; list-style: none; padding: 1.1rem 2.2rem 1.1rem 0; position: relative; display: grid; gap: .15rem; }
+.depo-form summary::-webkit-details-marker { display: none; }
+.depo-form summary::after { content: "+"; position: absolute; right: .2rem; top: 50%; transform: translateY(-50%); font-family: var(--f-display); font-size: 1.6rem; color: var(--peach-ink); }
+.depo-form[open] summary::after { content: "\2212"; }
+.depo-form__titulo { font-family: var(--f-display); font-weight: 600; font-size: 1.15rem; color: var(--ink); }
+.depo-form__sub { font-size: var(--fs-s); color: var(--ink-soft); }
+.depo-form form { display: grid; gap: 1rem; padding: .2rem 0 1.4rem; }
+.depo-form__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: .9rem 1.2rem; }
+.depo-form textarea { width: 100%; resize: vertical; min-height: 6.5rem; }
+.seg--nota label { min-width: 2.6rem; text-align: center; }
+.depo-form__consent { display: grid; grid-template-columns: auto 1fr; gap: .6rem; align-items: start; font-size: var(--fs-s); color: var(--ink-soft); }
+.depo-form__consent input { margin-top: .25rem; accent-color: var(--peach-deep); }
+.depo-form__consent label { font-weight: 400; }
+.depo-form__acoes { display: flex; flex-wrap: wrap; gap: .8rem 1.2rem; align-items: center; }
+.depo-form__status { font-size: var(--fs-s); color: var(--ink-soft); margin: 0; }
+.depo-form__status.is-ok { color: var(--sage-deep); font-weight: 600; }
+.depo-form__status.is-erro { color: var(--peach-ink); }
+
+.products__mais { grid-column: 1 / -1; display: flex; justify-content: center; padding: .4rem 0 .2rem; }
+.field textarea, .field select {
+  width: 100%; padding: .85rem 1rem; border: 2px solid var(--sand); border-radius: var(--r-sm);
+  background: var(--paper); font: inherit; font-size: 1.05rem; color: var(--ink); transition: border-color .15s;
+}
+.field textarea:focus, .field select:focus { border-color: var(--peach-deep); outline: none; }
+.depo--exemplo { padding-top: 2.6rem; }
+.depo-form__grid .field:has(.seg--nota) { grid-column: 1 / -1; }
+.seg--nota label { min-width: 2.4rem; padding-inline: .7rem; }

@@ -164,7 +164,9 @@ function montaProdutos(produtos) {
     if (p.lancamento && !divisorPosto) { partes.push(divisorHTML); divisorPosto = true; }
     partes.push(produtoHTML(p));
   }
+  partes.push('<div class="products__mais" hidden><button type="button" class="btn btn--ghost" id="mais-lancamentos">Ver mais ideias em teste</button></div>');
   lista.innerHTML = partes.join("\n");
+  lista.querySelector("#mais-lancamentos").addEventListener("click", () => { mostraTodosLanc = true; aplicaFiltro(); medir("filtro", "Mais lançamentos"); });
   aplicaContatos(lista);
   iniciaCarrosseis(lista);
   montaFiltros(produtos);
@@ -317,12 +319,15 @@ function montaFiltros(produtos) {
   filtrosEl.innerHTML = todos.map(([v, r]) => `<button type="button" class="filtro" data-filtro="${esc(v)}" aria-pressed="${v === filtroAtual}">${esc(r)}</button>`).join("");
 }
 
+const LANCAMENTOS_VISIVEIS = 4; // na vista padrão, o resto fica atrás de "Ver mais ideias em teste"
+let mostraTodosLanc = false;
 function aplicaFiltro() {
   if (!lista) return;
   const bruto = buscaInput ? buscaInput.value.trim() : "";
   const termos = normaliza(bruto).split(" ").filter(Boolean);
   const tema = filtroAtual.startsWith("tema:") ? filtroAtual.slice(5) : "";
-  let visiveis = 0, lancVisiveis = 0, total = 0;
+  const vistaPadrao = !termos.length && filtroAtual === "tudo" && !mostraTodosLanc;
+  let visiveis = 0, lancVisiveis = 0, total = 0, lancEscondidos = 0;
   lista.querySelectorAll(".product").forEach((el) => {
     const tipo = el.dataset.tipo || "peca";
     let ok = true;
@@ -334,12 +339,19 @@ function aplicaFiltro() {
       else if (filtroAtual === "lancamento") ok = tipo === "lancamento";
       else if (tema) ok = el.dataset.tema === tema;
       if (ok && termos.length) ok = termos.every((t) => (el.dataset.busca || "").includes(t));
+      if (ok && tipo === "lancamento" && vistaPadrao && lancVisiveis >= LANCAMENTOS_VISIVEIS) { ok = false; lancEscondidos++; }
       if (ok) { visiveis++; if (tipo === "lancamento") lancVisiveis++; }
     }
     el.hidden = !ok;
   });
   const divisor = lista.querySelector(".products__divisor");
   if (divisor) divisor.hidden = lancVisiveis === 0;
+  const mais = lista.querySelector(".products__mais");
+  if (mais) {
+    mais.hidden = lancEscondidos === 0;
+    const b = mais.querySelector("button");
+    if (b) b.textContent = `Ver mais ${lancEscondidos} ${lancEscondidos === 1 ? "ideia" : "ideias"} em teste`;
+  }
   if (vazioEl) {
     vazioEl.hidden = visiveis > 0;
     const zap = vazioEl.querySelector(".js-wa");
@@ -423,6 +435,85 @@ async function carregaDoBanco() {
 }
 /* quem espera o catálogo ficar pronto (inclusive o guardião) usa isto */
 window.PANDA_CATALOGO = carregaDoBanco().then(() => true);
+
+/* =========================================================
+   Depoimentos: "Quem recebe um mimo, conta"
+   - cópia local (depoimentos.js) primeiro, banco depois; só aprovados
+   - cartões de exemplo levam a marca "exemplo" à vista (regra 11.1 do manual)
+   - o formulário grava como não aprovado; o painel publica
+   ========================================================= */
+const depoSecao = document.getElementById("depoimentos");
+const depoLista = document.getElementById("lista-depoimentos");
+const depoNota = document.getElementById("depoimentos-nota");
+function depoHTML(d) {
+  const nota = Math.min(5, Math.max(1, Number(d.nota) || 5));
+  const onde = [d.cidade, d.peca].filter(Boolean).map(esc).join(" · ");
+  return `<figure class="depo${d.exemplo ? " depo--exemplo" : ""}">
+      <blockquote><p>${esc(d.texto)}</p></blockquote>
+      <figcaption>
+        <span class="depo__estrelas" aria-label="${nota} de 5">${"★".repeat(nota)}${"☆".repeat(5 - nota)}</span>
+        <strong>${esc(d.nome)}</strong>
+        ${onde ? `<span>${onde}</span>` : ""}
+      </figcaption>
+    </figure>`;
+}
+function montaDepoimentos(itens) {
+  if (!depoSecao || !depoLista) return;
+  const lista = (Array.isArray(itens) ? itens : []).filter((d) => d && d.nome && d.texto).slice(0, 6);
+  depoLista.innerHTML = lista.map(depoHTML).join("");
+  depoLista.hidden = lista.length === 0;
+  if (depoNota) depoNota.hidden = !lista.some((d) => d.exemplo);
+}
+montaDepoimentos(window.PANDA_DEPOIMENTOS);
+(async function depoimentosDoBanco() {
+  const cfg = window.PANDA_CONFIG;
+  if (!cfg || !cfg.URL || !cfg.CHAVE || !depoLista) return;
+  try {
+    const r = await fetch(`${cfg.URL}/rest/v1/pm_depoimentos?select=nome,cidade,peca,nota,texto,exemplo,criado_em&aprovado=eq.true&order=criado_em.desc&limit=6`,
+      { headers: { apikey: cfg.CHAVE, Authorization: `Bearer ${cfg.CHAVE}` }, signal: AbortSignal.timeout ? AbortSignal.timeout(6000) : undefined });
+    if (!r.ok) return;
+    const dados = await r.json();
+    if (Array.isArray(dados)) montaDepoimentos(dados); // vazio esconde os cartões: o banco manda
+  } catch (e) { /* sem banco, fica a cópia local */ }
+})();
+window.PANDA_MONTA_DEPOIMENTOS = montaDepoimentos;
+
+const formDepo = document.getElementById("form-depoimento");
+if (formDepo) {
+  const texto = formDepo.querySelector("#d-texto");
+  const contador = document.getElementById("d-count");
+  const status = document.getElementById("depo-status");
+  const diz = (msg, tipo) => { status.textContent = msg; status.className = `depo-form__status${tipo ? " is-" + tipo : ""}`; };
+  texto.addEventListener("input", () => { if (contador) contador.textContent = String(texto.value.length); });
+  formDepo.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const dados = {
+      nome: formDepo.nome.value.trim(), cidade: formDepo.cidade.value.trim(), peca: formDepo.peca.value.trim(),
+      nota: Number(formDepo.nota.value) || 5, texto: texto.value.trim(),
+    };
+    if (dados.nome.length < 2) return diz("Conta pra gente o seu nome, do jeito que quer aparecer.", "erro");
+    if (dados.texto.length < 10) return diz("Escreve um pouquinho mais: como foi receber o mimo?", "erro");
+    if (!formDepo.consent.checked) return diz("Precisamos da sua autorização pra publicar.", "erro");
+    const cfg = window.PANDA_CONFIG;
+    const botao = document.getElementById("d-enviar");
+    botao.disabled = true; diz("Enviando...", "");
+    try {
+      if (!cfg || !cfg.URL) throw new Error("sem banco");
+      const r = await fetch(`${cfg.URL}/rest/v1/pm_depoimentos`, {
+        method: "POST",
+        headers: { apikey: cfg.CHAVE, Authorization: `Bearer ${cfg.CHAVE}`, "Content-Type": "application/json", Prefer: "return=minimal" },
+        body: JSON.stringify(dados),
+      });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      diz("Recebido! A gente lê com carinho e publica em até 2 dias. Obrigado por contar.", "ok");
+      formDepo.reset(); if (contador) contador.textContent = "0";
+      medir("depoimento", dados.peca || "sem peça");
+    } catch (err) {
+      botao.disabled = false;
+      diz("Não deu certo agora. Se preferir, manda o depoimento pelo WhatsApp, pelo botão verde aqui embaixo.", "erro");
+    }
+  });
+}
 
 /* =========================================================
    Monte seu mimo

@@ -22,6 +22,10 @@
       fotos, preço e botão do WhatsApp, fecha com Escape
     - simulador em modo foto real: o nome aparece dentro da plaquinha
     - movimento: nada fica invisível depois de rolar até a seção
+    - conversão (V2): hero com título comercial e assinatura, só as chamadas para ação da tabela
+      4.7 do manual, preço em toda peça publicada, frete numa frase só, sem promessa de "vida útil",
+      quatro lançamentos visíveis e "Ver mais", depoimentos (cartões, marca de exemplo, formulário
+      gravando no banco simulado, seção sem cartões quando o banco devolve vazio), privacidade linkada
     - conteúdo sempre visível: página carregada num webview ainda sem altura (Instagram,
       WhatsApp), sem IntersectionObserver e sem JavaScript; hero, selos e catálogo aparecem,
       e nenhuma seção segue invisível 4,5 s depois do carregamento
@@ -231,6 +235,8 @@ for (const [w, h] of viewports) {
   }
 
   // lançamentos em teste: selo "Em breve" no quadro, ilustração, "Me avise" medido por peça, sem tela de detalhe
+  // (a vista padrão mostra quatro; "Ver mais" revela o resto antes de conferir cada um)
+  await page.$eval('#mais-lancamentos', (b) => b.click()).catch(() => {}); await page.waitForTimeout(120);
   for (const card of await page.$$('.product--lancamento')) {
     const r = await card.evaluate((el) => {
       const selo = el.querySelector('.product__selo'); const cta = el.querySelector('.product__cta');
@@ -552,6 +558,96 @@ for (const [w, h] of viewports) {
   await page.close();
 }
 
+// ---- conversão (V2): o que vende precisa estar na tela, do jeito que o manual manda ----
+{
+  const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  const depos = [];
+  await page.route('**/rest/v1/pm_depoimentos*', (r) => {
+    if (r.request().method() === 'POST') { try { depos.push(JSON.parse(r.request().postData() || '{}')); } catch {} return r.fulfill({ status: 201, body: '' }); }
+    r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([
+      { nome: 'Ana B.', cidade: 'Recife/PE', peca: 'Caneca', nota: 5, texto: 'Depoimento vindo do banco, aprovado no painel.', exemplo: false },
+      { nome: 'Exemplo E.', cidade: 'Cidade/UF', peca: 'Copo', nota: 4, texto: 'Cartão ilustrativo marcado como exemplo.', exemplo: true },
+    ]) });
+  });
+  await page.goto(page_url, { waitUntil: 'load' });
+  await page.waitForTimeout(600);
+  const html = fs.readFileSync(path.resolve(here, '..', 'index.html'), 'utf8');
+  const produtosLocal = JSON.parse(fs.readFileSync(path.resolve(here, '..', 'produtos.js'), 'utf8').replace(/^[\s\S]*?window\.PANDA_PRODUTOS\s*=\s*/, '').replace(/;\s*$/, ''));
+  // hero: título comercial + assinatura logo abaixo + chamadas certas
+  const hero = await page.evaluate(() => ({
+    h1: document.querySelector('.hero h1')?.textContent.trim(),
+    assinatura: document.querySelector('.hero .hero__assinatura')?.textContent.trim(),
+    botoes: [...document.querySelectorAll('.hero__actions .btn')].map((b) => b.textContent.trim()),
+    facts: document.querySelectorAll('.hero__facts li').length,
+  }));
+  if (!/Presentes personalizados/.test(hero.h1 || '')) failures.push(`[conversão] o título do hero não diz o que a marca vende (está "${hero.h1}")`);
+  if (hero.assinatura !== 'Feito com carinho, feito pra você.') failures.push('[conversão] a assinatura da marca sumiu do hero (regra 4.3)');
+  if (hero.botoes[0] !== 'Quero criar meu mimo' || hero.botoes[1] !== 'Ver as peças') failures.push(`[conversão] chamadas do hero fora da tabela 4.7: ${hero.botoes.join(' | ')}`);
+  if (hero.facts < 4) failures.push('[conversão] a faixa de segurança do hero perdeu itens');
+  // chamadas para ação: só as da tabela 4.7 (botões .btn com texto)
+  const permitidas = ['Quero criar meu mimo', 'Ver as peças', 'Quero essa', 'Pedir esse mimo no WhatsApp', 'Orçamento para 10+ unidades', 'Me avise', 'Pedir pelo WhatsApp', 'Perguntar no WhatsApp', 'Ver no Instagram', 'Ver com meu nome', 'Enviar depoimento', 'Voltar pro início', 'Limpar busca', 'Ver mais'];
+  const fora = await page.$$eval('main .btn, footer .btn', (els) => els.map((b) => b.textContent.replace(/\s+/g, ' ').trim()).filter(Boolean));
+  const estranhas = [...new Set(fora.filter((t) => !permitidas.some((p) => t === p || t.startsWith(p))))];
+  if (estranhas.length) failures.push(`[conversão] chamada(s) fora da tabela 4.7 do manual: ${estranhas.join(' | ')}`);
+  // preço em toda peça publicada que não é lançamento
+  const semPreco = await page.$$eval('#lista-produtos .product[data-tipo="peca"]', (els) => els.filter((el) => !el.querySelector('.product__preco')?.textContent.trim()).map((el) => el.querySelector('h3')?.textContent.trim()));
+  if (semPreco.length) failures.push(`[conversão] peça(s) sem preço no cartão: ${semPreco.join(', ')}`);
+  const localSemPreco = produtosLocal.filter((p) => !p.lancamento && !p.em_breve && !p.preco_texto).map((p) => p.nome);
+  if (localSemPreco.length) failures.push(`[conversão] peça(s) sem preço na cópia local (produtos.js): ${localSemPreco.join(', ')}`);
+  // frete: uma frase só, promessas sem exagero
+  if (/Frete grátis para algumas regi/i.test(html)) failures.push('[conversão] frete com a frase antiga ("para algumas regiões"); use a frase única da regra 11.1');
+  if (!/Envio para <strong>todo o Brasil<\/strong>\. Frete grátis em regiões participantes/.test(html)) failures.push('[conversão] a barra do topo não traz a frase única do frete');
+  if (/dura a vida útil/i.test(html)) failures.push('[conversão] promessa forte demais: "dura a vida útil" (regra 11.1)');
+  if (!/Nada é produzido sem o seu "pode fazer"/.test(html)) failures.push('[conversão] a frase de segurança ("Nada é produzido sem o seu \'pode fazer\'") saiu do site');
+  // lançamentos: quatro visíveis, botão revela o resto
+  const lanc = await page.evaluate(() => {
+    const todos = [...document.querySelectorAll('#lista-produtos .product[data-tipo="lancamento"]')];
+    return { total: todos.length, visiveis: todos.filter((el) => !el.hidden).length, botao: document.querySelector('#mais-lancamentos')?.closest('.products__mais')?.hidden === false, texto: document.querySelector('#mais-lancamentos')?.textContent.trim() };
+  });
+  if (lanc.total > 4 && lanc.visiveis !== 4) failures.push(`[conversão] ${lanc.visiveis} lançamentos visíveis na vista padrão; a regra é 4`);
+  if (lanc.total > 4 && !lanc.botao) failures.push('[conversão] o botão "Ver mais ideias em teste" não aparece');
+  if (lanc.total > 4) {
+    await page.click('#mais-lancamentos'); await page.waitForTimeout(150);
+    const depois = await page.$$eval('#lista-produtos .product[data-tipo="lancamento"]', (els) => els.filter((el) => !el.hidden).length);
+    if (depois !== lanc.total) failures.push(`[conversão] "Ver mais" mostrou ${depois} de ${lanc.total} lançamentos`);
+  }
+  // depoimentos: cartões do banco, marca de exemplo, formulário
+  const depo = await page.evaluate(() => ({
+    cartoes: document.querySelectorAll('#lista-depoimentos .depo').length,
+    exemplos: document.querySelectorAll('#lista-depoimentos .depo--exemplo').length,
+    nota: document.getElementById('depoimentos-nota')?.hidden === false,
+    estrelas: document.querySelector('#lista-depoimentos .depo__estrelas')?.getAttribute('aria-label'),
+    privacidade: !!document.querySelector('#form-depoimento a[href="privacidade.html"]') && !!document.querySelector('footer a[href="privacidade.html"]'),
+  }));
+  if (depo.cartoes !== 2) failures.push(`[depoimentos] esperava 2 cartões do banco simulado, vieram ${depo.cartoes}`);
+  if (depo.exemplos !== 1 || !depo.nota) failures.push('[depoimentos] cartão de exemplo sem a marca "exemplo" ou sem a nota explicativa');
+  if (!/de 5$/.test(depo.estrelas || '')) failures.push('[depoimentos] as estrelas não têm rótulo acessível "N de 5"');
+  if (!depo.privacidade) failures.push('[depoimentos] falta o link para privacidade.html no formulário ou no rodapé');
+  if (!fs.existsSync(path.resolve(here, '..', 'privacidade.html'))) failures.push('[depoimentos] privacidade.html não existe');
+  await page.$eval('#depo-form', (d) => { d.open = true; });
+  await page.fill('#d-nome', 'Teste Guardião'); await page.fill('#d-cidade', 'Pedreira/SP'); await page.selectOption('#d-peca', 'Caneca');
+  await page.click('#d-enviar'); await page.waitForTimeout(200);
+  let st = await page.$eval('#depo-status', (p) => p.textContent);
+  if (!/pouquinho mais/.test(st)) failures.push(`[depoimentos] enviar sem texto não avisou (status: "${st}")`);
+  await page.fill('#d-texto', 'Chegou rápido e a prévia veio antes, como prometido.');
+  await page.click('#d-enviar'); await page.waitForTimeout(200);
+  st = await page.$eval('#depo-status', (p) => p.textContent);
+  if (!/autorização/.test(st)) failures.push(`[depoimentos] enviar sem autorização não avisou (status: "${st}")`);
+  await page.check('#d-consent'); await page.click('#d-enviar'); await page.waitForTimeout(500);
+  st = await page.$eval('#depo-status', (p) => p.textContent);
+  if (!/Recebido/.test(st)) failures.push(`[depoimentos] envio válido não confirmou (status: "${st}")`);
+  const gravado = depos[0];
+  if (!gravado || gravado.nome !== 'Teste Guardião' || gravado.peca !== 'Caneca' || gravado.nota !== 5 || 'aprovado' in gravado) failures.push(`[depoimentos] o que chegou ao banco não é o que foi digitado: ${JSON.stringify(gravado)}`);
+  await page.close();
+  // banco devolvendo vazio: a seção não mostra cartão nenhum (nem os exemplos da cópia local)
+  const p2 = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  await p2.route('**/rest/v1/pm_depoimentos*', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+  await p2.goto(page_url, { waitUntil: 'load' }); await p2.waitForTimeout(600);
+  const vazio = await p2.evaluate(() => ({ cartoes: document.querySelectorAll('#lista-depoimentos .depo').length, escondido: document.getElementById('lista-depoimentos').hidden }));
+  if (vazio.cartoes !== 0 || !vazio.escondido) failures.push('[depoimentos] com o banco vazio, os cartões de exemplo da cópia local continuaram na tela');
+  await p2.close();
+}
+
 // ---- conteúdo sempre visível: a animação de entrada nunca pode deixar a página em branco ----
 // Cenário real: webview do Instagram/WhatsApp carrega a página antes de ter altura (innerHeight ~0);
 // tudo o que depender de "está abaixo da primeira tela" esconde a página inteira, hero incluído.
@@ -636,7 +732,7 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
   await page.route('**/rest/v1/pm_eventos*', (r) => { try { eventos.push(JSON.parse(r.request().postData() || '{}')); } catch {} r.fulfill({ status: 201, body: '' }); });
   await page.goto(page_url, { waitUntil: 'load' });
   await page.waitForTimeout(400);
-  await page.$eval('.hero .js-wa', (a) => { a.addEventListener('click', (e) => e.preventDefault(), { once: true }); a.click(); });
+  await page.$eval('.fab.js-wa', (a) => { a.addEventListener('click', (e) => e.preventDefault(), { once: true }); a.click(); });
   await page.waitForTimeout(400);
   const tipos = eventos.map((e) => e.evento);
   if (!tipos.includes('pageview')) failures.push(`[medição] a visita não foi registrada (eventos: ${tipos.join(', ') || 'nenhum'})`);

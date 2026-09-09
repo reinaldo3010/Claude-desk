@@ -161,7 +161,8 @@ adultos que presenteiam), não é luxo frio. Não fala em "produto", fala em **p
 ### 4.3 Assinatura e frases-chave
 | Papel | Frase | Onde |
 |---|---|---|
-| Assinatura principal | **Feito com carinho, feito pra você.** | Hero, rodapé, bilhete, balão do mascote, verso da tag |
+| Assinatura principal | **Feito com carinho, feito pra você.** | Hero (linha manuscrita logo abaixo do título comercial), rodapé, bilhete, balão do mascote, verso da tag |
+| Título comercial do hero | Presentes personalizados com o nome de quem você ama. | Só no hero do site, em Fredoka; diz o que a marca vende antes da assinatura dizer como |
 | Assinatura de produto | Mais que um presente, um mimo. | Seção de diferenciais, embalagem, post de apresentação |
 | Adesivo / faixa | Personalizados com amor | Faixa sobre a seção de produtos, sticker em stories |
 | Adesivo / selo | Personalizado do seu jeito | Coração pontilhado no simulador, tag |
@@ -207,6 +208,23 @@ Escola e rotina. Cada ocasião tem um manuscrito próprio: *pra mãe, pro pai ·
 prof · quer ser meu padrinho? · bem-vindo ao time · de volta às aulas*.
 
 ---
+
+### 4.7 Chamadas para ação
+Poucas chamadas, sempre as mesmas, para a pessoa nunca precisar decidir o que um botão faz.
+
+| Papel | Texto | Onde | Leva para |
+|---|---|---|---|
+| Principal | **Quero criar meu mimo** | hero, contato | simulador (hero) ou WhatsApp (contato) |
+| Secundária | **Ver as peças** | hero | catálogo |
+| Peça | **Quero essa** | cartão e detalhe da peça | WhatsApp com a peça no texto |
+| Simulador | **Pedir esse mimo no WhatsApp** | abaixo da prévia | WhatsApp com nome, base e cor |
+| Empresas | **Orçamento para 10+ unidades** | pedidos em quantidade | WhatsApp com a pergunta de quantidade |
+| Lançamento | **Me avise** | cartão em teste | WhatsApp pedindo aviso |
+| Apoio | Pedir pelo WhatsApp · Perguntar no WhatsApp | busca sem resultado, dúvidas | WhatsApp |
+
+Junto da principal e do simulador vai sempre a frase de segurança: **"Nada é produzido sem o seu
+'pode fazer'."** Ela vale para todo pedido, ao contrário de "só paga depois", que só vale até 10
+unidades e por isso não vai para o hero.
 
 ## 5. Logotipo
 
@@ -487,6 +505,21 @@ O site (`index.html`) é a aplicação de referência da identidade e já segue 
 seção usa os mesmos tokens (`styles.css`), a mesma estrutura de título (eyebrow + Fredoka + trecho
 Caveat + lede) e passa pelo guardião de qualidade antes de publicar.
 
+Regras de conversão (V2, setembro de 2026):
+- **Preço sempre visível.** Toda peça publicada mostra "A partir de R$ X" (ou o valor fechado) no
+  cartão e no detalhe. "Valor sob consulta" só para lançamentos em teste. Os valores iniciais são
+  provisórios e se editam no painel.
+- **Frete numa frase só**, igual em todo o site: "Envio para todo o Brasil. Frete grátis em regiões
+  participantes: consulte seu CEP no pedido."
+- **Promessas sem exagero.** "A personalização foi feita para acompanhar a vida útil da peça,
+  seguindo os cuidados", nunca "dura para sempre".
+- **Depoimentos** ("Quem recebe um mimo, conta"): só relatos reais, enviados pelo formulário do site ou
+  recebidos no WhatsApp, aprovados no painel antes de aparecer. Cartões de exemplo existem só para
+  mostrar o formato e levam a marca "exemplo" à vista; saem quando os reais entrarem.
+- **Lançamentos em teste:** quatro visíveis por vez; os demais aparecem em "Ver mais ideias em teste".
+- **Privacidade:** a página `privacidade.html` explica medição, pedidos e depoimentos; o formulário
+  de depoimento pede autorização expressa.
+
 Movimento: as seções abaixo da primeira tela entram subindo 12 px em 250 ms, uma vez só. A animação é
 enfeite e o conteúdo é obrigatório: hero e selos de confiança nunca entram nela; se a tela ainda não tem
 altura confiável (navegador embutido do Instagram ou do WhatsApp carregando antes do layout) nada se
@@ -589,6 +622,7 @@ humano · sem pedido mínimo (exceto tags/chaveiros, 10 unidades).
 - [ ] Texto em "a gente", com número onde há promessa, no máximo uma exclamação, emoji só em
       WhatsApp e redes.
 - [ ] Assinatura correta: "Feito com carinho, feito pra você." (com ponto, sem abreviar).
+- [ ] Peça publicada com preço "a partir de"; chamada para ação da tabela 4.7; frase de segurança junto da principal.
 - [ ] Contraste AA nos pares da seção 7.3.
 - [ ] No site: guardião verde (`npm test`) antes do merge.
 
@@ -709,6 +743,7 @@ adereço pequeno no Pandinha em datas comemorativas, com aprovação prévia (6.
 | set/2026 | 1.12 | Textos do coração, celular e azulejo passam a HTML; redes ganham símbolos SVG. Logos de contato/rodapé mantêm fontes mais fiéis, sem rotação, com descritor legível. Guardião cobre essas seções e protege fotos novas cadastradas no painel. Corrigida a promessa de fidelidade automática dos traçados antigos. |
 | set/2026 | 1.11 | Frases dos selos, faixas, etiqueta e balões passam a texto HTML legível; símbolos preservados em SVG, câmera e sacola com versões para tela, WhatsApp vetorial. Corrigida a regra que reduzia a faixa de ocasiões. Guardião passa a medir legibilidade e densidades fracionárias, com defeitos de prova (13.7). |
 | set/2026 | 1.10 | Aplicação dos 11 SVGs fornecidos pelo dono nos elementos correspondentes do site, painel e manual visual; coleção preservada no kit, com exceção tipográfica restrita à faixa pronta e sem apagar o acervo anterior (13.6). |
+| set/2026 | 2.0 | V2 de conversão: título comercial no hero com a assinatura logo abaixo (4.3), tabela de chamadas para ação (4.7), preço visível em toda peça, frete numa frase, promessas sem exagero, depoimentos reais aprovados no painel com exemplos marcados, quatro lançamentos visíveis, página de privacidade (11.1). |
 | set/2026 | 1.9 | Movimento do site: a animação de entrada nunca pode esconder conteúdo. Hero e selos ficam fora dela; sem altura de tela confiável nada se esconde; rede de segurança revela tudo em 4 s. Guardião ganha o cenário de webview sem altura, sem IntersectionObserver e sem JavaScript, e o catálogo tem aviso sem JavaScript. |
 | set/2026 | 1.8 | Pandinha em cena aplicado: hero do site, imagem de compartilhamento e 404 com a versão 3D; seis poses em `marca/kit/pandinha-3d/`, com tabela de uso na 6.5. |
 | set/2026 | 1.7 | Dois planos do mascote (6.5): Pandinha adesivo segue como identidade e impressão; Pandinha em cena (3D de pelúcia) aprovado para hero, og, 404, Reel, story e campanhas, com lista fechada de lugares e regras de consistência. Pasta `marca/kit/pandinha-3d/`. |
