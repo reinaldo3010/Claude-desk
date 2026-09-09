@@ -1,6 +1,6 @@
 # Manual da marca Panda Mimo
 
-Versão 2.3 · setembro de 2026 · documento vivo
+Versão 2.4 · setembro de 2026 · documento vivo
 
 Este é o brand book da **Panda Mimo**, marca de itens personalizados. Ele registra o que a marca é,
 como fala, como se veste e como se comporta em cada ponto de contato. Foi escrito a partir da
@@ -713,6 +713,9 @@ fontes estão em `marca/kit/padrao-referencia/documentacao/`.
 
 ### 13.7 Legibilidade na tela
 
+A margarida de Ocasiões usa a edição aprovada no piloto de setembro: flor-nitida.webp, com versão @2x e transparência real. O mestre PNG e o registro de geração ficam em marca/kit/tela/. O original e o traçado anterior permanecem preservados; esta edição raster não deve ser anunciada como vetor nem como recuperação exata da fonte.
+
+
 Aprovado pelo dono: priorizar nitidez e leitura, separando as frases dos selos e das
 faixas em texto HTML, com os símbolos e as cores da marca. Os selos usam Fredoka a
 18 px ou mais; as descrições usam Nunito a 14 px ou mais. As três faixas também usam
@@ -772,6 +775,7 @@ adereço pequeno no Pandinha em datas comemorativas, com aprovação prévia (6.
 | Data | Versão | O que mudou |
 |---|---|---|
 | set/2026 | 1.0 | Primeira edição, consolidando a identidade aplicada no site (paleta, tipografia, logo, mascote, tom de voz, aplicações, governança). |
+| set/2026 | 2.4 | Piloto de edição da margarida: pétalas e miolo mais definidos, transparência real conferida, WebPs em duas densidades e mestre PNG preservado (13.7). |
 | set/2026 | 2.3 | Homologação de loja: páginas Sobre, Trocas e garantia, Como funciona a compra e Privacidade e cookies, linkadas no rodapé com a identificação da loja (Decreto 7.962/2013) editável no painel (11.1); fontes servidas do próprio site (8.1); título comercial, dados estruturados (Organization, FAQPage, ItemList com preços), manifest e sitemap completo; FAQ cita a garantia legal de 90 dias; guardião ganha axe-core e as checagens de páginas, SEO e fontes. |
 | set/2026 | 2.2 | Etiqueta da hero volta a ser o adesivo em imagem, exceção registrada em 13.7; guardião de nitidez passa a exigir o adesivo com `alt`. |
 | set/2026 | 2.1 | Revisão das edições 1.10 a 1.12: faixa em Lobster vira referência histórica (13.6); azulejo em teste ganha ilustração própria em Caveat e a exceção de código sai; descritor “Itens personalizados” só no rodapé (13.7). Logo da pílula em SVG confirmado por comparação lado a lado no tamanho de uso. |
