@@ -14,12 +14,21 @@ A identidade está aprovada: evoluir é acrescentar dentro dessas regras, nunca 
 - Antes de publicar mudança no site, rodar o guardião: `cd panda-mimo && npm test` (rápido: `QA_VIEWPORTS=390 npm test`).
 - Ao mudar uma regra da marca, atualizar o manual (texto em `MARCA.md`, visual em `marca/index.html`) e registrar no histórico ao final do `MARCA.md`.
 
-## seu-mimo-studio/ (kit vetorial da marca Seu Mimo Studio)
+## seu-mimo-studio/ (marca Seu Mimo Studio)
 
-Marca separada da Panda Mimo, com paleta (café, bege, oliva, off-white, preto) e tipografia
-(DM Serif Display, Montserrat) próprias. Antes de qualquer trabalho, leia `seu-mimo-studio/MARCA.md`.
-A identidade é construída em vetor: letreiro em curvas da DM Serif Display, símbolo e mascote gerados
-por `kit/mascote/kit.py` (pose ou expressão nova nasce do gerador, nunca desenhada à parte). Nunca
-misturar elementos das duas marcas; a prancha aprovada em `kit/mestres/` é a referência de sensação.
-O mascote vetorial gerado aqui não foi aprovado pelo dono: o caminho oficial para imagens do mascote
-é `seu-mimo-studio/PROMPTS-MASCOTE.md` (referência aprovada + Nano Banana + LoRA treinada).
+**Sessão nova começa por `seu-mimo-studio/COMECE-AQUI.md`** (documento de passagem: o que existe, o que
+falta, o que já foi decidido) e depois `seu-mimo-studio/MARCA.md` (o manual da marca).
+
+Marca separada da Panda Mimo, para público geral adulto, com paleta (café, oliva, bege, off white, papel
+claro, fundo, preto) e tipografia (DM Serif Display, Montserrat) próprias. Nunca misturar cor, fonte,
+mascote ou texto entre as duas marcas.
+
+- Logotipo, símbolo e avatar estão prontos em `kit/svg/`, `kit/pdf/` e `kit/png/`. Use os arquivos; não
+  recrie o letreiro em fonte nem redesenhe o símbolo.
+- Fontes próprias em `kit/fontes/`, servidas do próprio site. Nada de Google Fonts em página pública.
+- **O mascote é peça em aberto.** A construção vetorial em `kit/mascote/` foi reprovada pelo dono e fica
+  só como registro; não sai em material publicado. A referência aprovada é
+  `kit/mestres/referencia-mascote-1400.jpg`, e imagens novas saem do roteiro de
+  `seu-mimo-studio/PROMPTS-MASCOTE.md`. Não desenhe o mascote de novo.
+- O site da marca ainda não existe como código. Quando for construído, vai em `seu-mimo-studio/site/`,
+  com a arquitetura do site da Panda Mimo e a identidade desta marca.
