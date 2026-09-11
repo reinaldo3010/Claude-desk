@@ -17,6 +17,7 @@ A identidade está aprovada: evoluir é acrescentar dentro dessas regras, nunca 
 ## seu-mimo-studio/ (kit vetorial da marca Seu Mimo Studio)
 
 Marca separada da Panda Mimo, com paleta (café, bege, oliva, off-white, preto) e tipografia
-(Playfair Display, Montserrat) próprias. `seu-mimo-studio/kit/LEIAME.md` explica método, arquivos,
-fidelidade medida e limites. Nunca misturar elementos das duas marcas; a prancha aprovada em
-`kit/mestres/` é a referência, e o letreiro é traçado da prancha, não composto em fonte.
+(DM Serif Display, Montserrat) próprias. Antes de qualquer trabalho, leia `seu-mimo-studio/MARCA.md`.
+A identidade é construída em vetor: letreiro em curvas da DM Serif Display, símbolo e mascote gerados
+por `kit/mascote/kit.py` (pose ou expressão nova nasce do gerador, nunca desenhada à parte). Nunca
+misturar elementos das duas marcas; a prancha aprovada em `kit/mestres/` é a referência de sensação.

@@ -4,5 +4,19 @@
   "bege": "#C0966D",
   "offwhite": "#D4C7B5",
   "preto": "#050505",
-  "branco": "#FFFFFF"
+  "branco": "#FFFFFF",
+  "fundo": "#E6D9CA",
+  "mascote": {
+    "kraft": "#C9A27B",
+    "kraft_esc": "#A98058",
+    "kraft_topo": "#D9B48F",
+    "oliva": "#2F2E1E",
+    "oliva_claro": "#4A4931",
+    "cafe": "#3A2E21",
+    "cafe_claro": "#5A4636",
+    "off": "#EFE6D8",
+    "off_esc": "#D4C7B5",
+    "rosa": "#D9A08C",
+    "fundo": "#E6D9CA"
+  }
 }
