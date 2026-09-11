@@ -10,11 +10,12 @@ Antes de mexer em qualquer coisa, leia `../MARCA.md` (o manual da marca) e o `CL
 
 | Arquivo | O que é |
 |---|---|
-| `index.html` | a home: cabeçalho, abertura, garantias, peças, como funciona, frase, fecho, rodapé |
+| `index.html` | a home, em 14 seções: aviso, abertura, garantias, peças (com busca e filtro), veja como fica, ocasiões, pedidos em quantidade, como funciona, diferenciais, cuidados, depoimentos, dúvidas, frase da marca e fecho |
 | `sobre.html` `trocas.html` `termos.html` `privacidade.html` | as quatro páginas de apoio |
 | `404.html` | página de endereço inexistente (usa endereços absolutos, de propósito) |
 | `styles.css` | **todas** as cores e fontes, como tokens em `:root`. Nada de valor solto |
-| `produtos.js` | a cópia local do catálogo: as seis peças, com preço. JSON válido de propósito |
+| `produtos.js` | a cópia local do catálogo: as seis peças, com preço, tema, etiquetas e texto de detalhe. JSON válido de propósito |
+| `depoimentos.js` | a cópia local dos depoimentos. Os cartões de exemplo levam a marca "exemplo" à vista |
 | `config.js` | endereço e chave do banco. Em branco = site roda só com a cópia local |
 | `script.js` | monta as peças, liga os botões de WhatsApp, mede sem cookie, abre o menu do celular |
 | `assets/` | logotipo e símbolo em SVG, mascote, ícones, imagem de compartilhamento, fontes |
@@ -27,7 +28,18 @@ da tabela `sms_config` passa a mandar e esta linha só vale como reserva.
 
 **Mudar preço ou acrescentar peça:** `produtos.js`. Mantenha as chaves entre aspas — é o que deixa o
 arquivo legível pelo guardião. Se a peça for nova, escolha um dos desenhos de linha já definidos em
-`index.html` (`ic-garrafa`, `ic-caneca`, `ic-copo`, `ic-ecobag`, `ic-tag`, `ic-kit`).
+`index.html` (`ic-garrafa`, `ic-caneca`, `ic-copo`, `ic-ecobag`, `ic-tag`, `ic-kit`) e um `tema` entre
+`bebidas`, `dia-a-dia`, `lembrancinha` e `presente` — o tema vira chip de filtro sozinho. As `etiquetas`
+aparecem no detalhe e entram na busca; `detalhes` é o texto que explica a peça quando ela é aberta.
+
+**Mexer no "Veja como fica":** o desenho sai dos mesmos ícones de linha do catálogo, ampliados. Onde o
+nome cai em cada peça, quanto ele pode ocupar e quais cores exigem palco escuro está em `script.js`, nas
+constantes `PECAS_PREVIA`, `CORES_PREVIA` e `LETRAS_PREVIA`. Bege e off white **precisam** de palco
+escuro: sobre o fundo claro elas somem, e o guardião confere isso.
+
+**Publicar um depoimento:** enquanto não há banco, edite `depoimentos.js`. Cartão sem `"exemplo": true`
+é tratado como depoimento real — não invente um. Com o banco no ar, o formulário grava como não aprovado
+e a publicação passa a ser feita lá.
 
 **Colocar a foto real de uma peça:** preencha `fotos` com `{ "url", "url_2x", "alt", "largura",
 "altura" }`. A foto tem de ser um **quadro quadrado transparente**, com a peça inteira e folga em

@@ -37,6 +37,17 @@ node node_modules/playwright/cli.js install chromium
 
 **Funcionamento**
 
+- **busca**: filtra de verdade, ignora acento (`ceramica` acha `Cerâmica`), mostra o estado vazio com o
+  termo procurado no link do WhatsApp, e "Limpar busca" devolve o catálogo inteiro
+- **filtros por tema**: um chip marcado por vez, e só as peças daquele tema na tela
+- **detalhe da peça**: abre pelo botão com o nome certo, traz material, preço, texto e etiquetas, atualiza
+  o endereço para `#peca/slug`, fecha com Escape e limpa o endereço ao fechar
+- **veja como fica**: as quatro peças desenham, o nome aparece e **cabe** na peça em todos os tamanhos
+  testados, a cor clara troca o palco para escuro (senão o desenho sumiria), a quantidade se conserta
+  sozinha e a mensagem do WhatsApp leva peça, cor, nome, letra e quantidade
+- **dúvidas**: uma aberta por vez, com `aria-expanded` coerente e resposta não cortada
+- **depoimentos**: os cartões vêm do banco, o de exemplo fica marcado, o formulário recusa envio sem
+  texto e sem autorização, e o que chega ao banco é exatamente o que foi digitado — sem `aprovado`
 - menu do celular: abre, fecha ao clicar num link e fecha com Escape
 - âncora do menu para **abaixo** do cabeçalho fixo, nunca atrás dele
 - botão flutuante do WhatsApp sai do caminho na seção de contato e volta depois

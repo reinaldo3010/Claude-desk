@@ -1,6 +1,6 @@
 # Manual da marca Seu Mimo Studio
 
-Versão 1.4 · setembro de 2026 · documento vivo
+Versão 1.5 · setembro de 2026 · documento vivo
 
 Marca de presentes personalizados para público geral, irmã da Panda Mimo (que fala com o público
 feminino e infantil). As duas nunca se misturam: cada uma tem nome, paleta, tipografia, mascote e site
@@ -63,6 +63,9 @@ Abaixo dessas transparências o texto reprova. Borda de botão contornado: `rgba
 - **Montserrat** (OFL) para "STUDIO", subtítulos em caixa alta espaçada e todo texto corrido (peso 400
   a 600). Espaçamento da caixa alta: 0,5 a 0,6 em no "STUDIO" e em títulos; 0,3 em em rótulos pequenos
   (11 px), onde o espaço maior quebra a palavra.
+- **Playfair Display itálica** (OFL) só como **apoio**, em dois lugares: a palavra de ênfase dentro de um
+  título e a citação de depoimento. Nunca em título inteiro, botão, preço ou rótulo — nesses a serifa é
+  sempre a DM Serif Display.
 - Manuscrita, para a assinatura: **Caveat** (OFL), uma frase por peça, nunca em botão ou preço.
 - Arquivos mestres em `kit/fontes/`, em TTF. Para uso em tela, os subconjuntos latinos em WOFF2 ficam
   em `site/assets/fontes/` e são servidos do próprio endereço do site: nenhuma página pública pede
@@ -176,6 +179,29 @@ Calma, próxima e adulta. Fala com "você"; a marca é "a gente" ou "o Studio". 
 diminutivo em excesso (isso é território da Panda Mimo). Palavras da casa: mimo, presente, história,
 momento, cuidado, prévia.
 
+### 6.1 Chamadas para ação
+
+O site usa este vocabulário e nenhum outro. O guardião reprova chamada fora da lista, para o site não
+virar uma coleção de verbos diferentes dizendo a mesma coisa.
+
+| Chamada | Onde |
+|---|---|
+| Pedir pelo WhatsApp | cabeçalho, abertura, fecho, estado vazio da busca |
+| Ver as peças | abertura |
+| Quero essa | cartão de peça e detalhe |
+| Ver detalhes | cartão de peça |
+| Ver ideias | cartões de ocasião |
+| Ver com meu nome | detalhe, levando ao "Veja como fica" |
+| Pedir esse mimo no WhatsApp | "Veja como fica" |
+| Orçamento para 10+ unidades | pedidos em quantidade |
+| Perguntar no WhatsApp | dúvidas |
+| Enviar depoimento | formulário de depoimento |
+| Limpar busca | estado vazio da busca |
+| Falar sobre um problema | página de trocas |
+| Voltar ao início | páginas de apoio e 404 |
+
+Nunca: "clique aqui", "saiba mais", "compre agora", "aproveite". A chamada diz o que acontece ao clicar.
+
 ## 7. Aplicações previstas
 
 **Site próprio: existe, em `site/`.** Construído em setembro de 2026 com a arquitetura e o guardião do
@@ -221,6 +247,7 @@ uma regra mudar aqui, a prancha muda junto.
 
 | Data | Versão | O que mudou |
 |---|---|---|
+| set/2026 | 1.5 | Site ampliado de 6 para 14 seções, com busca e filtro no catálogo, detalhe da peça, simulador de prévia, ocasiões, pedidos em quantidade, diferenciais, cuidados, depoimentos e dúvidas. Playfair Display itálica entra como fonte de apoio, com uso restrito a ênfase em título e citação (3). Vocabulário de chamadas para ação fixado e conferido pelo guardião (6.1). Escala tipográfica ampliada: título de abertura vai a 72 px no computador. |
 | set/2026 | 1.4 | **Mascote resolvido.** Desenho definitivo entregue: folha de modelo com 12 expressões, 16 poses, 6 variações de laço, 6 elementos extras e 3 fundos, mais as poses soltas em PNG transparente, tudo em `kit/mascote-2d/` (5, 5.2, 5.3). Estilo fixado como ilustração chapada com contorno, não render 3D (5). Paleta própria do mascote medida na arte e registrada (5.1); o kraft dele não é mais descrito como o bege da marca (2). A construção vetorial reprovada e o render 3D de referência passam a registro (5.4). Site trocado para a arte definitiva na abertura, no fecho e na 404. Pendência do mascote muda de "desenho" para "vetor editável" e para as quinze ações que faltam em arquivo solto (8). |
 | set/2026 | 1.3 | Site próprio construído em `site/`, com o guardião apontado para ele (7). Caveat entra no kit como a manuscrita da marca, não mais "ou similar", e os subconjuntos WOFF2 passam a ser servidos do próprio site (3). Pares de cor medidos em contraste e registrados; três tons da prancha original reprovavam em AA e foram corrigidos — bege nunca em texto sobre fundo claro, e o número de passo passa a usar `#9C7444` (2.1). |
 | set/2026 | 1.2 | Mascote passa a constar como peça em aberto: construção vetorial reprovada pelo dono, referência aprovada e roteiro de geração assumem o lugar, desenho definitivo vai para ilustrador (5 e 8). Papel claro `#EFE6D8` entra na paleta (2). Espaçamento de caixa alta por tamanho (3). Correção: são cinco peças de logotipo, não quatro (4). Book visual da marca com o site (9). |

@@ -68,7 +68,12 @@ const fail = (w, msg) => failures.push(`[${w}px] ${msg}`);
 let quadrosConferidos = false;
 
 /* vocabulário de chamada para ação desta marca: o que aparece em botão ou em link de peça */
-const CHAMADAS = ['Pedir pelo WhatsApp', 'Ver as peças', 'Quero essa', 'Voltar ao início', 'Falar sobre um problema'];
+const CHAMADAS = [
+  'Pedir pelo WhatsApp', 'Ver as peças', 'Quero essa', 'Ver detalhes', 'Ver ideias',
+  'Ver com meu nome', 'Pedir esse mimo no WhatsApp', 'Orçamento para 10+ unidades',
+  'Perguntar no WhatsApp', 'Enviar depoimento', 'Limpar busca', 'Voltar ao início',
+  'Falar sobre um problema',
+];
 
 /* a assinatura e a frase da marca (MARCA.md 1) precisam estar na home */
 const ASSINATURA = 'Mais do que presentes, são histórias que ficam.';
@@ -265,6 +270,153 @@ for (const [w, h] of viewports) {
     tiles.forEach((m) => fail(w, m));
   }
 
+  /* ---- busca e filtros do catálogo ---- */
+  if (!(await page.$('#busca-pecas'))) fail(w, 'catálogo sem campo de busca');
+  else {
+    const visiveis = () => page.$$eval('#lista-pecas .peca', (l) => l.filter((e) => !e.hidden).length);
+    const total = await page.$$eval('#lista-pecas .peca', (l) => l.length);
+
+    await page.fill('#busca-pecas', 'caneca'); await page.waitForTimeout(90);
+    const r1 = await page.evaluate(() => {
+      const vis = [...document.querySelectorAll('#lista-pecas .peca')].filter((e) => !e.hidden);
+      return { n: vis.length, ok: vis.every((e) => (e.dataset.busca || '').includes('caneca')), txt: document.getElementById('catalogo-resultado').textContent };
+    });
+    if (!r1.n || !r1.ok) fail(w, `busca "caneca" mostrou ${r1.n} cartão(ões), nem todos com caneca`);
+    if (!/^\d+ peças?/.test(r1.txt) || !r1.txt.includes('"caneca"')) fail(w, `texto do resultado da busca inesperado: "${r1.txt}"`);
+
+    /* a busca ignora acento: "ceramica" tem de achar "Cerâmica" */
+    await page.fill('#busca-pecas', 'ceramica'); await page.waitForTimeout(90);
+    if ((await visiveis()) < 1) fail(w, 'a busca não ignora acento: "ceramica" não achou "Cerâmica"');
+
+    await page.fill('#busca-pecas', 'xyzqw'); await page.waitForTimeout(90);
+    const r2 = await page.evaluate(() => ({
+      vis: [...document.querySelectorAll('#lista-pecas .peca')].filter((e) => !e.hidden).length,
+      vazio: !document.getElementById('catalogo-vazio').hidden,
+      zap: document.querySelector('#catalogo-vazio .js-wa')?.href || '',
+      txt: document.getElementById('catalogo-resultado').textContent,
+    }));
+    if (r2.vis !== 0 || !r2.vazio) fail(w, 'busca sem resultado não mostrou o estado vazio');
+    if (!/wa\.me/.test(r2.zap) || !decodeURIComponent(r2.zap).includes('xyzqw')) fail(w, 'o WhatsApp do estado vazio não leva o que a pessoa procurou');
+    if (!/^Nenhuma peça/.test(r2.txt)) fail(w, `resultado vazio com texto inesperado: "${r2.txt}"`);
+
+    await page.$eval('#limpar-busca', (b) => b.click()); await page.waitForTimeout(90);
+    if ((await visiveis()) !== total) fail(w, '"Limpar busca" não devolveu o catálogo inteiro');
+
+    for (const filtro of ['tema:bebidas', 'tema:presente']) {
+      const chip = await page.$(`.filtro[data-filtro="${filtro}"]`);
+      if (!chip) { fail(w, `chip de filtro ${filtro} não existe`); continue; }
+      await chip.click(); await page.waitForTimeout(90);
+      const r = await page.evaluate(() => {
+        const vis = [...document.querySelectorAll('#lista-pecas .peca')].filter((e) => !e.hidden);
+        return { n: vis.length, marcados: document.querySelectorAll('.filtro[aria-pressed="true"]').length, temas: vis.map((e) => e.dataset.tema) };
+      });
+      if (r.marcados !== 1) fail(w, `filtro ${filtro}: ${r.marcados} chips marcados ao mesmo tempo`);
+      const tema = filtro.slice(5);
+      if (!r.n || r.temas.some((t) => t !== tema)) fail(w, `filtro ${filtro} mostrou ${r.n} cartão(ões), nem todos do tema`);
+    }
+    await page.$eval('.filtro[data-filtro="tudo"]', (b) => b.click()); await page.waitForTimeout(90);
+    if ((await visiveis()) !== total) fail(w, 'filtro "Tudo" não devolveu o catálogo inteiro');
+  }
+
+  /* ---- detalhe da peça ---- */
+  {
+    const nomeCard = await page.$eval('#lista-pecas .peca h3', (h) => h.textContent.trim());
+    await page.$eval('#lista-pecas .peca .peca__ver', (b) => b.click());
+    await page.waitForTimeout(200);
+    const d = await page.evaluate(() => {
+      const dlg = document.getElementById('detalhe');
+      const r = dlg.getBoundingClientRect();
+      return {
+        aberto: dlg.open,
+        titulo: document.getElementById('detalhe-titulo').textContent.trim(),
+        material: document.getElementById('detalhe-material').textContent.trim(),
+        preco: document.getElementById('detalhe-preco').textContent.trim(),
+        texto: document.getElementById('detalhe-texto').textContent.trim(),
+        marcas: document.querySelectorAll('#detalhe-marcas li').length,
+        quadro: document.getElementById('detalhe-quadro').children.length,
+        zap: document.getElementById('detalhe-zap').href,
+        hash: location.hash,
+        dentro: r.left >= -1 && r.right <= document.documentElement.clientWidth + 1,
+      };
+    });
+    if (!d.aberto) fail(w, 'detalhe da peça não abriu');
+    if (d.titulo !== nomeCard) fail(w, `detalhe abriu com título "${d.titulo}" em vez de "${nomeCard}"`);
+    if (!d.material) fail(w, 'detalhe sem o material');
+    if (!d.preco) fail(w, 'detalhe sem preço');
+    if (d.texto.length < 40) fail(w, 'detalhe sem o texto que explica a peça');
+    if (d.marcas < 2) fail(w, `detalhe com ${d.marcas} etiqueta(s); esperava as da peça`);
+    if (!d.quadro) fail(w, 'detalhe com o quadro da peça vazio');
+    if (!/^https:\/\/wa\.me\/\d{8,}/.test(d.zap)) fail(w, 'detalhe sem botão de WhatsApp válido');
+    if (!/^#peca\//.test(d.hash)) fail(w, `detalhe não atualizou o endereço (hash "${d.hash}")`);
+    if (!d.dentro) fail(w, 'detalhe sai da tela');
+    await page.keyboard.press('Escape'); await page.waitForTimeout(180);
+    const depois = await page.evaluate(() => ({ aberto: document.getElementById('detalhe').open, hash: location.hash }));
+    if (depois.aberto) fail(w, 'detalhe não fecha com Escape');
+    if (/^#peca\//.test(depois.hash)) fail(w, 'detalhe fechou mas o endereço continuou apontando para a peça');
+  }
+
+  /* ---- veja como fica ---- */
+  {
+    const escolhe = (id) => page.$eval(`label[for="${id}"]`, (l) => l.click());
+    const LARGURA = { garrafa: 64, caneca: 78, copo: 56, ecobag: 96 };
+    for (const peca of ['garrafa', 'caneca', 'copo', 'ecobag']) {
+      await escolhe(`p-${peca}`);
+      for (const nome of ['', 'Jo', 'Helena', 'João Ção', 'Ana & Bia', 'Maria Aparecida']) {
+        await page.fill('#m-nome', nome); await page.waitForTimeout(40);
+        const r = await page.evaluate(() => {
+          const t = document.getElementById('previa-nome');
+          const u = document.querySelector('#previa-peca use');
+          return { texto: t.textContent, largura: t.getComputedTextLength(), icone: u ? u.getAttribute('href') : '' };
+        });
+        if (r.icone !== `#ic-${peca}`) fail(w, `a prévia de ${peca} desenhou "${r.icone}"`);
+        if (r.texto !== (nome.trim() || 'Seu nome')) fail(w, `a prévia não escreveu "${nome}" (veio "${r.texto}")`);
+        if (r.largura > LARGURA[peca] + 2) fail(w, `"${nome}" não cabe na ${peca} (${Math.round(r.largura)} > ${LARGURA[peca]})`);
+      }
+    }
+    /* cor clara tem de trocar o fundo do palco, senão o desenho some */
+    for (const [cor, claro] of [['oliva', false], ['bege', true], ['offwhite', true], ['cafe', false]]) {
+      await escolhe(`c-${cor}`); await page.waitForTimeout(60);
+      const escuro = await page.$eval('.previa', (p) => getComputedStyle(p).backgroundColor);
+      const ehOliva = /47,\s*46,\s*30/.test(escuro);
+      if (claro && !ehOliva) fail(w, `a cor ${cor} é clara e o palco da prévia continuou claro: sumiria`);
+      if (!claro && ehOliva) fail(w, `a cor ${cor} é escura e o palco virou escuro sem precisar`);
+    }
+    for (const [val, esperado] of [['0', 1], ['-3', 1], ['abc', 1], ['9999', 500], ['12', 12], ['', 1]]) {
+      await page.$eval('#m-qtd', (i, v) => { i.value = v; i.dispatchEvent(new Event('input', { bubbles: true })); i.dispatchEvent(new Event('change', { bubbles: true })); i.blur(); }, val);
+      const got = await page.$eval('#m-qtd', (i) => i.value);
+      if (+got !== esperado) fail(w, `quantidade "${val}" virou "${got}" (esperado ${esperado})`);
+    }
+    await escolhe('p-copo'); await escolhe('c-bege'); await escolhe('l-mao');
+    await page.fill('#m-nome', 'Helena'); await page.fill('#m-qtd', '3');
+    const msg = await page.evaluate(() => new Promise((res) => {
+      const o = window.open;
+      window.open = (u) => { window.open = o; res(decodeURIComponent(u.split('text=')[1])); };
+      document.getElementById('m-enviar').click();
+    }));
+    for (const parte of ['copo térmico', 'bege', '"Helena"', 'letra manuscrita', 'Quantidade: 3'])
+      if (!msg.includes(parte)) fail(w, `a mensagem do WhatsApp não leva "${parte}"`);
+    await escolhe('p-garrafa'); await escolhe('c-oliva'); await escolhe('l-serifa'); await page.fill('#m-qtd', '1');
+    /* as provas acima deixam o foco num campo, e o site esconde o botão flutuante
+       enquanto há teclado aberto — o que está certo. Tira o foco antes de seguir. */
+    await page.evaluate(() => document.activeElement && document.activeElement.blur());
+    await page.waitForTimeout(120);
+  }
+
+  /* ---- dúvidas: uma aberta por vez ---- */
+  {
+    const itens = await page.$$('.duvida');
+    if (itens.length < 6) fail(w, `a seção de dúvidas tem ${itens.length} pergunta(s)`);
+    for (let i = 0; i < Math.min(itens.length, 3); i++) {
+      if (!(await itens[i].evaluate((d) => d.open))) await itens[i].$eval('summary', (s) => s.click());
+      await page.waitForTimeout(70);
+      const abertas = await page.$$eval('.duvida[open]', (l) => l.length);
+      const expandido = await itens[i].$eval('summary', (s) => s.getAttribute('aria-expanded'));
+      if (abertas !== 1) fail(w, `dúvida ${i + 1}: ${abertas} abertas ao mesmo tempo`);
+      if (expandido !== 'true') fail(w, `dúvida ${i + 1} sem aria-expanded=true`);
+      if (await itens[i].$eval('p', (p) => p.scrollWidth > p.clientWidth + 1)) fail(w, `dúvida ${i + 1} com a resposta cortada`);
+    }
+  }
+
   /* ---- âncoras chegam abaixo do cabeçalho fixo ---- */
   const topH = await page.$eval('.topo', (t) => t.getBoundingClientRect().height);
   for (const id of ['pecas', 'como-funciona', 'contato']) {
@@ -285,9 +437,9 @@ for (const [w, h] of viewports) {
       if (!aberto) fail(w, 'menu do celular não abre');
       const sai = await page.evaluate(() => { const r = document.getElementById('menu-principal').getBoundingClientRect(); return r.right > document.documentElement.clientWidth + 1 || r.left < -1; });
       if (sai) fail(w, 'menu aberto sai da tela');
-      await page.$eval('#menu-principal a[href="#como-funciona"]', (a) => a.click()); await page.waitForTimeout(160);
+      await page.$eval('#menu-principal a[href="#ocasioes"]', (a) => a.click()); await page.waitForTimeout(160);
       if (!(await page.$eval('.menu-btn', (b) => b.getAttribute('aria-expanded') === 'false'))) fail(w, 'menu não fecha ao clicar num link');
-      const top = await page.evaluate(() => document.getElementById('como-funciona').getBoundingClientRect().top);
+      const top = await page.evaluate(() => document.getElementById('ocasioes').getBoundingClientRect().top);
       if (top < topH - 2) fail(w, 'link do menu leva a seção para debaixo do cabeçalho');
       await botao.click(); await page.keyboard.press('Escape'); await page.waitForTimeout(120);
       if (!(await page.$eval('.menu-btn', (b) => b.getAttribute('aria-expanded') === 'false'))) fail(w, 'menu não fecha com Escape');
@@ -354,7 +506,7 @@ for (const [w, h] of viewports) {
     const cores = foraDosTokens.match(/#[0-9A-Fa-f]{3,8}\b|rgba?\([^)]*\)/g) || [];
     if (cores.length) failures.push(`[identidade] cor fora dos tokens em styles.css: ${[...new Set(cores)].join(', ')}`);
     const fontes = (foraDosTokens.match(/font-family:\s*[^;}]+/g) || []).filter((f) => !/var\(--f-/.test(f));
-    const foraFontFace = fontes.filter((f) => !/"(DM Serif Display|Montserrat|Caveat)"\s*$/.test(f.trim()));
+    const foraFontFace = fontes.filter((f) => !/"(DM Serif Display|Montserrat|Caveat|Playfair Display)"\s*$/.test(f.trim()));
     if (foraFontFace.length) failures.push(`[identidade] fonte fora dos tokens em styles.css: ${foraFontFace.join(' | ')}`);
   }
   /* os tokens precisam bater com a tabela da seção 2 do MARCA.md */
@@ -396,10 +548,18 @@ for (const [w, h] of viewports) {
     if (m) failures.push(`[identidade] ${f} usa "${m[0]}": não é a arte definitiva do mascote; use os arquivos exportados de kit/mascote-2d/ (MARCA.md 5)`);
   }
   for (const f of fs.readdirSync(path.resolve(raiz, 'assets'))) if (REPROVADOS.test(f)) failures.push(`[identidade] assets/${f} não é a arte definitiva do mascote; remova e exporte de kit/mascote-2d/`);
-  /* a arte definitiva precisa estar exportada, em 1x e @2x */
-  for (const f of ['mascote-abertura', 'mascote-convite', 'mascote-perdido'])
-    for (const v of [`${f}.webp`, `${f}@2x.webp`])
-      if (!existe(`assets/${v}`)) failures.push(`[identidade] falta assets/${v}; rode "python exporta-para-o-site.py" em kit/mascote-2d/`);
+  /* a arte definitiva precisa estar exportada, em 1x mais uma versão de densidade maior.
+     O exportador escolhe @2x ou @3x conforme o pixel que a arte tem, então aqui basta
+     exigir que exista uma das duas — quem cobra a nitidez de fato é a passada de nitidez. */
+  const ARTE_NO_SITE = [
+    'mascote-abertura', 'mascote-convite', 'mascote-perdido',
+    'mascote-empresas', 'mascote-duvidas', 'mascote-vazio',
+    'pose-ideia', 'pose-entregando', 'pose-carta', 'pose-dormindo', 'pose-de-costas',
+  ];
+  for (const f of ARTE_NO_SITE) {
+    if (!existe(`assets/${f}.webp`)) failures.push(`[identidade] falta assets/${f}.webp; rode "python exporta-para-o-site.py" em kit/mascote-2d/`);
+    else if (!existe(`assets/${f}@2x.webp`) && !existe(`assets/${f}@3x.webp`)) failures.push(`[identidade] assets/${f}.webp está sem a versão de densidade maior (@2x ou @3x)`);
+  }
   /* e o kit precisa continuar com a folha de modelo, que é o que mantém o padrão */
   for (const f of ['folha-de-modelo.png', 'folha-de-poses-transparente.png', 'poses/abracando-coracao.png'])
     if (!fs.existsSync(path.resolve(raiz, '..', 'kit', 'mascote-2d', f))) failures.push(`[identidade] falta kit/mascote-2d/${f}, a fonte da arte do mascote`);
@@ -434,7 +594,7 @@ for (const [w, h] of viewports) {
 
   for (const f of ['robots.txt', 'sitemap.xml', '404.html', 'site.webmanifest',
     'assets/og.jpg', 'assets/apple-touch-icon.png', 'assets/favicon-32.png', 'assets/icone-192.png', 'assets/icone-512.png',
-    'assets/fontes/dmserif.woff2', 'assets/fontes/montserrat.woff2', 'assets/fontes/caveat.woff2'])
+    'assets/fontes/dmserif.woff2', 'assets/fontes/montserrat.woff2', 'assets/fontes/caveat.woff2', 'assets/fontes/playfair-italico.woff2'])
     if (!existe(f)) failures.push(`[lançamento] falta o arquivo ${f}`);
 
   if (/^https?:\/\//.test(cab.canonical)) {
@@ -584,6 +744,67 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     await page.close();
   }
 
+  /* a2) depoimentos: cartões do banco, marca de exemplo e o formulário gravando ---- */
+  {
+    const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+    const enviados = [];
+    await page.addInitScript((cfg) => { window.SMS_CONFIG = cfg; }, CFG);
+    await page.route('**/rest/v1/sms_eventos*', (r) => r.fulfill({ status: 201, body: '' }));
+    await page.route('**/rest/v1/sms_produtos*', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/rest/v1/sms_config*', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/rest/v1/sms_depoimentos*', (r) => {
+      if (r.request().method() === 'POST') {
+        try { enviados.push(JSON.parse(r.request().postData() || '{}')); } catch {}
+        return r.fulfill({ status: 201, body: '' });
+      }
+      r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([
+        { nome: 'Ana B.', cidade: 'Recife/PE', peca: 'Caneca', nota: 5, texto: 'Depoimento vindo do banco, aprovado no painel.', exemplo: false },
+        { nome: 'Exemplo E.', cidade: 'Cidade/UF', peca: 'Copo', nota: 4, texto: 'Cartão ilustrativo, marcado como exemplo.', exemplo: true },
+      ]) });
+    });
+    await page.goto(page_url, { waitUntil: 'load' });
+    await page.waitForTimeout(700);
+    const d = await page.evaluate(() => ({
+      cartoes: document.querySelectorAll('#lista-depoimentos .depo').length,
+      exemplos: document.querySelectorAll('#lista-depoimentos .depo--exemplo').length,
+      nota: document.getElementById('depoimentos-nota')?.hidden === false,
+      estrelas: document.querySelector('#lista-depoimentos .depo__estrelas')?.getAttribute('aria-label') || '',
+      privacidade: !!document.querySelector('#form-depoimento a[href="privacidade.html"]'),
+    }));
+    if (d.cartoes !== 2) failures.push(`[depoimentos] esperava 2 cartões do banco simulado, vieram ${d.cartoes}`);
+    if (d.exemplos !== 1 || !d.nota) failures.push('[depoimentos] o cartão de exemplo não está marcado, ou falta a nota que explica');
+    if (!/de 5$/.test(d.estrelas)) failures.push('[depoimentos] as estrelas não têm rótulo acessível "N de 5"');
+    if (!d.privacidade) failures.push('[depoimentos] o formulário não linka a página de privacidade');
+
+    await page.$eval('#depo-form', (x) => { x.open = true; });
+    await page.fill('#d-nome', 'Teste Guardião'); await page.fill('#d-cidade', 'Pedreira/SP');
+    await page.selectOption('#d-peca', 'Caneca');
+    await page.click('#d-enviar'); await page.waitForTimeout(200);
+    let st = await page.$eval('#depo-status', (p2) => p2.textContent);
+    if (!/pouco mais/.test(st)) failures.push(`[depoimentos] enviar sem texto não avisou (status: "${st}")`);
+    await page.fill('#d-texto', 'Chegou antes do prazo e a prévia veio certinha.');
+    await page.click('#d-enviar'); await page.waitForTimeout(200);
+    st = await page.$eval('#depo-status', (p2) => p2.textContent);
+    if (!/autorização/.test(st)) failures.push(`[depoimentos] enviar sem autorização não avisou (status: "${st}")`);
+    await page.check('#d-consent'); await page.click('#d-enviar'); await page.waitForTimeout(500);
+    st = await page.$eval('#depo-status', (p2) => p2.textContent);
+    if (!/Recebido/.test(st)) failures.push(`[depoimentos] envio válido não confirmou (status: "${st}")`);
+    const gravado = enviados[0];
+    if (!gravado || gravado.nome !== 'Teste Guardião' || gravado.peca !== 'Caneca' || gravado.nota !== 5 || 'aprovado' in gravado)
+      failures.push(`[depoimentos] o que chegou ao banco não é o que foi digitado: ${JSON.stringify(gravado)}`);
+    await page.close();
+
+    /* banco devolvendo vazio: nem os cartões de exemplo da cópia local ficam */
+    const p2 = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await p2.addInitScript((cfg) => { window.SMS_CONFIG = cfg; }, CFG);
+    await p2.route('**/rest/v1/sms_depoimentos*', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await p2.route('**/rest/v1/sms_*', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await p2.goto(page_url, { waitUntil: 'load' }); await p2.waitForTimeout(700);
+    const vazio = await p2.evaluate(() => ({ cartoes: document.querySelectorAll('#lista-depoimentos .depo').length, escondido: document.getElementById('lista-depoimentos').hidden }));
+    if (vazio.cartoes !== 0 || !vazio.escondido) failures.push('[depoimentos] com o banco vazio, os cartões de exemplo da cópia local continuaram na tela');
+    await p2.close();
+  }
+
   /* b) quem pede "não rastrear" não é medido */
   {
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
@@ -682,7 +903,7 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     if (/fonts\.googleapis\.com|fonts\.gstatic\.com/.test(t)) failures.push(`[fontes] ${pg} carrega fontes de terceiros; use assets/fontes (LGPD e primeira pintura)`);
     if (/<link[^>]+href="https?:\/\/(?!seu-mimo-studio)/.test(t)) failures.push(`[fontes] ${pg} tem <link> para um endereço de fora`);
   }
-  for (const fam of ['DM Serif Display', 'Montserrat', 'Caveat'])
+  for (const fam of ['DM Serif Display', 'Montserrat', 'Caveat', 'Playfair Display'])
     if (!new RegExp(`@font-face \\{ font-family: "${fam}"`).test(ler('styles.css'))) failures.push(`[fontes] styles.css sem @font-face de ${fam}`);
   if (!/<link rel="manifest" href="site\.webmanifest">/.test(index)) failures.push('[cabeçalho] index.html sem o manifest');
 

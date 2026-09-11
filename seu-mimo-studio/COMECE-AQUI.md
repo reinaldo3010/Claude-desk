@@ -23,10 +23,12 @@ construído. Quem abrir uma sessão nova lê este arquivo primeiro.
 | **Site da Seu Mimo Studio** | **`seu-mimo-studio/site/`** |
 | **Guardião do site novo, passando nas 14 telas** | **`seu-mimo-studio/site/qa/`** |
 
-O site tem a home (cabeçalho, abertura, quatro garantias, as seis peças com preço, como funciona em
-quatro passos, frase da marca, fecho e rodapé), as quatro páginas de apoio reescritas na voz desta
-marca, a página de 404, os ícones, a imagem de compartilhamento, o `robots.txt`, o `sitemap.xml`, o
-manifest e os dados estruturados. Como usar e como mudar está em `site/LEIAME.md`.
+A home tem 14 seções: aviso de envio, abertura, quatro garantias, as peças com busca, filtro por tema e
+detalhe, o simulador "Veja como fica", seis ocasiões, pedidos em quantidade, como funciona, diferenciais,
+cuidados por tipo de peça, depoimentos com formulário, dúvidas em sanfona, a frase da marca e o fecho.
+Mais as quatro páginas de apoio na voz desta marca, a 404, os ícones, a imagem de compartilhamento, o
+`robots.txt`, o `sitemap.xml`, o manifest e os dados estruturados (incluindo o FAQPage). Como usar e como
+mudar está em `site/LEIAME.md`.
 
 **Falta, e depende de coisas que só você tem:**
 
