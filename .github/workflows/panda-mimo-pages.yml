@@ -2,7 +2,8 @@ name: Panda Mimo · publicar no GitHub Pages
 
 on:
   push:
-    branches: [main, claude/custom-items-brand-site-vi3ru8]
+    # a branch de trabalho foi mesclada na main em 11/09/2026 e apagada; publica só da main
+    branches: [main]
     paths: ["panda-mimo/**", ".github/workflows/panda-mimo-pages.yml"]
   workflow_dispatch:
 

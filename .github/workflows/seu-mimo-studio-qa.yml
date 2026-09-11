@@ -1,0 +1,44 @@
+name: Seu Mimo Studio · guardião de qualidade
+
+# O site da Seu Mimo Studio é publicado pelo Cloudflare Pages, que observa a branch
+# direto e não espera por este workflow. Então aqui o guardião **avisa**, não bloqueia.
+# Para virar porteira de verdade, ligue a proteção da branch main em
+# Settings · Branches e exija este check antes de mesclar.
+
+on:
+  pull_request:
+    paths:
+      - "seu-mimo-studio/site/**"
+      - "seu-mimo-studio/kit/**"
+      - ".github/workflows/seu-mimo-studio-qa.yml"
+  push:
+    branches: [main]
+    paths:
+      - "seu-mimo-studio/site/**"
+      - "seu-mimo-studio/kit/**"
+      - ".github/workflows/seu-mimo-studio-qa.yml"
+  workflow_dispatch:
+
+jobs:
+  audit:
+    name: Guardião nas 14 telas
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: seu-mimo-studio/site
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: Auditoria completa, nitidez, banco simulado e acessibilidade
+        run: npm test
+      - name: Publica as capturas por seção
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: capturas-seu-mimo-studio
+          path: seu-mimo-studio/site/qa/shots
+          retention-days: 14

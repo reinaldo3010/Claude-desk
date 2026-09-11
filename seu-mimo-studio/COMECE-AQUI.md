@@ -134,6 +134,10 @@ npm run shots                 # só as capturas, sem reprovar
 O que ele confere, item por item, está em `site/qa/LEIA-ME.md`. Hoje ele passa limpo, com três avisos
 que não bloqueiam: o WhatsApp de reserva, o endereço provisório e os dados da loja em branco.
 
+Ele também roda sozinho no GitHub, a cada push na `main` e a cada pull request que toque o site ou o
+kit. Mas **avisa, não bloqueia**: o Cloudflare publica sem esperar. Para virar porteira, ligue a
+proteção da branch `main` em *Settings · Branches* e exija o check.
+
 Regra da casa: **rodar o guardião antes de publicar qualquer mudança.** Ele já pegou página em branco,
 texto ilegível, imagem esticada e falha de acessibilidade antes de o cliente ver. Na construção deste
 site ele pegou, entre outras, uma âncora de menu que parava atrás do cabeçalho por causa da animação de

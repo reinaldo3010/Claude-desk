@@ -95,6 +95,16 @@ Um guardião que só aprova não serve para nada. Para conferir que ele reprova 
 propósito e rode: apague o preço de uma peça em `produtos.js`, troque um token por uma cor da Panda
 Mimo, tire a assinatura da marca da abertura. Ele tem de reclamar de cada uma.
 
+## No GitHub
+
+O guardião também roda sozinho a cada push na `main` e a cada pull request que toque
+`seu-mimo-studio/site/` ou `seu-mimo-studio/kit/`, pelo workflow
+`.github/workflows/seu-mimo-studio-qa.yml`. As capturas ficam anexadas à execução por 14 dias.
+
+Uma ressalva importante: **isso avisa, não bloqueia.** O Cloudflare Pages observa a branch por
+conta própria e publica sem esperar o workflow. Para o guardião virar porteira de verdade, ligue a
+proteção da branch `main` em *Settings · Branches* e exija este check antes de mesclar.
+
 ## Capturas
 
 `npm run shots` salva uma imagem por seção em `qa/shots/<largura>/`, mais a página inteira em
