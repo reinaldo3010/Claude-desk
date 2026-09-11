@@ -48,6 +48,8 @@ node node_modules/playwright/cli.js install chromium
 - **dúvidas**: uma aberta por vez, com `aria-expanded` coerente e resposta não cortada
 - **depoimentos**: os cartões vêm do banco, o de exemplo fica marcado, o formulário recusa envio sem
   texto e sem autorização, e o que chega ao banco é exatamente o que foi digitado — sem `aprovado`
+- **orientação na página longa**: o botão de voltar ao topo só aparece depois da primeira tela e
+  leva mesmo ao topo; o item do menu da seção visível fica marcado, e só um por vez
 - menu do celular: abre, fecha ao clicar num link e fecha com Escape
 - âncora do menu para **abaixo** do cabeçalho fixo, nunca atrás dele
 - botão flutuante do WhatsApp sai do caminho na seção de contato e volta depois
@@ -83,6 +85,9 @@ node node_modules/playwright/cli.js install chromium
   `sitemap.xml` e `404.html`, todos apontando para o mesmo endereço do `canonical`
 - as quatro páginas de apoio existem, estão linkadas no rodapé e têm `canonical`, título e descrição
   próprios, além da identificação da loja exigida pelo Decreto 7.962/2013
+- cada página de apoio tem o mesmo cuidado da home: bloco de topo com olho e título, o resumo
+  "Num relance" no alto, caminho para as páginas irmãs no fim, e **o mesmo menu da home** — se o
+  menu de uma página divergir, o guardião reprova
 - `trocas.html` informa a garantia legal de 90 dias (CDC art. 26) e explica o art. 49
 - `privacidade.html` tem a seção de cookies e afirma que o site não usa nenhum
 - fontes servidas do próprio site, nada de Google Fonts em página pública

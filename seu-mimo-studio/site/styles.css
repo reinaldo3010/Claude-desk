@@ -658,3 +658,93 @@ h3.titulo { font-size: var(--fs-3); color: var(--oliva); }
   .rodape__navs { flex-wrap: wrap; gap: 1.75rem 2.5rem; }
   .rodape__pose { align-self: flex-start; }
 }
+
+/* =========================================================
+   PÁGINAS DE APOIO, COM A MESMA ATENÇÃO QUE A HOME
+   ========================================================= */
+
+.pagina__in { max-width: 72ch; }
+/* o limite estreito de título vale para a home, onde ele é cartaz. Em página de
+   texto a mesma regra quebra "Prazos que você pode cobrar da gente" em quatro linhas. */
+.pagina h1.titulo { max-width: 24ch; }
+.pagina h2.titulo { max-width: 34ch; }
+
+/* ---------- topo da página ---------- */
+.pagina__topo {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  gap: clamp(1rem, 3vw, 2.5rem); align-items: end;
+  padding-bottom: 1.75rem; margin-bottom: .5rem;
+  border-bottom: 1px solid var(--linha);
+}
+.pagina__topo-copy { display: flex; flex-direction: column; gap: .75rem; }
+.pagina__topo img { width: auto; max-width: 100%; flex: none; }
+@media (max-width: 640px) {
+  .pagina__topo { grid-template-columns: 1fr; }
+  .pagina__topo img { justify-self: start; }
+}
+
+/* ---------- num relance: o resumo honesto no alto ---------- */
+.relance {
+  background: var(--papel); padding: 1.375rem 1.5rem;
+  display: flex; flex-direction: column; gap: .75rem;
+  border-left: 3px solid var(--oliva);
+}
+.relance h2 {
+  font-family: var(--f-texto); font-size: var(--fs-2xs); font-weight: 600;
+  letter-spacing: .22em; text-transform: uppercase; color: var(--ink-suave); margin: 0;
+}
+.relance ul { display: flex; flex-direction: column; gap: .5rem; }
+.relance li { font-size: var(--fs-s); line-height: 1.55; padding-left: 1.25rem; position: relative; }
+.relance li::before { content: ""; position: absolute; left: 0; top: .58em; width: 6px; height: 6px; background: var(--bege-ink); }
+.relance strong { color: var(--oliva); font-weight: 600; }
+
+/* ---------- a frase que mais importa da página ---------- */
+.destaque {
+  font-family: var(--f-apoio); font-style: italic;
+  font-size: clamp(1.125rem, 1rem + .6vw, 1.375rem); line-height: 1.5;
+  color: var(--oliva); border-left: 3px solid var(--bege-ink);
+  padding: .25rem 0 .25rem 1.125rem; margin-block: .5rem;
+}
+
+/* ---------- caminho para as páginas irmãs, no fim ---------- */
+.pagina__irmas {
+  margin-top: 1.5rem; padding-top: 1.75rem; border-top: 1px solid var(--linha);
+  display: flex; flex-direction: column; gap: .875rem;
+}
+.pagina__irmas h2 {
+  font-family: var(--f-texto); font-size: var(--fs-2xs); font-weight: 600;
+  letter-spacing: .22em; text-transform: uppercase; color: var(--ink-suave); margin: 0;
+}
+.pagina__irmas div { display: flex; flex-wrap: wrap; gap: .625rem; }
+.pagina__irmas a {
+  border: 1px solid var(--linha-forte); padding: .5rem .875rem;
+  font-size: var(--fs-xs); font-weight: 600; color: var(--oliva);
+}
+.pagina__irmas a:hover { background: var(--oliva-veu); }
+
+/* =========================================================
+   NAVEGAÇÃO NUMA PÁGINA LONGA
+   ========================================================= */
+
+/* onde a pessoa está: o item do menu da seção visível fica marcado */
+.menu a[aria-current="true"] { border-color: var(--oliva); color: var(--oliva); }
+
+/* volta ao topo, ao lado do botão do WhatsApp */
+.ao-topo {
+  position: fixed; right: clamp(1rem, 2.5vw, 1.75rem);
+  bottom: calc(clamp(1rem, 2.5vw, 1.75rem) + 68px); z-index: 60;
+  width: 44px; height: 44px; border: 1px solid var(--linha-forte); border-radius: 50%;
+  background: var(--fundo); color: var(--oliva); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity .2s ease, transform .2s ease, visibility .2s ease, background-color .15s ease;
+}
+.ao-topo:hover { background: var(--papel); }
+.ao-topo svg { width: 18px; height: 18px; }
+.ao-topo.is-oculto { opacity: 0; visibility: hidden; transform: translateY(8px); }
+
+/* ---------- etiquetas no cartão da peça ---------- */
+.peca__marcas { display: flex; flex-wrap: wrap; gap: .3125rem; margin-top: .125rem; }
+.peca__marcas li {
+  font-size: .625rem; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--ink-suave); border: 1px solid var(--linha); padding: .1875rem .375rem;
+}

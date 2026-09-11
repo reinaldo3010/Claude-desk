@@ -454,6 +454,31 @@ for (const [w, h] of viewports) {
   await page.evaluate(() => window.scrollTo(0, 0)); await page.waitForTimeout(380);
   if (await page.$eval('.fab', (f) => f.classList.contains('is-oculto'))) fail(w, 'botão flutuante não volta a aparecer');
 
+  /* ---- orientação numa página longa: voltar ao topo e a seção atual no menu ---- */
+  {
+    const aoTopo = await page.$('.ao-topo');
+    if (!aoTopo) fail(w, 'falta o botão de voltar ao topo');
+    else {
+      await page.evaluate(() => window.scrollTo(0, 0)); await page.waitForTimeout(180);
+      if (!(await page.$eval('.ao-topo', (b) => b.classList.contains('is-oculto')))) fail(w, 'o botão de voltar ao topo aparece já no alto da página');
+      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight / 2)); await page.waitForTimeout(220);
+      if (await page.$eval('.ao-topo', (b) => b.classList.contains('is-oculto'))) fail(w, 'o botão de voltar ao topo não aparece depois de rolar');
+      await page.$eval('.ao-topo', (b) => b.click());
+      /* a rolagem é suave e a página é longa: espera chegar, em vez de chutar um tempo */
+      const chegou = await page.waitForFunction(() => window.scrollY <= 4, null, { timeout: 4000 }).then(() => true).catch(() => false);
+      if (!chegou) fail(w, `o botão de voltar ao topo não levou a página ao topo (parou em ${Math.round(await page.evaluate(() => window.scrollY))}px)`);
+    }
+    /* a seção visível fica marcada no menu (só onde o menu está à mostra) */
+    if (w > 900) {
+      await page.evaluate(() => document.getElementById('ocasioes').scrollIntoView({ behavior: 'instant', block: 'center' }));
+      await page.waitForTimeout(400);
+      const marcado = await page.$$eval('.menu a[aria-current="true"]', (l) => l.map((a) => a.getAttribute('href')));
+      if (marcado.length !== 1) fail(w, `${marcado.length} itens do menu marcados como seção atual (esperava 1)`);
+      else if (marcado[0] !== '#ocasioes') fail(w, `o menu marcou ${marcado[0]} com a seção de ocasiões na tela`);
+      await page.evaluate(() => window.scrollTo(0, 0)); await page.waitForTimeout(200);
+    }
+  }
+
   /* ---- movimento: depois de rolar até a seção, ela precisa estar visível ---- */
   await page.evaluate(() => document.getElementById('contato').scrollIntoView({ behavior: 'instant', block: 'center' }));
   await page.waitForTimeout(450);
@@ -890,6 +915,18 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     if (!/<meta name="description" content="[^"]{60,170}">/.test(t)) failures.push(`[páginas] ${pg} sem meta description de 60 a 170 caracteres`);
     if (!t.includes('id="loja-dados"')) failures.push(`[páginas] ${pg} sem a linha de identificação da loja no rodapé (Decreto 7.962/2013)`);
     if (!/href="index\.html"/.test(t)) failures.push(`[páginas] ${pg} sem caminho de volta para o início`);
+    /* a página de apoio tem de ter o mesmo cuidado da home: topo com olho e título,
+       resumo honesto no alto, e caminho para as irmãs no fim */
+    if (!t.includes('class="pagina__topo"')) failures.push(`[páginas] ${pg} sem o bloco de topo (olho, título, lede e mascote)`);
+    if (!t.includes('class="relance"')) failures.push(`[páginas] ${pg} sem o resumo "Num relance" no alto`);
+    if (!t.includes('class="pagina__irmas"')) failures.push(`[páginas] ${pg} sem o caminho para as páginas irmãs no fim`);
+    if (!/class="eyebrow"/.test(t)) failures.push(`[páginas] ${pg} sem o olho acima do título`);
+    /* o menu tem de ser o mesmo da home, senão a navegação muda de página para página */
+    const menuHome = (index.match(/<nav class="menu"[\s\S]*?<\/nav>/) || [''])[0]
+      .match(/>([^<]+)<\/a>/g)?.join('|') || '';
+    const menuPg = (t.match(/<nav class="menu"[\s\S]*?<\/nav>/) || [''])[0]
+      .match(/>([^<]+)<\/a>/g)?.join('|') || '';
+    if (menuHome && menuPg !== menuHome) failures.push(`[páginas] ${pg} tem um menu diferente do da home`);
     for (const outra of PAGINAS) if (!t.includes(`href="${outra}"`)) failures.push(`[páginas] ${pg} não linka ${outra} no rodapé`);
   }
   if (!/Cookies<\/h2>/.test(ler('privacidade.html'))) failures.push('[páginas] privacidade.html sem a seção sobre cookies');

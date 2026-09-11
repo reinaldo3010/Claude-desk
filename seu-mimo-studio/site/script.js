@@ -114,6 +114,7 @@ function pecaHTML(p) {
         <h3 class="titulo">${esc(p.nome)}</h3>
         <span class="peca__material">${esc(p.material || "")}</span>
         <span class="peca__preco">${esc(p.preco_texto || "Valor sob consulta")}</span>
+        ${(p.etiquetas || []).length ? `<ul class="peca__marcas">${(p.etiquetas || []).slice(0, 3).map((e) => `<li>${esc(e)}</li>`).join("")}</ul>` : ""}
         <button type="button" class="peca__ver">Ver detalhes</button>
         <a class="peca__cta js-wa" href="#contato" data-msg="${esc(p.mensagem)}" data-rotulo="Quero essa · ${esc(p.nome)}">Quero essa <span aria-hidden="true">›</span></a>
       </div>
@@ -598,6 +599,45 @@ if (fab) {
   document.addEventListener("focusin", (e) => { if (e.target.matches("input, textarea, select")) { teclado = true; atualiza(); } });
   document.addEventListener("focusout", (e) => { if (e.target.matches("input, textarea, select")) { teclado = false; atualiza(); } });
 }
+
+/* =========================================================
+   Onde a pessoa está, numa página longa
+   O item do menu da seção visível fica marcado, e o botão de voltar ao topo
+   aparece depois da primeira tela. Sem IntersectionObserver, nada disso existe
+   e a página continua inteira — é enfeite de orientação, não conteúdo.
+   ========================================================= */
+(function orientacao() {
+  const aoTopo = document.querySelector(".ao-topo");
+  if (aoTopo) {
+    aoTopo.addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: reduzMovimento ? "auto" : "smooth" });
+      const marca = document.querySelector(".marca");
+      if (marca) marca.focus({ preventScroll: true });
+    });
+    const mostraOuEsconde = () => aoTopo.classList.toggle("is-oculto", window.scrollY < window.innerHeight * 0.9);
+    window.addEventListener("scroll", mostraOuEsconde, { passive: true });
+    mostraOuEsconde();
+  }
+
+  const itens = [...document.querySelectorAll('.menu a[href^="#"]')];
+  if (!itens.length || !("IntersectionObserver" in window)) return;
+  const secoes = itens
+    .map((a) => ({ a, el: document.getElementById(a.getAttribute("href").slice(1)) }))
+    .filter((x) => x.el);
+  if (!secoes.length) return;
+  const visiveis = new Set();
+  const marca = () => {
+    /* a seção marcada é a mais alta entre as que estão na tela */
+    let escolhida = null;
+    for (const s of secoes) if (visiveis.has(s.el) && (!escolhida || s.el.offsetTop < escolhida.el.offsetTop)) escolhida = s;
+    secoes.forEach((s) => (s === escolhida ? s.a.setAttribute("aria-current", "true") : s.a.removeAttribute("aria-current")));
+  };
+  const io = new IntersectionObserver((entradas) => {
+    entradas.forEach((en) => (en.isIntersecting ? visiveis.add(en.target) : visiveis.delete(en.target)));
+    marca();
+  }, { rootMargin: "-45% 0px -45% 0px" });
+  secoes.forEach((s) => io.observe(s.el));
+})();
 
 /* =========================================================
    Movimento, com moderação

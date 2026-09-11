@@ -11,7 +11,7 @@ Antes de mexer em qualquer coisa, leia `../MARCA.md` (o manual da marca) e o `CL
 | Arquivo | O que é |
 |---|---|
 | `index.html` | a home, em 14 seções: aviso, abertura, garantias, peças (com busca e filtro), veja como fica, ocasiões, pedidos em quantidade, como funciona, diferenciais, cuidados, depoimentos, dúvidas, frase da marca e fecho |
-| `sobre.html` `trocas.html` `termos.html` `privacidade.html` | as quatro páginas de apoio |
+| `sobre.html` `trocas.html` `termos.html` `privacidade.html` | as quatro páginas de apoio, cada uma com topo, resumo "Num relance" e caminho para as irmãs |
 | `404.html` | página de endereço inexistente (usa endereços absolutos, de propósito) |
 | `styles.css` | **todas** as cores e fontes, como tokens em `:root`. Nada de valor solto |
 | `produtos.js` | a cópia local do catálogo: as seis peças, com preço, tema, etiquetas e texto de detalhe. JSON válido de propósito |
