@@ -12,7 +12,7 @@ primeira rodada ficaram em `tracados-referencia/` só como registro.
 | `png/` | exportações em PNG com transparência, lado maior 2000 px, para redes, IA e gráfica |
 | `mascote/` | `mascote2.py` (gerador de poses, expressões e símbolo; `mascote.py` é a primeira versão, descartada), `coracoes.py`, `logo.py`, `tipo.py` |
 | `fontes/` | DM Serif Display, Montserrat, Playfair Display (variáveis), com licenças OFL |
-| `mestres/` | prancha aprovada e recortes ampliados |
+| `mestres/` | prancha aprovada, recortes ampliados e `referencia-mascote-1400.jpg` (o arquivo que se sobe nas IAs de imagem) |
 | `cores.json` | paleta da marca e cores do mascote |
 
 ## Gerar de novo
@@ -26,7 +26,8 @@ uma expressão nova é uma tripla em `EXPRESSOES`. Nada é desenhado à parte: �
 
 ## Regra de ouro com IA
 
-A IA não desenha logo, letreiro nem mascote. Ela faz cena, fundo e mockup; logo e mascote entram
+Os prompts prontos para gerar o mascote sempre igual (Nano Banana, LoRA, Recraft) estão em
+`../PROMPTS-MASCOTE.md`. A IA não desenha logo, letreiro nem texto da marca. Ela faz cena, fundo e mockup; logo e mascote entram
 depois, como camada, a partir destes arquivos. Quando precisar do mascote dentro de uma imagem gerada,
 use `png/mascote-feliz.png` como referência e peça para manter exatamente. Confira o resultado com a
 folha de modelo.

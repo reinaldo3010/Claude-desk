@@ -21,3 +21,5 @@ Marca separada da Panda Mimo, com paleta (café, bege, oliva, off-white, preto) 
 A identidade é construída em vetor: letreiro em curvas da DM Serif Display, símbolo e mascote gerados
 por `kit/mascote/kit.py` (pose ou expressão nova nasce do gerador, nunca desenhada à parte). Nunca
 misturar elementos das duas marcas; a prancha aprovada em `kit/mestres/` é a referência de sensação.
+O mascote vetorial gerado aqui não foi aprovado pelo dono: o caminho oficial para imagens do mascote
+é `seu-mimo-studio/PROMPTS-MASCOTE.md` (referência aprovada + Nano Banana + LoRA treinada).
