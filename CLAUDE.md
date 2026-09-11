@@ -13,3 +13,10 @@ A identidade está aprovada: evoluir é acrescentar dentro dessas regras, nunca 
 - Nunca apagar assets existentes ao ampliar o acervo; nunca esconder problema de layout com `overflow: hidden`.
 - Antes de publicar mudança no site, rodar o guardião: `cd panda-mimo && npm test` (rápido: `QA_VIEWPORTS=390 npm test`).
 - Ao mudar uma regra da marca, atualizar o manual (texto em `MARCA.md`, visual em `marca/index.html`) e registrar no histórico ao final do `MARCA.md`.
+
+## seu-mimo-studio/ (kit vetorial da marca Seu Mimo Studio)
+
+Marca separada da Panda Mimo, com paleta (café, bege, oliva, off-white, preto) e tipografia
+(Playfair Display, Montserrat) próprias. `seu-mimo-studio/kit/LEIAME.md` explica método, arquivos,
+fidelidade medida e limites. Nunca misturar elementos das duas marcas; a prancha aprovada em
+`kit/mestres/` é a referência, e o letreiro é traçado da prancha, não composto em fonte.
