@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "seu-mimo-studio",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8123", "--directory", "seu-mimo-studio/site"],
+      "port": 8123
+    },
+    {
+      "name": "panda-mimo",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8124", "--directory", "panda-mimo"],
+      "port": 8124
+    }
+  ]
+}

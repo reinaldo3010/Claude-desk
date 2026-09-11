@@ -26,9 +26,29 @@ mascote ou texto entre as duas marcas.
 - Logotipo, símbolo e avatar estão prontos em `kit/svg/`, `kit/pdf/` e `kit/png/`. Use os arquivos; não
   recrie o letreiro em fonte nem redesenhe o símbolo.
 - Fontes próprias em `kit/fontes/`, servidas do próprio site. Nada de Google Fonts em página pública.
-- **O mascote é peça em aberto.** A construção vetorial em `kit/mascote/` foi reprovada pelo dono e fica
-  só como registro; não sai em material publicado. A referência aprovada é
-  `kit/mestres/referencia-mascote-1400.jpg`, e imagens novas saem do roteiro de
-  `seu-mimo-studio/PROMPTS-MASCOTE.md`. Não desenhe o mascote de novo.
-- O site da marca ainda não existe como código. Quando for construído, vai em `seu-mimo-studio/site/`,
-  com a arquitetura do site da Panda Mimo e a identidade desta marca.
+- **O mascote está resolvido.** A arte definitiva vive em `kit/mascote-2d/`, com folha de modelo
+  (12 expressões, 16 ações), folhas de poses e as poses soltas em PNG transparente. É a única que sai
+  publicada. **Não desenhe o mascote** e não o gere por IA: pose nova se desenha a partir da folha de
+  modelo. Duas coisas ficaram para trás e o guardião reprova as duas: a construção vetorial de
+  `kit/mascote/` e `kit/svg/mascote-*.svg` (reprovada pelo dono) e o render 3D
+  `kit/mestres/referencia-mascote-*` (referência provisória).
+- O mascote do site sai do kit, não de arte guardada no site:
+  `cd seu-mimo-studio/kit/mascote-2d && python exporta-para-o-site.py`.
+- O site da marca está em `seu-mimo-studio/site/`: HTML, CSS e JavaScript puros, sem build, com a
+  arquitetura técnica do site da Panda Mimo e a identidade desta marca. Leia `site/LEIAME.md` antes de
+  mexer.
+- Cores e fontes vêm dos tokens de `site/styles.css`; o guardião reprova valor solto no código.
+- Antes de publicar mudança no site, rodar o guardião: `cd seu-mimo-studio/site && npm test`
+  (rápido: `QA_VIEWPORTS=390 npm test`). Ele confere, além de layout e acessibilidade, que nenhuma cor,
+  fonte ou palavra da Panda Mimo entrou aqui.
+- Dado que ainda não existe (CNPJ, endereço, WhatsApp real, data de publicação) fica **entre colchetes
+  e à vista**, com a classe `.falta`. Nunca inventar e nunca esconder: o guardião reprova colchete sem
+  a marca e avisa quantos faltam.
+- Publicação no Cloudflare Pages, com `seu-mimo-studio/site` como raiz publicada; banco em projeto
+  Supabase próprio, tabelas com prefixo `sms_`. As duas decisões estão em `COMECE-AQUI.md` seção 3.
+
+## O `npx` não funciona neste repositório
+
+O caminho tem um `&` (`OneDrive - MINGARDI & ELIAS`) e o `npx` do Windows quebra a resolução de
+caminho por causa dele. Use `node node_modules/<pacote>/cli.js` no lugar — por exemplo
+`node node_modules/playwright/cli.js install chromium`. O `npm install` e o `npm test` funcionam normalmente.

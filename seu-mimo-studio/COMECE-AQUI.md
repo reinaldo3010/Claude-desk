@@ -1,7 +1,8 @@
 # Começar o site da Seu Mimo Studio no seu computador
 
-Documento de passagem, escrito em 11 de setembro de 2026, ao mudar o trabalho da versão web do Claude
-Code para o Claude Code instalado na sua máquina. Quem abrir uma sessão nova lê este arquivo primeiro.
+Documento de passagem. Escrito em 11 de setembro de 2026, ao mudar o trabalho da versão web do Claude
+Code para o Claude Code instalado na sua máquina, e atualizado no mesmo dia, quando o site foi
+construído. Quem abrir uma sessão nova lê este arquivo primeiro.
 
 ---
 
@@ -12,56 +13,53 @@ Code para o Claude Code instalado na sua máquina. Quem abrir uma sessão nova l
 | O quê | Onde |
 |---|---|
 | Site da Panda Mimo, no ar e homologado | `panda-mimo/` · https://reinaldo3010.github.io/Claude-desk/ |
-| Guardião de qualidade (14 telas, nitidez, acessibilidade) | `panda-mimo/qa/` |
-| Páginas legais (sobre, trocas, termos, privacidade) | `panda-mimo/*.html` |
+| Guardião de qualidade da Panda Mimo | `panda-mimo/qa/` |
 | Manual da marca Seu Mimo Studio | `seu-mimo-studio/MARCA.md` |
 | Kit da marca: logotipo, símbolo, avatar em SVG, PDF e PNG | `seu-mimo-studio/kit/` |
-| Fontes próprias (DM Serif Display, Montserrat, Playfair) | `seu-mimo-studio/kit/fontes/` |
-| Roteiro para gerar imagens do mascote sempre iguais | `seu-mimo-studio/PROMPTS-MASCOTE.md` |
+| Fontes próprias (DM Serif Display, Montserrat, Playfair, Caveat) | `seu-mimo-studio/kit/fontes/` |
+| **Arte definitiva do mascote**: folha de modelo, folhas de poses e poses soltas | **`seu-mimo-studio/kit/mascote-2d/`** |
+| Roteiro de geração assistida, hoje só para cena e fundo | `seu-mimo-studio/PROMPTS-MASCOTE.md` |
 | Book da marca e mockup do site, em prancha editável | https://claude.ai/code/artifact/4c1abf96-6efc-4dd8-9831-bdbf4c551bde |
+| **Site da Seu Mimo Studio** | **`seu-mimo-studio/site/`** |
+| **Guardião do site novo, passando nas 14 telas** | **`seu-mimo-studio/site/qa/`** |
 
-**Falta, e é o trabalho da nova sessão:**
+O site tem a home (cabeçalho, abertura, quatro garantias, as seis peças com preço, como funciona em
+quatro passos, frase da marca, fecho e rodapé), as quatro páginas de apoio reescritas na voz desta
+marca, a página de 404, os ícones, a imagem de compartilhamento, o `robots.txt`, o `sitemap.xml`, o
+manifest e os dados estruturados. Como usar e como mudar está em `site/LEIAME.md`.
 
-O site da Seu Mimo Studio não existe como código. Existe só o desenho dele, no book acima. A primeira
-sessão local constrói `seu-mimo-studio/site/`, com a mesma arquitetura do site da Panda Mimo e a
-identidade da Seu Mimo Studio.
+**Falta, e depende de coisas que só você tem:**
+
+| O quê | Por que trava | Onde entra |
+|---|---|---|
+| O número real de WhatsApp | sem ele nenhum clique chega a ninguém | `site/script.js`, constante `CONTATO` |
+| Razão social, CNPJ, endereço e e-mail | exigidos pelo Decreto 7.962/2013 | rodapé das cinco páginas, e no corpo de `sobre.html`, `termos.html` e `privacidade.html` |
+| Uma frase sobre quem está por trás do Studio | é o único parágrafo do `sobre.html` que não pode ser inventado | `site/sobre.html` |
+| A data de publicação das políticas | `termos.html` e `privacidade.html` | os dois arquivos |
+| As fotos reais das seis peças | hoje o quadro mostra o desenho de linha e a legenda "foto da peça" | `site/produtos.js`, campo `fotos` |
+| O projeto Supabase e o domínio | decididos, mas ainda não criados | `site/config.js` e `site/LEIAME.md` |
+
+Todos esses dados estão **entre colchetes e destacados na tela**, de propósito: o guardião reprova
+colchete escondido, e avisa em cada rodada quantos ainda faltam. É mais honesto do que sumir com a
+falta.
 
 ---
 
 ## 2. Passo a passo no seu computador
 
-Abra o terminal (PowerShell ou Git Bash) e rode, uma linha por vez:
+O repositório já está clonado. Para preparar o guardião do site novo, uma vez só:
 
 ```bash
-git clone https://github.com/reinaldo3010/Claude-desk.git
-cd Claude-desk
-git checkout claude/custom-items-brand-site-vi3ru8
-```
-
-O repositório tem cerca de 120 MB por causa das imagens e dos PDFs. O clone leva alguns minutos.
-
-Depois, dentro da pasta:
-
-```bash
-cd panda-mimo
+cd seu-mimo-studio/site
 npm install
-npx playwright install chromium
-cd ..
+node node_modules/playwright/cli.js install chromium
 ```
 
-Isso instala o que o guardião precisa. É uma vez só.
+> O caminho deste repositório tem um `&` (`OneDrive - MINGARDI & ELIAS`), e o `npx` do Windows quebra
+> com isso. Por isso o comando do Chromium chama o `cli.js` direto. Vale para qualquer `npx` aqui
+> dentro: troque por `node node_modules/<pacote>/cli.js`, ou mova o repositório para um caminho sem `&`.
 
-Por fim, abra o Claude Code nessa pasta e cole o conteúdo de `seu-mimo-studio/PROMPT-PRIMEIRA-SESSAO.md`.
-
-### Antes de clonar, uma decisão
-
-A branch `claude/custom-items-brand-site-vi3ru8` tem 47 commits e uma pull request aberta em rascunho
-(a número 2). Duas opções:
-
-- **Recomendado:** feche a pull request como mesclada no GitHub antes de clonar. Aí você trabalha na
-  `main` e não precisa lembrar do nome da branch nunca mais.
-- Ou clone e trabalhe na branch mesmo, como está no comando acima. Funciona igual, só exige lembrar o
-  nome dela a cada sessão.
+O guardião da Panda Mimo é separado e tem a própria instalação, em `panda-mimo/`.
 
 ---
 
@@ -70,76 +68,88 @@ A branch `claude/custom-items-brand-site-vi3ru8` tem 47 commits e uma pull reque
 Estas foram discutidas e fechadas. Reabrir custa tempo e desfaz trabalho.
 
 1. **São duas marcas separadas.** Panda Mimo fala com público feminino e infantil; Seu Mimo Studio fala
-   com público geral adulto. Nunca misturar cor, fonte, mascote ou texto entre as duas.
+   com público geral adulto. Nunca misturar cor, fonte, mascote ou texto entre as duas. O guardião do
+   site novo reprova qualquer cor, fonte ou menção da marca irmã dentro dele.
 2. **A identidade da Seu Mimo Studio está aprovada:** logotipo, símbolo, paleta e tipografia. Evoluir é
    acrescentar dentro das regras do `MARCA.md`, nunca redesenhar.
-3. **O mascote é peça em aberto.** A construção vetorial foi reprovada. A referência aprovada é
-   `kit/mestres/referencia-mascote-1400.jpg`. Imagens novas saem do roteiro do `PROMPTS-MASCOTE.md`.
-   O desenho definitivo vai para um ilustrador. **Não tente desenhar o mascote de novo.**
-4. **O site da Panda Mimo está homologado e no ar.** Não mexer nele para construir o novo.
-5. **Site estático, sem framework.** HTML, CSS e JavaScript puros, sem build. Foi decisão de manutenção:
+3. **O mascote está resolvido** (11/09/2026). A arte definitiva está em `kit/mascote-2d/` e é a única
+   que sai publicada: folha de modelo com 12 expressões e 16 ações, folhas de poses e as poses soltas em
+   PNG transparente. A construção vetorial reprovada e o render 3D de referência ficam como registro.
+   **Não tente desenhar o mascote nem gerá-lo por IA:** pose nova se desenha a partir da folha de modelo.
+4. **O site da Panda Mimo está homologado e no ar.** Não mexer nele.
+5. **Site estático, sem framework.** HTML, CSS e JavaScript puros, sem build. Decisão de manutenção:
    qualquer pessoa consegue editar, e não quebra com atualização de dependência.
-6. **Nada de cookie.** A medição é própria, sem identificar ninguém. Isso está escrito na página de
-   privacidade e o guardião confere.
+6. **Nada de cookie.** A medição é própria, sem identificar ninguém, e quem pede "não rastrear" no
+   navegador não entra na conta. Está escrito na página de privacidade e o guardião confere os dois.
+7. **Publicação no Cloudflare Pages** (11/09/2026), com a pasta `seu-mimo-studio/site` como raiz
+   publicada. O GitHub Pages serve um site por repositório e a Panda Mimo já ocupa a raiz. Endereço
+   provisório: `seu-mimo-studio.pages.dev`. Configuração exata em `site/LEIAME.md`.
+8. **Projeto Supabase próprio** (11/09/2026), separado do da Panda Mimo, com tabelas de prefixo `sms_`.
+   Isola as duas marcas uma da outra. O projeto ainda não foi criado, e o site roda inteiro sem ele.
+9. **O catálogo começa com as mesmas seis peças e os mesmos preços da Panda Mimo** (11/09/2026):
+   garrafas R$ 89, canecas R$ 49, copos R$ 79, ecobags R$ 59, tags R$ 15 com mínimo de 10, kits R$ 149.
+   É o que o mockup do book já desenhava.
+10. **A Caveat é a manuscrita desta marca.** O manual já a nomeava; ela entrou no kit em 11/09/2026,
+    com a licença OFL. Não é empréstimo da Panda Mimo: é a fonte que a seção 3 do `MARCA.md` pede.
 
 ---
 
-## 4. Decisões que a nova sessão precisa tomar
+## 4. O que a próxima sessão pode fazer
 
-Estas ficaram em aberto de propósito, porque dependem de você.
+Em ordem de quanto destrava o resto:
 
-**Onde o site vai ser publicado.** O GitHub Pages serve um site por repositório, e o da Panda Mimo já
-ocupa a raiz. Três caminhos:
-
-- Publicar a Seu Mimo Studio num subcaminho, tipo `/studio/`. Rápido, mas endereço feio.
-- Usar **Cloudflare Pages** ou **Netlify**, que publicam dois projetos a partir de duas pastas do mesmo
-  repositório, cada um com seu domínio. Gratuito. É o que eu recomendo quando os domínios existirem.
-- Repositório separado só para a Seu Mimo Studio. Mais limpo, mas perde o site da Panda Mimo como
-  referência de arquitetura ali do lado.
-
-**Banco de dados.** O site da Panda Mimo usa o projeto Supabase `ckljoxxlyecljdwuuzfl`, com tabelas com
-prefixo `pm_`. Para a Seu Mimo Studio: ou tabelas novas com prefixo `sms_` no mesmo projeto, ou um projeto
-Supabase separado. O mesmo projeto é mais simples de administrar; separado isola melhor as duas marcas.
-
-**Se o catálogo começa igual.** As peças da Seu Mimo Studio são as mesmas seis da Panda Mimo (garrafas,
-canecas, copos, ecobags, tags, kits) ou o sortimento é outro?
+1. **Preencher os dados que faltam** (tabela da seção 1). É o que separa o site de estar no ar.
+2. **Criar o projeto Supabase** com as quatro tabelas de `site/LEIAME.md` e preencher `site/config.js`.
+   Enquanto isso não existe, o catálogo vive na cópia local e o painel de administração não existe.
+3. **Um painel de administração**, como o `panda-mimo/admin.html`, para o catálogo e os contatos serem
+   editados sem tocar em código. Só faz sentido depois do banco.
+4. **As fotos das peças**, no formato da seção 8 do `MARCA.md`.
+5. **O mascote em vetor editável.** A arte definitiva resolve site, redes e impressão, mas é raster:
+   bordado, gravação a laser e corte precisam de curva. É hoje a pendência mais importante da marca.
+6. **As outras quinze ações do mascote em arquivo solto.** A folha de modelo tem dezesseis poses; só a
+   de abraçar o coração veio em alta resolução. As demais precisam ser exportadas uma a uma.
 
 ---
 
 ## 5. O que você precisa ter em mãos
 
 - Acesso ao GitHub, na conta `reinaldo3010`.
-- Acesso ao painel do Supabase, se for mexer em banco.
-- O número real de WhatsApp da Seu Mimo Studio. O site da Panda Mimo ainda usa um número de reserva, e o
-  guardião avisa sobre isso. Não repita o erro no site novo.
-- Os dados da loja para o rodapé: nome empresarial, CNPJ ou CPF, endereço e e-mail. A lei do comércio
-  eletrônico exige (Decreto 7.962/2013) e o guardião reprova a publicação sem eles.
-- As fotos reais das peças, quando existirem. Até lá o site usa marcas de lugar.
+- Uma conta no Cloudflare, para publicar.
+- Uma conta no Supabase, quando for criar o banco.
+- O número real de WhatsApp da Seu Mimo Studio.
+- Os dados da loja para o rodapé: nome empresarial, CNPJ ou CPF, endereço e e-mail.
+- As fotos reais das peças, quando existirem.
 
 ---
 
 ## 6. Como rodar o guardião
 
-Ele existe hoje só para a Panda Mimo. A nova sessão adapta para o site novo.
-
 ```bash
-cd panda-mimo
-npm test                      # completo: 14 telas, nitidez e acessibilidade
+cd seu-mimo-studio/site
+npm test                      # completo: 14 telas, nitidez, banco simulado e acessibilidade
 QA_VIEWPORTS=390 npm test     # rápido, só no celular
 npm run shots                 # só as capturas, sem reprovar
 ```
 
+O que ele confere, item por item, está em `site/qa/LEIA-ME.md`. Hoje ele passa limpo, com três avisos
+que não bloqueiam: o WhatsApp de reserva, o endereço provisório e os dados da loja em branco.
+
 Regra da casa: **rodar o guardião antes de publicar qualquer mudança.** Ele já pegou página em branco,
-texto ilegível, imagem esticada e falha de acessibilidade antes de o cliente ver.
+texto ilegível, imagem esticada e falha de acessibilidade antes de o cliente ver. Na construção deste
+site ele pegou, entre outras, uma âncora de menu que parava atrás do cabeçalho por causa da animação de
+entrada, e cinco pares de cor que a prancha original usava e que reprovavam em contraste.
+
+O guardião da Panda Mimo continua separado, em `panda-mimo/`, e roda com os mesmos comandos de lá.
 
 ---
 
 ## 7. Regras da casa, que valem em qualquer sessão
 
-- Ler `MARCA.md` da marca antes de tocar em qualquer coisa dela.
+- Ler o `MARCA.md` da marca antes de tocar em qualquer coisa dela.
 - Cores e fontes vêm dos tokens do CSS, nunca valor solto no meio do código.
 - Nunca apagar arquivo do acervo ao acrescentar coisa nova.
 - Nunca esconder problema de layout com `overflow: hidden`.
+- Dado que falta fica entre colchetes e à vista, nunca inventado e nunca escondido.
 - Ao mudar uma regra da marca, atualizar o manual e registrar no histórico no fim dele.
 - A inteligência artificial nunca desenha logotipo, letreiro nem texto da marca. Isso entra por cima,
   com os arquivos do kit.
@@ -156,3 +166,6 @@ A Seu Mimo Studio nasceu de uma prancha gerada por inteligência artificial, apr
 o logotipo construído em vetor, o símbolo, a paleta e a tipografia. A tentativa de construir o mascote em
 vetor foi reprovada duas vezes e o caminho mudou: referência aprovada mais geração assistida agora,
 ilustrador depois.
+
+Em 11 de setembro de 2026 o trabalho passou para o computador local e o site foi construído, com a
+arquitetura técnica da Panda Mimo e a identidade desta marca, a partir do mockup do book.

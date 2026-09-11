@@ -1,0 +1,15 @@
+{
+  "name": "seu-mimo-studio-site",
+  "private": true,
+  "description": "Site da Seu Mimo Studio (presentes personalizados) e seu guardião de qualidade",
+  "type": "module",
+  "scripts": {
+    "test": "node qa/audit.mjs",
+    "shots": "node qa/audit.mjs --shots",
+    "imagens": "node qa/gera-imagens.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.55.0",
+    "axe-core": "4.13.0"
+  }
+}
