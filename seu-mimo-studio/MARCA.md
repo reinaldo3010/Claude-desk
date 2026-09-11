@@ -1,6 +1,6 @@
 # Manual da marca Seu Mimo Studio
 
-Versão 1.0 · setembro de 2026 · documento vivo
+Versão 1.1 · setembro de 2026 · documento vivo
 
 Marca de presentes personalizados para público geral, irmã da Panda Mimo (que fala com o público
 feminino e infantil). As duas nunca se misturam: cada uma tem nome, paleta, tipografia, mascote e site
@@ -60,14 +60,14 @@ foto, usar a versão branca ou off white com a foto escurecida.
 
 ## 5. Mascote: a Caixinha
 
-O mascote é um desenho vetorial 2D construído por peças, em `kit/mascote/mascote.py` (gerador) e
+O mascote é um desenho vetorial 2D construído por peças, em `kit/mascote/mascote2.py` (gerador) e
 `kit/svg/mascote-*.svg` (poses prontas). A **folha de modelo** (`kit/svg/folha-de-modelo.svg`) mostra as
 cinco poses (feliz, piscando, agradecido, entregando, surpreso), as seis expressões (feliz, surpreso,
 piscando, encantado, sorrindo, determinado) e o símbolo, todos com as mesmas peças e proporções.
 
-Regras: caixa em kraft com lateral mais escura e tampa mais clara; laço oliva sempre no topo, sobre a
-fita que cruza a tampa e cai em ponta de andorinha à direita; rosto no terço médio da frente, sempre sobre
-kraft limpo; braços e pernas café com pontas redondas; etiqueta à esquerda com coração; no máximo um
+Regras: caixa em kraft com lateral mais escura e tampa com espessura e beiral; laço oliva grande,
+assentado no centro da tampa; a fita corre pela tampa até o canto direito e cai em ponta de andorinha pela
+borda direita da frente, longe do rosto; rosto centrado na frente, sempre sobre kraft limpo; braços e pernas café com pontas redondas; etiqueta à esquerda com coração; no máximo um
 coração solto por pose. Nova pose ou expressão nasce do gerador, nunca desenhada à parte.
 
 O render 3D da prancha é referência de sensação, não peça da marca. Enquanto não houver um modelo 3D
@@ -100,4 +100,5 @@ etiqueta off white com o símbolo, tag de produto com o logotipo vertical.
 
 | Data | Versão | O que mudou |
 |---|---|---|
+| set/2026 | 1.1 | Mascote redesenhado: caixa em perspectiva com tampa de espessura, laço grande assentado, fita pela borda direita, rosto limpo; símbolo de linha simplificado. Primeira construção do mascote descartada por não atingir o padrão. |
 | set/2026 | 1.0 | Identidade construída em vetor a partir da prancha aprovada: letreiro em DM Serif Display e Montserrat, corações desenhados, símbolo monolinha, mascote 2D por peças com folha de modelo, kit em SVG e PDF, avatar. Traçados automáticos anteriores preservados em `kit/tracados-referencia/`. |

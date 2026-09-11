@@ -7,16 +7,20 @@
   "branco": "#FFFFFF",
   "fundo": "#E6D9CA",
   "mascote": {
-    "kraft": "#C9A27B",
-    "kraft_esc": "#A98058",
-    "kraft_topo": "#D9B48F",
+    "kraft": "#CFA57C",
+    "kraft_som": "#B88A5E",
+    "kraft_lat": "#A67B52",
+    "tampa": "#DDB58D",
+    "tampa_borda": "#C6976B",
     "oliva": "#2F2E1E",
-    "oliva_claro": "#4A4931",
+    "oliva_luz": "#4B4A33",
+    "oliva_som": "#1F1E13",
     "cafe": "#3A2E21",
-    "cafe_claro": "#5A4636",
-    "off": "#EFE6D8",
-    "off_esc": "#D4C7B5",
-    "rosa": "#D9A08C",
+    "cafe_luz": "#5B4837",
+    "off": "#F1E8DA",
+    "off_som": "#D9CCBA",
+    "rosa": "#E0A48E",
+    "sombra": "#C9B9A4",
     "fundo": "#E6D9CA"
   }
 }

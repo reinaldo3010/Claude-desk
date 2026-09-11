@@ -10,7 +10,7 @@ primeira rodada ficaram em `tracados-referencia/` só como registro.
 | `svg/` | logotipo principal, letreiro, vertical, símbolo (oliva, preto, branco, sobre oliva), avatar, 5 poses do mascote (transparente e com fundo), 6 expressões, folha de modelo |
 | `pdf/` | os mesmos arquivos em PDF vetorial, página do tamanho do desenho |
 | `png/` | exportações em PNG com transparência, lado maior 2000 px, para redes, IA e gráfica |
-| `mascote/` | `mascote.py` (gerador de poses e expressões), `coracoes.py`, `logo.py`, `tipo.py` |
+| `mascote/` | `mascote2.py` (gerador de poses, expressões e símbolo; `mascote.py` é a primeira versão, descartada), `coracoes.py`, `logo.py`, `tipo.py` |
 | `fontes/` | DM Serif Display, Montserrat, Playfair Display (variáveis), com licenças OFL |
 | `mestres/` | prancha aprovada e recortes ampliados |
 | `cores.json` | paleta da marca e cores do mascote |
