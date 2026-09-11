@@ -1,3 +1,18 @@
+> **Leia antes: o desenho definitivo do mascote já existe.**
+>
+> Este documento nasceu como contorno, em agosto e setembro de 2026, para gerar imagens do mascote com
+> alguma consistência enquanto o desenho definitivo não existia. Ele chegou em 11 de setembro de 2026 e
+> está em `kit/mascote-2d/` (seção 5 do `MARCA.md`).
+>
+> O que muda: **não se gera mais o mascote.** Para qualquer material, use os arquivos do kit. A geração
+> assistida continua útil para o que está **em volta** dele — cena, fundo, mockup de embalagem, foto de
+> ambiente — com o mascote entrando depois, como camada, a partir do PNG transparente.
+>
+> A referência a subir numa IA de imagem, quando for o caso, passa a ser
+> `kit/mascote-2d/poses/abracando-coracao.png`, e não mais o render 3D.
+
+---
+
 # Como fazer o mascote com IA, sempre igual
 
 O problema não é a IA desenhar mal. É que ela desenha **diferente a cada vez**. A solução tem duas

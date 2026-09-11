@@ -1,26 +1,36 @@
 {
+  "_leia": "Cores da marca (seção 2 do MARCA.md) e cores próprias do mascote. As do mascote foram medidas na arte definitiva entregue em 11/09/2026 (mascote-2d/poses/abracando-coracao.png), não escolhidas a olho: são o que o ilustrador usou.",
+
   "oliva": "#2F2E1E",
   "cafe": "#3A2E21",
   "bege": "#C0966D",
+  "bege_escuro": "#9C7444",
   "offwhite": "#D4C7B5",
   "preto": "#050505",
   "branco": "#FFFFFF",
   "fundo": "#E6D9CA",
+  "papel": "#EFE6D8",
+
   "mascote": {
-    "kraft": "#CFA57C",
-    "kraft_som": "#B88A5E",
-    "kraft_lat": "#A67B52",
-    "tampa": "#DDB58D",
-    "tampa_borda": "#C6976B",
-    "oliva": "#2F2E1E",
-    "oliva_luz": "#4B4A33",
-    "oliva_som": "#1F1E13",
-    "cafe": "#3A2E21",
-    "cafe_luz": "#5B4837",
-    "off": "#F1E8DA",
-    "off_som": "#D9CCBA",
-    "rosa": "#E0A48E",
-    "sombra": "#C9B9A4",
-    "fundo": "#E6D9CA"
+    "_leia": "Paleta própria da Caixinha. Ela é mais clara e mais rosada que o bege da marca, de propósito: o mascote aparece sobre o fundo e sobre o oliva, e precisa de luz própria para se destacar nos dois. Não usar estes valores em texto, botão ou fundo de página.",
+    "contorno": "#180B04",
+    "kraft_luz": "#FFDCA7",
+    "kraft": "#F0BA84",
+    "kraft_som": "#BA7E4E",
+    "fita": "#5A5A42",
+    "fita_som": "#363624",
+    "coracao": "#54543C",
+    "cafe": "#422A1E",
+    "etiqueta": "#F6DEC0",
+    "bochecha": "#F7A180"
+  },
+
+  "lacos_alternativos": {
+    "_leia": "As variações de laço da folha de modelo, medidas no meio-tom de cada laço em mascote-2d/folha-de-modelo.png. O oliva é o oficial e o único que aparece em material da marca; os outros existem para ocasião (Natal, chá de bebê, casamento) e nunca entram no logotipo nem no símbolo.",
+    "oliva": "#5A6450",
+    "vermelho": "#B43228",
+    "rosa": "#F0A0A0",
+    "azul": "#78A0C8",
+    "branco": "#F0E6D2"
   }
 }
