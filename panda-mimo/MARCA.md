@@ -536,6 +536,14 @@ regras:
 - Modelo novo entra com nome, descrição, categoria e teste: o guardião confere que nada sai da área,
   que frase não cai sobre foto e que o Pandinha não cobre nada.
 
+**Desfazer, alças e modelos da pessoa (setembro de 2026).** O editor guarda até 60 passos: desfazer e
+refazer valem para mover, escrever, trocar cor, acrescentar e apagar, inclusive a foto tirada de um
+espaço, que volta com o passo. Gestos seguidos do mesmo tipo contam como um passo só. Na vista aberta,
+a camada escolhida mostra alças: os quatro cantos aumentam e diminuem mantendo o centro, e o botão de
+cima gira, encostando sozinho em 0°, 90° e 180°. Quem quiser guardar a própria montagem salva um
+**modelo meu**, que aparece na categoria "Meus modelos" e fica só naquele navegador. O modelo guarda a
+montagem, nunca as fotos da pessoa: quem usar coloca as suas.
+
 **Arte trazida de fora (Canva).** A página informa a medida da volta inteira, 21 × 9 cm, que é
 2480 × 1063 px a 300 dpi, oferece o gabarito em PNG com a margem de segurança de 5 mm e as marcas da
 frente, do verso e da alça, abre o Canva em outra aba e recebe de volta o PNG exportado, aplicando-o ao
@@ -818,6 +826,7 @@ adereço pequeno no Pandinha em datas comemorativas, com aprovação prévia (6.
 | Data | Versão | O que mudou |
 |---|---|---|
 | set/2026 | 1.0 | Primeira edição, consolidando a identidade aplicada no site (paleta, tipografia, logo, mascote, tom de voz, aplicações, governança). |
+| set/2026 | 2.8 | Editor ganha desfazer e refazer (até 60 passos, com a foto voltando junto), alças de girar e redimensionar na vista aberta, e "Meus modelos": a pessoa guarda a própria montagem naquele navegador, sem as fotos (10.3). |
 | set/2026 | 2.7 | A arte da caneca vira camadas editáveis: clicar e arrastar em cima da própria caneca, acrescentar foto, frase, enfeite e Pandinha do acervo, escolher fonte e cor da paleta, mudar ordem e duplicar (10.3). Seis modelos novos e cinco categorias novas (Professores, Casamento, Bebê, Pet, Amizade), somando 14 artes. Caminho de ida e volta com o Canva: gabarito, atalho e importação da arte pronta. |
 | set/2026 | 2.6 | Modelos de arte da caneca por ocasião (Namorados, Aniversário, Natal, Mães, Pais, Só fotos): artes de volta inteira com até seis espaços de foto, frases editáveis e enfeites da paleta, com o Pandinha adesivo em lugar livre (10.3). A página passa a informar a medida da arte (21 × 9 cm, 2480 × 1063 px a 300 dpi) e a entregar o gabarito em PNG para quem monta no Canva. |
 | set/2026 | 2.5 | Estúdio da caneca em 360° (`caneca-3d.html`): foto ou arte própria aplicada num modelo 3D de referência, cores do interior e da alça, nome e Pandinha adesivo, prévia e arte plana em 300 dpi baixáveis, pedido pelo WhatsApp com as escolhas (10.3). Convite na seção Monte seu mimo com a chamada "Ver minha foto na caneca" (4.7), link no rodapé, página no sitemap; guardião ganha o teste de ponta a ponta do estúdio e os testes unitários da arte. |

@@ -62,6 +62,11 @@ Os modelos ficam em `simulador/modelos.js`, descritos em fração da área de im
 copie um item da lista e rode `npm run test:arte`, que confere se tudo cabe na área, se nada se sobrepõe
 e se cores e fontes são as da marca.
 
+**Desfazer, alças e modelos seus:** o editor guarda até 60 passos (`Ctrl+Z` e `Ctrl+Shift+Z` também
+funcionam), a camada escolhida mostra alças na vista aberta para girar e redimensionar puxando, e o
+botão "Salvar como meu modelo" guarda a montagem em "Meus modelos", só naquele navegador
+(`localStorage`, chave `pm_caneca_meus_modelos`), sem as fotos de quem montou.
+
 **Ida e volta com o Canva:** a página diz a medida (21 × 9 cm, ou 2480 × 1063 px a 300 dpi), baixa um
 gabarito em PNG com a margem de segurança e as marcas de frente, verso e alça, abre o Canva em outra aba
 e recebe de volta o PNG exportado, aplicando-o ao redor da caneca.

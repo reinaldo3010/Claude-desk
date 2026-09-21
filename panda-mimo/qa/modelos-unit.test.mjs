@@ -2,8 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   TEMPLATES, CATEGORIAS, CORES_DE_ARTE, FONTES, ENFEITES, ADESIVOS, FORMAS_DE_FOTO,
-  modeloPorId, modelosDaCategoria, novaArte, desenhaArte, caixaDaCamada, camadaEm, medidorDeTexto,
-  FRENTE, VERSO,
+  modeloPorId, modelosDaCategoria, novaArte, desenhaArte, caixaDaCamada, camadaEm, alcasDaCamada,
+  medidorDeTexto, FRENTE, VERSO,
 } from '../simulador/modelos.js';
 import { computeArtePlacement, printAreaOf, tamanhoRecomendado } from '../simulador/arte.js';
 
@@ -182,4 +182,35 @@ test('o tamanho indicado para montar a arte fora do site é o da área de impres
   assert.equal(medida.dpi, 300);
   assert.equal(Math.round(medida.larguraCm), 21);
   assert.equal(Math.round(medida.alturaCm), 9);
+});
+
+test('as alças ficam nos cantos da camada e giram junto com ela', () => {
+  const arte = novaArte(modeloPorId('fotos-quatro'));
+  const camada = arte.camadas[0];
+  const caixa = caixaDaCamada(camada, area, medidor);
+  const reto = alcasDaCamada(camada, area, medidor);
+  assert.equal(reto.cantos.length, 4);
+  const noReto = reto.cantos.find((c) => c.id === 'no');
+  assert.ok(Math.abs(noReto.x - (caixa.centroX - caixa.width / 2)) < 1e-9);
+  assert.ok(Math.abs(noReto.y - (caixa.centroY - caixa.height / 2)) < 1e-9);
+  // Girar não muda o tamanho: cada canto continua à mesma distância do centro.
+  camada.rotacao = 90;
+  const girada = alcasDaCamada(camada, area, medidor);
+  const raio = (ponto) => Math.hypot(ponto.x - caixa.centroX, ponto.y - caixa.centroY);
+  for (const canto of girada.cantos) {
+    const antes = reto.cantos.find((c) => c.id === canto.id);
+    assert.ok(Math.abs(raio(antes) - raio(canto)) < 1e-9, 'girar mudou o tamanho da camada');
+  }
+  assert.ok(Math.hypot(girada.cantos[0].x - noReto.x, girada.cantos[0].y - noReto.y) > 1, 'os cantos não acompanharam o giro');
+  assert.ok(Math.abs(raio(reto.giro) - raio(girada.giro)) < 1e-9);
+});
+
+test('sem espaço em cima, o botão de girar passa para baixo da camada', () => {
+  const noTopo = { id: 'x', tipo: 'enfeite', forma: 'coracao', cor: '--peach', x: 0.5, y: 0.02, tamanho: 0.05, rotacao: 0 };
+  const alcasDoTopo = alcasDaCamada(noTopo, area, medidor);
+  assert.equal(alcasDoTopo.giro.acima, false, 'o botão continuou em cima sem caber');
+  assert.ok(alcasDoTopo.giro.y > caixaDaCamada(noTopo, area, medidor).centroY, 'o botão de girar não desceu');
+  const noMeio = { ...noTopo, y: 0.5 };
+  assert.equal(alcasDaCamada(noMeio, area, medidor).giro.acima, true);
+  assert.ok(alcasDaCamada(noMeio, area, medidor).giro.y < caixaDaCamada(noMeio, area, medidor).centroY);
 });

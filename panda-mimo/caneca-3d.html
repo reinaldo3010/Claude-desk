@@ -91,12 +91,30 @@
 
           <div id="template-mode" hidden>
             <p class="studio-help" id="template-name"></p>
-            <p class="studio-help studio-dica">Clique em cima da caneca para escolher um item. Arraste para mudar de lugar. Tudo o que está aqui pode ser trocado, movido ou apagado.</p>
+            <p class="studio-help studio-dica">Clique em cima da caneca para escolher um item e arraste para mudar de lugar. Na arte aberta, puxe um canto para aumentar e o botão de cima para girar.</p>
             <div class="studio-toolbar" role="group" aria-label="Acrescentar na arte">
               <button type="button" id="add-foto">+ Foto</button>
               <button type="button" id="add-frase">+ Frase</button>
               <button type="button" id="add-enfeite">+ Enfeite</button>
               <button type="button" id="add-pandinha">+ Pandinha</button>
+            </div>
+            <div class="studio-historico">
+              <div class="studio-historico__botoes" role="group" aria-label="Desfazer e refazer">
+                <button type="button" id="desfazer" disabled>Desfazer</button>
+                <button type="button" id="refazer" disabled>Refazer</button>
+              </div>
+              <button type="button" class="studio-text-button" id="salvar-modelo">Salvar como meu modelo</button>
+              <button type="button" class="studio-text-button" id="apagar-modelo" hidden>Apagar este modelo meu</button>
+            </div>
+            <div class="studio-salvar-modelo" id="form-meu-modelo" hidden>
+              <label class="studio-campo" for="nome-meu-modelo">Nome do seu modelo
+                <input id="nome-meu-modelo" type="text" maxlength="40" placeholder="Ex.: Aniversário da Malu">
+              </label>
+              <p class="studio-help">Guarda a arte montada (sem as fotos) só neste navegador, para você usar de novo.</p>
+              <div class="studio-salvar-modelo__acoes">
+                <button type="button" class="studio-text-button" id="confirmar-meu-modelo">Salvar modelo</button>
+                <button type="button" class="studio-text-button" id="cancelar-meu-modelo">Cancelar</button>
+              </div>
             </div>
             <ul class="studio-camadas" id="camadas" aria-label="Itens da arte"></ul>
             <div class="studio-props" id="camada-props"></div>

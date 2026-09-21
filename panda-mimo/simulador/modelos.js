@@ -448,6 +448,30 @@ export function caixaDaCamada(camada, printArea, medidor) {
   return { x: centroX - largura / 2, y: centroY - altura / 2, width: largura, height: altura, centroX, centroY };
 }
 
+/**
+ * Os quatro cantos e o botão de girar de uma camada, em milímetros, já com a inclinação aplicada.
+ * É o que a vista aberta desenha como alças e o que o dedo procura antes de mover a camada.
+ */
+export function alcasDaCamada(camada, printArea, medidor, folgaDoGiro = 6) {
+  const caixa = caixaDaCamada(camada, printArea, medidor);
+  const angulo = (camada.rotacao || 0) * Math.PI / 180;
+  const cos = Math.cos(angulo), sin = Math.sin(angulo);
+  const meiaLargura = caixa.width / 2, meiaAltura = caixa.height / 2;
+  const ponto = (dx, dy) => ({ x: caixa.centroX + dx * cos - dy * sin, y: caixa.centroY + dx * sin + dy * cos });
+  // O botão de girar fica acima; sem espaço lá em cima, ele passa para baixo.
+  const cabeEmCima = caixa.centroY - meiaAltura - folgaDoGiro > printArea.y;
+  return {
+    caixa,
+    cantos: [
+      { id: 'no', ...ponto(-meiaLargura, -meiaAltura) },
+      { id: 'ne', ...ponto(meiaLargura, -meiaAltura) },
+      { id: 'se', ...ponto(meiaLargura, meiaAltura) },
+      { id: 'so', ...ponto(-meiaLargura, meiaAltura) },
+    ],
+    giro: { id: 'giro', ...ponto(0, cabeEmCima ? -meiaAltura - folgaDoGiro : meiaAltura + folgaDoGiro), acima: cabeEmCima },
+  };
+}
+
 /** Quem está debaixo do dedo: a camada mais de cima cujo retângulo (girado) contém o ponto. */
 export function camadaEm(arte, ponto, printArea, medidor, folgaMm = 1.5) {
   for (let i = arte.camadas.length - 1; i >= 0; i -= 1) {

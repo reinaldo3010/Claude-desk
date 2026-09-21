@@ -1160,6 +1160,80 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
       failures.push(`[estúdio ${w}] o pedido não acompanhou a frase e o enfeite novos`);
     }
 
+    // desfazer e refazer: o passo volta inteiro, inclusive a foto tirada
+    const historico = await pe.evaluate(async () => {
+      const conta = () => document.querySelectorAll('#camadas .studio-camada').length;
+      const inicio = conta();
+      document.getElementById('add-frase').click();
+      await new Promise((r) => setTimeout(r, 300));
+      const comAFrase = conta();
+      document.getElementById('desfazer').click();
+      await new Promise((r) => setTimeout(r, 300));
+      const desfeito = conta();
+      document.getElementById('refazer').click();
+      await new Promise((r) => setTimeout(r, 300));
+      return { inicio, comAFrase, desfeito, refeito: conta() };
+    });
+    if (historico.comAFrase !== historico.inicio + 1 || historico.desfeito !== historico.inicio || historico.refeito !== historico.comAFrase) {
+      failures.push(`[estúdio ${w}] desfazer e refazer não voltaram o passo (${JSON.stringify(historico)})`);
+    }
+
+    // alças da vista aberta: puxar um canto muda o tamanho da camada escolhida
+    const alcas = await pe.evaluate(async () => {
+      const flat = document.getElementById('flat-art');
+      const assinatura = () => {
+        const d = flat.getContext('2d').getImageData(0, 0, flat.width, flat.height).data;
+        let soma = 0;
+        for (let i = 0; i < d.length; i += 997) soma += d[i];
+        return soma;
+      };
+      const botoes = [...document.querySelectorAll('#camadas .studio-camada')];
+      botoes[botoes.length - 1].click();
+      await new Promise((r) => setTimeout(r, 300));
+      const antes = assinatura();
+      const caixa = flat.getBoundingClientRect();
+      // canto superior esquerdo da foto da frente do modelo de namorados
+      const x = caixa.left + 0.043 * caixa.width;
+      const y = caixa.top + 0.09 * caixa.height;
+      const evento = (tipo, px, py) => flat.dispatchEvent(new PointerEvent(tipo, { clientX: px, clientY: py, bubbles: true, cancelable: true, pointerId: 3, button: 0, buttons: 1 }));
+      evento('pointerdown', x, y);
+      await new Promise((r) => setTimeout(r, 100));
+      evento('pointermove', x - 30, y - 14);
+      await new Promise((r) => setTimeout(r, 250));
+      evento('pointerup', x - 30, y - 14);
+      await new Promise((r) => setTimeout(r, 350));
+      return { editando: document.getElementById('camada-props').textContent.slice(0, 30), mudou: assinatura() !== antes };
+    });
+    if (!alcas.mudou) failures.push(`[estúdio ${w}] puxar o canto na arte aberta não mudou o tamanho (${alcas.editando})`);
+
+    // salvar a arte como modelo meu, usar e apagar
+    const meus = await pe.evaluate(async () => {
+      document.getElementById('salvar-modelo').click();
+      await new Promise((r) => setTimeout(r, 200));
+      document.getElementById('nome-meu-modelo').value = 'Modelo de teste';
+      document.getElementById('confirmar-meu-modelo').click();
+      await new Promise((r) => setTimeout(r, 500));
+      const categorias = [...document.querySelectorAll('#model-categories button')].map((b) => b.textContent);
+      document.querySelector('#model-categories button[data-categoria="meus"]')?.click();
+      await new Promise((r) => setTimeout(r, 400));
+      const nomes = [...document.querySelectorAll('#model-list .studio-model__nome')].map((s) => s.textContent);
+      const guardados = JSON.parse(localStorage.getItem('pm_caneca_meus_modelos') || '[]');
+      document.getElementById('apagar-modelo').click();
+      await new Promise((r) => setTimeout(r, 400));
+      return {
+        categorias, nomes,
+        guardado: guardados.length === 1 && guardados[0].nome === 'Modelo de teste',
+        temFoto: JSON.stringify(guardados).includes('data:image'),
+        depoisDeApagar: JSON.parse(localStorage.getItem('pm_caneca_meus_modelos') || '[]').length,
+      };
+    });
+    if (!meus.categorias.includes('Meus modelos') || !meus.nomes.includes('Modelo de teste')) {
+      failures.push(`[estúdio ${w}] o modelo salvo não apareceu em Meus modelos (${JSON.stringify(meus)})`);
+    }
+    if (!meus.guardado) failures.push(`[estúdio ${w}] o modelo salvo não ficou guardado neste navegador`);
+    if (meus.temFoto) failures.push(`[estúdio ${w}] o modelo salvo levou junto a foto da pessoa; ele deve guardar só a montagem`);
+    if (meus.depoisDeApagar !== 0) failures.push(`[estúdio ${w}] apagar o modelo meu não o tirou da lista`);
+
     // apagar volta a avisar do espaço vazio
     await pe.evaluate(async () => {
       const foto = [...document.querySelectorAll('#camadas .studio-camada')].find((b) => b.querySelector('small')?.textContent === 'Foto');

@@ -71,7 +71,9 @@ exemplo entra e aparece na vista aberta, nome e cores vão para a mensagem do Wh
 fica marcado e arquivo falso gera aviso. Modo modelo: a categoria filtra a lista, as camadas aparecem,
 duas fotos entram pela janela de arquivo, clicar na caneca escolhe o item que está ali, arrastar move,
 acrescentar frase e enfeite funciona, o segundo "+ Pandinha" não cria um segundo mascote, tirar a foto
-volta a avisar do espaço vazio, e a arte do Canva volta para o modo livre aplicada ao redor. No fim,
+volta a avisar do espaço vazio, desfazer e refazer voltam o passo inteiro, puxar o canto na arte aberta
+muda o tamanho, o modelo salvo entra em "Meus modelos" sem levar a foto junto e sai quando apagado, e a
+arte do Canva volta para o modo livre aplicada ao redor. No fim,
 os três arquivos saem ("Baixar arte plana", "Baixar prévia" e o gabarito em 2480 × 1063 px). Captura em
 `qa/shots/<largura>/estudio-caneca.png`. A página também passa pelo axe-core e pelas checagens de
 cabeçalho, rodapé e sitemap. Para ver local: `npm run servir` e abra o endereço impresso.

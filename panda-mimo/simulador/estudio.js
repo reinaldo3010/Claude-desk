@@ -14,8 +14,8 @@ import { createMugViewer, MUG_SPEC } from './caneca-3d.js';
 import { loadArtwork, composeArtwork, exportPrintArtwork, exportGuideArtwork, tamanhoRecomendado, printAreaOf } from './arte.js';
 import {
   CATEGORIAS, ADESIVOS, ENFEITES, CORES_DE_ARTE, FONTES, FORMAS_DE_FOTO, ROTULOS,
-  modeloPorId, modelosDaCategoria, novaArte, desenhaArte, desenhaForma, caixaDaCamada, camadaEm,
-  medidorDeTexto, cor,
+  modeloPorId, modelosDaCategoria, novaArte, desenhaArte, desenhaForma, camadaEm,
+  alcasDaCamada, medidorDeTexto, cor,
 } from './modelos.js';
 
 // Cores da cerâmica: dado físico da peça (manual 7.4), não cor de interface.
@@ -32,7 +32,9 @@ const LETRAS = { Fredoka: 'Redondinha', Caveat: 'Manuscrita', Nunito: 'Simples' 
 const PANDA_ADESIVO = 'assets/panda-coracao.webp';
 const ARTE_EXEMPLO = { url: 'assets/coracao-jeito.webp', nome: 'Arte da Panda Mimo (exemplo)' };
 const PROJETO_TIPO = 'panda-mimo/caneca';
-const PROJETO_VERSAO = 3;
+const PROJETO_VERSAO = 4;
+const MEUS_MODELOS = 'pm_caneca_meus_modelos';
+const PASSOS_GUARDADOS = 60;
 const LIMITES = Object.freeze({
   fraseTamanho: [3, 22], enfeiteTamanho: [0.04, 0.5], adesivoTamanho: [0.06, 0.6],
   fotoLargura: [0.06, 0.6], giro: [-180, 180],
@@ -46,6 +48,9 @@ const el = {
   categories: $('model-categories'), models: $('model-list'), moreModels: $('model-more'),
   templateMode: $('template-mode'), templateName: $('template-name'),
   camadas: $('camadas'), props: $('camada-props'),
+  desfazer: $('desfazer'), refazer: $('refazer'),
+  salvarModelo: $('salvar-modelo'), apagarModelo: $('apagar-modelo'), formMeuModelo: $('form-meu-modelo'),
+  nomeMeuModelo: $('nome-meu-modelo'), confirmarMeuModelo: $('confirmar-meu-modelo'), cancelarMeuModelo: $('cancelar-meu-modelo'),
   addFoto: $('add-foto'), addFrase: $('add-frase'), addEnfeite: $('add-enfeite'), addPandinha: $('add-pandinha'),
   freeMode: $('free-mode'), freeName: $('free-name'),
   drop: $('art-drop'), file: $('art-file'), choose: $('choose-art'), fileInfo: $('art-file-info'), fileName: $('art-file-name'),
@@ -73,6 +78,8 @@ let mostrarTodosOsModelos = false;
 let artwork = null;           // arte livre: { image, width, height, name, dispose }
 let artworkBlob = null;
 const fotos = new Map();      // id da camada de foto → { asset, blob }
+const lixeira = new Map();    // fotos tiradas da arte, guardadas para o desfazer
+const historico = { passado: [], futuro: [], ultimaChave: '', ultimoInstante: 0 };
 const adesivos = new Map();   // arquivo → Image já carregada
 let selecionada = null;       // id da camada em edição
 let arrasto = null;           // { id, dx, dy } enquanto o dedo está pressionado
@@ -91,6 +98,7 @@ const ALTURA_MM = MUG_SPEC.heightMm;
 
 /* ---------- utilidades ---------- */
 const clamp = (valor, min, max) => Math.min(max, Math.max(min, valor));
+const clone = (valor) => (typeof structuredClone === 'function' ? structuredClone(valor) : JSON.parse(JSON.stringify(valor)));
 const novoId = () => `c${(contador += 1)}`;
 
 function loadImage(url) {
@@ -144,6 +152,147 @@ function fracaoDoEventoPlano(event) {
   return { x: (event.clientX - bounds.left) / bounds.width, y: (event.clientY - bounds.top) / bounds.height };
 }
 
+/* ---------- desfazer e refazer ---------- */
+const retrato = () => ({ arte: clone(arte), fotos: [...fotos.keys()] });
+
+/**
+ * Guarda como a arte está antes de mudar. Mudanças seguidas do mesmo tipo (arrastar, digitar,
+ * puxar um controle) entram como um passo só: desfazer volta o gesto inteiro, não cada pixel.
+ */
+function registra(chave = 'estrutura') {
+  if (!arte) return;
+  const agora = Date.now();
+  if (chave === historico.ultimaChave && agora - historico.ultimoInstante < 900) {
+    historico.ultimoInstante = agora;
+    return;
+  }
+  historico.ultimaChave = chave;
+  historico.ultimoInstante = agora;
+  historico.passado.push(retrato());
+  if (historico.passado.length > PASSOS_GUARDADOS) historico.passado.shift();
+  historico.futuro.length = 0;
+  atualizaHistorico();
+}
+
+function limpaHistorico() {
+  historico.passado.length = 0;
+  historico.futuro.length = 0;
+  historico.ultimaChave = '';
+  atualizaHistorico();
+}
+
+function atualizaHistorico() {
+  el.desfazer.disabled = !historico.passado.length;
+  el.refazer.disabled = !historico.futuro.length;
+}
+
+/** Volta as fotos para o estado daquele passo: o que saiu fica na lixeira e pode voltar. */
+function aplicaRetrato(retratoSalvo) {
+  arte = retratoSalvo.arte;
+  modeloAtual = acheModelo(arte.modelo);
+  const querem = new Set(retratoSalvo.fotos);
+  for (const [id, item] of [...fotos]) {
+    if (!querem.has(id)) { lixeira.set(id, item); fotos.delete(id); }
+  }
+  for (const id of querem) {
+    if (!fotos.has(id) && lixeira.has(id)) { fotos.set(id, lixeira.get(id)); lixeira.delete(id); }
+  }
+  if (!arte.camadas.some((camada) => camada.id === selecionada)) selecionada = arte.camadas.at(-1)?.id || null;
+  historico.ultimaChave = '';
+  montaCamadas();
+  montaPropriedades();
+  marcaModeloEscolhido();
+  atualizaHistorico();
+  schedule();
+}
+
+function desfaz() {
+  if (!historico.passado.length) return;
+  historico.futuro.push(retrato());
+  aplicaRetrato(historico.passado.pop());
+}
+
+function refaz() {
+  if (!historico.futuro.length) return;
+  historico.passado.push(retrato());
+  aplicaRetrato(historico.futuro.pop());
+}
+
+/* ---------- meus modelos (ficam só neste navegador) ---------- */
+let meusModelos = [];
+
+function carregaMeusModelos() {
+  try {
+    const guardado = JSON.parse(localStorage.getItem(MEUS_MODELOS) || '[]');
+    meusModelos = Array.isArray(guardado) ? guardado.filter((m) => m?.id && Array.isArray(m.camadas)) : [];
+  } catch {
+    meusModelos = [];
+  }
+}
+
+function guardaMeusModelos() {
+  try {
+    localStorage.setItem(MEUS_MODELOS, JSON.stringify(meusModelos));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+const acheModelo = (id) => meusModelos.find((m) => m.id === id) || modeloPorId(id);
+const ehMeuModelo = (id) => meusModelos.some((m) => m.id === id);
+
+function listaDeModelos(qual) {
+  if (qual === 'meus') return meusModelos;
+  const base = modelosDaCategoria(qual);
+  return qual === 'todos' ? [...meusModelos, ...base] : base;
+}
+
+function salvaModeloAtual() {
+  const nome = el.nomeMeuModelo.value.trim();
+  if (!arte || !nome) { setError('Dê um nome para o seu modelo.'); return; }
+  setError('');
+  const meu = {
+    id: `meu-${Date.now().toString(36)}`,
+    categoria: 'meus',
+    nome,
+    descricao: 'Modelo seu, guardado neste navegador',
+    fundo: arte.fundo,
+    semente: arte.semente,
+    enfeites: clone(arte.enfeites),
+    // O modelo guarda a montagem, não as fotos: quem usar coloca as suas.
+    camadas: clone(arte.camadas),
+  };
+  meusModelos = [meu, ...meusModelos].slice(0, 30);
+  if (!guardaMeusModelos()) {
+    meusModelos = meusModelos.filter((m) => m.id !== meu.id);
+    setStatus('Este navegador não deixou guardar o modelo. Salve o projeto em arquivo no passo 4.');
+    return;
+  }
+  arte.modelo = meu.id;
+  modeloAtual = meu;
+  el.formMeuModelo.hidden = true;
+  el.nomeMeuModelo.value = '';
+  montaCategorias();
+  montaModelos();
+  marcaModeloEscolhido();
+  atualizaModo();
+  setStatus(`"${nome}" entrou em Meus modelos. Ele fica só neste navegador.`);
+}
+
+function apagaMeuModelo() {
+  if (!arte || !ehMeuModelo(arte.modelo)) return;
+  const nome = modeloAtual?.nome || 'o modelo';
+  meusModelos = meusModelos.filter((m) => m.id !== arte.modelo);
+  guardaMeusModelos();
+  if (categoria === 'meus' && !meusModelos.length) categoria = 'todos';
+  montaCategorias();
+  montaModelos();
+  marcaModeloEscolhido();
+  atualizaModo();
+  setStatus(`"${nome}" saiu de Meus modelos. A arte continua aqui na tela.`);
+}
+
 /* ---------- composição ---------- */
 function opcoesDeComposicao(extra = {}) {
   const base = { state, spec: MUG_SPEC, ...extra };
@@ -195,21 +344,54 @@ function drawFlat(source, placement) {
     context.stroke();
   }
   context.restore();
-  // Contorno de quem está sendo editado. Fica só aqui: não entra na textura nem no arquivo.
+  // Contorno e alças de quem está sendo editado. Ficam só aqui: não entram na textura,
+  // na prévia baixada nem no arquivo de impressão.
   const camada = camadaPorId(selecionada);
-  if (camada) {
-    const caixa = caixaDaCamada(camada, area, medidor);
-    const escalaX = el.flat.width / area.width;
-    const escalaY = el.flat.height / area.height;
-    context.save();
-    context.translate((caixa.centroX - area.x) * escalaX, (caixa.centroY - area.y) * escalaY);
-    context.rotate((camada.rotacao || 0) * Math.PI / 180);
-    context.strokeStyle = cor('--peach-ink');
-    context.lineWidth = 2;
-    context.setLineDash([5, 4]);
-    context.strokeRect(-caixa.width * escalaX / 2, -caixa.height * escalaY / 2, caixa.width * escalaX, caixa.height * escalaY);
-    context.restore();
+  if (camada) desenhaSelecao(context, camada, area);
+}
+
+/** Quantos pixels do canvas cabem em um milímetro, e quantos em um pixel da tela. */
+function escalasDaVistaAberta(area) {
+  const bounds = el.flat.getBoundingClientRect();
+  const porMm = el.flat.width / area.width;
+  const porPixelDeTela = bounds.width ? el.flat.width / bounds.width : 1;
+  return { porMm, porPixelDeTela, bounds };
+}
+
+function desenhaSelecao(context, camada, area) {
+  const { porMm, porPixelDeTela } = escalasDaVistaAberta(area);
+  const alcas = alcasDaCamada(camada, area, medidor);
+  const caixa = alcas.caixa;
+  const lado = 13 * porPixelDeTela;
+  context.save();
+  context.translate((caixa.centroX - area.x) * porMm, (caixa.centroY - area.y) * porMm);
+  context.rotate((camada.rotacao || 0) * Math.PI / 180);
+  const meiaLargura = caixa.width * porMm / 2;
+  const meiaAltura = caixa.height * porMm / 2;
+  context.strokeStyle = cor('--peach-ink');
+  context.lineWidth = 2 * porPixelDeTela;
+  context.setLineDash([5 * porPixelDeTela, 4 * porPixelDeTela]);
+  context.strokeRect(-meiaLargura, -meiaAltura, meiaLargura * 2, meiaAltura * 2);
+  context.setLineDash([]);
+  // Haste e botão de girar, do lado em que ele coube.
+  const sentido = alcas.giro.acima ? -1 : 1;
+  context.beginPath();
+  context.moveTo(0, sentido * meiaAltura);
+  context.lineTo(0, sentido * (meiaAltura + 6 * porMm));
+  context.stroke();
+  context.fillStyle = cor('--paper');
+  context.beginPath();
+  context.arc(0, sentido * (meiaAltura + 6 * porMm), lado * 0.55, 0, Math.PI * 2);
+  context.fill();
+  context.stroke();
+  for (const [dx, dy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
+    context.fillStyle = cor('--paper');
+    context.beginPath();
+    context.rect(dx * meiaLargura - lado / 2, dy * meiaAltura - lado / 2, lado, lado);
+    context.fill();
+    context.stroke();
   }
+  context.restore();
 }
 
 /* ---------- pedido no WhatsApp ---------- */
@@ -285,6 +467,7 @@ function aoPonteiro({ tipo, ponto }) {
     const camada = camadaEm(arte, pontoMm(fracao), areaMm, medidor);
     if (!camada) return false;
     seleciona(camada.id, { mostrarPainel: true });
+    registra(`mover:${camada.id}`);
     arrasto = { id: camada.id, dx: camada.x - fracao.x, dy: camada.y - fracao.y };
     return true;
   }
@@ -381,7 +564,11 @@ function cartaoDeModelo(modelo) {
 }
 
 function montaCategorias() {
-  const lista = [{ id: 'todos', nome: 'Todos' }, ...CATEGORIAS.filter((c) => c.id !== 'livre')];
+  const lista = [
+    { id: 'todos', nome: 'Todos' },
+    ...(meusModelos.length ? [{ id: 'meus', nome: 'Meus modelos' }] : []),
+    ...CATEGORIAS.filter((c) => c.id !== 'livre'),
+  ];
   el.categories.replaceChildren(...lista.map((item) => {
     const button = document.createElement('button');
     button.type = 'button';
@@ -401,7 +588,7 @@ function montaCategorias() {
 const VISIVEIS_DE_INICIO = 6;
 
 function montaModelos() {
-  const lista = modelosDaCategoria(categoria);
+  const lista = listaDeModelos(categoria);
   // Com um modelo escolhido que está mais para baixo, a lista já abre inteira.
   const escondido = arte && !lista.slice(0, VISIVEIS_DE_INICIO).some((m) => m.id === arte.modelo) && lista.some((m) => m.id === arte.modelo);
   const todos = mostrarTodosOsModelos || escondido;
@@ -434,7 +621,7 @@ async function garanteAdesivos() {
 }
 
 function escolheModelo(id) {
-  const modelo = id ? modeloPorId(id) : null;
+  const modelo = id ? acheModelo(id) : null;
   if (modelo ? arte?.modelo === modelo.id : arte === null) return;
   for (const item of fotos.values()) item.asset?.dispose();
   fotos.clear();
@@ -443,6 +630,7 @@ function escolheModelo(id) {
   selecionada = arte ? (camadasDeFoto()[0]?.id || arte.camadas[0]?.id || null) : null;
   setError('');
   setStatus('');
+  limpaHistorico();
   marcaModeloEscolhido();
   atualizaModo();
   // Com um modelo na mão, a vista aberta já abre: dá para arrastar as coisas ali também.
@@ -457,6 +645,10 @@ function atualizaModo() {
   el.freeName.hidden = Boolean(arte);
   el.adjustments.hidden = Boolean(arte);
   el.templateName.textContent = modeloAtual ? `${modeloAtual.nome}: ${modeloAtual.descricao}.` : '';
+  el.apagarModelo.hidden = !(arte && ehMeuModelo(arte.modelo));
+  el.salvarModelo.hidden = !arte;
+  if (!arte) el.formMeuModelo.hidden = true;
+  atualizaHistorico();
   montaCamadas();
   montaPropriedades();
   if (!arte) syncRangeOutputs();
@@ -655,6 +847,7 @@ function montaPropriedades() {
 
   if (camada.tipo === 'frase') {
     partes.push(campoTexto('Frase', camada.texto || '', 40, (valor) => {
+      registra(`texto:${camada.id}`);
       const iguais = camada.grupo ? arte.camadas.filter((c) => c.grupo === camada.grupo) : [camada];
       for (const alvo of iguais) alvo.texto = valor;
       const botaoDaLista = el.camadas.querySelector(`[data-camada="${camada.id}"] .studio-camada__texto > span`);
@@ -667,9 +860,9 @@ function montaPropriedades() {
       nota.textContent = 'Esta frase se repete na volta da caneca: mudou aqui, mudou nas outras.';
       partes.push(nota);
     }
-    partes.push(campoSelect('Jeito da letra', FONTES, camada.fonte, (valor) => { camada.fonte = valor; schedule(); }));
-    partes.push(campoCores(camada.cor, (token) => { camada.cor = token; schedule(); }));
-    partes.push(campoRange('Tamanho da letra', camada.tamanho, LIMITES.fraseTamanho, 0.5, (valor) => { camada.tamanho = valor; schedule(); }));
+    partes.push(campoSelect('Jeito da letra', FONTES, camada.fonte, (valor) => { registra(`fonte:${camada.id}`); camada.fonte = valor; schedule(); }));
+    partes.push(campoCores(camada.cor, (token) => { registra(`cor:${camada.id}`); camada.cor = token; schedule(); }));
+    partes.push(campoRange('Tamanho da letra', camada.tamanho, LIMITES.fraseTamanho, 0.5, (valor) => { registra(`tamanho:${camada.id}`); camada.tamanho = valor; schedule(); }));
   }
 
   if (camada.tipo === 'foto') {
@@ -679,8 +872,9 @@ function montaPropriedades() {
     acoes.append(botao(item?.asset ? 'Trocar foto' : 'Escolher foto', () => pedeArquivo({ tipo: 'camada', id: camada.id })));
     if (item?.asset) acoes.append(botao('Tirar a foto', () => tiraFoto(camada.id)));
     partes.push(acoes);
-    partes.push(campoSelect('Formato', FORMAS_DE_FOTO, camada.forma, (valor) => { camada.forma = valor; schedule(); }));
+    partes.push(campoSelect('Formato', FORMAS_DE_FOTO, camada.forma, (valor) => { registra(`forma:${camada.id}`); camada.forma = valor; schedule(); }));
     partes.push(campoRange('Tamanho', camada.largura, LIMITES.fotoLargura, 0.005, (valor) => {
+      registra(`tamanho:${camada.id}`);
       const proporcao = camada.altura / camada.largura;
       camada.largura = valor;
       camada.altura = clamp(valor * proporcao, 0.05, 1);
@@ -688,9 +882,9 @@ function montaPropriedades() {
     }));
     if (item?.asset) {
       const ajuste = camada.ajuste || (camada.ajuste = { scale: 1, offsetX: 0, offsetY: 0 });
-      partes.push(campoRange('Aproximar a foto', ajuste.scale, [1, 3], 0.01, (valor) => { ajuste.scale = valor; schedule(); }));
-      partes.push(campoRange('Foto para os lados', ajuste.offsetX, [-1, 1], 0.01, (valor) => { ajuste.offsetX = valor; schedule(); }));
-      partes.push(campoRange('Foto para cima ou para baixo', ajuste.offsetY, [-1, 1], 0.01, (valor) => { ajuste.offsetY = valor; schedule(); }));
+      partes.push(campoRange('Aproximar a foto', ajuste.scale, [1, 3], 0.01, (valor) => { registra(`enquadra:${camada.id}`); ajuste.scale = valor; schedule(); }));
+      partes.push(campoRange('Foto para os lados', ajuste.offsetX, [-1, 1], 0.01, (valor) => { registra(`enquadra:${camada.id}`); ajuste.offsetX = valor; schedule(); }));
+      partes.push(campoRange('Foto para cima ou para baixo', ajuste.offsetY, [-1, 1], 0.01, (valor) => { registra(`enquadra:${camada.id}`); ajuste.offsetY = valor; schedule(); }));
     }
   }
 
@@ -716,6 +910,7 @@ function montaPropriedades() {
       }
       botaoForma.appendChild(canvas);
       botaoForma.addEventListener('click', () => {
+        registra(`forma:${camada.id}`);
         camada.forma = item.forma;
         montaCamadas();
         montaPropriedades();
@@ -724,25 +919,26 @@ function montaPropriedades() {
       grade.appendChild(botaoForma);
     }
     partes.push(grade);
-    partes.push(campoCores(camada.cor, (token) => { camada.cor = token; montaCamadas(); montaPropriedades(); schedule(); }));
-    partes.push(campoRange('Tamanho', camada.tamanho, LIMITES.enfeiteTamanho, 0.005, (valor) => { camada.tamanho = valor; schedule(); }));
+    partes.push(campoCores(camada.cor, (token) => { registra(`cor:${camada.id}`); camada.cor = token; montaCamadas(); montaPropriedades(); schedule(); }));
+    partes.push(campoRange('Tamanho', camada.tamanho, LIMITES.enfeiteTamanho, 0.005, (valor) => { registra(`tamanho:${camada.id}`); camada.tamanho = valor; schedule(); }));
   }
 
   if (camada.tipo === 'adesivo') {
     partes.push(campoSelect('Pose do Pandinha', ADESIVOS.map((a) => ({ valor: a.arquivo, nome: a.nome })), camada.arquivo, async (valor) => {
+      registra(`pose:${camada.id}`);
       camada.arquivo = valor;
       await garanteAdesivos();
       montaCamadas();
       schedule();
     }));
-    partes.push(campoRange('Tamanho', camada.tamanho, LIMITES.adesivoTamanho, 0.005, (valor) => { camada.tamanho = valor; schedule(); }));
+    partes.push(campoRange('Tamanho', camada.tamanho, LIMITES.adesivoTamanho, 0.005, (valor) => { registra(`tamanho:${camada.id}`); camada.tamanho = valor; schedule(); }));
     const nota = document.createElement('p');
     nota.className = 'studio-help';
     nota.textContent = 'Um Pandinha por caneca. Ele acompanha a arte, nunca fica na frente dela.';
     partes.push(nota);
   }
 
-  partes.push(campoRange('Inclinação', camada.rotacao || 0, LIMITES.giro, 1, (valor) => { camada.rotacao = valor; schedule(); }));
+  partes.push(campoRange('Inclinação', camada.rotacao || 0, LIMITES.giro, 1, (valor) => { registra(`giro:${camada.id}`); camada.rotacao = valor; schedule(); }));
 
   const ordem = document.createElement('div');
   ordem.className = 'studio-props__acoes';
@@ -757,6 +953,7 @@ function montaPropriedades() {
 }
 
 function mudaOrdem(id, direcao) {
+  registra('estrutura');
   const indice = arte.camadas.findIndex((camada) => camada.id === id);
   const destino = indice + direcao;
   if (indice < 0 || destino < 0 || destino >= arte.camadas.length) return;
@@ -769,6 +966,7 @@ function mudaOrdem(id, direcao) {
 function duplica(id) {
   const camada = camadaPorId(id);
   if (!camada) return;
+  registra('estrutura');
   const copia = { ...camada, id: novoId(), x: clamp(camada.x + 0.03, 0, 1), y: clamp(camada.y + 0.05, 0, 1) };
   delete copia.grupo;
   if (camada.tipo === 'foto') {
@@ -784,6 +982,7 @@ function duplica(id) {
 }
 
 function apaga(id) {
+  registra('estrutura');
   const indice = arte.camadas.findIndex((camada) => camada.id === id);
   if (indice < 0) return;
   const [camada] = arte.camadas.splice(indice, 1);
@@ -803,6 +1002,7 @@ function lugarLivre() {
 }
 
 function acrescenta(camada) {
+  registra('estrutura');
   arte.camadas.push(camada);
   montaCamadas();
   seleciona(camada.id);
@@ -867,8 +1067,10 @@ function isProjectFile(file) {
 }
 
 function tiraFoto(id, redesenhar = true) {
+  if (redesenhar) registra(`foto:${id}`);
   const item = fotos.get(id);
-  if (item?.asset && !item.compartilhada) item.asset.dispose();
+  // A foto vai para a lixeira em vez de sumir: o desfazer precisa dela de volta.
+  if (item) lixeira.set(id, item);
   fotos.delete(id);
   const camada = camadaPorId(id);
   if (camada?.ajuste) Object.assign(camada.ajuste, { scale: 1, offsetX: 0, offsetY: 0 });
@@ -887,8 +1089,9 @@ async function handleFile(file, destino = destinoDoArquivo) {
   try {
     const asset = await loadArtwork(file);
     if (destino?.tipo === 'camada' && arte) {
+      registra(`foto:${destino.id}`);
       const anterior = fotos.get(destino.id);
-      if (anterior?.asset && !anterior.compartilhada) anterior.asset.dispose();
+      if (anterior) lixeira.set(`${destino.id}:${Date.now()}`, anterior);
       fotos.set(destino.id, { asset, blob: file });
       seleciona(destino.id);
       montaCamadas();
@@ -1125,7 +1328,7 @@ async function openProject(file) {
     if (project.arte?.camadas?.length) {
       escolheModelo(project.arte.modelo || null);
       arte = { ...project.arte, camadas: project.arte.camadas.map((camada) => ({ ...camada })) };
-      modeloAtual = modeloPorId(arte.modelo);
+      modeloAtual = acheModelo(arte.modelo);
       contador = arte.camadas.length + 10;
       selecionada = arte.camadas[0]?.id || null;
       marcaModeloEscolhido();
@@ -1154,30 +1357,105 @@ async function openProject(file) {
 }
 
 /* ---------- edição na vista aberta ---------- */
+/** A alça que está debaixo do dedo, se houver: os quatro cantos aumentam, o de cima gira. */
+function alcaSobOPonto(event) {
+  const camada = camadaPorId(selecionada);
+  if (!camada) return null;
+  const { bounds } = escalasDaVistaAberta(areaMm);
+  if (!bounds.width) return null;
+  const porPixel = bounds.width / areaMm.width;
+  const naTela = (ponto) => ({
+    x: bounds.left + (ponto.x - areaMm.x) * porPixel,
+    y: bounds.top + (ponto.y - areaMm.y) * porPixel,
+  });
+  const perto = (ponto) => Math.hypot(event.clientX - ponto.x, event.clientY - ponto.y) <= 16;
+  const alcas = alcasDaCamada(camada, areaMm, medidor);
+  if (perto(naTela(alcas.giro))) return { tipo: 'girar', camada, caixa: alcas.caixa };
+  for (const canto of alcas.cantos) {
+    if (perto(naTela(canto))) return { tipo: 'redimensionar', camada, caixa: alcas.caixa };
+  }
+  return null;
+}
+
+/** Aumenta ou diminui a camada mantendo o centro parado, pelo quanto o dedo se afastou dele. */
+function redimensiona(gesto, ponto) {
+  const distancia = Math.hypot(ponto.x - gesto.centro.x, ponto.y - gesto.centro.y);
+  const fator = clamp(distancia / Math.max(gesto.distanciaInicial, 0.5), 0.15, 8);
+  const camada = gesto.camada;
+  if (camada.tipo === 'frase') {
+    camada.tamanho = clamp(gesto.base.tamanho * fator, LIMITES.fraseTamanho[0], LIMITES.fraseTamanho[1]);
+    camada.largura = clamp(gesto.base.largura * fator, 0.05, 0.95);
+  } else if (camada.tipo === 'foto') {
+    camada.largura = clamp(gesto.base.largura * fator, LIMITES.fotoLargura[0], LIMITES.fotoLargura[1]);
+    camada.altura = clamp(gesto.base.altura * fator, 0.06, 1);
+  } else {
+    const limite = camada.tipo === 'adesivo' ? LIMITES.adesivoTamanho : LIMITES.enfeiteTamanho;
+    camada.tamanho = clamp(gesto.base.tamanho * fator, limite[0], limite[1]);
+  }
+  schedule();
+}
+
+/** Gira pelo ângulo que o dedo descreveu em volta do centro, encostando no reto quando chega perto. */
+function gira(gesto, ponto) {
+  const angulo = Math.atan2(ponto.y - gesto.centro.y, ponto.x - gesto.centro.x);
+  let graus = gesto.base.rotacao + (angulo - gesto.anguloInicial) * 180 / Math.PI;
+  graus = ((graus + 180) % 360 + 360) % 360 - 180;
+  for (const marco of [-180, -90, 0, 90, 180]) if (Math.abs(graus - marco) < 4) graus = marco;
+  gesto.camada.rotacao = Math.round(graus);
+  montaPropriedades();
+  schedule();
+}
+
+// Segurar o ponteiro mantém o arrasto mesmo se o dedo sair do desenho; nem todo navegador
+// (nem um evento simulado em teste) tem ponteiro ativo, então a falha aqui é inofensiva.
+const capturaPonteiro = (event) => { try { el.flat.setPointerCapture(event.pointerId); } catch { /* sem captura */ } };
+const soltaPonteiro = (event) => { try { el.flat.releasePointerCapture(event.pointerId); } catch { /* idem */ } };
+
 function ligaVistaAberta() {
   el.flat.addEventListener('pointerdown', (event) => {
     if (!arte) return;
     const fracao = fracaoDoEventoPlano(event);
     if (!fracao) return;
-    const camada = camadaEm(arte, pontoMm(fracao), areaMm, medidor);
-    // Clicar no vazio solta a seleção: some o contorno e o painel volta ao aviso.
+    const ponto = pontoMm(fracao);
+    const alca = alcaSobOPonto(event);
+    if (alca) {
+      registra(`${alca.tipo}:${alca.camada.id}`);
+      const centro = { x: alca.caixa.centroX, y: alca.caixa.centroY };
+      arrasto = {
+        tipo: alca.tipo, id: alca.camada.id, camada: alca.camada, centro,
+        distanciaInicial: Math.hypot(ponto.x - centro.x, ponto.y - centro.y),
+        anguloInicial: Math.atan2(ponto.y - centro.y, ponto.x - centro.x),
+        base: { ...alca.camada },
+      };
+      capturaPonteiro(event);
+      event.preventDefault();
+      return;
+    }
+    const camada = camadaEm(arte, ponto, areaMm, medidor);
+    // Clicar no vazio solta a seleção: somem o contorno e as alças.
     if (!camada) { if (selecionada) seleciona(null); return; }
     seleciona(camada.id);
-    arrasto = { id: camada.id, dx: camada.x - fracao.x, dy: camada.y - fracao.y };
-    el.flat.setPointerCapture?.(event.pointerId);
+    registra(`mover:${camada.id}`);
+    arrasto = { tipo: 'mover', id: camada.id, dx: camada.x - fracao.x, dy: camada.y - fracao.y };
+    capturaPonteiro(event);
     event.preventDefault();
   });
   el.flat.addEventListener('pointermove', (event) => {
     if (!arte) return;
     const fracao = fracaoDoEventoPlano(event);
     if (!fracao) return;
+    if (arrasto?.tipo === 'redimensionar') { redimensiona(arrasto, pontoMm(fracao)); return; }
+    if (arrasto?.tipo === 'girar') { gira(arrasto, pontoMm(fracao)); return; }
     if (arrasto) { moveCamada(arrasto, fracao); return; }
-    el.flat.style.cursor = camadaEm(arte, pontoMm(fracao), areaMm, medidor) ? 'grab' : '';
+    const alca = alcaSobOPonto(event);
+    if (alca) el.flat.style.cursor = alca.tipo === 'girar' ? 'grab' : 'nwse-resize';
+    else el.flat.style.cursor = camadaEm(arte, pontoMm(fracao), areaMm, medidor) ? 'grab' : '';
   });
   const solta = (event) => {
     if (!arrasto) return;
     arrasto = null;
-    el.flat.releasePointerCapture?.(event.pointerId);
+    montaPropriedades();
+    soltaPonteiro(event);
   };
   el.flat.addEventListener('pointerup', solta);
   el.flat.addEventListener('pointercancel', solta);
@@ -1248,6 +1526,29 @@ function bind() {
   el.panda.addEventListener('change', readTextOptions);
 
   el.moreModels.addEventListener('click', () => { mostrarTodosOsModelos = !mostrarTodosOsModelos; montaModelos(); });
+  el.desfazer.addEventListener('click', desfaz);
+  el.refazer.addEventListener('click', refaz);
+  el.salvarModelo.addEventListener('click', () => {
+    el.formMeuModelo.hidden = !el.formMeuModelo.hidden;
+    if (!el.formMeuModelo.hidden) {
+      el.nomeMeuModelo.value = modeloAtual?.nome ? `${modeloAtual.nome} do meu jeito` : 'Meu modelo';
+      el.nomeMeuModelo.focus();
+      el.nomeMeuModelo.select();
+    }
+  });
+  el.confirmarMeuModelo.addEventListener('click', salvaModeloAtual);
+  el.nomeMeuModelo.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') { event.preventDefault(); salvaModeloAtual(); }
+  });
+  el.cancelarMeuModelo.addEventListener('click', () => { el.formMeuModelo.hidden = true; });
+  el.apagarModelo.addEventListener('click', apagaMeuModelo);
+  // Ctrl+Z e Ctrl+Shift+Z, menos quando a pessoa está digitando (lá o desfazer é do campo).
+  document.addEventListener('keydown', (event) => {
+    if (!arte || !(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== 'z') return;
+    if (/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName || '')) return;
+    event.preventDefault();
+    if (event.shiftKey) refaz(); else desfaz();
+  });
   el.saveGuide.addEventListener('click', saveGuide);
   el.importarCanva.addEventListener('click', () => { el.canvaFile.value = ''; el.canvaFile.click(); });
   el.canvaFile.addEventListener('change', () => importaDoCanva(el.canvaFile.files?.[0]));
@@ -1268,6 +1569,7 @@ function bind() {
 }
 
 async function init() {
+  carregaMeusModelos();
   bind();
   el.sizeGuide.textContent = `${medida.larguraCm.toFixed(0)} × ${medida.alturaCm.toFixed(0)} cm (${medida.larguraPx} × ${medida.alturaPx} px a ${medida.dpi} dpi)`;
   montaCategorias();
