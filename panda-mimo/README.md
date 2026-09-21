@@ -42,6 +42,15 @@ Em `index.html`, revise também os textos que são propostas:
 Os preços e o texto longo de cada produto se preenchem pelo painel (campos **Preço** e **Texto da tela de detalhe**).
 Enquanto o preço estiver vazio, a tela de detalhe mostra "Valor sob consulta".
 
+## Estúdio da caneca em 360°
+
+`caneca-3d.html` deixa a pessoa colocar a própria foto ou arte numa caneca em 3D (three.js servido de
+`vendor/three/`, sem CDN), escolher as cores do interior e da alça, escrever um nome e baixar a prévia, a
+arte plana em 300 dpi (210 × 90 mm) ou o projeto para continuar depois. Nada é enviado: a imagem fica no
+navegador. O código está em `simulador/` (`estudio.js` liga a página, `arte.js` compõe a arte em
+milímetros, `caneca-3d.js` desenha a caneca). Para abrir localmente use `npm run servir`, porque por
+`file://` o navegador bloqueia o canvas. As medidas da caneca ficam em `MUG_SPEC` (`simulador/caneca-3d.js`).
+
 ## Manual da marca
 
 A marca tem um brand book próprio, escrito a partir da identidade aprovada no site:

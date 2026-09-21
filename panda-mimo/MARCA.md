@@ -217,7 +217,8 @@ Poucas chamadas, sempre as mesmas, para a pessoa nunca precisar decidir o que um
 | Principal | **Quero criar meu mimo** | hero, contato | simulador (hero) ou WhatsApp (contato) |
 | Secundária | **Ver as peças** | hero | catálogo |
 | Peça | **Quero essa** | cartão e detalhe da peça | WhatsApp com a peça no texto |
-| Simulador | **Pedir esse mimo no WhatsApp** | abaixo da prévia | WhatsApp com nome, base e cor |
+| Simulador | **Pedir esse mimo no WhatsApp** | abaixo da prévia (nome) e no estúdio da caneca | WhatsApp com nome, base e cor; no estúdio, com cores, arte e nome |
+| Estúdio da caneca | **Ver minha foto na caneca** | seção Monte seu mimo | `caneca-3d.html`, a caneca em 360° |
 | Empresas | **Orçamento para 10+ unidades** | pedidos em quantidade | WhatsApp com a pergunta de quantidade |
 | Lançamento | **Me avise** | cartão em teste | WhatsApp pedindo aviso |
 | Apoio | Pedir pelo WhatsApp · Perguntar no WhatsApp | busca sem resultado, dúvidas | WhatsApp |
@@ -498,6 +499,17 @@ posicionada em porcentagem da foto. Ao trocar a foto-base de uma dessas três pe
 da placa precisam ser recalibradas em `script.js` (`FOTO_REAL`). Prévias enviadas por WhatsApp seguem o
 mesmo princípio: arte aplicada na peça, cor e posição reais, nada de arte solta.
 
+**Estúdio da caneca em 360° (`caneca-3d.html`, setembro de 2026).** Para foto ou arte própria, o site tem
+um segundo simulador, só de caneca: um modelo paramétrico de referência (caneca reta de 325 ml, 82 × 95 mm,
+área de personalização de 210 × 90 mm com folga junto à alça), renderizado no navegador, com cores do
+interior e da alça, arte em um lado, nos dois ou ao redor, nome em Fredoka ou Caveat e o Pandinha adesivo
+(`panda-coracao.webp`, nunca a versão 3D da 6.5). A imagem da pessoa fica no navegador e só vira arquivo
+quando ela baixa a prévia, a arte plana em 300 dpi ou o projeto. Regras: a prévia é declarada como prévia
+("Só uma prévia, tá?"); a arte plana sai na medida real, sem guias, para a produção conferir; o modelo
+não é medição de peça do fornecedor, e trocar de fornecedor pede recalibrar `MUG_SPEC` em
+`simulador/caneca-3d.js`; o guardião abre a página, coloca a arte de exemplo, troca cores e vistas e
+baixa os dois arquivos.
+
 ### 10.4 Não fazer
 Sem fundo branco recortado às pressas, sem sombra dura, sem filtro colorido, sem peça cortada pela
 metade, sem colagens com mais de três peças, sem texto sobre a foto de catálogo.
@@ -775,6 +787,7 @@ adereço pequeno no Pandinha em datas comemorativas, com aprovação prévia (6.
 | Data | Versão | O que mudou |
 |---|---|---|
 | set/2026 | 1.0 | Primeira edição, consolidando a identidade aplicada no site (paleta, tipografia, logo, mascote, tom de voz, aplicações, governança). |
+| set/2026 | 2.5 | Estúdio da caneca em 360° (`caneca-3d.html`): foto ou arte própria aplicada num modelo 3D de referência, cores do interior e da alça, nome e Pandinha adesivo, prévia e arte plana em 300 dpi baixáveis, pedido pelo WhatsApp com as escolhas (10.3). Convite na seção Monte seu mimo com a chamada "Ver minha foto na caneca" (4.7), link no rodapé, página no sitemap; guardião ganha o teste de ponta a ponta do estúdio e os testes unitários da arte. |
 | set/2026 | 2.4 | Piloto de edição da margarida: pétalas e miolo mais definidos, transparência real conferida, WebPs em duas densidades e mestre PNG preservado (13.7). |
 | set/2026 | 2.3 | Homologação de loja: páginas Sobre, Trocas e garantia, Como funciona a compra e Privacidade e cookies, linkadas no rodapé com a identificação da loja (Decreto 7.962/2013) editável no painel (11.1); fontes servidas do próprio site (8.1); título comercial, dados estruturados (Organization, FAQPage, ItemList com preços), manifest e sitemap completo; FAQ cita a garantia legal de 90 dias; guardião ganha axe-core e as checagens de páginas, SEO e fontes. |
 | set/2026 | 2.2 | Etiqueta da hero volta a ser o adesivo em imagem, exceção registrada em 13.7; guardião de nitidez passa a exigir o adesivo com `alt`. |

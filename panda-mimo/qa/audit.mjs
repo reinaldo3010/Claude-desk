@@ -587,7 +587,7 @@ for (const [w, h] of viewports) {
   if (hero.botoes[0] !== 'Quero criar meu mimo' || hero.botoes[1] !== 'Ver as peças') failures.push(`[conversão] chamadas do hero fora da tabela 4.7: ${hero.botoes.join(' | ')}`);
   if (hero.facts < 4) failures.push('[conversão] a faixa de segurança do hero perdeu itens');
   // chamadas para ação: só as da tabela 4.7 (botões .btn com texto)
-  const permitidas = ['Quero criar meu mimo', 'Ver as peças', 'Quero essa', 'Pedir esse mimo no WhatsApp', 'Orçamento para 10+ unidades', 'Me avise', 'Pedir pelo WhatsApp', 'Perguntar no WhatsApp', 'Ver no Instagram', 'Ver com meu nome', 'Enviar depoimento', 'Voltar pro início', 'Limpar busca', 'Ver mais'];
+  const permitidas = ['Quero criar meu mimo', 'Ver as peças', 'Quero essa', 'Pedir esse mimo no WhatsApp', 'Orçamento para 10+ unidades', 'Me avise', 'Pedir pelo WhatsApp', 'Perguntar no WhatsApp', 'Ver no Instagram', 'Ver com meu nome', 'Ver minha foto na caneca', 'Enviar depoimento', 'Voltar pro início', 'Limpar busca', 'Ver mais'];
   const fora = await page.$$eval('main .btn, footer .btn', (els) => els.map((b) => b.textContent.replace(/\s+/g, ' ').trim()).filter(Boolean));
   const estranhas = [...new Set(fora.filter((t) => !permitidas.some((p) => t === p || t.startsWith(p))))];
   if (estranhas.length) failures.push(`[conversão] chamada(s) fora da tabela 4.7 do manual: ${estranhas.join(' | ')}`);
@@ -916,8 +916,27 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
   }
   if (!/Cookies<\/h2>/.test(ler('privacidade.html'))) failures.push('[páginas] privacidade.html perdeu a seção sobre cookies');
   if (!/90 dias/.test(ler('trocas.html'))) failures.push('[páginas] trocas.html não informa a garantia legal de 90 dias (CDC art. 26)');
+  // estúdio da caneca em 360° (caneca-3d.html): mesma disciplina de cabeçalho, rodapé e sitemap
+  {
+    const pg = 'caneca-3d.html';
+    if (!fs.existsSync(path.resolve(raiz, pg))) failures.push(`[estúdio] falta ${pg}`);
+    else {
+      const t = ler(pg);
+      if (!new RegExp(`href="${pg}"`).test(index)) failures.push(`[estúdio] o index não leva para ${pg}`);
+      if (!t.includes(`<link rel="canonical" href="`) || !t.includes(pg + '"')) failures.push(`[estúdio] ${pg} sem canonical próprio`);
+      if (!/<title>[^<]{10,70}Panda Mimo<\/title>/.test(t)) failures.push(`[estúdio] ${pg} sem <title> "… · Panda Mimo"`);
+      if (!/<meta name="description" content="[^"]{60,170}">/.test(t)) failures.push(`[estúdio] ${pg} sem meta description de 60 a 170 caracteres`);
+      if (!t.includes('id="loja-dados"')) failures.push(`[estúdio] ${pg} sem a linha de identificação da loja no rodapé`);
+      for (const outra of PAGINAS) if (!t.includes(`href="${outra}"`)) failures.push(`[estúdio] ${pg} não linka ${outra} no rodapé`);
+      if (!sitemap.includes(`<loc>https://reinaldo3010.github.io/Claude-desk/${pg}</loc>`) && !/SEU-DOMINIO/.test(sitemap)) failures.push(`[estúdio] sitemap.xml não lista ${pg}`);
+      if (/fonts\.googleapis\.com|fonts\.gstatic\.com|https?:\/\/[^"']*\.js/.test(t)) failures.push(`[estúdio] ${pg} carrega fonte ou script de terceiros`);
+      for (const f of ['simulador/estudio.js', 'simulador/arte.js', 'simulador/caneca-3d.js', 'simulador/estudio.css', 'vendor/three/three.module.js', 'vendor/three/OrbitControls.js'])
+        if (!fs.existsSync(path.resolve(raiz, f))) failures.push(`[estúdio] falta o arquivo ${f}`);
+      if (!/Nada é produzido sem o seu/.test(t)) failures.push('[estúdio] frase de segurança da tabela 4.7 sumiu da página');
+    }
+  }
   // fontes: só arquivos nossos; nada de terceiros nas páginas públicas
-  for (const pg of ['index.html', '404.html', ...PAGINAS]) {
+  for (const pg of ['index.html', '404.html', 'caneca-3d.html', ...PAGINAS]) {
     const t = ler(pg);
     if (/fonts\.googleapis\.com|fonts\.gstatic\.com/.test(t)) failures.push(`[fontes] ${pg} ainda carrega fontes de terceiros; use assets/fontes (LGPD e primeira pintura)`);
   }
@@ -951,7 +970,7 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
   // axe-core (WCAG 2.2 AA + boas práticas): nenhuma violação séria ou crítica nas páginas públicas
   const axePath = path.resolve(raiz, 'node_modules', 'axe-core', 'axe.min.js');
   if (!fs.existsSync(axePath)) failures.push('[acessibilidade] axe-core não instalado (npm install)');
-  else for (const pg of ['index.html', ...PAGINAS, '404.html']) {
+  else for (const pg of ['index.html', ...PAGINAS, 'caneca-3d.html', '404.html']) {
     const pa = await browser.newPage({ viewport: { width: 390, height: 844 } });
     await pa.route('**/rest/v1/**', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
     await pa.goto('file://' + path.resolve(raiz, pg), { waitUntil: 'load' });
@@ -964,6 +983,86 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     }
     await pa.close();
   }
+}
+
+// ---- estúdio da caneca em 360°: funciona de ponta a ponta, servido por http (canvas e WebGL exigem origem) ----
+{
+  const { servir } = await import('./servidor.mjs');
+  const servidor = await servir();
+  const larguras = viewports.some(([w]) => w >= 1024) && viewports.some(([w]) => w < 600) ? [390, 1280] : [viewports[0]?.[0] || 390];
+  for (const w of larguras) {
+    const pe = await browser.newPage({ viewport: { width: w, height: w < 600 ? 844 : 800 } });
+    const erros = [];
+    pe.on('pageerror', (e) => erros.push(e.message));
+    pe.on('console', (m) => m.type() === 'error' && erros.push(m.text()));
+    pe.on('requestfailed', (r) => erros.push(`pedido falhou: ${r.url().slice(0, 80)}`));
+    pe.on('response', (r) => r.status() >= 400 && r.url().startsWith(servidor.url) && erros.push(`${r.status()} em ${r.url().slice(servidor.url.length)}`));
+    await pe.route('**/rest/v1/**', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: '[{"whatsapp":"5511999999999"}]' }));
+    await pe.goto(servidor.url + 'caneca-3d.html', { waitUntil: 'load' });
+    const pronto = await pe.waitForFunction(() => document.getElementById('viewer-loading')?.hidden || !document.getElementById('viewer-fallback')?.hidden, null, { timeout: 15000 }).then(() => true).catch(() => false);
+    if (!pronto) failures.push(`[estúdio ${w}] a prévia 3D não ficou pronta em 15 s`);
+    const estado = await pe.evaluate(() => ({
+      canvas: !!document.querySelector('#mug-viewport canvas.mug-3d-canvas'),
+      fallback: !document.getElementById('viewer-fallback').hidden,
+      rolagem: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+      previa: !document.getElementById('save-preview').disabled,
+      zap: document.getElementById('mug-order').href,
+    }));
+    if (estado.fallback || !estado.canvas) failures.push(`[estúdio ${w}] o 3D caiu no aviso de indisponível`);
+    if (estado.rolagem) failures.push(`[estúdio ${w}] rolagem lateral na página`);
+    if (!estado.previa) failures.push(`[estúdio ${w}] "Baixar prévia" continua desligado com o 3D pronto`);
+    if (!/^https:\/\/wa\.me\/5511999999999\?text=/.test(estado.zap) || !new URL(estado.zap).searchParams.get('text').includes('Interior: Branco')) failures.push(`[estúdio ${w}] o pedido não leva as escolhas para o WhatsApp (${estado.zap.slice(0, 60)})`);
+    // arte de exemplo entra, aparece na arte plana e o pedido menciona a arte
+    await pe.click('#use-example');
+    const comArte = await pe.waitForFunction(() => !document.getElementById('art-file-info').hidden, null, { timeout: 8000 }).then(() => true).catch(() => false);
+    if (!comArte) failures.push(`[estúdio ${w}] a arte de exemplo não entrou`);
+    await pe.waitForTimeout(400);
+    const plana = await pe.evaluate(() => {
+      const c = document.getElementById('flat-art'); const ctx = c.getContext('2d');
+      const d = ctx.getImageData(0, 0, c.width, c.height).data; let pintados = 0;
+      for (let i = 0; i < d.length; i += 16) if (d[i] < 235 || d[i + 1] < 235 || d[i + 2] < 235) pintados += 1;
+      return { pintados, zap: new URL(document.getElementById('mug-order').href).searchParams.get('text') || '', erro: document.getElementById('art-error').hidden };
+    });
+    if (plana.pintados < 200) failures.push(`[estúdio ${w}] a arte plana ficou em branco depois de colocar a arte`);
+    if (!plana.zap.includes('Arte:')) failures.push(`[estúdio ${w}] a mensagem do pedido não cita a arte`);
+    if (!plana.erro) failures.push(`[estúdio ${w}] apareceu erro de arquivo com a arte de exemplo`);
+    // nome, cores e vistas
+    await pe.evaluate(() => document.querySelectorAll('details.studio-options').forEach((d) => { d.open = true; }));
+    await pe.fill('#art-name', 'Malu');
+    await pe.selectOption('#inside-color', 'rosa');
+    await pe.click('[data-preset="preta"]');
+    await pe.click('[data-view="back"]');
+    await pe.waitForTimeout(700);
+    const depois = await pe.evaluate(() => ({
+      zap: new URL(document.getElementById('mug-order').href).searchParams.get('text') || '',
+      pressed: document.querySelector('[data-view][aria-pressed="true"]')?.dataset.view,
+      preset: document.querySelector('[data-preset][aria-pressed="true"]')?.dataset.preset,
+      interior: document.getElementById('inside-color').value,
+    }));
+    if (!depois.zap.includes('"Malu"') || !depois.zap.includes('Interior: Preto')) failures.push(`[estúdio ${w}] o pedido não acompanha nome e cores escolhidos`);
+    if (depois.pressed !== 'back') failures.push(`[estúdio ${w}] o botão de vista "Verso" não ficou marcado`);
+    if (depois.preset !== 'preta' || depois.interior !== 'preta') failures.push(`[estúdio ${w}] a combinação "Preto e branco" não aplicou as duas cores`);
+    // arquivo inválido é recusado com mensagem, sem erro de console
+    await pe.setInputFiles('#art-file', { name: 'falso.png', mimeType: 'image/png', buffer: Buffer.from('<svg/>') });
+    await pe.waitForTimeout(300);
+    const recusa = await pe.evaluate(() => ({ visivel: !document.getElementById('art-error').hidden, texto: document.getElementById('art-error').textContent }));
+    if (!recusa.visivel || !recusa.texto) failures.push(`[estúdio ${w}] arquivo inválido não gerou aviso`);
+    // exportação da arte plana em 300 dpi e da prévia
+    const baixados = [];
+    pe.on('download', (d) => baixados.push(d.suggestedFilename()));
+    await pe.click('#save-print');
+    await pe.click('#save-preview');
+    await pe.waitForFunction(() => /salva/.test(document.getElementById('save-status').textContent), null, { timeout: 10000 }).catch(() => {});
+    await pe.waitForTimeout(800);
+    if (!baixados.some((n) => /300dpi\.png$/.test(n))) failures.push(`[estúdio ${w}] "Baixar arte plana" não gerou o PNG em 300 dpi (${baixados.join(', ') || 'nada baixado'})`);
+    if (!baixados.some((n) => /previa/.test(n))) failures.push(`[estúdio ${w}] "Baixar prévia" não gerou a imagem (${baixados.join(', ') || 'nada baixado'})`);
+    const dir = path.join(here, 'shots', String(w));
+    fs.mkdirSync(dir, { recursive: true });
+    await pe.screenshot({ path: path.join(dir, 'estudio-caneca.png'), fullPage: true }).catch(() => {});
+    erros.filter((e) => !/Failed to load resource|net::ERR_/.test(e)).forEach((e) => failures.push(`[estúdio ${w}] erro: ${e}`));
+    await pe.close();
+  }
+  await servidor.close();
 }
 
 await browser.close();

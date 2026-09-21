@@ -57,6 +57,17 @@ perda de detalhes e contornos mais irregulares. Mestres preservados; não confun
 arquivo vetorial com arte mais fiel. Flores/folhas têm suavidade na própria arte;
 uma nova fonte aprovada é necessária antes de prometer definição adicional.
 
+## Estúdio da caneca em 360° — setembro de 2026
+
+`npm test` começa pelos testes unitários da arte (`arte-unit.test.mjs`: geometria em mm, dpi efetivo,
+corte, recusa de arquivo inválido, exportação em 300 dpi). Depois, `audit.mjs` sobe um servidor http
+próprio (`servidor.mjs`; por `file://` o canvas fica bloqueado) e abre `caneca-3d.html` em 390 e 1280 px:
+o 3D precisa ficar pronto em 15 s, a arte de exemplo entra e aparece na arte plana, nome e cores vão para
+a mensagem do WhatsApp, o botão de vista fica marcado, arquivo falso gera aviso, e "Baixar arte plana" e
+"Baixar prévia" geram os dois arquivos. Captura em `qa/shots/<largura>/estudio-caneca.png`. A página
+também passa pelo axe-core e pelas checagens de cabeçalho, rodapé e sitemap. Para ver local:
+`npm run servir` e abra o endereço impresso.
+
 ## Revisão humana obrigatória
 
 Abra as capturas em 100% de zoom. Confira cada símbolo, cada frase, bordas, proporção,
