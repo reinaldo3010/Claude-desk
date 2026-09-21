@@ -217,7 +217,8 @@ Poucas chamadas, sempre as mesmas, para a pessoa nunca precisar decidir o que um
 | Principal | **Quero criar meu mimo** | hero, contato | simulador (hero) ou WhatsApp (contato) |
 | Secundária | **Ver as peças** | hero | catálogo |
 | Peça | **Quero essa** | cartão e detalhe da peça | WhatsApp com a peça no texto |
-| Simulador | **Pedir esse mimo no WhatsApp** | abaixo da prévia | WhatsApp com nome, base e cor |
+| Simulador | **Pedir esse mimo no WhatsApp** | abaixo da prévia (nome) e no estúdio da caneca | WhatsApp com nome, base e cor; no estúdio, com cores, arte e nome |
+| Estúdio da caneca | **Ver minha foto na caneca** | seção Monte seu mimo | `caneca-3d.html`, a caneca em 360° |
 | Empresas | **Orçamento para 10+ unidades** | pedidos em quantidade | WhatsApp com a pergunta de quantidade |
 | Lançamento | **Me avise** | cartão em teste | WhatsApp pedindo aviso |
 | Apoio | Pedir pelo WhatsApp · Perguntar no WhatsApp | busca sem resultado, dúvidas | WhatsApp |
@@ -425,6 +426,19 @@ No site as três famílias não vêm do Google: são subconjuntos latinos em WOF
 mais rápida. O guardião reprova se uma página pública voltar a carregar fonte externa. Em Canva, Word e
 gráfica, as mesmas fontes se instalam a partir de `marca/kit/fontes/`.
 
+### 8.1.1 As letras da arte do cliente (setembro de 2026)
+As três famílias acima são **a voz da marca**: site, peças de comunicação, embalagem, redes. A arte que
+o cliente monta na caneca é outra coisa: é o presente dele, não a fala da Panda Mimo. Por isso o estúdio
+oferece uma **biblioteca de 15 letras** — as três da marca e mais doze de licença OFL (Lobster, Pacifico,
+Dancing Script, Great Vibes, Playfair Display, Cinzel, Bebas Neue, Amatic SC, Patrick Hand, Indie Flower,
+Baloo 2 e Poppins).
+
+Regras: os arquivos ficam em `assets/fontes/arte/`, servidos do nosso endereço, com a licença de cada
+família ao lado (`OFL-<nome>.txt`); nada é carregado do Google Fonts. Eles só baixam quando alguém abre
+a biblioteca ou usa uma arte que pede aquela letra. Os **modelos prontos da casa continuam só nas três
+letras da marca** — a biblioteca é para quem está montando a própria arte. Montserrat e DM Serif Display
+não entram nunca: são da Seu Mimo Studio.
+
 ### 8.2 Escala (a do site)
 | Papel | Tamanho | Variável |
 |---|---|---|
@@ -471,6 +485,25 @@ sistema de terceiros), use **Nunito para tudo** e mantenha o manuscrito só como
 Ícones (`ic-*.webp`, `badge-*.webp`): traço arredondado, duas cores (nanquim + pêssego), fundo
 transparente. Ícones novos seguem esse desenho; não misturar com bibliotecas de ícones de linha fina.
 
+### 9.1 Ilustrações das coleções de arte (setembro de 2026)
+
+As coleções de modelos do estúdio da caneca trazem ilustrações próprias — uma bicicleta, uma
+chuteira, uma flor de lótus — que não são elemento de interface nem adesivo do acervo: elas vivem
+**dentro da arte do cliente**, e por isso têm regra própria.
+
+| Regra | Por quê |
+|---|---|
+| **Desenhadas por curvas**, nunca por imagem. Os caminhos ficam em `simulador/<coleção>-dados.js`. | A mesma ilustração vai para a prévia na tela e para o arquivo de 300 dpi. Bitmap ampliado embaça na sublimação. |
+| **Cor só por token da paleta** (`--sage`, `--kraft`…), nunca valor solto. | A ilustração acompanha o `styles.css` como o resto do site; mudou o token, mudou a arte. Teste unitário reprova hexadecimal solto no arquivo de dados. |
+| **Uma tinta principal**, que a pessoa troca pela paleta. As outras cores ficam fixas. | Dá personalização sem deixar a peça sair com cor de fora da marca. |
+| **Entram na arte como camada comum** (tipo `enfeite`): mover, girar, redimensionar, recolorir, duplicar, apagar. | É a promessa do estúdio: nada na arte é intocável. |
+| **A forma em si não se edita.** Não há edição de nós. | A bicicleta continua sendo uma bicicleta; o estúdio não é o Illustrator. |
+| Traço arredondado, poucas cores, silhueta cheia. Nada de linha fina de biblioteca genérica. | Mesma linguagem dos ícones e dos adesivos puffy. |
+
+A primeira coleção assim é a **esportiva**: 137 ilustrações em seis modalidades (treino funcional,
+musculação, ciclismo, corrida, yoga e pilates, futebol), 24 modelos. Coleção nova segue estas
+mesmas regras e entra com prova visual das artes no tamanho de uso.
+
 ---
 
 ## 10. Fotografia e imagem de produto
@@ -497,6 +530,116 @@ O simulador do site desenha o nome na foto real da peça (garrafa, caneca, copo)
 posicionada em porcentagem da foto. Ao trocar a foto-base de uma dessas três peças, a posição e a cor
 da placa precisam ser recalibradas em `script.js` (`FOTO_REAL`). Prévias enviadas por WhatsApp seguem o
 mesmo princípio: arte aplicada na peça, cor e posição reais, nada de arte solta.
+
+**Estúdio da caneca em 360° (`caneca-3d.html`, setembro de 2026).** Para foto ou arte própria, o site tem
+um segundo simulador, só de caneca: um modelo paramétrico de referência (caneca reta de 325 ml, 82 × 95 mm,
+área de personalização de 210 × 90 mm com folga junto à alça), renderizado no navegador, com cores do
+interior e da alça, arte em um lado, nos dois ou ao redor, nome em Fredoka ou Caveat e o Pandinha adesivo
+(`panda-coracao.webp`, nunca a versão 3D da 6.5). A imagem da pessoa fica no navegador e só vira arquivo
+quando ela baixa a prévia, a arte plana em 300 dpi ou o projeto. Regras: a prévia é declarada como prévia
+("Só uma prévia, tá?"); a arte plana sai na medida real, sem guias, para a produção conferir; o modelo
+não é medição de peça do fornecedor, e trocar de fornecedor pede recalibrar `MUG_SPEC` em
+`simulador/caneca-3d.js`; o guardião abre a página, coloca a arte de exemplo, troca cores e vistas e
+baixa os dois arquivos.
+
+**Modelos de arte da caneca (setembro de 2026).** O estúdio traz artes prontas que dão a volta
+inteira, organizadas por ocasião: Namorados, Aniversário, Natal, Dia das Mães, Dia dos Pais,
+Professores, Casamento, Bebê, Pet, Amizade e Só fotos. Cada modelo nasce com espaços de foto (de um a
+seis), frases escritas e enfeites da paleta espalhados pelo fundo.
+
+**A arte é editável em camadas.** Depois de escolher um modelo, tudo nele pode mudar: a pessoa clica em
+cima da própria caneca para escolher um item, arrasta para mudar de lugar, e pode acrescentar foto,
+frase, enfeite (coração, flor, estrela, bolinha, patinha, floco, confete, folha, xícara) e o Pandinha.
+Cada item tem tamanho, inclinação e ordem; frase tem fonte e cor; foto tem formato e enquadramento. As
+regras:
+
+- As camadas vivem em `simulador/modelos.js`, descritas em fração da área de impressão. O mesmo desenho
+  serve para a prévia 3D, para a vista aberta e para o arquivo de 300 dpi: não existe arte "só de tela".
+- Cor só por token da paleta (seção 7); fonte só Fredoka, Caveat ou Nunito (seção 8), com Caveat apenas
+  em frase curta, nunca em parágrafo. A lista de cores e fontes que a pessoa vê sai do próprio código,
+  então não há como escolher algo fora da marca.
+- Um Pandinha por peça, sempre o adesivo do acervo (6.3 e 6.4), escolhido entre as nove poses. Pedir
+  outro Pandinha só seleciona o que já está lá. O 3D de cena (6.5) não entra em peça de cliente.
+- Enfeite de fundo não encosta em foto nem em frase, e o sorteio é sempre o mesmo: a arte que a pessoa
+  aprovou é igual à que vai para a produção.
+- Espaço de foto vazio aparece tracejado na prévia e vira aviso; no arquivo de produção ele sai como
+  fundo, sem o tracejado. O contorno de seleção existe só na vista aberta e nunca entra na textura,
+  na prévia baixada ou no arquivo de impressão.
+- Modelo novo entra com nome, descrição, categoria e teste: o guardião confere que nada sai da área,
+  que frase não cai sobre foto e que o Pandinha não cobre nada.
+
+**Como o estúdio se organiza (setembro de 2026).** A tela tem dois lados com papéis fixos, e é assim
+que ela cresce sem virar uma pilha de controles:
+
+- **A peça, à esquerda.** A caneca em 360°, as vistas, o zoom, as cores do interior e da alça (num
+  bloco que abre) e a arte aberta. Tudo o que é da peça mora junto da peça.
+- **A arte, à direita, em abas.** Modelo, Fotos, Frases e Enfeites, ou Modelo e Minha arte quando a
+  pessoa traz a arte pronta. Cada aba mostra só o seu tipo de item, com a contagem ao lado do nome.
+  Um item é um cartão que abre no lugar, com os controles dele dentro, e só um fica aberto por vez.
+- **A ocasião é um seletor, não uma parede de botões.** As categorias vêm agrupadas (Datas
+  comemorativas, Momentos, Do dia a dia, Sua arte) e há busca por nome. A lista abre com seis modelos
+  e cresce sob pedido. Dá para acrescentar ocasiões sem mexer no layout.
+- **Clicar na caneca abre a aba do item.** A peça e o painel falam a mesma língua: escolher pela peça
+  leva ao cartão certo, e escolher pelo cartão contorna o item na arte aberta.
+- **Um só padrão de campo.** Todo seletor e todo campo de texto do estúdio tem o mesmo desenho: canto
+  arredondado, borda de areia, 46 px de altura e a letra da marca. Mudar um controle de lugar não pode
+  devolvê-lo à aparência crua do navegador, e o guardião reprova qualquer campo fora desse padrão.
+- **Cadeado na prévia, fechado por padrão.** Com ele fechado, arrastar na caneca só gira a peça: um
+  toque escolhe o item, mas nada sai do lugar sem querer. Abrindo o cadeado, arrastar move o item.
+
+**O que dá para fazer com a arte (setembro de 2026).** Além de mover, escrever e trocar cor:
+
+- **Frase em arco.** A frase acompanha a curva da caneca, como nos letreiros. O arco vai de um lado
+  ao outro e a caixa de seleção acompanha a curva.
+- **Elementos do acervo.** Coração de costura, laço, margarida, folhinha, patinhas, sininho e presente
+  entram na arte. São as mesmas ilustrações do site (manual 9), com fundo transparente: nada de
+  clipart genérico de banco de imagem, que apagaria a identidade.
+- **Tratamento de foto.** Preto e branco, sépia, mais clara, mais escura, mais contraste e desbotada.
+  O filtro é do desenho: o arquivo da pessoa não é alterado.
+- **Tirar o fundo claro.** Para foto de fundo liso (estúdio, papel, parede clara), o site recorta a
+  partir das bordas. Se a foto for de cena, ele avisa em vez de estragar a imagem, e dá para voltar
+  atrás a qualquer momento.
+- **Cor do fundo da arte.** O mesmo modelo muda de clima trocando o fundo, dentro da paleta.
+- **Centralizar na frente, no meio, no verso e na altura**, para acertar sem precisar de pontaria.
+- **Margem de segurança à vista** na arte aberta: 5 mm em toda a volta, que é o que a produção pede.
+
+**Como o trabalho não se perde (setembro de 2026).** O rascunho fica guardado no próprio aparelho
+(IndexedDB) e é oferecido de volta ao voltar à página, com a hora em que parou. O botão "Copiar link da
+montagem" gera um endereço com a arte inteira, sem as fotos, para mandar a ideia a outra pessoa. Nada
+disso vai para servidor nosso: fotos e rascunho ficam no aparelho de quem monta, e a página diz isso.
+
+**Para vender em quantidade (setembro de 2026).** "Vários nomes de uma vez" recebe uma lista, troca a
+frase escolhida em cada arte e entrega tudo num arquivo só, com uma arte de 300 dpi por nome. É o
+caminho de turma de escola, padrinhos e brinde de empresa, que a seção 11.7 já prevê.
+
+**Desfazer, alças e modelos da pessoa (setembro de 2026).** O editor guarda até 60 passos: desfazer e
+refazer valem para mover, escrever, trocar cor, acrescentar e apagar, inclusive a foto tirada de um
+espaço, que volta com o passo. Gestos seguidos do mesmo tipo contam como um passo só. Na vista aberta,
+a camada escolhida mostra alças: os quatro cantos aumentam e diminuem mantendo o centro, e o botão de
+cima gira, encostando sozinho em 0°, 90° e 180°. Quem quiser guardar a própria montagem salva um
+**modelo meu**, que aparece na categoria "Meus modelos" e fica só naquele navegador. O modelo guarda a
+montagem, nunca as fotos da pessoa: quem usar coloca as suas.
+
+**A cena da prévia (setembro de 2026).** A caneca pode aparecer sozinha no fundo claro (padrão), numa
+mesa de madeira, numa mesa clara de linho ou em cima de uma caixa de presente kraft com fita pêssego.
+Também dá para ver o vidrado brilhante (o da peça padrão) ou fosco. Tudo é desenhado na hora, sem
+arquivo de imagem: madeira, linho e papel kraft são texturas geradas em código, nas cores quentes da
+marca. A cena é enfeite da prévia e **não muda a arte**: o arquivo de produção sai igual em qualquer
+cena. Cena nova segue a mesma regra: cor quente da casa, sem logo de terceiros e sem fotografia de
+banco de imagem.
+
+**Vídeo da caneca girando.** Onde o navegador permite, a página grava uma volta completa em WebM (cinco
+segundos) para mandar no WhatsApp ou postar. É a prévia em movimento, com a mesma cena e o mesmo
+acabamento que estão na tela. A prévia parada também sai em 4K, para post e anúncio, e no celular dá
+para mandar direto pelo compartilhamento do aparelho, sem baixar e anexar.
+
+**Arte trazida de fora (Canva).** A página informa a medida da volta inteira, 21 × 9 cm, que é
+2480 × 1063 px a 300 dpi. "Levar minha arte para o Canva" baixa a arte como ela está, na medida certa, e
+abre o Canva em outra aba: lá é arrastar o arquivo para dentro do projeto. O Canva não deixa um site de
+fora abrir um projeto já com a arte dentro sem integração oficial, e a página diz isso em vez de
+prometer o que não faz. Quem quiser começar do zero baixa só o gabarito, com a margem de segurança de
+5 mm e as marcas da frente, do verso e da alça. Na volta, "Trazer a arte do Canva" recebe o PNG e
+aplica ao redor da caneca; se a proporção não bater, a página avisa em vez de cortar em silêncio.
 
 ### 10.4 Não fazer
 Sem fundo branco recortado às pressas, sem sombra dura, sem filtro colorido, sem peça cortada pela
@@ -775,6 +918,14 @@ adereço pequeno no Pandinha em datas comemorativas, com aprovação prévia (6.
 | Data | Versão | O que mudou |
 |---|---|---|
 | set/2026 | 1.0 | Primeira edição, consolidando a identidade aplicada no site (paleta, tipografia, logo, mascote, tom de voz, aplicações, governança). |
+| set/2026 | 2.12 | Coleções de arte com ilustração própria (9.1): a coleção esportiva entra com 24 modelos em seis modalidades e 137 ilustrações desenhadas por curvas, que entram na arte como camada editável e pintam só por token da paleta. O seletor de ocasião passa a ter ordem de grupos decidida à mão, para o catálogo crescer sem embaralhar a tela (10.3). |
+| set/2026 | 2.11 | Arte ganha frase em arco, elementos do acervo da marca, tratamento e recorte de fundo de foto, cor de fundo, centralizar e margem de segurança à vista; o trabalho passa a ficar guardado no aparelho como rascunho, com link da montagem para mandar a ideia; prévia em 4K, compartilhamento direto no celular e "vários nomes de uma vez" entregando uma arte por nome num arquivo só (10.3). |
+| set/2026 | 2.10 | Estúdio ganha cena na prévia (fundo claro, mesa de madeira, mesa clara e caixa de presente kraft), acabamento brilhante ou fosco e vídeo da caneca girando em WebM (10.3); biblioteca de 15 letras para a arte do cliente, com as doze novas em OFL servidas do nosso endereço (8.1.1); "Levar minha arte para o Canva" passa a baixar a arte junto. Guardião ganha a trava do padrão visual dos campos. |
+| set/2026 | 2.9 | Estúdio reorganizado para crescer: a peça de um lado (com as cores junto dela), a arte do outro em abas por tipo de item, ocasião em seletor agrupado com busca, cartões que abrem no lugar e cadeado na prévia, fechado por padrão, para ninguém arrastar a arte sem querer (10.3). |
+| set/2026 | 2.8 | Editor ganha desfazer e refazer (até 60 passos, com a foto voltando junto), alças de girar e redimensionar na vista aberta, e "Meus modelos": a pessoa guarda a própria montagem naquele navegador, sem as fotos (10.3). |
+| set/2026 | 2.7 | A arte da caneca vira camadas editáveis: clicar e arrastar em cima da própria caneca, acrescentar foto, frase, enfeite e Pandinha do acervo, escolher fonte e cor da paleta, mudar ordem e duplicar (10.3). Seis modelos novos e cinco categorias novas (Professores, Casamento, Bebê, Pet, Amizade), somando 14 artes. Caminho de ida e volta com o Canva: gabarito, atalho e importação da arte pronta. |
+| set/2026 | 2.6 | Modelos de arte da caneca por ocasião (Namorados, Aniversário, Natal, Mães, Pais, Só fotos): artes de volta inteira com até seis espaços de foto, frases editáveis e enfeites da paleta, com o Pandinha adesivo em lugar livre (10.3). A página passa a informar a medida da arte (21 × 9 cm, 2480 × 1063 px a 300 dpi) e a entregar o gabarito em PNG para quem monta no Canva. |
+| set/2026 | 2.5 | Estúdio da caneca em 360° (`caneca-3d.html`): foto ou arte própria aplicada num modelo 3D de referência, cores do interior e da alça, nome e Pandinha adesivo, prévia e arte plana em 300 dpi baixáveis, pedido pelo WhatsApp com as escolhas (10.3). Convite na seção Monte seu mimo com a chamada "Ver minha foto na caneca" (4.7), link no rodapé, página no sitemap; guardião ganha o teste de ponta a ponta do estúdio e os testes unitários da arte. |
 | set/2026 | 2.4 | Piloto de edição da margarida: pétalas e miolo mais definidos, transparência real conferida, WebPs em duas densidades e mestre PNG preservado (13.7). |
 | set/2026 | 2.3 | Homologação de loja: páginas Sobre, Trocas e garantia, Como funciona a compra e Privacidade e cookies, linkadas no rodapé com a identificação da loja (Decreto 7.962/2013) editável no painel (11.1); fontes servidas do próprio site (8.1); título comercial, dados estruturados (Organization, FAQPage, ItemList com preços), manifest e sitemap completo; FAQ cita a garantia legal de 90 dias; guardião ganha axe-core e as checagens de páginas, SEO e fontes. |
 | set/2026 | 2.2 | Etiqueta da hero volta a ser o adesivo em imagem, exceção registrada em 13.7; guardião de nitidez passa a exigir o adesivo com `alt`. |

@@ -57,6 +57,52 @@ perda de detalhes e contornos mais irregulares. Mestres preservados; não confun
 arquivo vetorial com arte mais fiel. Flores/folhas têm suavidade na própria arte;
 uma nova fonte aprovada é necessária antes de prometer definição adicional.
 
+## Estúdio da caneca em 360° — setembro de 2026
+
+`npm test` começa pelos testes unitários (`qa/*-unit.test.mjs`): a arte livre (geometria em mm, dpi
+efetivo, corte, recusa de arquivo inválido, exportação em 300 dpi) e a arte em camadas (nada sai da
+área, frase não cai sobre foto, o Pandinha não cobre nada, o clique acha a camada de cima, editar uma
+arte não altera o modelo de origem, cores e fontes são as da marca, o desenho é sempre igual e a medida
+indicada é 2480 × 1063 px).
+
+Depois, `audit.mjs` sobe um servidor http próprio (`servidor.mjs`; por `file://` o canvas fica
+bloqueado) e abre `caneca-3d.html` em 390 e 1280 px. Modo livre: o 3D fica pronto em 15 s, a arte de
+exemplo entra e aparece na vista aberta, nome e cores vão para a mensagem do WhatsApp, o botão de vista
+fica marcado e arquivo falso gera aviso. Modo modelo: o seletor de ocasião vem agrupado e filtra, a busca por nome acha o modelo certo, as abas
+aparecem com a contagem de cada tipo e só um container fica aberto; o cadeado começa fechado e
+arrastar na caneca não mexe na arte, mas um toque escolhe o item e abre a aba dele; destravado, o
+arrasto move. As camadas aparecem,
+duas fotos entram pela janela de arquivo, clicar na caneca escolhe o item que está ali, arrastar move,
+acrescentar frase e enfeite funciona, o segundo "+ Pandinha" não cria um segundo mascote, tirar a foto
+volta a avisar do espaço vazio, desfazer e refazer voltam o passo inteiro, puxar o canto na arte aberta
+muda o tamanho, o modelo salvo entra em "Meus modelos" sem levar a foto junto e sai quando apagado, e a
+arte do Canva volta para o modo livre aplicada ao redor. No fim,
+os três arquivos saem ("Baixar arte plana", "Baixar prévia" e o gabarito em 2480 × 1063 px). Captura em
+`qa/shots/<largura>/estudio-caneca.png`. A página também passa pelo axe-core e pelas checagens de
+cabeçalho, rodapé e sitemap. Para ver local: `npm run servir` e abra o endereço impresso.
+
+O guardião também trava o **padrão visual dos campos**: todo `select` e todo campo de texto visível da
+página do estúdio precisa ter canto arredondado (8 px ou mais), 40 px de altura, borda e a letra da
+marca. Foi assim que se pegou o dia em que os seletores de cor da peça mudaram de coluna e voltaram à
+aparência crua do navegador. Um defeito de prova (um campo sem borda e com fonte serifada) confirma que
+a regra reprova de verdade.
+
+Entram também: a curva da frase e o "centralizar no verso" mudando a arte, os elementos do acervo
+entrando como camada, a cor de fundo da arte, o tratamento preto e branco da foto e o botão de tirar o
+fundo claro; "vários nomes de uma vez" gerando o arquivo com uma arte por nome; a prévia em 4K; o link
+da montagem indo para a área de transferência; e o rascunho, que depois de recarregar a página volta
+com exatamente o que estava na tela.
+
+Entram na mesma passada: a biblioteca de letras (a lista aparece, a letra escolhida carrega do nosso
+endereço e muda a arte), a cena e o acabamento da prévia (o resumo acompanha a escolha e o botão do
+vídeo aparece) e o "Levar minha arte para o Canva" (baixa o PNG em 2480 × 1063).
+
+Para a revisão humana dos modelos, `npm run provas` percorre os 14, preenche as fotos com imagens do
+acervo e salva cada arte aberta (21 × 9 cm) em `qa/shots/`. É por essas provas que se confere cor,
+tamanho de letra e composição no tamanho de uso; o guardião confere as regras, não o gosto.
+O axe-core também foi rodado com o editor em uso (modelo escolhido, frase e enfeite acrescentados),
+em 390 e 1280 px, sem violações.
+
 ## Revisão humana obrigatória
 
 Abra as capturas em 100% de zoom. Confira cada símbolo, cada frase, bordas, proporção,

@@ -226,7 +226,7 @@ for (const [w, h] of viewports) {
     const rotulo = await car.getAttribute('aria-label');
     if (bolinhas !== n) fail(w, `${rotulo}: ${n} fotos e ${bolinhas} bolinhas`);
     await car.$eval('.carousel__nav--next', (b) => b.click());
-    await page.waitForTimeout(420);
+    await car.waitForSelector(`.carousel__status:text-is("Foto 2 de ${n}")`, { timeout: 4000 }).catch(() => {});
     const st = await car.$eval('.carousel__status', (e) => e.textContent);
     if (st !== `Foto 2 de ${n}`) fail(w, `${rotulo}: não avançou (status "${st}")`);
     const marcadas = await car.$$eval('.carousel__dot[aria-current="true"]', (l) => l.length);
@@ -587,7 +587,7 @@ for (const [w, h] of viewports) {
   if (hero.botoes[0] !== 'Quero criar meu mimo' || hero.botoes[1] !== 'Ver as peças') failures.push(`[conversão] chamadas do hero fora da tabela 4.7: ${hero.botoes.join(' | ')}`);
   if (hero.facts < 4) failures.push('[conversão] a faixa de segurança do hero perdeu itens');
   // chamadas para ação: só as da tabela 4.7 (botões .btn com texto)
-  const permitidas = ['Quero criar meu mimo', 'Ver as peças', 'Quero essa', 'Pedir esse mimo no WhatsApp', 'Orçamento para 10+ unidades', 'Me avise', 'Pedir pelo WhatsApp', 'Perguntar no WhatsApp', 'Ver no Instagram', 'Ver com meu nome', 'Enviar depoimento', 'Voltar pro início', 'Limpar busca', 'Ver mais'];
+  const permitidas = ['Quero criar meu mimo', 'Ver as peças', 'Quero essa', 'Pedir esse mimo no WhatsApp', 'Orçamento para 10+ unidades', 'Me avise', 'Pedir pelo WhatsApp', 'Perguntar no WhatsApp', 'Ver no Instagram', 'Ver com meu nome', 'Ver minha foto na caneca', 'Enviar depoimento', 'Voltar pro início', 'Limpar busca', 'Ver mais'];
   const fora = await page.$$eval('main .btn, footer .btn', (els) => els.map((b) => b.textContent.replace(/\s+/g, ' ').trim()).filter(Boolean));
   const estranhas = [...new Set(fora.filter((t) => !permitidas.some((p) => t === p || t.startsWith(p))))];
   if (estranhas.length) failures.push(`[conversão] chamada(s) fora da tabela 4.7 do manual: ${estranhas.join(' | ')}`);
@@ -916,8 +916,27 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
   }
   if (!/Cookies<\/h2>/.test(ler('privacidade.html'))) failures.push('[páginas] privacidade.html perdeu a seção sobre cookies');
   if (!/90 dias/.test(ler('trocas.html'))) failures.push('[páginas] trocas.html não informa a garantia legal de 90 dias (CDC art. 26)');
+  // estúdio da caneca em 360° (caneca-3d.html): mesma disciplina de cabeçalho, rodapé e sitemap
+  {
+    const pg = 'caneca-3d.html';
+    if (!fs.existsSync(path.resolve(raiz, pg))) failures.push(`[estúdio] falta ${pg}`);
+    else {
+      const t = ler(pg);
+      if (!new RegExp(`href="${pg}"`).test(index)) failures.push(`[estúdio] o index não leva para ${pg}`);
+      if (!t.includes(`<link rel="canonical" href="`) || !t.includes(pg + '"')) failures.push(`[estúdio] ${pg} sem canonical próprio`);
+      if (!/<title>[^<]{10,70}Panda Mimo<\/title>/.test(t)) failures.push(`[estúdio] ${pg} sem <title> "… · Panda Mimo"`);
+      if (!/<meta name="description" content="[^"]{60,170}">/.test(t)) failures.push(`[estúdio] ${pg} sem meta description de 60 a 170 caracteres`);
+      if (!t.includes('id="loja-dados"')) failures.push(`[estúdio] ${pg} sem a linha de identificação da loja no rodapé`);
+      for (const outra of PAGINAS) if (!t.includes(`href="${outra}"`)) failures.push(`[estúdio] ${pg} não linka ${outra} no rodapé`);
+      if (!sitemap.includes(`<loc>https://reinaldo3010.github.io/Claude-desk/${pg}</loc>`) && !/SEU-DOMINIO/.test(sitemap)) failures.push(`[estúdio] sitemap.xml não lista ${pg}`);
+      if (/fonts\.googleapis\.com|fonts\.gstatic\.com|https?:\/\/[^"']*\.js/.test(t)) failures.push(`[estúdio] ${pg} carrega fonte ou script de terceiros`);
+      for (const f of ['simulador/estudio.js', 'simulador/arte.js', 'simulador/caneca-3d.js', 'simulador/estudio.css', 'vendor/three/three.module.js', 'vendor/three/OrbitControls.js'])
+        if (!fs.existsSync(path.resolve(raiz, f))) failures.push(`[estúdio] falta o arquivo ${f}`);
+      if (!/Nada é produzido sem o seu/.test(t)) failures.push('[estúdio] frase de segurança da tabela 4.7 sumiu da página');
+    }
+  }
   // fontes: só arquivos nossos; nada de terceiros nas páginas públicas
-  for (const pg of ['index.html', '404.html', ...PAGINAS]) {
+  for (const pg of ['index.html', '404.html', 'caneca-3d.html', ...PAGINAS]) {
     const t = ler(pg);
     if (/fonts\.googleapis\.com|fonts\.gstatic\.com/.test(t)) failures.push(`[fontes] ${pg} ainda carrega fontes de terceiros; use assets/fontes (LGPD e primeira pintura)`);
   }
@@ -951,7 +970,7 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
   // axe-core (WCAG 2.2 AA + boas práticas): nenhuma violação séria ou crítica nas páginas públicas
   const axePath = path.resolve(raiz, 'node_modules', 'axe-core', 'axe.min.js');
   if (!fs.existsSync(axePath)) failures.push('[acessibilidade] axe-core não instalado (npm install)');
-  else for (const pg of ['index.html', ...PAGINAS, '404.html']) {
+  else for (const pg of ['index.html', ...PAGINAS, 'caneca-3d.html', '404.html']) {
     const pa = await browser.newPage({ viewport: { width: 390, height: 844 } });
     await pa.route('**/rest/v1/**', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
     await pa.goto('file://' + path.resolve(raiz, pg), { waitUntil: 'load' });
@@ -964,6 +983,667 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     }
     await pa.close();
   }
+}
+
+// ---- estúdio da caneca em 360°: funciona de ponta a ponta, servido por http (canvas e WebGL exigem origem) ----
+{
+  const { servir } = await import('./servidor.mjs');
+  const servidor = await servir();
+  const larguras = viewports.some(([w]) => w >= 1024) && viewports.some(([w]) => w < 600) ? [390, 1280] : [viewports[0]?.[0] || 390];
+  for (const w of larguras) {
+    const contexto = await browser.newContext({
+      viewport: { width: w, height: w < 600 ? 844 : 800 },
+      permissions: ['clipboard-read', 'clipboard-write'],
+    });
+    const pe = await contexto.newPage();
+    const erros = [];
+    pe.on('pageerror', (e) => erros.push(e.message));
+    pe.on('console', (m) => m.type() === 'error' && erros.push(m.text()));
+    pe.on('requestfailed', (r) => erros.push(`pedido falhou: ${r.url().slice(0, 80)}`));
+    pe.on('response', (r) => r.status() >= 400 && r.url().startsWith(servidor.url) && erros.push(`${r.status()} em ${r.url().slice(servidor.url.length)}`));
+    await pe.route('**/rest/v1/**', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: '[{"whatsapp":"5511999999999"}]' }));
+    await pe.goto(servidor.url + 'caneca-3d.html', { waitUntil: 'load' });
+    const pronto = await pe.waitForFunction(() => document.getElementById('viewer-loading')?.hidden || !document.getElementById('viewer-fallback')?.hidden, null, { timeout: 15000 }).then(() => true).catch(() => false);
+    if (!pronto) failures.push(`[estúdio ${w}] a prévia 3D não ficou pronta em 15 s`);
+    const estado = await pe.evaluate(() => ({
+      canvas: !!document.querySelector('#mug-viewport canvas.mug-3d-canvas'),
+      fallback: !document.getElementById('viewer-fallback').hidden,
+      rolagem: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+      previa: !document.getElementById('save-preview').disabled,
+      zap: document.getElementById('mug-order').href,
+    }));
+    if (estado.fallback || !estado.canvas) failures.push(`[estúdio ${w}] o 3D caiu no aviso de indisponível`);
+    if (estado.rolagem) failures.push(`[estúdio ${w}] rolagem lateral na página`);
+    if (!estado.previa) failures.push(`[estúdio ${w}] "Baixar prévia" continua desligado com o 3D pronto`);
+    if (!/^https:\/\/wa\.me\/5511999999999\?text=/.test(estado.zap) || !new URL(estado.zap).searchParams.get('text').includes('Interior: Branco')) failures.push(`[estúdio ${w}] o pedido não leva as escolhas para o WhatsApp (${estado.zap.slice(0, 60)})`);
+    // abre os blocos recolhidos: só assim dá para medir todos os campos da página
+    await pe.evaluate(() => {
+      for (const id of ['peca-cores', 'peca-cena', 'flat-details', 'bloco-canva']) {
+        const bloco = document.getElementById(id);
+        if (bloco) bloco.open = true;
+      }
+    });
+    await pe.waitForTimeout(250);
+
+    // a aba "Minha arte" é onde entra a arte pronta de quem não quer modelo
+    await pe.click('#abas [data-aba="arte"]');
+    await pe.waitForTimeout(250);
+    // arte de exemplo entra, aparece na arte plana e o pedido menciona a arte
+    await pe.click('#use-example');
+    const comArte = await pe.waitForFunction(() => !document.getElementById('art-file-info').hidden, null, { timeout: 8000 }).then(() => true).catch(() => false);
+    if (!comArte) failures.push(`[estúdio ${w}] a arte de exemplo não entrou`);
+    await pe.waitForTimeout(400);
+    const plana = await pe.evaluate(() => {
+      const c = document.getElementById('flat-art'); const ctx = c.getContext('2d');
+      const d = ctx.getImageData(0, 0, c.width, c.height).data; let pintados = 0;
+      for (let i = 0; i < d.length; i += 16) if (d[i] < 235 || d[i + 1] < 235 || d[i + 2] < 235) pintados += 1;
+      return { pintados, zap: new URL(document.getElementById('mug-order').href).searchParams.get('text') || '', erro: document.getElementById('art-error').hidden };
+    });
+    if (plana.pintados < 200) failures.push(`[estúdio ${w}] a arte plana ficou em branco depois de colocar a arte`);
+    if (!plana.zap.includes('Arte:')) failures.push(`[estúdio ${w}] a mensagem do pedido não cita a arte`);
+    if (!plana.erro) failures.push(`[estúdio ${w}] apareceu erro de arquivo com a arte de exemplo`);
+    // nome, cores e vistas (as cores da peça ficam junto da peça, num bloco que abre)
+    await pe.evaluate(() => { document.getElementById('peca-cores').open = true; });
+    await pe.fill('#art-name', 'Malu');
+    await pe.selectOption('#inside-color', 'rosa');
+    await pe.click('[data-preset="preta"]');
+    await pe.click('[data-view="back"]');
+    await pe.waitForTimeout(700);
+    const depois = await pe.evaluate(() => ({
+      zap: new URL(document.getElementById('mug-order').href).searchParams.get('text') || '',
+      pressed: document.querySelector('[data-view][aria-pressed="true"]')?.dataset.view,
+      preset: document.querySelector('[data-preset][aria-pressed="true"]')?.dataset.preset,
+      interior: document.getElementById('inside-color').value,
+    }));
+    if (!depois.zap.includes('"Malu"') || !depois.zap.includes('Interior: Preto')) failures.push(`[estúdio ${w}] o pedido não acompanha nome e cores escolhidos`);
+    if (depois.pressed !== 'back') failures.push(`[estúdio ${w}] o botão de vista "Verso" não ficou marcado`);
+    if (depois.preset !== 'preta' || depois.interior !== 'preta') failures.push(`[estúdio ${w}] a combinação "Preto e branco" não aplicou as duas cores`);
+    // arquivo inválido é recusado com mensagem, sem erro de console
+    await pe.setInputFiles('#art-file', { name: 'falso.png', mimeType: 'image/png', buffer: Buffer.from('<svg/>') });
+    await pe.waitForTimeout(300);
+    const recusa = await pe.evaluate(() => ({ visivel: !document.getElementById('art-error').hidden, texto: document.getElementById('art-error').textContent }));
+    if (!recusa.visivel || !recusa.texto) failures.push(`[estúdio ${w}] arquivo inválido não gerou aviso`);
+    // padrão visual dos campos: nenhum controle pode voltar à aparência crua do navegador
+    const campos = await pe.evaluate(() => {
+      const familias = ['Nunito', 'Fredoka'];
+      const fora = [];
+      const visivel = (el) => el.offsetParent !== null || el.getClientRects().length > 0;
+      for (const campo of document.querySelectorAll('select, input[type="text"], input[type="search"], input[type="number"]')) {
+        if (campo.classList.contains('studio-sr-only') || !visivel(campo)) continue;
+        const estilo = getComputedStyle(campo);
+        const raio = parseFloat(estilo.borderTopLeftRadius) || 0;
+        const altura = campo.getBoundingClientRect().height;
+        const borda = parseFloat(estilo.borderTopWidth) || 0;
+        const daCasa = familias.some((f) => estilo.fontFamily.includes(f));
+        if (raio < 8 || altura < 40 || borda < 1 || !daCasa) {
+          fora.push({
+            onde: campo.id || campo.name || campo.className || campo.tagName,
+            raio: Math.round(raio), altura: Math.round(altura), borda, fonte: estilo.fontFamily.split(',')[0],
+          });
+        }
+      }
+      return fora;
+    });
+    if (campos.length) {
+      failures.push(`[estúdio ${w}] campo(s) fora do padrão do site (canto arredondado, 40 px de altura, borda e fonte da marca): ${campos.map((c) => `${c.onde} raio ${c.raio}px altura ${c.altura}px fonte ${c.fonte}`).join(' · ')}`);
+    }
+
+    // painel em abas: escolher o modelo, e cada tipo de item no seu container
+    await pe.click('#abas [data-aba="modelo"]');
+    await pe.waitForTimeout(250);
+    const filtros = await pe.evaluate(() => ({
+      abas: [...document.querySelectorAll('#abas button')].map((b) => b.dataset.aba),
+      grupos: [...document.querySelectorAll('#categoria-modelo optgroup')].map((g) => g.label),
+      ocasioes: document.querySelectorAll('#categoria-modelo option').length,
+      resultado: document.getElementById('resultado-modelos').textContent,
+    }));
+    if (filtros.abas.join(',') !== 'modelo,arte') failures.push(`[estúdio ${w}] sem modelo, as abas deviam ser Modelo e Minha arte (${filtros.abas.join(',')})`);
+    if (filtros.grupos.length < 3 || filtros.ocasioes < 10) failures.push(`[estúdio ${w}] o seletor de ocasião não veio agrupado (${JSON.stringify(filtros)})`);
+    if (!/\d+ modelos/.test(filtros.resultado)) failures.push(`[estúdio ${w}] a lista de modelos não diz quantos são ("${filtros.resultado}")`);
+
+    await pe.selectOption('#categoria-modelo', 'natal');
+    await pe.waitForTimeout(300);
+    const soNatal = await pe.$$eval('#model-list .studio-model', (b) => b.map((x) => x.dataset.modelo));
+    if (!soNatal.length || !soNatal.every((id) => id.startsWith('natal'))) failures.push(`[estúdio ${w}] a ocasião Natal mostrou ${soNatal.join(', ')}`);
+    await pe.selectOption('#categoria-modelo', 'todos');
+    await pe.fill('#busca-modelo', 'padrinho');
+    await pe.waitForTimeout(300);
+    const busca = await pe.$$eval('#model-list .studio-model', (b) => b.map((x) => x.dataset.modelo).filter(Boolean));
+    if (busca.join(',') !== 'casamento-padrinhos') failures.push(`[estúdio ${w}] a busca por "padrinho" trouxe ${busca.join(', ') || 'nada'}`);
+    await pe.fill('#busca-modelo', '');
+    await pe.waitForTimeout(250);
+
+    // Coleção esportiva: as ilustrações precisam chegar como camadas de verdade, com nome próprio,
+    // cor da paleta e tamanho maior que o de um enfeite. Se virarem desenho fixo, a promessa some.
+    await pe.selectOption('#categoria-modelo', 'ciclismo');
+    await pe.waitForTimeout(300);
+    const ciclismo = await pe.$$eval('#model-list .studio-model', (b) => b.map((x) => x.dataset.modelo).filter(Boolean));
+    if (ciclismo.length !== 4 || !ciclismo.every((id) => id.startsWith('esp-cic'))) {
+      failures.push(`[estúdio ${w}] a modalidade Ciclismo mostrou ${ciclismo.join(', ') || 'nada'}`);
+    }
+    await pe.click('[data-modelo="esp-cic-01"]');
+    await pe.waitForTimeout(500);
+    await pe.evaluate(() => document.querySelector('#abas [data-aba="enfeites"]').click());
+    await pe.waitForTimeout(250);
+    const esporte = await pe.evaluate(() => {
+      const itens = [...document.querySelectorAll('#lista-enfeites .studio-item')];
+      return {
+        quantos: itens.length,
+        rotulos: itens.map((i) => i.querySelector('.studio-item__texto span')?.textContent || ''),
+        semNome: itens.filter((i) => !(i.querySelector('.studio-item__texto span')?.textContent || '').trim()).length,
+      };
+    });
+    if (esporte.quantos < 4) failures.push(`[estúdio ${w}] o modelo esportivo trouxe só ${esporte.quantos} ilustrações editáveis`);
+    if (esporte.semNome) failures.push(`[estúdio ${w}] ${esporte.semNome} ilustrações do modelo esportivo ficaram sem nome no painel`);
+    // abrir a primeira ilustração e trocar a cor: a arte tem de mudar, e mudar para cor da paleta
+    const trocaDeCor = await pe.evaluate(async () => {
+      const flat = document.getElementById('flat-art');
+      const assinatura = () => {
+        const d = flat.getContext('2d').getImageData(0, 0, flat.width, flat.height).data;
+        let soma = 0;
+        for (let i = 0; i < d.length; i += 997) soma += d[i] + d[i + 1] * 2 + d[i + 2] * 3;
+        return soma;
+      };
+      document.querySelector('#lista-enfeites .studio-item__cabeca').click();
+      await new Promise((r) => setTimeout(r, 350));
+      const corpo = document.querySelector('#lista-enfeites [data-corpo]');
+      const antes = assinatura();
+      const botoes = [...corpo.querySelectorAll('.studio-cores button')];
+      const alvo = botoes.find((b) => b.getAttribute('aria-pressed') !== 'true');
+      alvo?.click();
+      await new Promise((r) => setTimeout(r, 450));
+      const faixa = corpo.querySelector('input[type="range"]');
+      return {
+        antes,
+        depois: assinatura(),
+        cores: botoes.length,
+        maximo: faixa ? Number(faixa.max) : 0,
+      };
+    });
+    if (trocaDeCor.antes === trocaDeCor.depois) failures.push(`[estúdio ${w}] trocar a cor da ilustração esportiva não mudou a arte`);
+    if (trocaDeCor.cores < 6) failures.push(`[estúdio ${w}] a ilustração esportiva ficou sem a paleta para escolher (${trocaDeCor.cores} cores)`);
+    if (trocaDeCor.maximo < 1) failures.push(`[estúdio ${w}] a ilustração esportiva não pode crescer além de um enfeite (máximo ${trocaDeCor.maximo})`);
+
+    await pe.evaluate(() => document.querySelector('#abas [data-aba="modelo"]').click());
+    await pe.selectOption('#categoria-modelo', 'todos');
+    await pe.waitForTimeout(300);
+    await pe.evaluate(() => { const b = document.getElementById('model-more'); if (b && !b.hidden && b.textContent.startsWith('Ver mais')) b.click(); });
+    await pe.waitForSelector('[data-modelo="namorados-coracoes"]', { state: 'visible' });
+    await pe.click('[data-modelo="namorados-coracoes"]');
+    await pe.waitForTimeout(500);
+    const comModelo = await pe.evaluate(() => ({
+      abas: [...document.querySelectorAll('#abas button')].map((b) => b.dataset.aba),
+      ativa: document.querySelector('#abas [aria-selected="true"]')?.dataset.aba,
+      contas: [...document.querySelectorAll('#abas .studio-aba__conta')].map((s) => s.textContent),
+      fotos: document.querySelectorAll('#lista-fotos .studio-item').length,
+      frases: document.querySelectorAll('#lista-frases .studio-item').length,
+      enfeites: document.querySelectorAll('#lista-enfeites .studio-item').length,
+      painelFotos: !document.getElementById('painel-fotos').hidden,
+      painelFrases: !document.getElementById('painel-frases').hidden,
+      aviso: document.getElementById('art-warnings').textContent,
+    }));
+    if (comModelo.abas.join(',') !== 'modelo,fotos,frases,enfeites') failures.push(`[estúdio ${w}] com modelo, faltam abas (${comModelo.abas.join(',')})`);
+    if (comModelo.ativa !== 'fotos') failures.push(`[estúdio ${w}] escolher o modelo não levou para a aba das fotos (${comModelo.ativa})`);
+    if (comModelo.fotos !== 2 || comModelo.frases !== 2 || comModelo.enfeites !== 1) failures.push(`[estúdio ${w}] os itens não foram separados por tipo (${JSON.stringify(comModelo)})`);
+    if (comModelo.contas.join(',') !== '2,2,1') failures.push(`[estúdio ${w}] as abas não mostram quantos itens têm (${comModelo.contas.join(',')})`);
+    if (!comModelo.painelFotos || comModelo.painelFrases) failures.push(`[estúdio ${w}] mais de um container aberto ao mesmo tempo`);
+    if (!/falta escolher/.test(comModelo.aviso)) failures.push(`[estúdio ${w}] o modelo com espaços vazios não avisou ("${comModelo.aviso}")`);
+
+    // uma foto em cada espaço, pelo cartão (a mesma janela de arquivo que a pessoa usa)
+    const fotoDeTeste = path.resolve(here, '..', 'assets', 'uso-caneca-cafe.webp');
+    pe.on('filechooser', async (fc) => { await fc.setFiles(fotoDeTeste); });
+    const vaziosAgora = () => pe.$$eval('#lista-fotos .studio-item__cabeca small', (ss) => ss.filter((s) => s.textContent.startsWith('Toque para escolher')).length);
+    for (let i = 0; i < 2; i += 1) {
+      await pe.evaluate(() => {
+        const alvo = [...document.querySelectorAll('#lista-fotos .studio-item__cabeca')]
+          .find((b) => b.querySelector('small')?.textContent.startsWith('Toque para escolher'));
+        alvo?.click();
+      });
+      // espera a foto chegar antes do próximo espaço: a janela de arquivo demora o que demorar
+      await pe.waitForFunction((restam) => [...document.querySelectorAll('#lista-fotos .studio-item__cabeca small')]
+        .filter((s) => s.textContent.startsWith('Toque para escolher')).length === restam, 1 - i, { timeout: 12000 })
+        .catch(() => {});
+      await pe.waitForTimeout(250);
+    }
+    if (await vaziosAgora()) failures.push(`[estúdio ${w}] as duas fotos não entraram pelos cartões`);
+    await pe.evaluate(() => document.querySelector('#abas [data-aba="frases"]').click());
+    await pe.evaluate(() => document.querySelector('#lista-frases .studio-item__cabeca').click());
+    await pe.waitForTimeout(300);
+    await pe.fill('[data-corpo] input[type="text"]', 'a gente combina mesmo');
+    await pe.waitForTimeout(500);
+    const preenchido = await pe.evaluate(() => {
+      const c = document.getElementById('flat-art');
+      const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+      let pintados = 0;
+      for (let i = 0; i < d.length; i += 16) if (d[i] < 235 || d[i + 1] < 235 || d[i + 2] < 235) pintados += 1;
+      return {
+        pintados,
+        vazias: [...document.querySelectorAll('#lista-fotos .studio-item__cabeca small')].filter((s) => s.textContent.startsWith('Toque para escolher')).length,
+        aviso: document.getElementById('art-warnings').textContent,
+        zap: new URL(document.getElementById('mug-order').href).searchParams.get('text') || '',
+      };
+    });
+    if (preenchido.pintados < 2000) failures.push(`[estúdio ${w}] a arte do modelo não apareceu na vista aberta`);
+    if (preenchido.vazias) failures.push(`[estúdio ${w}] ficaram ${preenchido.vazias} espaços sem foto depois de escolher as duas`);
+    if (/falta escolher/.test(preenchido.aviso)) failures.push(`[estúdio ${w}] o aviso de espaço vazio continuou depois de preencher tudo`);
+    if (!preenchido.zap.includes('Corações ao redor') || !preenchido.zap.includes('Fotos escolhidas: 2 de 2') || !preenchido.zap.includes('a gente combina mesmo')) {
+      failures.push(`[estúdio ${w}] o pedido não leva o modelo, as fotos e a frase escritos`);
+    }
+
+    const baixados = [];
+    pe.on('download', (d) => baixados.push(d.suggestedFilename()));
+
+    // o cadeado da prévia: travado (padrão) a caneca só gira; destravado, o item se move
+    const cadeado = await pe.evaluate(async () => {
+      const flat = document.getElementById('flat-art');
+      const assinatura = () => {
+        const d = flat.getContext('2d').getImageData(0, 0, flat.width, flat.height).data;
+        let soma = 0;
+        for (let i = 0; i < d.length; i += 997) soma += d[i];
+        return soma;
+      };
+      const canvas = document.querySelector('canvas.mug-3d-canvas');
+      const caixa = canvas.getBoundingClientRect();
+      const cx = caixa.left + caixa.width / 2;
+      const cy = caixa.top + caixa.height / 2;
+      const evento = (tipo, x, y, ponteiro) => canvas.dispatchEvent(new PointerEvent(tipo, { clientX: x, clientY: y, bubbles: true, cancelable: true, pointerId: ponteiro, button: 0, buttons: 1 }));
+      const arrasta = async (ponteiro) => {
+        evento('pointerdown', cx, cy, ponteiro);
+        await new Promise((r) => setTimeout(r, 120));
+        evento('pointermove', cx, cy - 40, ponteiro);
+        await new Promise((r) => setTimeout(r, 250));
+        evento('pointerup', cx, cy - 40, ponteiro);
+        await new Promise((r) => setTimeout(r, 350));
+      };
+      document.querySelector('#abas [data-aba="enfeites"]').click();
+      await new Promise((r) => setTimeout(r, 250));
+      const comeca = document.getElementById('travar').getAttribute('aria-pressed');
+      const antesTravado = assinatura();
+      await arrasta(11);
+      const moveuTravado = assinatura() !== antesTravado;
+      // um toque curto, mesmo travado, escolhe o item e abre a aba dele
+      const abaAntes = document.querySelector('#abas [aria-selected="true"]').dataset.aba;
+      evento('pointerdown', cx, cy, 12);
+      await new Promise((r) => setTimeout(r, 80));
+      evento('pointerup', cx + 2, cy + 1, 12);
+      await new Promise((r) => setTimeout(r, 400));
+      const abaDepois = document.querySelector('#abas [aria-selected="true"]').dataset.aba;
+      // destravado, o mesmo arrasto move
+      document.getElementById('travar').click();
+      await new Promise((r) => setTimeout(r, 200));
+      const antesLivre = assinatura();
+      await arrasta(13);
+      const moveuLivre = assinatura() !== antesLivre;
+      const textoLivre = document.getElementById('travar-texto').textContent;
+      document.getElementById('travar').click();
+      await new Promise((r) => setTimeout(r, 200));
+      return {
+        comeca, moveuTravado, abaAntes, abaDepois, moveuLivre, textoLivre,
+        textoTravado: document.getElementById('travar-texto').textContent,
+        aberto: document.querySelectorAll('.studio-item--aberto').length,
+      };
+    });
+    if (cadeado.comeca !== 'true') failures.push(`[estúdio ${w}] a arte devia começar travada`);
+    if (cadeado.moveuTravado) failures.push(`[estúdio ${w}] com o cadeado fechado, arrastar na caneca mexeu na arte`);
+    if (cadeado.abaDepois !== 'fotos') failures.push(`[estúdio ${w}] tocar na foto da caneca não abriu a aba Fotos (${cadeado.abaAntes} → ${cadeado.abaDepois})`);
+    if (!cadeado.moveuLivre) failures.push(`[estúdio ${w}] com o cadeado aberto, arrastar não moveu o item`);
+    if (cadeado.textoLivre !== 'Arte livre' || cadeado.textoTravado !== 'Arte travada') failures.push(`[estúdio ${w}] o cadeado não diz em que estado está (${cadeado.textoLivre} / ${cadeado.textoTravado})`);
+    if (cadeado.aberto !== 1) failures.push(`[estúdio ${w}] devia haver um cartão aberto por vez (${cadeado.aberto})`);
+
+    // acrescentar frase, enfeite e Pandinha (um só, como manda o manual)
+    const acrescimos = await pe.evaluate(async () => {
+      const conta = () => document.querySelectorAll('.studio-item').length;
+      const inicio = conta();
+      document.querySelector('#abas [data-aba="frases"]').click();
+      document.getElementById('add-frase').click();
+      await new Promise((r) => setTimeout(r, 300));
+      const campo = document.querySelector('[data-corpo] input[type="text"]');
+      campo.value = 'feito com carinho';
+      campo.dispatchEvent(new Event('input'));
+      document.querySelectorAll('[data-corpo] .studio-cor')[3].click();
+      await new Promise((r) => setTimeout(r, 200));
+      document.querySelector('#abas [data-aba="enfeites"]').click();
+      const desenhos = document.querySelectorAll('#grade-enfeites .studio-forma').length;
+      document.querySelectorAll('#grade-enfeites .studio-forma')[1].click();
+      await new Promise((r) => setTimeout(r, 300));
+      document.getElementById('add-pandinha').click();
+      await new Promise((r) => setTimeout(r, 400));
+      const comUm = conta();
+      document.getElementById('add-pandinha').click();
+      await new Promise((r) => setTimeout(r, 400));
+      return { inicio, desenhos, comUm, depois: conta(), zap: new URL(document.getElementById('mug-order').href).searchParams.get('text') || '' };
+    });
+    if (acrescimos.depois !== acrescimos.inicio + 2) failures.push(`[estúdio ${w}] acrescentar frase e enfeite não deu certo (${JSON.stringify(acrescimos)})`);
+    if (acrescimos.comUm !== acrescimos.depois) failures.push(`[estúdio ${w}] o segundo toque em "+ Pandinha" criou outro Pandinha (manual 6.4)`);
+    if (acrescimos.desenhos < 6) failures.push(`[estúdio ${w}] a grade de enfeites mostrou só ${acrescimos.desenhos} desenhos`);
+    if (!acrescimos.zap.includes('feito com carinho') || !acrescimos.zap.includes('Enfeites acrescentados')) {
+      failures.push(`[estúdio ${w}] o pedido não acompanhou a frase e o enfeite novos`);
+    }
+
+    // biblioteca de letras: a lista aparece, a letra escolhida carrega do nosso endereço e muda a arte
+    const letras = await pe.evaluate(async () => {
+      const flat = document.getElementById('flat-art');
+      const assinatura = () => {
+        const d = flat.getContext('2d').getImageData(0, 0, flat.width, flat.height).data;
+        let soma = 0;
+        for (let i = 0; i < d.length; i += 997) soma += d[i];
+        return soma;
+      };
+      document.querySelector('#abas [data-aba="frases"]').click();
+      await new Promise((r) => setTimeout(r, 200));
+      const cabeca = document.querySelector('#lista-frases .studio-item__cabeca');
+      if (cabeca.getAttribute('aria-expanded') !== 'true') cabeca.click();
+      await new Promise((r) => setTimeout(r, 1200));
+      const total = document.querySelectorAll('.studio-letra').length;
+      const antes = assinatura();
+      document.querySelector('.studio-letra[data-fonte="Great Vibes"]')?.click();
+      await new Promise((r) => setTimeout(r, 1200));
+      return {
+        total, mudou: assinatura() !== antes,
+        carregada: document.fonts.check('400 16px "Great Vibes"'),
+        sub: document.querySelector('#lista-frases .studio-item__cabeca small')?.textContent || '',
+      };
+    });
+    if (letras.total < 12) failures.push(`[estúdio ${w}] a biblioteca de letras mostrou só ${letras.total} opções`);
+    if (!letras.carregada) failures.push(`[estúdio ${w}] a letra escolhida não carregou do nosso próprio endereço`);
+    if (!letras.mudou || !/Caligrafia/.test(letras.sub)) failures.push(`[estúdio ${w}] trocar a letra não mudou a arte ("${letras.sub}")`);
+
+    // arte: curva da frase, elementos da marca, cor de fundo e centralizar
+    const arteNova = await pe.evaluate(async () => {
+      const flat = document.getElementById('flat-art');
+      const assinatura = () => {
+        const d = flat.getContext('2d').getImageData(0, 0, flat.width, flat.height).data;
+        let soma = 0;
+        for (let i = 0; i < d.length; i += 997) soma += d[i];
+        return soma;
+      };
+      const espera = (ms) => new Promise((r) => setTimeout(r, ms));
+      // curva da frase
+      document.querySelector('#abas [data-aba="frases"]').click();
+      await espera(200);
+      const cabeca = document.querySelector('#lista-frases .studio-item__cabeca');
+      if (cabeca.getAttribute('aria-expanded') !== 'true') cabeca.click();
+      await espera(500);
+      const curva = [...document.querySelectorAll('[data-corpo] input[type="range"]')]
+        .find((r) => r.parentElement.textContent.includes('Curva'));
+      const antesDaCurva = assinatura();
+      if (curva) { curva.value = 70; curva.dispatchEvent(new Event('input')); }
+      await espera(600);
+      const curvou = assinatura() !== antesDaCurva;
+      // centralizar no verso
+      const antesDoLugar = assinatura();
+      [...document.querySelectorAll('[data-corpo] button')].find((b) => b.textContent === 'Centralizar no verso')?.click();
+      await espera(600);
+      const centralizou = assinatura() !== antesDoLugar;
+      // elemento do acervo
+      document.querySelector('#abas [data-aba="enfeites"]').click();
+      await espera(200);
+      const elementos = document.querySelectorAll('#grade-elementos .studio-elemento').length;
+      const antesDoElemento = document.querySelectorAll('.studio-item').length;
+      document.querySelectorAll('#grade-elementos .studio-elemento')[0]?.click();
+      await espera(900);
+      const comElemento = document.querySelectorAll('.studio-item').length;
+      // cor do fundo da arte
+      document.querySelector('#abas [data-aba="modelo"]').click();
+      await espera(200);
+      const cores = document.querySelectorAll('#fundo-arte .studio-cor').length;
+      const antesDoFundo = assinatura();
+      document.querySelectorAll('#fundo-arte .studio-cor')[4]?.click();
+      await espera(700);
+      return {
+        curvou, centralizou, elementos, acrescentou: comElemento - antesDoElemento, cores,
+        trocouFundo: assinatura() !== antesDoFundo,
+        temCurva: Boolean(curva),
+      };
+    });
+    if (!arteNova.temCurva || !arteNova.curvou) failures.push(`[estúdio ${w}] a curva da frase não mudou a arte`);
+    if (!arteNova.centralizou) failures.push(`[estúdio ${w}] "Centralizar no verso" não moveu a frase`);
+    if (arteNova.elementos < 6 || arteNova.acrescentou !== 1) failures.push(`[estúdio ${w}] os elementos da marca não entraram (${JSON.stringify(arteNova)})`);
+    if (arteNova.cores < 6 || !arteNova.trocouFundo) failures.push(`[estúdio ${w}] a cor de fundo da arte não mudou nada`);
+
+    // filtro e recorte de fundo da foto
+    const foto = await pe.evaluate(async () => {
+      const flat = document.getElementById('flat-art');
+      const assinatura = () => {
+        const d = flat.getContext('2d').getImageData(0, 0, flat.width, flat.height).data;
+        let soma = 0;
+        for (let i = 0; i < d.length; i += 997) soma += d[i];
+        return soma;
+      };
+      const espera = (ms) => new Promise((r) => setTimeout(r, ms));
+      document.querySelector('#abas [data-aba="fotos"]').click();
+      await espera(200);
+      const cabeca = document.querySelector('#lista-fotos .studio-item__cabeca');
+      if (cabeca.getAttribute('aria-expanded') !== 'true') cabeca.click();
+      await espera(500);
+      const antes = assinatura();
+      const tratamento = [...document.querySelectorAll('[data-corpo] select')]
+        .find((sel) => sel.parentElement.textContent.includes('Tratamento'));
+      if (tratamento) { tratamento.value = 'pb'; tratamento.dispatchEvent(new Event('change')); }
+      await espera(700);
+      return {
+        temTratamento: Boolean(tratamento),
+        mudou: assinatura() !== antes,
+        temRecorte: [...document.querySelectorAll('[data-corpo] button')].some((b) => b.textContent === 'Tirar o fundo claro'),
+      };
+    });
+    if (!foto.temTratamento || !foto.mudou) failures.push(`[estúdio ${w}] o tratamento preto e branco não mudou a foto`);
+    if (!foto.temRecorte) failures.push(`[estúdio ${w}] falta o botão de tirar o fundo claro da foto`);
+
+    // cena e acabamento da prévia
+    const cena = await pe.evaluate(async () => {
+      document.getElementById('peca-cena').open = true;
+      const cenas = document.querySelectorAll('#cenas button').length;
+      const acabamentos = document.querySelectorAll('#acabamentos button').length;
+      document.querySelector('#cenas [data-valor="madeira"]').click();
+      await new Promise((r) => setTimeout(r, 700));
+      const comCena = document.getElementById('cena-resumo').textContent;
+      document.querySelector('#acabamentos [data-valor="fosco"]').click();
+      await new Promise((r) => setTimeout(r, 500));
+      const comFosco = document.getElementById('cena-resumo').textContent;
+      document.querySelector('#cenas [data-valor="estudio"]').click();
+      document.querySelector('#acabamentos [data-valor="brilhante"]').click();
+      await new Promise((r) => setTimeout(r, 600));
+      return { cenas, acabamentos, comCena, comFosco, video: !document.getElementById('save-video').hidden };
+    });
+    if (cena.cenas < 3 || cena.acabamentos !== 2) failures.push(`[estúdio ${w}] faltam cenas ou acabamentos (${JSON.stringify(cena)})`);
+    if (!/Mesa de madeira/.test(cena.comCena) || !/fosco/.test(cena.comFosco)) failures.push(`[estúdio ${w}] a cena escolhida não aparece no resumo (${cena.comCena} / ${cena.comFosco})`);
+    if (!cena.video) failures.push(`[estúdio ${w}] o botão do vídeo girando não apareceu`);
+
+    // desfazer e refazer: o passo volta inteiro
+    const historico = await pe.evaluate(async () => {
+      const conta = () => document.querySelectorAll('.studio-item').length;
+      document.querySelector('#abas [data-aba="frases"]').click();
+      const inicio = conta();
+      document.getElementById('add-frase').click();
+      await new Promise((r) => setTimeout(r, 300));
+      const comAFrase = conta();
+      document.getElementById('desfazer').click();
+      await new Promise((r) => setTimeout(r, 300));
+      const desfeito = conta();
+      document.getElementById('refazer').click();
+      await new Promise((r) => setTimeout(r, 300));
+      return { inicio, comAFrase, desfeito, refeito: conta() };
+    });
+    if (historico.comAFrase !== historico.inicio + 1 || historico.desfeito !== historico.inicio || historico.refeito !== historico.comAFrase) {
+      failures.push(`[estúdio ${w}] desfazer e refazer não voltaram o passo (${JSON.stringify(historico)})`);
+    }
+
+    // alças da vista aberta: puxar um canto muda o tamanho da camada escolhida
+    const alcas = await pe.evaluate(async () => {
+      const flat = document.getElementById('flat-art');
+      const assinatura = () => {
+        const d = flat.getContext('2d').getImageData(0, 0, flat.width, flat.height).data;
+        let soma = 0;
+        for (let i = 0; i < d.length; i += 997) soma += d[i];
+        return soma;
+      };
+      document.querySelector('#abas [data-aba="fotos"]').click();
+      await new Promise((r) => setTimeout(r, 200));
+      const cabecaDaFoto = document.querySelector('#lista-fotos .studio-item__cabeca');
+      if (cabecaDaFoto.getAttribute('aria-expanded') !== 'true') cabecaDaFoto.click();
+      await new Promise((r) => setTimeout(r, 300));
+      const antes = assinatura();
+      const caixa = flat.getBoundingClientRect();
+      const x = caixa.left + 0.043 * caixa.width;
+      const y = caixa.top + 0.09 * caixa.height;
+      const evento = (tipo, px, py) => flat.dispatchEvent(new PointerEvent(tipo, { clientX: px, clientY: py, bubbles: true, cancelable: true, pointerId: 3, button: 0, buttons: 1 }));
+      evento('pointerdown', x, y);
+      await new Promise((r) => setTimeout(r, 100));
+      evento('pointermove', x - 30, y - 14);
+      await new Promise((r) => setTimeout(r, 250));
+      evento('pointerup', x - 30, y - 14);
+      await new Promise((r) => setTimeout(r, 350));
+      return { mudou: assinatura() !== antes };
+    });
+    if (!alcas.mudou) failures.push(`[estúdio ${w}] puxar o canto na arte aberta não mudou o tamanho`);
+
+    // salvar a arte como modelo meu, usar e apagar
+    const meus = await pe.evaluate(async () => {
+      document.getElementById('salvar-modelo').click();
+      await new Promise((r) => setTimeout(r, 200));
+      document.getElementById('nome-meu-modelo').value = 'Modelo de teste';
+      document.getElementById('confirmar-meu-modelo').click();
+      await new Promise((r) => setTimeout(r, 500));
+      const ocasioes = [...document.querySelectorAll('#categoria-modelo option')].map((o) => o.value);
+      document.querySelector('#abas [data-aba="modelo"]').click();
+      const seletor = document.getElementById('categoria-modelo');
+      seletor.value = 'meus';
+      seletor.dispatchEvent(new Event('change'));
+      await new Promise((r) => setTimeout(r, 400));
+      const nomes = [...document.querySelectorAll('#model-list .studio-model__nome')].map((s) => s.textContent);
+      const guardados = JSON.parse(localStorage.getItem('pm_caneca_meus_modelos') || '[]');
+      document.querySelector('#abas [data-aba="fotos"]').click();
+      document.getElementById('apagar-modelo').click();
+      await new Promise((r) => setTimeout(r, 400));
+      return {
+        ocasioes, nomes,
+        guardado: guardados.length === 1 && guardados[0].nome === 'Modelo de teste',
+        temFoto: JSON.stringify(guardados).includes('data:image'),
+        depoisDeApagar: JSON.parse(localStorage.getItem('pm_caneca_meus_modelos') || '[]').length,
+      };
+    });
+    if (!meus.ocasioes.includes('meus') || !meus.nomes.includes('Modelo de teste')) {
+      failures.push(`[estúdio ${w}] o modelo salvo não apareceu em Meus modelos (${JSON.stringify(meus)})`);
+    }
+    if (!meus.guardado) failures.push(`[estúdio ${w}] o modelo salvo não ficou guardado neste navegador`);
+    if (meus.temFoto) failures.push(`[estúdio ${w}] o modelo salvo levou junto a foto da pessoa; ele deve guardar só a montagem`);
+    if (meus.depoisDeApagar !== 0) failures.push(`[estúdio ${w}] apagar o modelo meu não o tirou da lista`);
+
+    // apagar a foto volta a avisar do espaço vazio
+    await pe.evaluate(async () => {
+      document.querySelector('#abas [data-aba="fotos"]').click();
+      await new Promise((r) => setTimeout(r, 200));
+      // abre o cartão só se ele estiver fechado: tocar de novo na cabeça fecharia
+      const cabeca = document.querySelector('#lista-fotos .studio-item__cabeca');
+      if (cabeca.getAttribute('aria-expanded') !== 'true') cabeca.click();
+      await new Promise((r) => setTimeout(r, 300));
+      [...document.querySelectorAll('[data-corpo] button')].find((b) => b.textContent === 'Tirar a foto')?.click();
+    });
+    await pe.waitForTimeout(500);
+    const removido = await pe.$eval('#art-warnings', (e) => e.textContent);
+    if (!/falta escolher/.test(removido)) failures.push(`[estúdio ${w}] tirar uma foto não voltou a avisar do espaço vazio`);
+
+    // levar a arte para o Canva: o clique no link baixa o PNG na medida da volta inteira
+    await pe.click('#abas [data-aba="modelo"]');
+    await pe.evaluate(() => { document.getElementById('bloco-canva').open = true; });
+    // o teste não abre o Canva de verdade: tira o destino e fica só com o efeito do clique
+    await pe.$eval('#abrir-canva', (a) => { a.removeAttribute('target'); a.setAttribute('href', '#'); });
+    await pe.click('#abrir-canva');
+    await pe.waitForTimeout(1500);
+    if (!baixados.some((n) => /^arte-da-caneca-para-o-canva-2480x1063\.png$/.test(n))) {
+      failures.push(`[estúdio ${w}] "Levar minha arte para o Canva" não baixou a arte na medida certa (${baixados.join(', ') || 'nada baixado'})`);
+    }
+
+    // vários nomes de uma vez: um arquivo com uma arte por nome
+    await pe.evaluate(() => {
+      document.querySelector('#abas [data-aba="frases"]').click();
+      document.getElementById('lote').open = true;
+      document.getElementById('lote-nomes').value = 'Malu\nTheo\nDona Cleide';
+    });
+    const lote = await pe.$eval('#lote', (e) => !e.hidden);
+    if (!lote) failures.push(`[estúdio ${w}] o bloco de vários nomes não apareceu`);
+    await pe.click('#lote-gerar');
+    await pe.waitForFunction(() => /artes num arquivo|Escreva ao menos|Escolha qual/.test(document.getElementById('lote-status').textContent), null, { timeout: 30000 }).catch(() => {});
+    const loteStatus = await pe.$eval('#lote-status', (e) => e.textContent);
+    if (!/3 artes num arquivo/.test(loteStatus)) failures.push(`[estúdio ${w}] as artes em lote não saíram ("${loteStatus}")`);
+    if (!baixados.some((n) => /^canecas-panda-mimo-3-nomes\.zip$/.test(n))) failures.push(`[estúdio ${w}] o arquivo com as artes de cada nome não foi baixado (${baixados.join(', ') || 'nada'})`);
+
+    // prévia grande e link da montagem
+    await pe.click('#save-4k');
+    await pe.waitForTimeout(2500);
+    if (!baixados.some((n) => /previa-4k/.test(n))) failures.push(`[estúdio ${w}] a prévia em 4K não foi baixada`);
+    await pe.click('#copiar-link');
+    await pe.waitForTimeout(800);
+    const link = await pe.evaluate(() => navigator.clipboard.readText().catch(() => ''));
+    if (!/#m=|#j=/.test(link)) failures.push(`[estúdio ${w}] o link da montagem não foi copiado (${link.slice(0, 40)})`);
+
+    // trazer a arte pronta do Canva: volta para a aba Minha arte, ao redor, com a arte inteira
+    await pe.setInputFiles('#canva-file', fotoDeTeste);
+    await pe.waitForTimeout(900);
+    const doCanva = await pe.evaluate(() => ({
+      abas: [...document.querySelectorAll('#abas button')].map((b) => b.dataset.aba),
+      ativa: document.querySelector('#abas [aria-selected="true"]')?.dataset.aba,
+      layout: document.querySelector('input[name="layout"]:checked')?.value,
+      status: document.getElementById('save-status').textContent,
+      arquivo: document.getElementById('art-file-name').textContent,
+    }));
+    if (doCanva.abas.join(',') !== 'modelo,arte' || doCanva.ativa !== 'arte') failures.push(`[estúdio ${w}] a arte do Canva não abriu a aba Minha arte (${JSON.stringify(doCanva)})`);
+    if (doCanva.layout !== 'wrap') failures.push(`[estúdio ${w}] a arte do Canva não foi aplicada ao redor da caneca`);
+    if (!/Canva|proporção/i.test(doCanva.status)) failures.push(`[estúdio ${w}] a arte do Canva entrou sem dizer o que aconteceu ("${doCanva.status}")`);
+    if (!doCanva.arquivo) failures.push(`[estúdio ${w}] a arte do Canva não aparece como arquivo escolhido`);
+
+
+    // exportação da arte plana em 300 dpi, do gabarito e da prévia
+    await pe.click('#save-print');
+    await pe.click('#save-preview');
+    // o gabarito mora no bloco do Canva, dentro da aba Modelo
+    await pe.click('#abas [data-aba="modelo"]');
+    await pe.evaluate(() => { document.getElementById('bloco-canva').open = true; });
+    await pe.waitForTimeout(200);
+    await pe.click('#save-guide');
+    await pe.waitForFunction(() => /salva/.test(document.getElementById('save-status').textContent), null, { timeout: 10000 }).catch(() => {});
+    await pe.waitForTimeout(800);
+    if (!baixados.some((n) => /300dpi\.png$/.test(n))) failures.push(`[estúdio ${w}] "Baixar arte plana" não gerou o PNG em 300 dpi (${baixados.join(', ') || 'nada baixado'})`);
+    if (!baixados.some((n) => /previa/.test(n))) failures.push(`[estúdio ${w}] "Baixar prévia" não gerou a imagem (${baixados.join(', ') || 'nada baixado'})`);
+    if (!baixados.some((n) => /^gabarito-caneca-panda-mimo-2480x1063\.png$/.test(n))) failures.push(`[estúdio ${w}] o gabarito da arte não saiu em 2480 × 1063 px (${baixados.join(', ') || 'nada baixado'})`);
+    // rascunho: recarrega e o trabalho volta igualzinho
+    const antesDeRecarregar = await pe.evaluate(() => ({
+      camadas: document.querySelectorAll('.studio-item').length,
+      arquivo: document.getElementById('art-file-name').textContent,
+    }));
+    await pe.waitForTimeout(1600);
+    await pe.reload({ waitUntil: 'load' });
+    const apareceu = await pe.waitForFunction(() => !document.getElementById('rascunho').hidden, null, { timeout: 15000 }).then(() => true).catch(() => false);
+    if (!apareceu) failures.push(`[estúdio ${w}] o rascunho guardado não foi oferecido depois de recarregar`);
+    else {
+      await pe.click('#rascunho-continuar');
+      await pe.waitForFunction((alvo) => (alvo.camadas
+        ? document.querySelectorAll('.studio-item').length === alvo.camadas
+        : document.getElementById('art-file-name').textContent === alvo.arquivo), antesDeRecarregar, { timeout: 15000 }).catch(() => {});
+      const voltou = await pe.evaluate(() => ({
+        camadas: document.querySelectorAll('.studio-item').length,
+        arquivo: document.getElementById('art-file-name').textContent,
+      }));
+      if (voltou.camadas !== antesDeRecarregar.camadas || voltou.arquivo !== antesDeRecarregar.arquivo) {
+        failures.push(`[estúdio ${w}] o rascunho voltou diferente do que estava (${JSON.stringify(voltou)} em vez de ${JSON.stringify(antesDeRecarregar)})`);
+      }
+    }
+
+
+    const medidaNaTela = await pe.$eval('#size-guide', (e) => e.textContent);
+    if (!/21 × 9 cm \(2480 × 1063 px a 300 dpi\)/.test(medidaNaTela)) failures.push(`[estúdio ${w}] a página não diz o tamanho certo da arte ("${medidaNaTela}")`);
+    const dir = path.join(here, 'shots', String(w));
+    fs.mkdirSync(dir, { recursive: true });
+    await pe.screenshot({ path: path.join(dir, 'estudio-caneca.png'), fullPage: true }).catch(() => {});
+    // setPointerCapture só falha com ponteiro simulado (o OrbitControls o chama no pointerdown);
+    // com dedo ou mouse de verdade o id existe e a captura funciona.
+    erros.filter((e) => !/Failed to load resource|net::ERR_|PointerCapture/.test(e))
+      .forEach((e) => failures.push(`[estúdio ${w}] erro: ${e}`));
+    await pe.close();
+    await contexto.close();
+  }
+  await servidor.close();
 }
 
 await browser.close();

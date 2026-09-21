@@ -1,5 +1,8 @@
 # Claude-desk
 
+**Sessão nova começa por `ESTADO-ATUAL.md`** (na raiz): a frente aberta, o que ficou pronto, o que
+vem a seguir e o que é trabalho de outra sessão parado no diretório.
+
 ## panda-mimo/ (site e marca Panda Mimo)
 
 Antes de qualquer trabalho em `panda-mimo/`, leia **`panda-mimo/MARCA.md`**, o manual da marca.
@@ -12,6 +15,11 @@ A identidade está aprovada: evoluir é acrescentar dentro dessas regras, nunca 
 - Arquivos-mestre (SVG, fontes, prompt para IA) ficam em `panda-mimo/marca/kit/`; elemento novo do acervo é vetorizado e entra lá também (seção 13.5 do manual).
 - Nunca apagar assets existentes ao ampliar o acervo; nunca esconder problema de layout com `overflow: hidden`.
 - Antes de publicar mudança no site, rodar o guardião: `cd panda-mimo && npm test` (rápido: `QA_VIEWPORTS=390 npm test`).
+- **Estúdio da caneca em 360° (`caneca-3d.html` e `simulador/`)**: antes de mexer, leia
+  `panda-mimo/simulador/COMECE-AQUI.md` (o que é, como rodar, como a arte em camadas funciona, o que
+  falta) e `panda-mimo/simulador/LICOES-APRENDIDAS.md` (as armadilhas que já custaram tempo). O
+  estúdio não abre por `file://`: use `cd panda-mimo && npm run servir`. Toda função nova entra com
+  checagem no guardião e, quando muda regra de marca, com registro em `MARCA.md` e no histórico.
 - Ao mudar uma regra da marca, atualizar o manual (texto em `MARCA.md`, visual em `marca/index.html`) e registrar no histórico ao final do `MARCA.md`.
 
 ## seu-mimo-studio/ (marca Seu Mimo Studio)

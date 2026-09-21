@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#FBF6EF">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Crie sua caneca em 360° · Panda Mimo</title>
+  <meta name="description" content="Veja sua foto ou arte em uma caneca 3D: escolha um modelo de data comemorativa, coloque suas fotos, escreva sua frase e gire a caneca de todos os lados.">
+  <link rel="canonical" href="https://reinaldo3010.github.io/Claude-desk/caneca-3d.html">
+  <meta property="og:site_name" content="Panda Mimo">
+  <meta property="og:locale" content="pt_BR">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Crie sua caneca em 360° · Panda Mimo">
+  <meta property="og:description" content="Veja sua foto ou arte em uma caneca 3D: escolha um modelo de data comemorativa, coloque suas fotos, escreva sua frase e gire a caneca de todos os lados.">
+  <meta property="og:url" content="https://reinaldo3010.github.io/Claude-desk/caneca-3d.html">
+  <meta property="og:image" content="https://reinaldo3010.github.io/Claude-desk/assets/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Crie sua caneca em 360° · Panda Mimo">
+  <meta name="twitter:description" content="Veja sua foto ou arte em uma caneca 3D: escolha um modelo de data comemorativa, coloque suas fotos, escreva sua frase e gire a caneca de todos os lados.">
+  <meta name="twitter:image" content="https://reinaldo3010.github.io/Claude-desk/assets/og.jpg">
+  <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="assets/icone-192.png" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="preload" href="assets/fontes/fredoka.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fontes/nunito.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="simulador/estudio.css">
+</head>
+<body class="studio-page">
+<a class="skip" href="#conteudo">Ir para o conteúdo</a>
+<header class="studio-topbar">
+  <div class="wrap studio-topbar__in">
+    <a href="index.html" class="brand" aria-label="Panda Mimo — início"><img src="assets/logo-pill.svg" alt="Panda Mimo — itens personalizados" width="900" height="254"></a>
+    <a class="studio-back" href="index.html#monte"><span aria-hidden="true">←</span> Voltar para as peças</a>
+  </div>
+</header>
+<main class="wrap studio-main" id="conteudo">
+  <header class="studio-heading">
+    <div><p class="eyebrow">MONTE SEU MIMO</p><h1 class="display">Sua arte. <span class="hand">Sua caneca.</span></h1></div>
+    <p>Uma foto, uma lembrança, um carinho.<br>Gire a caneca e veja sua ideia de todos os lados.</p>
+  </header>
+  <noscript><p class="studio-message">Ative o JavaScript para personalizar a caneca. Você também pode <a href="index.html#contato">contar sua ideia pra gente</a>.</p></noscript>
+  <div class="studio-layout">
+
+    <!-- ===================== A PEÇA ===================== -->
+    <section class="studio-preview" aria-label="Prévia da caneca">
+      <div class="studio-preview__bar">
+        <span class="studio-badge">PRÉVIA EM 360°</span>
+        <button type="button" class="studio-cadeado" id="travar" aria-pressed="true">
+          <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" focusable="false"><rect x="5" y="10.5" width="14" height="10" rx="2.4" fill="none" stroke="currentColor" stroke-width="2"/><path id="cadeado-arco" d="M8.4 10.5V7.8a3.6 3.6 0 0 1 7.2 0v2.7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <span id="travar-texto">Arte travada</span>
+        </button>
+      </div>
+      <div class="studio-viewport" id="mug-viewport" role="region" aria-label="Caneca em três dimensões. Arraste para girar ou use os botões de vista.">
+        <p class="studio-loading" id="viewer-loading" role="status">Preparando sua caneca…</p>
+        <div id="viewer-fallback" class="studio-fallback" hidden><p>O 3D não abriu neste navegador. Sua arte continua disponível na vista plana.</p><button type="button" class="btn btn--ghost btn--sm" id="viewer-retry">Tentar o 3D novamente</button></div>
+      </div>
+      <div class="studio-view-tools">
+        <div class="studio-view-buttons" role="group" aria-label="Escolher vista da caneca">
+          <button type="button" data-view="front" aria-pressed="true">Frente</button>
+          <button type="button" data-view="back" aria-pressed="false">Verso</button>
+          <button type="button" data-view="handle" aria-pressed="false">Alça</button>
+          <button type="button" data-view="inside" aria-pressed="false">Interior</button>
+        </div>
+        <label class="studio-zoom" for="mug-zoom">Zoom <input id="mug-zoom" type="range" min="75" max="140" value="100" step="5" aria-label="Aproximar a caneca"></label>
+      </div>
+      <p class="studio-gesture" id="studio-gesture">Arraste para girar a caneca. Use dois dedos ou o controle para aproximar.</p>
+
+      <!-- cores da peça ficam junto da peça, não no editor da arte -->
+      <details class="studio-peca" id="peca-cores">
+        <summary><span>Cores da peça</span><span class="studio-peca__resumo" id="peca-resumo">Toda branca</span></summary>
+        <p class="studio-help">Por fora, branca. O carinho fica por sua conta.</p>
+        <div class="studio-color-presets" role="group" aria-label="Combinações de cores"><button type="button" data-preset="branca" aria-pressed="true">Toda branca</button><button type="button" data-preset="preta" aria-pressed="false">Preto e branco</button><button type="button" data-preset="rosa" aria-pressed="false">Toque rosa</button></div>
+        <div class="studio-color-fields"><label for="inside-color">Interior<select id="inside-color" name="inside"><option value="branca">Branco</option><option value="preta">Preto</option><option value="vermelha">Vermelho</option><option value="amarela">Amarelo</option><option value="rosa">Rosa</option><option value="azul">Azul</option></select></label><label for="handle-color">Alça<select id="handle-color" name="handle"><option value="branca">Branco</option><option value="preta">Preto</option><option value="vermelha">Vermelho</option><option value="amarela">Amarelo</option><option value="rosa">Rosa</option><option value="azul">Azul</option></select></label></div>
+      </details>
+
+      <details class="studio-peca" id="peca-cena">
+        <summary><span>Cena e acabamento</span><span class="studio-peca__resumo" id="cena-resumo">Fundo claro · brilhante</span></summary>
+        <p class="studio-help">Veja a caneca como ela vai aparecer na foto do presente.</p>
+        <div class="studio-cenas" id="cenas" role="group" aria-label="Cena da prévia"></div>
+        <div class="studio-cenas" id="acabamentos" role="group" aria-label="Acabamento da cerâmica"></div>
+      </details>
+
+      <details class="studio-flat" id="flat-details">
+        <summary>Ver a arte aberta <span>área de 21 × 9 cm</span></summary>
+        <div class="studio-flat__paper"><canvas id="flat-art" width="840" height="360" role="img" aria-label="Arte plana dentro da área de personalização"></canvas></div>
+        <p>Esta é a área que envolve a caneca, com um espaço livre junto à alça. Puxe um canto para aumentar e o botão de cima para girar.</p>
+        <label class="studio-check"><input type="checkbox" id="mostrar-margem" checked> Mostrar a margem de segurança</label>
+      </details>
+      <div class="studio-caption"><span class="hand">Só uma prévia, tá?</span><p>Modelo de referência de 325 ml. A gente confere a peça, a combinação de cores e a arte final antes de produzir.</p></div>
+    </section>
+
+    <!-- ===================== A ARTE ===================== -->
+    <aside class="studio-controls" aria-label="Montar a arte da caneca">
+      <form id="mug-form" autocomplete="off">
+        <p class="studio-intro">Escolha um modelo, coloque as fotos e escreva do seu jeito. Clique em cima da caneca para mexer em qualquer item.</p>
+        <div class="studio-rascunho" id="rascunho" hidden>
+          <p id="rascunho-texto">Você tem um rascunho guardado neste aparelho.</p>
+          <div class="studio-rascunho__acoes">
+            <button type="button" class="studio-text-button" id="rascunho-continuar">Continuar de onde parei</button>
+            <button type="button" class="studio-text-button" id="rascunho-apagar">Começar do zero</button>
+          </div>
+        </div>
+
+        <div class="studio-abas" id="abas" role="tablist" aria-label="Partes da arte"></div>
+        <p class="studio-dica" id="dica-aba"></p>
+
+        <div class="studio-acoes-arte" id="acoes-arte" hidden>
+          <div class="studio-historico__botoes" role="group" aria-label="Desfazer e refazer">
+            <button type="button" id="desfazer" disabled>Desfazer</button>
+            <button type="button" id="refazer" disabled>Refazer</button>
+          </div>
+          <button type="button" class="studio-text-button" id="salvar-modelo">Salvar como meu modelo</button>
+          <button type="button" class="studio-text-button" id="apagar-modelo" hidden>Apagar este modelo meu</button>
+        </div>
+        <div class="studio-salvar-modelo" id="form-meu-modelo" hidden>
+          <label class="studio-campo" for="nome-meu-modelo">Nome do seu modelo
+            <input id="nome-meu-modelo" type="text" maxlength="40" placeholder="Ex.: Aniversário da Malu">
+          </label>
+          <p class="studio-help">Guarda a arte montada (sem as fotos) só neste navegador, para você usar de novo.</p>
+          <div class="studio-salvar-modelo__acoes">
+            <button type="button" class="studio-text-button" id="confirmar-meu-modelo">Salvar modelo</button>
+            <button type="button" class="studio-text-button" id="cancelar-meu-modelo">Cancelar</button>
+          </div>
+        </div>
+
+        <!-- aba: modelo -->
+        <div class="studio-painel" id="painel-modelo" role="tabpanel" aria-labelledby="aba-modelo" tabindex="0">
+          <div class="studio-filtros">
+            <label class="studio-campo" for="categoria-modelo">Para qual ocasião?
+              <select id="categoria-modelo"></select>
+            </label>
+            <label class="studio-campo" for="busca-modelo">Buscar por nome
+              <input id="busca-modelo" type="search" placeholder="Ex.: coração, fotos, Natal" autocomplete="off">
+            </label>
+          </div>
+          <p class="studio-help" id="resultado-modelos" role="status"></p>
+          <div class="studio-models" id="model-list" role="group" aria-label="Modelos de arte"></div>
+          <button type="button" class="studio-text-button" id="model-more" hidden></button>
+          <div class="studio-fundo-arte" id="fundo-arte" hidden></div>
+
+          <details class="studio-guide" id="bloco-canva">
+            <summary>Quer montar a arte no Canva?</summary>
+            <p>A volta inteira da caneca tem <span id="size-guide">21 × 9 cm</span>. Deixe 5 mm de folga em cada borda.</p>
+            <ol class="studio-passos">
+              <li><strong>Levar minha arte para o Canva</strong> baixa a arte como está e abre o Canva numa aba nova.</li>
+              <li>No Canva, crie um design com essa medida e arraste o arquivo para dentro dele.</li>
+              <li>Termine de mexer lá, exporte em PNG e volte aqui em <strong>Trazer a arte do Canva</strong>.</li>
+            </ol>
+            <div class="studio-canva">
+              <a class="studio-text-button" id="abrir-canva" href="https://www.canva.com/" target="_blank" rel="noopener noreferrer">Levar minha arte para o Canva</a>
+              <button type="button" class="studio-text-button" id="importar-canva">Trazer a arte do Canva</button>
+              <button type="button" class="studio-text-button" id="save-guide">Baixar só o gabarito</button>
+            </div>
+            <p class="studio-help">O Canva não deixa um site de fora abrir um projeto já com a arte dentro, então ela vai como arquivo. É arrastar e soltar lá.</p>
+          </details>
+        </div>
+
+        <!-- aba: fotos -->
+        <div class="studio-painel" id="painel-fotos" role="tabpanel" aria-labelledby="aba-fotos" tabindex="0" hidden>
+          <button type="button" class="studio-acrescentar" id="add-foto">+ Acrescentar foto</button>
+          <ul class="studio-itens" id="lista-fotos"></ul>
+        </div>
+
+        <!-- aba: frases -->
+        <div class="studio-painel" id="painel-frases" role="tabpanel" aria-labelledby="aba-frases" tabindex="0" hidden>
+          <button type="button" class="studio-acrescentar" id="add-frase">+ Acrescentar frase</button>
+          <ul class="studio-itens" id="lista-frases"></ul>
+        </div>
+
+        <!-- aba: enfeites -->
+        <div class="studio-painel" id="painel-enfeites" role="tabpanel" aria-labelledby="aba-enfeites" tabindex="0" hidden>
+          <p class="studio-help">Toque num desenho para acrescentar na caneca.</p>
+          <div class="studio-formas" id="grade-enfeites" role="group" aria-label="Desenhos para acrescentar"></div>
+          <p class="studio-help">Do acervo da Panda Mimo:</p>
+          <div class="studio-elementos" id="grade-elementos" role="group" aria-label="Elementos da marca para acrescentar"></div>
+          <button type="button" class="studio-acrescentar" id="add-pandinha">+ Pandinha</button>
+          <ul class="studio-itens" id="lista-enfeites"></ul>
+        </div>
+
+        <!-- aba: minha arte (quando a pessoa traz a arte pronta) -->
+        <div class="studio-painel" id="painel-arte" role="tabpanel" aria-labelledby="aba-arte" tabindex="0" hidden>
+          <div class="studio-drop" id="art-drop">
+            <svg viewBox="0 0 40 40" width="36" height="36" aria-hidden="true"><path d="M8 25v8h24v-8M20 27V7M12 15l8-8 8 8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <button type="button" id="choose-art" class="btn btn--dark btn--sm">Escolher foto ou arte</button>
+            <p>Ou solte o arquivo aqui</p><small>PNG, JPG ou WebP · até 20 MB · ou um projeto salvo aqui (.json)</small>
+          </div>
+          <div class="studio-file" id="art-file-info" hidden><span id="art-file-name"></span><button type="button" class="studio-text-button" id="remove-art">Remover</button></div>
+          <div class="studio-example-row"><button type="button" class="studio-text-button" id="use-example">Experimentar com uma arte da Panda Mimo</button></div>
+          <fieldset class="studio-layout-field"><legend>Onde vai a arte?</legend><div class="studio-placement"><label><input type="radio" name="layout" value="front" checked><span>Só na frente</span></label><label><input type="radio" name="layout" value="both"><span>Nos dois lados</span></label><label><input type="radio" name="layout" value="wrap"><span>Ao redor</span></label></div></fieldset>
+          <div class="studio-ranges" id="art-adjustments">
+            <label for="art-scale">Tamanho <output id="scale-value" for="art-scale">100%</output><input id="art-scale" type="range" min="20" max="250" value="100" step="1"></label>
+            <label for="art-x">Para os lados <output id="x-value" for="art-x">0</output><input id="art-x" type="range" min="-100" max="100" value="0" step="1"></label>
+            <label for="art-y">Para cima ou para baixo <output id="y-value" for="art-y">0</output><input id="art-y" type="range" min="-100" max="100" value="0" step="1"></label>
+            <label for="art-rotation">Inclinação <output id="rotation-value" for="art-rotation">0°</output><input id="art-rotation" type="range" min="-180" max="180" value="0" step="1"></label>
+          </div>
+          <button type="button" id="reset-art" class="studio-text-button">Centralizar e voltar ao tamanho inicial</button>
+          <div class="studio-nome-livre">
+            <label class="studio-campo" for="art-name">Nome ou frase curta<input id="art-name" type="text" maxlength="24" placeholder="Ex.: Malu"></label>
+            <label class="studio-campo" for="art-font">Jeito da letra<select id="art-font"><option value="Fredoka">Redondinha</option><option value="Caveat">Manuscrita</option></select></label>
+            <label class="studio-check"><input id="art-panda" type="checkbox" checked> Com o Pandinha</label>
+          </div>
+        </div>
+
+        <input id="art-file" class="studio-sr-only" type="file" accept="image/png,image/jpeg,image/webp,application/json,.json" aria-label="Arquivo da foto, da arte ou do projeto salvo">
+        <input id="canva-file" class="studio-sr-only" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Arte pronta, do Canva ou de outro programa">
+        <p id="art-error" class="studio-message" role="alert" hidden></p>
+
+        <!-- fechamento -->
+        <section class="studio-finish" aria-labelledby="finish-heading">
+          <h2 id="finish-heading">Leve seu mimo com você</h2>
+          <p id="art-warnings" class="studio-help" role="status"></p>
+          <a class="btn btn--dark js-wa" id="mug-order" href="index.html#contato" data-msg="Oi, Panda Mimo! Montei uma caneca no site 🐼">Pedir esse mimo no WhatsApp</a>
+          <p class="studio-help">Baixe a prévia e anexe na conversa. Nada é produzido sem o seu "pode fazer".</p>
+          <div class="studio-save-buttons"><button type="button" class="btn btn--ghost btn--sm" id="save-preview" disabled>Baixar prévia</button><button type="button" class="btn btn--ghost btn--sm" id="save-print">Baixar arte plana</button></div>
+          <button type="button" class="btn btn--ghost btn--sm" id="compartilhar" hidden>Mandar a prévia direto</button>
+          <div class="studio-extras">
+            <button type="button" class="studio-text-button" id="save-video" hidden>Baixar vídeo da caneca girando</button>
+            <button type="button" class="studio-text-button" id="save-4k">Baixar prévia em 4K</button>
+            <button type="button" class="studio-text-button" id="copiar-link">Copiar link da montagem</button>
+          </div>
+          <details class="studio-lote" id="lote">
+            <summary>Vários nomes de uma vez</summary>
+            <p class="studio-help">Para turma, padrinhos ou brinde de empresa: escreva um nome por linha e a gente gera uma arte para cada um, num arquivo só.</p>
+            <label class="studio-campo" for="lote-frase">Qual frase troca de nome
+              <select id="lote-frase"></select>
+            </label>
+            <label class="studio-campo" for="lote-nomes">Nomes, um por linha
+              <textarea id="lote-nomes" rows="5" placeholder="Malu&#10;Theo&#10;Dona Cleide"></textarea>
+            </label>
+            <div class="studio-lote__acoes">
+              <button type="button" class="studio-text-button" id="lote-gerar">Gerar as artes</button>
+              <span class="studio-help" id="lote-status" role="status"></span>
+            </div>
+          </details>
+          <button type="button" class="studio-text-button" id="save-project">Salvar tudo em um arquivo</button>
+          <p class="studio-help" id="save-status" role="status"></p>
+        </section>
+      </form>
+    </aside>
+  </div>
+</main>
+<footer class="footer">
+  <div class="wrap footer__in">
+    <img class="footer__brand" src="assets/logo-empilhado.webp" alt="Panda Mimo — itens personalizados" width="900" height="571" loading="lazy" decoding="async">
+    <p class="brand-descriptor">Itens personalizados</p>
+    <p class="footer__tag hand">Feito com carinho, feito pra você.</p>
+    <nav class="footer__nav" aria-label="Rodapé">
+      <a href="index.html#produtos">Produtos</a>
+      <a href="index.html#monte">Monte seu mimo</a>
+      <a href="index.html#duvidas">Dúvidas</a>
+      <a href="index.html#contato">Contato</a>
+    </nav>
+    <nav class="footer__nav footer__nav--legal" aria-label="Sobre a loja e políticas">
+      <a href="sobre.html">Sobre a Panda Mimo</a>
+      <a href="trocas.html">Trocas, defeitos e garantia</a>
+      <a href="termos.html">Como funciona a compra</a>
+      <a href="privacidade.html">Privacidade e cookies</a>
+    </nav>
+    <p class="footer__loja" id="loja-dados" hidden></p>
+    <p class="footer__legal">© <span id="ano">2026</span> Panda Mimo · Itens personalizados</p>
+  </div>
+</footer>
+<script src="config.js" defer></script>
+<script src="pagina.js" defer></script>
+<script type="module" src="simulador/estudio.js"></script>
+</body>
+</html>

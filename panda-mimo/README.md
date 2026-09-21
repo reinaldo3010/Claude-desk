@@ -42,6 +42,77 @@ Em `index.html`, revise também os textos que são propostas:
 Os preços e o texto longo de cada produto se preenchem pelo painel (campos **Preço** e **Texto da tela de detalhe**).
 Enquanto o preço estiver vazio, a tela de detalhe mostra "Valor sob consulta".
 
+## Estúdio da caneca em 360°
+
+`caneca-3d.html` deixa a pessoa colocar a própria foto ou arte numa caneca em 3D (three.js servido de
+`vendor/three/`, sem CDN), escolher as cores do interior e da alça, escrever um nome e baixar a prévia, a
+arte plana em 300 dpi (210 × 90 mm) ou o projeto para continuar depois.
+
+Há também **modelos de arte por ocasião**: 38 artes que dão a volta inteira na caneca, com espaços de
+foto — de uma a seis — e frases prontas, organizadas em quatro grupos no seletor: Datas comemorativas
+(Natal, Mães, Pais, Namorados, Professores), Momentos (Aniversário, Casamento, Bebê, Amizade e
+formatura), Esportes e movimento e Do dia a dia (Pet, Só fotos).
+
+**Coleção esportiva.** Seis modalidades — treino funcional, musculação, ciclismo, corrida, yoga e
+pilates, futebol — com quatro artes cada. As 137 ilustrações da coleção são desenhadas por curvas em
+`simulador/esportes.js`, a partir dos caminhos de `simulador/esportes-dados.js`: entram na arte como
+camadas comuns, então a pessoa move, gira, redimensiona, recolore e apaga cada uma. Não é um editor de
+nós: a bicicleta continua sendo uma bicicleta. As cores saem dos tokens da paleta, como no resto do
+site. Para olhar as 24 no tamanho de uso, abra `qa/esportes-provas.html` com o `npm run servir`.
+
+**A arte é editável em camadas.** A pessoa clica em cima da caneca em 3D para escolher um item e arrasta
+para mover; pode soltar uma foto direto na peça, acrescentar frase, enfeite (coração, flor, estrela,
+patinha, floco, confete, folha, xícara) e o Pandinha em qualquer uma das nove poses do acervo, trocar
+fonte e cor pela paleta da marca, mudar tamanho, inclinação e ordem, duplicar e apagar. A mesma edição
+funciona arrastando na vista aberta.
+
+Os modelos ficam em `simulador/modelos.js`, descritos em fração da área de impressão; para criar um novo,
+copie um item da lista e rode `npm run test:arte`, que confere se tudo cabe na área, se nada se sobrepõe
+e se cores e fontes são as da marca.
+
+**Como a tela se organiza:** à esquerda a peça (caneca em 360°, vistas, zoom, cores do interior e da
+alça, arte aberta) e o cadeado que, fechado, impede arrastar a arte sem querer; à direita a arte, em
+abas (Modelo, Fotos, Frases, Enfeites, ou Modelo e Minha arte). Cada item é um cartão que abre no
+lugar, e clicar na caneca abre a aba do item tocado. A ocasião é um seletor agrupado com busca, então
+dá para acrescentar categorias sem inchar a tela.
+
+**Ferramentas da arte:** frase em arco acompanhando a curva da caneca, elementos do acervo da marca
+(coração de costura, laço, margarida, folhinha, patinhas, sininho, presente), tratamento de foto (preto
+e branco, sépia, mais clara, mais escura, contraste, desbotada), recorte do fundo claro, cor do fundo da
+arte, centralizar na frente, no meio, no verso e na altura, e a margem de segurança à vista.
+
+**Não se perde e dá para mandar:** o rascunho fica no aparelho (IndexedDB, `simulador/rascunho.js`) e é
+oferecido de volta ao voltar à página; "Copiar link da montagem" põe a arte inteira no endereço, sem as
+fotos; a prévia sai também em 4K e, no celular, vai direto pelo compartilhamento do aparelho.
+
+**Vários nomes de uma vez:** uma lista de nomes vira uma arte de 300 dpi por nome, entregues num ZIP
+montado no próprio navegador (`simulador/zip.js`). É o caminho de turma, padrinhos e brinde de empresa.
+
+**Desfazer, alças e modelos seus:** o editor guarda até 60 passos (`Ctrl+Z` e `Ctrl+Shift+Z` também
+funcionam), a camada escolhida mostra alças na vista aberta para girar e redimensionar puxando, e o
+botão "Salvar como meu modelo" guarda a montagem em "Meus modelos", só naquele navegador
+(`localStorage`, chave `pm_caneca_meus_modelos`), sem as fotos de quem montou.
+
+**Cena, acabamento e vídeo:** a prévia mostra a caneca sozinha, numa mesa de madeira, numa mesa clara ou
+em cima de uma caixa de presente kraft, com vidrado brilhante ou fosco. Tudo é gerado em código
+(`simulador/caneca-3d.js`), sem arquivo de imagem. Onde o navegador deixa, dá para baixar um vídeo de
+cinco segundos com a caneca girando, em WebM.
+
+**Biblioteca de letras:** 15 opções para a arte do cliente (as três da marca e doze OFL em
+`assets/fontes/arte/`, com a licença de cada uma ao lado). Elas são servidas do próprio site e só baixam
+quando alguém abre a biblioteca. O catálogo está em `simulador/fontes.js`.
+
+**Ida e volta com o Canva:** "Levar minha arte para o Canva" baixa a arte como está (2480 × 1063 px a
+300 dpi) e abre o Canva em outra aba, onde é só arrastar o arquivo para dentro; o Canva não permite abrir
+um projeto já com a arte por link de fora. Quem começa do zero baixa só o gabarito, com a margem de
+segurança e as marcas de frente, verso e alça. "Trazer a arte do Canva" recebe o PNG exportado e aplica
+ao redor da caneca.
+
+Nada é enviado: a imagem fica no navegador. O código está em `simulador/` (`estudio.js` liga a página,
+`modelos.js` descreve e desenha a arte em camadas, `arte.js` compõe e exporta, `caneca-3d.js` desenha a
+caneca e diz onde o dedo tocou). Para abrir localmente use `npm run servir`, porque por `file://` o
+navegador bloqueia o canvas. As medidas da caneca ficam em `MUG_SPEC` (`simulador/caneca-3d.js`).
+
 ## Manual da marca
 
 A marca tem um brand book próprio, escrito a partir da identidade aprovada no site:

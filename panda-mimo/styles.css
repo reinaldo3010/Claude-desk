@@ -1098,6 +1098,12 @@ h2 .hand { font-size: 1.15em; }
 .hero__assinatura { font-size: clamp(1.5rem, 1.2rem + 1vw, 2.1rem); color: var(--hand-ink); line-height: 1.1; margin: -.2rem 0 .2rem; }
 .hero__facts li:nth-child(4) { display: list-item; }
 .builder__garantia { font-size: var(--fs-s); color: var(--ink-soft); margin: .4rem 0 0; }
+/* convite ao estúdio da caneca em 360° (caneca-3d.html) */
+.builder__estudio { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .9rem 1.5rem; margin-top: 1.6rem; padding: 1.1rem 1.4rem; background: var(--cream); border: 1px solid var(--sand); border-radius: var(--r-md); }
+.builder__estudio p { flex: 1 1 28ch; font-size: var(--fs-s); color: var(--ink-soft); line-height: 1.55; }
+.builder__estudio .hand { display: block; font-size: 1.35rem; color: var(--peach-ink); }
+.builder__estudio .btn { flex: none; }
+@media (max-width: 480px) { .builder__estudio .btn { width: 100%; } }
 
 .depoimentos { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.2rem; }
 .depo {

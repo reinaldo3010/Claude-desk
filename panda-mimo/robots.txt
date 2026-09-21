@@ -2,5 +2,6 @@ User-agent: *
 Allow: /
 Disallow: /admin.html
 Disallow: /marca/
+Disallow: /qa/
 
 Sitemap: https://reinaldo3010.github.io/Claude-desk/sitemap.xml
