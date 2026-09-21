@@ -30,7 +30,7 @@ h2{font-size:20px;margin:0 0 4px}canvas{width:100%;height:auto}small{color:var(-
 </main>
 <script type="module">
 import { CATEGORIAS_DE_COLECAO, MODELOS_DE_COLECAO } from '../simulador/colecoes.js';
-import { novaArte, desenhaArte } from '../simulador/modelos.js';
+import { CATEGORIAS, novaArte, desenhaArte } from '../simulador/modelos.js';
 await document.fonts.ready;
 await Promise.all(['600 14px Fredoka', '600 14px Nunito', '600 14px Caveat'].map((f) => document.fonts.load(f)));
 
@@ -38,22 +38,26 @@ const elGrupo = document.getElementById('grupo');
 const elCategoria = document.getElementById('categoria');
 const lista = document.getElementById('modelos');
 const conta = document.getElementById('conta');
-const nomeDaCategoria = (id) => CATEGORIAS_DE_COLECAO.find((c) => c.id === id)?.nome || id;
+const todasAsCategorias = [...CATEGORIAS_DE_COLECAO, ...CATEGORIAS];
+const categoria = (id) => todasAsCategorias.find((c) => c.id === id) || null;
+const nomeDaCategoria = (id) => categoria(id)?.nome || id;
 
-for (const nome of [...new Set(CATEGORIAS_DE_COLECAO.map((c) => c.grupo))]) {
+const grupoDosModelos = new Set(MODELOS_DE_COLECAO.map((m) => categoria(m.categoria)?.grupo).filter(Boolean));
+for (const nome of grupoDosModelos) {
   elGrupo.append(new Option(nome, nome));
 }
 
 function montaCategorias() {
-  const cabem = CATEGORIAS_DE_COLECAO.filter((c) => elGrupo.value === 'todos' || c.grupo === elGrupo.value);
+  const usadas = new Set(MODELOS_DE_COLECAO.map((m) => m.categoria));
+  const cabem = todasAsCategorias.filter((c) => usadas.has(c.id))
+    .filter((c) => elGrupo.value === 'todos' || c.grupo === elGrupo.value);
   const escolhido = elCategoria.value;
   elCategoria.replaceChildren(new Option('Todos os assuntos', 'todos'), ...cabem.map((c) => new Option(c.nome, c.id)));
   elCategoria.value = cabem.some((c) => c.id === escolhido) ? escolhido : 'todos';
 }
 
 function desenha() {
-  const grupos = new Map(CATEGORIAS_DE_COLECAO.map((c) => [c.id, c.grupo]));
-  const modelos = MODELOS_DE_COLECAO.filter((m) => (elGrupo.value === 'todos' || grupos.get(m.categoria) === elGrupo.value)
+  const modelos = MODELOS_DE_COLECAO.filter((m) => (elGrupo.value === 'todos' || categoria(m.categoria)?.grupo === elGrupo.value)
     && (elCategoria.value === 'todos' || m.categoria === elCategoria.value));
   conta.textContent = `${modelos.length} ${modelos.length === 1 ? 'arte' : 'artes'}.`;
   lista.replaceChildren();

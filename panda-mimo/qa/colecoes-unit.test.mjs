@@ -14,6 +14,8 @@ import { readFile } from 'node:fs/promises';
 import { desenhaIlustracao, limitesDaIlustracao, ilustracao } from '../simulador/desenho.js';
 import { MODELOS_PETS, CATEGORIAS_PETS } from '../simulador/pets.js';
 import { MODELOS_DATAS } from '../simulador/datas.js';
+import { MODELOS_BEBE } from '../simulador/bebe.js';
+import { MODELOS_CONVITES } from '../simulador/convites.js';
 import { ILUSTRACOES, proporcaoDaForma, ehIlustracao, TAMANHO_DA_ILUSTRACAO } from '../simulador/colecoes.js';
 import { PALETA } from '../simulador/paleta.js';
 import { TEMPLATES, CATEGORIAS, modelosDaCategoria, caixaDaCamada, novaArte, camadaEm } from '../simulador/modelos.js';
@@ -24,6 +26,8 @@ const area = { x: 0, y: 0, width: 210, height: 90 };
 const COLECOES = [
   { nome: 'Pets e bichinhos', modelos: MODELOS_PETS, arquivo: 'pets.js' },
   { nome: 'Datas comemorativas', modelos: MODELOS_DATAS, arquivo: 'datas.js' },
+  { nome: 'Bebê e maternidade', modelos: MODELOS_BEBE, arquivo: 'bebe.js' },
+  { nome: 'Convites e agradecimentos', modelos: MODELOS_CONVITES, arquivo: 'convites.js' },
 ];
 
 /** Um contexto de mentira que anota o que foi pedido, sem desenhar nada de verdade. */
@@ -118,7 +122,7 @@ test('cada assunto do seletor tem pelo menos quatro artes, para a pessoa ter de 
   // "Sem modelo", "Só fotos" e "Várias fotos do pet" são atalhos, não assunto: ficam de fora.
   // Os que ainda não chegaram lá ficam nesta lista, à vista. A lista é uma catraca: encheu um
   // assunto, tira daqui; assunto novo magro entra reprovando, que é o que a gente quer.
-  const AINDA_MAGROS = ['aniversario', 'casamento', 'bebe', 'amizade'];
+  const AINDA_MAGROS = ['aniversario', 'amizade'];
   const magros = CATEGORIAS
     .filter((c) => !['livre', 'fotos', 'pet'].includes(c.id))
     .filter((c) => modelosDaCategoria(c.id).length < 4)

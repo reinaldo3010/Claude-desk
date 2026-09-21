@@ -1108,8 +1108,16 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     await pe.selectOption('#categoria-modelo', 'todos');
     await pe.fill('#busca-modelo', 'padrinho');
     await pe.waitForTimeout(300);
-    const busca = await pe.$$eval('#model-list .studio-model', (b) => b.map((x) => x.dataset.modelo).filter(Boolean));
-    if (busca.join(',') !== 'casamento-padrinhos') failures.push(`[estúdio ${w}] a busca por "padrinho" trouxe ${busca.join(', ') || 'nada'}`);
+    // A busca precisa filtrar de verdade: trazer só o que fala de padrinho, e não o catálogo inteiro.
+    const busca = await pe.evaluate(() => ({
+      achados: [...document.querySelectorAll('#model-list .studio-model')].map((b) => b.dataset.modelo).filter(Boolean),
+      textos: [...document.querySelectorAll('#model-list .studio-model')].map((b) => b.textContent.toLowerCase()),
+      total: document.querySelectorAll('#model-list .studio-model').length,
+    }));
+    if (!busca.achados.length) failures.push(`[estúdio ${w}] a busca por "padrinho" não trouxe nada`);
+    if (busca.achados.length > 12) failures.push(`[estúdio ${w}] a busca por "padrinho" trouxe ${busca.achados.length} modelos: não está filtrando`);
+    const foraDoAssunto = busca.textos.filter((t) => !t.includes('padrinho'));
+    if (foraDoAssunto.length) failures.push(`[estúdio ${w}] a busca por "padrinho" trouxe ${foraDoAssunto.length} modelo(s) que não falam de padrinho`);
     await pe.fill('#busca-modelo', '');
     await pe.waitForTimeout(250);
 
