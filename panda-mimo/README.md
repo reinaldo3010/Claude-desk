@@ -46,7 +46,14 @@ Enquanto o preço estiver vazio, a tela de detalhe mostra "Valor sob consulta".
 
 `caneca-3d.html` deixa a pessoa colocar a própria foto ou arte numa caneca em 3D (three.js servido de
 `vendor/three/`, sem CDN), escolher as cores do interior e da alça, escrever um nome e baixar a prévia, a
-arte plana em 300 dpi (210 × 90 mm) ou o projeto para continuar depois. Nada é enviado: a imagem fica no
+arte plana em 300 dpi (210 × 90 mm) ou o projeto para continuar depois.
+
+Há também **modelos de arte por ocasião** (Namorados, Aniversário, Natal, Dia das Mães, Dia dos Pais e
+Só fotos): artes que dão a volta inteira na caneca, com espaços de foto — de uma a seis — e frases que
+a pessoa reescreve. Eles ficam em `simulador/modelos.js`, descritos em fração da área de impressão; para
+criar um novo, copie um item da lista e rode `npm run test:arte`, que confere se tudo cabe na área e se
+nada se sobrepõe. Para quem prefere montar a arte no Canva, a página diz a medida (21 × 9 cm, ou
+2480 × 1063 px a 300 dpi) e baixa um gabarito em PNG com a margem de segurança. Nada é enviado: a imagem fica no
 navegador. O código está em `simulador/` (`estudio.js` liga a página, `arte.js` compõe a arte em
 milímetros, `caneca-3d.js` desenha a caneca). Para abrir localmente use `npm run servir`, porque por
 `file://` o navegador bloqueia o canvas. As medidas da caneca ficam em `MUG_SPEC` (`simulador/caneca-3d.js`).

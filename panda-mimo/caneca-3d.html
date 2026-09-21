@@ -6,20 +6,20 @@
   <meta name="theme-color" content="#FBF6EF">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>Crie sua caneca em 360° · Panda Mimo</title>
-  <meta name="description" content="Veja sua foto ou arte em uma caneca 3D: gire, escolha as cores do interior e da alça e monte um mimo do seu jeito.">
+  <meta name="description" content="Veja sua foto ou arte em uma caneca 3D: escolha um modelo de data comemorativa, coloque suas fotos, escreva sua frase e gire a caneca de todos os lados.">
   <link rel="canonical" href="https://reinaldo3010.github.io/Claude-desk/caneca-3d.html">
   <meta property="og:site_name" content="Panda Mimo">
   <meta property="og:locale" content="pt_BR">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Crie sua caneca em 360° · Panda Mimo">
-  <meta property="og:description" content="Veja sua foto ou arte em uma caneca 3D: gire, escolha as cores do interior e da alça e monte um mimo do seu jeito.">
+  <meta property="og:description" content="Veja sua foto ou arte em uma caneca 3D: escolha um modelo de data comemorativa, coloque suas fotos, escreva sua frase e gire a caneca de todos os lados.">
   <meta property="og:url" content="https://reinaldo3010.github.io/Claude-desk/caneca-3d.html">
   <meta property="og:image" content="https://reinaldo3010.github.io/Claude-desk/assets/og.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Crie sua caneca em 360° · Panda Mimo">
-  <meta name="twitter:description" content="Veja sua foto ou arte em uma caneca 3D: gire, escolha as cores do interior e da alça e monte um mimo do seu jeito.">
+  <meta name="twitter:description" content="Veja sua foto ou arte em uma caneca 3D: escolha um modelo de data comemorativa, coloque suas fotos, escreva sua frase e gire a caneca de todos os lados.">
   <meta name="twitter:image" content="https://reinaldo3010.github.io/Claude-desk/assets/og.jpg">
   <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
   <link rel="icon" href="assets/icone-192.png" sizes="192x192" type="image/png">
@@ -78,36 +78,61 @@
           <div class="studio-color-fields"><label for="inside-color">Interior<select id="inside-color" name="inside"><option value="branca">Branco</option><option value="preta">Preto</option><option value="vermelha">Vermelho</option><option value="amarela">Amarelo</option><option value="rosa">Rosa</option><option value="azul">Azul</option></select></label><label for="handle-color">Alça<select id="handle-color" name="handle"><option value="branca">Branco</option><option value="preta">Preto</option><option value="vermelha">Vermelho</option><option value="amarela">Amarelo</option><option value="rosa">Rosa</option><option value="azul">Azul</option></select></label></div>
         </section>
 
+        <section class="studio-control-section" aria-labelledby="modelo-heading">
+          <h2 id="modelo-heading"><span class="studio-step">2</span> Escolha um modelo</h2>
+          <p class="studio-help">Artes que dão a volta inteira na caneca, com espaço pras suas fotos e frases que você pode trocar. Ou comece do zero com a sua arte pronta.</p>
+          <div class="studio-categories" id="model-categories" role="group" aria-label="Ocasiões"></div>
+          <div class="studio-models" id="model-list" role="group" aria-label="Modelos de arte"></div>
+        </section>
+
         <section class="studio-control-section" aria-labelledby="arte-heading">
-          <h2 id="arte-heading"><span class="studio-step">2</span> Coloque sua arte</h2>
-          <div class="studio-drop" id="art-drop">
-            <svg viewBox="0 0 40 40" width="36" height="36" aria-hidden="true"><path d="M8 25v8h24v-8M20 27V7M12 15l8-8 8 8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <button type="button" id="choose-art" class="btn btn--dark btn--sm">Escolher foto ou arte</button>
-            <p>Ou solte o arquivo aqui</p><small>PNG, JPG ou WebP · até 20 MB · ou um projeto salvo aqui (.json)</small>
-            <input id="art-file" class="studio-sr-only" type="file" accept="image/png,image/jpeg,image/webp,application/json,.json" aria-label="Arquivo da foto, da arte ou do projeto salvo">
+          <h2 id="arte-heading"><span class="studio-step">3</span> Coloque sua arte</h2>
+
+          <div id="template-mode" hidden>
+            <p class="studio-help" id="template-name"></p>
+            <div class="studio-slots" id="photo-slots" role="group" aria-label="Espaços de foto deste modelo"></div>
+            <div class="studio-texts" id="model-texts"></div>
           </div>
-          <div class="studio-file" id="art-file-info" hidden><span id="art-file-name"></span><button type="button" class="studio-text-button" id="remove-art">Remover</button></div>
-          <div class="studio-example-row"><button type="button" class="studio-text-button" id="use-example">Experimentar com uma arte da Panda Mimo</button></div>
+
+          <div id="free-mode">
+            <div class="studio-drop" id="art-drop">
+              <svg viewBox="0 0 40 40" width="36" height="36" aria-hidden="true"><path d="M8 25v8h24v-8M20 27V7M12 15l8-8 8 8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <button type="button" id="choose-art" class="btn btn--dark btn--sm">Escolher foto ou arte</button>
+              <p>Ou solte o arquivo aqui</p><small>PNG, JPG ou WebP · até 20 MB · ou um projeto salvo aqui (.json)</small>
+            </div>
+            <div class="studio-file" id="art-file-info" hidden><span id="art-file-name"></span><button type="button" class="studio-text-button" id="remove-art">Remover</button></div>
+            <div class="studio-example-row"><button type="button" class="studio-text-button" id="use-example">Experimentar com uma arte da Panda Mimo</button></div>
+            <fieldset class="studio-layout-field"><legend>Onde vai a arte?</legend><div class="studio-placement"><label><input type="radio" name="layout" value="front" checked><span>Só na frente</span></label><label><input type="radio" name="layout" value="both"><span>Nos dois lados</span></label><label><input type="radio" name="layout" value="wrap"><span>Ao redor</span></label></div></fieldset>
+          </div>
+
+          <input id="art-file" class="studio-sr-only" type="file" accept="image/png,image/jpeg,image/webp,application/json,.json" aria-label="Arquivo da foto, da arte ou do projeto salvo">
           <p class="studio-help">Sua imagem fica neste navegador. Ela só será enviada quando você a anexar ao pedido.</p>
           <p id="art-error" class="studio-message" role="alert" hidden></p>
-          <fieldset class="studio-layout-field"><legend>Onde vai a arte?</legend><div class="studio-placement"><label><input type="radio" name="layout" value="front" checked><span>Só na frente</span></label><label><input type="radio" name="layout" value="both"><span>Nos dois lados</span></label><label><input type="radio" name="layout" value="wrap"><span>Ao redor</span></label></div></fieldset>
+
+          <div class="studio-guide">
+            <p><strong>Quer montar a arte no Canva?</strong> A volta inteira da caneca tem <span id="size-guide">21 × 9 cm</span>. Deixe 5 mm de folga em cada borda.</p>
+            <button type="button" class="studio-text-button" id="save-guide">Baixar o gabarito da arte</button>
+          </div>
         </section>
 
         <details class="studio-control-section studio-options" id="art-adjustments">
           <summary><span>Ajustar tamanho e posição</span><span aria-hidden="true">+</span></summary>
+          <p class="studio-help" id="adjust-target">Ajusta a arte que está na caneca.</p>
           <div class="studio-ranges"><label for="art-scale">Tamanho <output id="scale-value" for="art-scale">100%</output><input id="art-scale" type="range" min="20" max="250" value="100" step="1"></label><label for="art-x">Para os lados <output id="x-value" for="art-x">0</output><input id="art-x" type="range" min="-100" max="100" value="0" step="1"></label><label for="art-y">Para cima ou para baixo <output id="y-value" for="art-y">0</output><input id="art-y" type="range" min="-100" max="100" value="0" step="1"></label><label for="art-rotation">Inclinação <output id="rotation-value" for="art-rotation">0°</output><input id="art-rotation" type="range" min="-180" max="180" value="0" step="1"></label></div>
           <button type="button" id="reset-art" class="studio-text-button">Centralizar e voltar ao tamanho inicial</button>
         </details>
 
-        <details class="studio-control-section studio-options">
+        <details class="studio-control-section studio-options" id="name-options">
           <summary><span>Adicionar um nome e o Pandinha</span><span aria-hidden="true">+</span></summary>
-          <label class="studio-name" for="art-name">Nome ou frase curta<input id="art-name" type="text" maxlength="24" placeholder="Ex.: Malu"></label>
-          <label class="studio-name" for="art-font">Jeito da letra<select id="art-font"><option value="Fredoka">Redondinha</option><option value="Caveat">Manuscrita</option></select></label>
+          <div id="free-name">
+            <label class="studio-name" for="art-name">Nome ou frase curta<input id="art-name" type="text" maxlength="24" placeholder="Ex.: Malu"></label>
+            <label class="studio-name" for="art-font">Jeito da letra<select id="art-font"><option value="Fredoka">Redondinha</option><option value="Caveat">Manuscrita</option></select></label>
+          </div>
           <label class="studio-check"><input id="art-panda" type="checkbox" checked> Com o Pandinha</label>
         </details>
 
         <section class="studio-control-section studio-finish" aria-labelledby="finish-heading">
-          <h2 id="finish-heading"><span class="studio-step">3</span> Leve seu mimo com você</h2>
+          <h2 id="finish-heading"><span class="studio-step">4</span> Leve seu mimo com você</h2>
           <p id="art-warnings" class="studio-help" role="status"></p>
           <div class="studio-save-buttons"><button type="button" class="btn btn--ghost btn--sm" id="save-preview" disabled>Baixar prévia</button><button type="button" class="btn btn--ghost btn--sm" id="save-print">Baixar arte plana</button></div>
           <button type="button" class="studio-text-button" id="save-project">Salvar tudo em um arquivo</button>

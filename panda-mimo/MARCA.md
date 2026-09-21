@@ -510,6 +510,28 @@ não é medição de peça do fornecedor, e trocar de fornecedor pede recalibrar
 `simulador/caneca-3d.js`; o guardião abre a página, coloca a arte de exemplo, troca cores e vistas e
 baixa os dois arquivos.
 
+**Modelos de arte da caneca (setembro de 2026).** O estúdio traz artes prontas que dão a volta inteira,
+organizadas por ocasião: Namorados, Aniversário, Natal, Dia das Mães, Dia dos Pais e Só fotos. Cada
+modelo tem espaços de foto (de um a seis), frases que a pessoa reescreve e enfeites da paleta espalhados
+pelo fundo. As regras:
+
+- Os modelos vivem em `simulador/modelos.js`, descritos em fração da área de impressão. O mesmo desenho
+  serve para a prévia 3D, para a vista aberta e para o arquivo de 300 dpi: não existe arte "só de tela".
+- Cor só por token da paleta (seção 7); fonte só Fredoka, Caveat ou Nunito (seção 8), com Caveat apenas
+  em frase curta, nunca em parágrafo.
+- Um Pandinha por peça, sempre o adesivo (6.4), inteiro e em lugar livre. Quando não sobra espaço sem
+  cobrir foto ou frase, ele fica de fora da arte. O 3D da 6.5 não entra em peça de cliente.
+- Enfeite não encosta em foto nem em frase, e o sorteio é sempre o mesmo: a arte que a pessoa aprovou é
+  igual à que vai para a produção.
+- Espaço de foto vazio aparece tracejado na prévia e vira aviso; no arquivo de produção ele sai como
+  fundo, sem o tracejado.
+- Modelo novo entra com nome, descrição, categoria e teste: o guardião confere que nada sai da área, que
+  frase não cai sobre foto e que o Pandinha não cobre nada.
+
+**Arte trazida de fora (Canva).** A página informa a medida da volta inteira, 21 × 9 cm, que é
+2480 × 1063 px a 300 dpi, e oferece o gabarito em PNG com a margem de segurança de 5 mm, as marcas da
+frente e do verso e o lado da alça. É a mesma medida do arquivo que a produção recebe.
+
 ### 10.4 Não fazer
 Sem fundo branco recortado às pressas, sem sombra dura, sem filtro colorido, sem peça cortada pela
 metade, sem colagens com mais de três peças, sem texto sobre a foto de catálogo.
@@ -787,6 +809,7 @@ adereço pequeno no Pandinha em datas comemorativas, com aprovação prévia (6.
 | Data | Versão | O que mudou |
 |---|---|---|
 | set/2026 | 1.0 | Primeira edição, consolidando a identidade aplicada no site (paleta, tipografia, logo, mascote, tom de voz, aplicações, governança). |
+| set/2026 | 2.6 | Modelos de arte da caneca por ocasião (Namorados, Aniversário, Natal, Mães, Pais, Só fotos): artes de volta inteira com até seis espaços de foto, frases editáveis e enfeites da paleta, com o Pandinha adesivo em lugar livre (10.3). A página passa a informar a medida da arte (21 × 9 cm, 2480 × 1063 px a 300 dpi) e a entregar o gabarito em PNG para quem monta no Canva. |
 | set/2026 | 2.5 | Estúdio da caneca em 360° (`caneca-3d.html`): foto ou arte própria aplicada num modelo 3D de referência, cores do interior e da alça, nome e Pandinha adesivo, prévia e arte plana em 300 dpi baixáveis, pedido pelo WhatsApp com as escolhas (10.3). Convite na seção Monte seu mimo com a chamada "Ver minha foto na caneca" (4.7), link no rodapé, página no sitemap; guardião ganha o teste de ponta a ponta do estúdio e os testes unitários da arte. |
 | set/2026 | 2.4 | Piloto de edição da margarida: pétalas e miolo mais definidos, transparência real conferida, WebPs em duas densidades e mestre PNG preservado (13.7). |
 | set/2026 | 2.3 | Homologação de loja: páginas Sobre, Trocas e garantia, Como funciona a compra e Privacidade e cookies, linkadas no rodapé com a identificação da loja (Decreto 7.962/2013) editável no painel (11.1); fontes servidas do próprio site (8.1); título comercial, dados estruturados (Organization, FAQPage, ItemList com preços), manifest e sitemap completo; FAQ cita a garantia legal de 90 dias; guardião ganha axe-core e as checagens de páginas, SEO e fontes. |

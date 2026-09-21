@@ -59,12 +59,16 @@ uma nova fonte aprovada é necessária antes de prometer definição adicional.
 
 ## Estúdio da caneca em 360° — setembro de 2026
 
-`npm test` começa pelos testes unitários da arte (`arte-unit.test.mjs`: geometria em mm, dpi efetivo,
-corte, recusa de arquivo inválido, exportação em 300 dpi). Depois, `audit.mjs` sobe um servidor http
+`npm test` começa pelos testes unitários (`qa/*-unit.test.mjs`): a arte livre (geometria em mm, dpi
+efetivo, corte, recusa de arquivo inválido, exportação em 300 dpi) e os modelos de ocasião (nada sai da
+área, frase não cai sobre foto, o Pandinha não cobre nada, o desenho é sempre igual, o dpi sai do
+tamanho do espaço e a medida indicada é 2480 × 1063 px). Depois, `audit.mjs` sobe um servidor http
 próprio (`servidor.mjs`; por `file://` o canvas fica bloqueado) e abre `caneca-3d.html` em 390 e 1280 px:
 o 3D precisa ficar pronto em 15 s, a arte de exemplo entra e aparece na arte plana, nome e cores vão para
-a mensagem do WhatsApp, o botão de vista fica marcado, arquivo falso gera aviso, e "Baixar arte plana" e
-"Baixar prévia" geram os dois arquivos. Captura em `qa/shots/<largura>/estudio-caneca.png`. A página
+a mensagem do WhatsApp, o botão de vista fica marcado e arquivo falso gera aviso. Depois troca para um
+modelo de ocasião: a categoria filtra a lista, os espaços de foto e as frases aparecem, duas fotos
+entram arrastando, a frase reescrita vai para o pedido, remover uma foto volta a avisar, e os três
+arquivos saem ("Baixar arte plana", "Baixar prévia" e o gabarito em 2480 × 1063 px). Captura em `qa/shots/<largura>/estudio-caneca.png`. A página
 também passa pelo axe-core e pelas checagens de cabeçalho, rodapé e sitemap. Para ver local:
 `npm run servir` e abra o endereço impresso.
 

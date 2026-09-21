@@ -3,10 +3,14 @@
  *
  * Coordenadas físicas, em mm, usam origem no canto superior esquerdo da parede
  * desenrolada. A costura u=0/1 fica na alça; frente u=.25, verso u=.75.
- * composeArtwork() entrega uma textura branca de toda a circunferência.
+ * composeArtwork() entrega uma textura branca de toda a circunferência. Com um modelo
+ * escolhido (modelos.js), a mesma função desenha a arte de volta inteira com os espaços
+ * de foto e as frases daquele modelo.
  * exportPrintArtwork() desenha a mesma composição diretamente em 300 dpi,
  * recortada na área imprimível, sem guias, perspectiva ou espelhamento.
  */
+
+import { desenhaModelo, geometriaDoModelo, cor, FRENTE as FRENTE_U, VERSO as VERSO_U } from './modelos.js';
 
 const MAX_BYTES = 20 * 1024 * 1024;
 const MAX_PIXELS = 40_000_000;
@@ -263,7 +267,47 @@ function mergedState(options) {
   };
 }
 
+/** Geometria e avisos de um modelo: dpi de cada foto e espaços ainda vazios. */
+export function computeTemplatePlacement(template, state = {}, spec = {}, photos = {}) {
+  const normalized = normalizedState(state);
+  const { canvasMm, printArea } = physicalSpec(spec);
+  const geometry = geometriaDoModelo(template, printArea);
+  const slots = geometry.fotos.map((espaco) => {
+    const foto = photos[espaco.id];
+    const larguraPx = positive(foto?.width, 0);
+    const alturaPx = positive(foto?.height, 0);
+    const preenchido = Boolean(foto?.image) && larguraPx > EPSILON && alturaPx > EPSILON;
+    // A foto cobre o espaço: o lado que "sobra" é cortado, e o dpi sai do lado que manda.
+    const escala = preenchido
+      ? Math.max(espaco.caixa.width / larguraPx, espaco.caixa.height / alturaPx) * clamp(number(foto.scale, 1), 0.2, 2.5)
+      : 0;
+    return {
+      id: espaco.id, rotulo: espaco.rotulo, caixa: espaco.caixa, preenchido,
+      effectiveDpi: preenchido ? 25.4 / escala : null,
+    };
+  });
+  return {
+    canvasMm, printArea, template: template.id, geometry, slots,
+    state: normalized,
+    vazios: slots.filter((s) => !s.preenchido).map((s) => s.rotulo),
+    effectiveDpi: slots.filter((s) => s.preenchido).reduce((menor, s) => (menor === null ? s.effectiveDpi : Math.min(menor, s.effectiveDpi)), null),
+  };
+}
+
+function templateWarnings(placement) {
+  const warnings = [];
+  const baixas = placement.slots.filter((s) => s.preenchido && s.effectiveDpi < 150);
+  if (baixas.length) {
+    warnings.push(`${baixas.length === 1 ? 'Uma foto está' : `${baixas.length} fotos estão`} com cerca de ${Math.max(1, Math.round(Math.min(...baixas.map((s) => s.effectiveDpi))))} dpi neste tamanho. Fotos maiores deixam a impressão mais nítida.`);
+  }
+  if (placement.vazios.length) {
+    warnings.push(`Ainda falta escolher: ${placement.vazios.join(', ')}. Espaço vazio sai impresso como fundo.`);
+  }
+  return warnings;
+}
+
 function warningsFor(placement) {
+  if (placement.template) return templateWarnings(placement);
   const warnings = [];
   if (placement.effectiveDpi !== null && placement.effectiveDpi < 150) {
     warnings.push(`A imagem tem cerca de ${Math.max(1, Math.round(placement.effectiveDpi))} dpi neste tamanho. Uma imagem maior deixa a impressão mais nítida.`);
@@ -306,6 +350,17 @@ function drawComposition(canvas, placement, options, cropToPrint = false) {
   context.beginPath();
   context.rect(area.x, area.y, area.width, area.height);
   context.clip();
+  if (options.template) {
+    desenhaModelo(context, options.template, area, {
+      textos: options.templateTexts,
+      fotos: options.templatePhotos,
+      placeholder: options.placeholder,
+      pandaImage: placement.state.withPanda ? options.pandaImage : null,
+    });
+    context.restore();
+    context.setTransform(1, 0, 0, 1, 0, 0);
+    return;
+  }
   if (options.artwork?.image) {
     for (const item of placement.items) {
       context.save();
@@ -355,7 +410,9 @@ function drawComposition(canvas, placement, options, cropToPrint = false) {
  * @returns {{canvas:HTMLCanvasElement, placement:object, warnings:string[]}}
  */
 export function composeArtwork(options = {}, canvas) {
-  const placement = computePlacement(options.artwork, mergedState(options), options.spec);
+  const placement = options.template
+    ? computeTemplatePlacement(options.template, mergedState(options), options.spec, options.templatePhotos)
+    : computePlacement(options.artwork, mergedState(options), options.spec);
   const width = Math.round(clamp(number(options.widthPx, 2048), 256, 4096));
   const height = Math.max(1, Math.round(width * placement.canvasMm.height / placement.canvasMm.width));
   const target = makeCanvas(canvas, width, height);
@@ -399,7 +456,9 @@ async function pngAtDpi(blob, dpi) {
 
 /** Output: print-only PNG, 300 dpi metadata, artwork at the same mm placement as the preview. */
 export async function exportPrintArtwork(options = {}) {
-  const placement = computePlacement(options.artwork, mergedState(options), options.spec);
+  const placement = options.template
+    ? computeTemplatePlacement(options.template, mergedState(options), options.spec, options.templatePhotos)
+    : computePlacement(options.artwork, mergedState(options), options.spec);
   const dpi = 300;
   const widthPx = Math.round(placement.printArea.width / 25.4 * dpi);
   const heightPx = Math.round(placement.printArea.height / 25.4 * dpi);
@@ -408,4 +467,81 @@ export async function exportPrintArtwork(options = {}) {
   const raw = await new Promise((resolve, reject) => target.toBlob(blob => blob ? resolve(blob) : reject(fileError('Não conseguimos preparar o arquivo da arte. Tente novamente.')), 'image/png'));
   const blob = await pngAtDpi(raw, dpi);
   return { blob, widthPx, heightPx, dpi, placement, warnings: warningsFor(placement) };
+}
+
+/** Área de impressão em milímetros, para quem precisa desenhar dentro dela (modelos e miniaturas). */
+export function printAreaOf(spec = {}) {
+  return physicalSpec(spec).printArea;
+}
+
+/** Medidas que a pessoa precisa saber para montar a arte fora do site (Canva, por exemplo). */
+export function tamanhoRecomendado(spec = {}, dpi = 300) {
+  const { printArea } = physicalSpec(spec);
+  return {
+    larguraMm: printArea.width, alturaMm: printArea.height,
+    larguraCm: printArea.width / 10, alturaCm: printArea.height / 10,
+    larguraPx: Math.round(printArea.width / 25.4 * dpi),
+    alturaPx: Math.round(printArea.height / 25.4 * dpi),
+    dpi,
+  };
+}
+
+/**
+ * Gabarito da arte de volta inteira: um PNG do tamanho exato da área de impressão, com a margem
+ * de segurança, as marcas da frente e do verso e o lado da alça. Serve de fundo no Canva.
+ */
+export async function exportGuideArtwork(spec = {}) {
+  const { printArea } = physicalSpec(spec);
+  const medida = tamanhoRecomendado(spec);
+  const canvas = makeCanvas(null, medida.larguraPx, medida.alturaPx);
+  const context = canvas.getContext('2d', { alpha: false });
+  if (!context) throw fileError('Seu navegador não conseguiu preparar o gabarito. Tente atualizar a página.');
+  const escala = canvas.width / printArea.width;
+  context.setTransform(escala, 0, 0, escala, 0, 0);
+  context.fillStyle = cor('--white');
+  context.fillRect(0, 0, printArea.width, printArea.height);
+  const margem = 5;
+  const marcas = [
+    { u: FRENTE_U, texto: 'FRENTE' },
+    { u: VERSO_U, texto: 'VERSO' },
+  ];
+  context.strokeStyle = cor('--sand');
+  context.lineWidth = 0.5;
+  context.strokeRect(0.25, 0.25, printArea.width - 0.5, printArea.height - 0.5);
+  context.setLineDash([3, 3]);
+  context.strokeStyle = cor('--peach-deep');
+  context.strokeRect(margem, margem, printArea.width - 2 * margem, printArea.height - 2 * margem);
+  context.setLineDash([]);
+  context.fillStyle = cor('--ink-soft');
+  context.textAlign = 'center';
+  context.textBaseline = 'middle';
+  for (const marca of marcas) {
+    // FRENTE_U e VERSO_U já são frações da área de impressão (modelos.js).
+    const x = marca.u * printArea.width;
+    context.setLineDash([2, 4]);
+    context.strokeStyle = cor('--kraft');
+    context.beginPath();
+    context.moveTo(x, 0);
+    context.lineTo(x, printArea.height);
+    context.stroke();
+    context.setLineDash([]);
+    context.font = '600 4px "Fredoka", sans-serif';
+    context.fillText(marca.texto, x, 8);
+  }
+  context.save();
+  context.font = '600 3.4px "Fredoka", sans-serif';
+  for (const [x, giro] of [[3.2, -Math.PI / 2], [printArea.width - 3.2, Math.PI / 2]]) {
+    context.save();
+    context.translate(x, printArea.height / 2);
+    context.rotate(giro);
+    context.fillText('LADO DA ALÇA', 0, 0);
+    context.restore();
+  }
+  context.restore();
+  context.font = '600 3.6px "Fredoka", sans-serif';
+  context.fillText(`Área de impressão ${medida.larguraCm.toFixed(0)} × ${medida.alturaCm.toFixed(0)} cm · ${medida.larguraPx} × ${medida.alturaPx} px a ${medida.dpi} dpi`, printArea.width / 2, printArea.height - 7);
+  context.font = '3px "Nunito", sans-serif';
+  context.fillText('O tracejado é a margem de segurança: nada importante fora dele.', printArea.width / 2, printArea.height - 2.6);
+  const raw = await new Promise((resolve, reject) => canvas.toBlob((blob) => blob ? resolve(blob) : reject(fileError('Não conseguimos preparar o gabarito. Tente novamente.')), 'image/png'));
+  return { blob: await pngAtDpi(raw, medida.dpi), ...medida };
 }

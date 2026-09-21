@@ -1047,15 +1047,78 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     await pe.waitForTimeout(300);
     const recusa = await pe.evaluate(() => ({ visivel: !document.getElementById('art-error').hidden, texto: document.getElementById('art-error').textContent }));
     if (!recusa.visivel || !recusa.texto) failures.push(`[estúdio ${w}] arquivo inválido não gerou aviso`);
-    // exportação da arte plana em 300 dpi e da prévia
+    // modelos de arte: categorias, espaços de foto, frases e a arte de volta inteira
+    const categorias = await pe.$$eval('#model-categories button', (b) => b.map((x) => x.textContent.trim()));
+    if (categorias.length < 5) failures.push(`[estúdio ${w}] faltam categorias de modelo (${categorias.join(', ')})`);
+    await pe.click('#model-categories button[data-categoria="natal"]');
+    await pe.waitForTimeout(250);
+    const soNatal = await pe.$$eval('#model-list .studio-model', (b) => b.map((x) => x.dataset.modelo));
+    if (soNatal.length < 2 || !soNatal.slice(1).every((id) => id.startsWith('natal'))) failures.push(`[estúdio ${w}] a categoria Natal mostrou ${soNatal.join(', ')}`);
+    await pe.click('#model-categories button[data-categoria="todos"]');
+    await pe.click('[data-modelo="namorados-coracoes"]');
+    await pe.waitForTimeout(400);
+    const comModelo = await pe.evaluate(() => ({
+      espacos: document.querySelectorAll('#photo-slots .studio-slot__pick').length,
+      frases: document.querySelectorAll('#model-texts input').length,
+      livreEscondido: document.getElementById('free-mode').hidden,
+      aviso: document.getElementById('art-warnings').textContent,
+    }));
+    if (comModelo.espacos !== 2 || comModelo.frases !== 2) failures.push(`[estúdio ${w}] o modelo escolhido não abriu 2 espaços de foto e 2 frases (${JSON.stringify(comModelo)})`);
+    if (!comModelo.livreEscondido) failures.push(`[estúdio ${w}] a área de arte livre continuou visível com um modelo escolhido`);
+    if (!/falta escolher/.test(comModelo.aviso)) failures.push(`[estúdio ${w}] o modelo com espaços vazios não avisou ("${comModelo.aviso}")`);
+    // uma foto em cada espaço, pelo arrastar e soltar
+    for (const indice of [0, 1]) {
+      await pe.evaluate(async (i) => {
+        const r = await fetch('assets/uso-caneca-cafe.webp');
+        const arquivo = new File([await r.blob()], `foto-${i + 1}.webp`, { type: 'image/webp' });
+        document.querySelectorAll('#photo-slots .studio-slot__pick')[i].click();
+        const dt = new DataTransfer();
+        dt.items.add(arquivo);
+        document.getElementById('photo-slots').dispatchEvent(new DragEvent('drop', { dataTransfer: dt, bubbles: true }));
+      }, indice);
+      await pe.waitForTimeout(500);
+    }
+    await pe.fill('#texto-principal', 'a gente combina mesmo');
+    await pe.waitForTimeout(500);
+    const preenchido = await pe.evaluate(() => {
+      const c = document.getElementById('flat-art');
+      const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+      let pintados = 0;
+      for (let i = 0; i < d.length; i += 16) if (d[i] < 235 || d[i + 1] < 235 || d[i + 2] < 235) pintados += 1;
+      return {
+        pintados,
+        nomes: [...document.querySelectorAll('#photo-slots .studio-slot__texto small')].map((s) => s.textContent),
+        aviso: document.getElementById('art-warnings').textContent,
+        zap: new URL(document.getElementById('mug-order').href).searchParams.get('text') || '',
+        ajuste: !document.getElementById('art-scale').disabled,
+      };
+    });
+    if (preenchido.pintados < 2000) failures.push(`[estúdio ${w}] a arte do modelo não apareceu na vista aberta`);
+    if (!preenchido.nomes.every((n) => /foto-\d\.webp/.test(n))) failures.push(`[estúdio ${w}] os espaços de foto não guardaram as fotos (${preenchido.nomes.join(', ')})`);
+    if (/falta escolher/.test(preenchido.aviso)) failures.push(`[estúdio ${w}] o aviso de espaço vazio continuou depois de preencher tudo`);
+    if (!preenchido.zap.includes('Corações ao redor') || !preenchido.zap.includes('Fotos escolhidas: 2 de 2') || !preenchido.zap.includes('a gente combina mesmo')) {
+      failures.push(`[estúdio ${w}] o pedido não leva o modelo, as fotos e a frase escritos`);
+    }
+    if (!preenchido.ajuste) failures.push(`[estúdio ${w}] os controles de ajuste não ligaram para a foto escolhida`);
+    // remover uma foto volta o aviso e o espaço vazio
+    await pe.click('#photo-slots .studio-slot:first-child .studio-slot__acoes button:last-child');
+    await pe.waitForTimeout(400);
+    const removido = await pe.evaluate(() => document.getElementById('art-warnings').textContent);
+    if (!/falta escolher/.test(removido)) failures.push(`[estúdio ${w}] remover uma foto não voltou a avisar do espaço vazio`);
+
+    // exportação da arte plana em 300 dpi, do gabarito e da prévia
     const baixados = [];
     pe.on('download', (d) => baixados.push(d.suggestedFilename()));
     await pe.click('#save-print');
+    await pe.click('#save-guide');
     await pe.click('#save-preview');
     await pe.waitForFunction(() => /salva/.test(document.getElementById('save-status').textContent), null, { timeout: 10000 }).catch(() => {});
     await pe.waitForTimeout(800);
     if (!baixados.some((n) => /300dpi\.png$/.test(n))) failures.push(`[estúdio ${w}] "Baixar arte plana" não gerou o PNG em 300 dpi (${baixados.join(', ') || 'nada baixado'})`);
     if (!baixados.some((n) => /previa/.test(n))) failures.push(`[estúdio ${w}] "Baixar prévia" não gerou a imagem (${baixados.join(', ') || 'nada baixado'})`);
+    if (!baixados.some((n) => /^gabarito-caneca-panda-mimo-2480x1063\.png$/.test(n))) failures.push(`[estúdio ${w}] o gabarito da arte não saiu em 2480 × 1063 px (${baixados.join(', ') || 'nada baixado'})`);
+    const medidaNaTela = await pe.$eval('#size-guide', (e) => e.textContent);
+    if (!/21 × 9 cm \(2480 × 1063 px a 300 dpi\)/.test(medidaNaTela)) failures.push(`[estúdio ${w}] a página não diz o tamanho certo da arte ("${medidaNaTela}")`);
     const dir = path.join(here, 'shots', String(w));
     fs.mkdirSync(dir, { recursive: true });
     await pe.screenshot({ path: path.join(dir, 'estudio-caneca.png'), fullPage: true }).catch(() => {});
