@@ -343,11 +343,15 @@ export async function createMugViewer(container, { onError, onReady, onChange, o
     canvas.style.cursor = onPointer({ tipo: 'passou', ponto: pontoDaCaneca(event), event }) ? 'grab' : '';
   }
   function aoSoltar(event) {
-    if (!arrastando) return;
-    arrastando = false;
-    controls.enabled = true;
-    try { canvas.releasePointerCapture(event.pointerId); } catch { /* idem */ }
-    onPointer?.({ tipo: 'soltou', ponto: pontoDaCaneca(event), event });
+    // O aviso de soltar vale mesmo sem arrasto: é assim que a página distingue um toque
+    // (escolher um item) de um gesto de girar a caneca.
+    const arrastava = arrastando;
+    if (arrastava) {
+      arrastando = false;
+      controls.enabled = true;
+      try { canvas.releasePointerCapture(event.pointerId); } catch { /* idem */ }
+    }
+    onPointer?.({ tipo: 'soltou', ponto: pontoDaCaneca(event), event, arrastava });
   }
   function aoBaterDuasVezes(event) {
     if (!onPointer || disposed) return;

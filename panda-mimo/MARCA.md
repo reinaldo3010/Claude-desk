@@ -536,6 +536,22 @@ regras:
 - Modelo novo entra com nome, descrição, categoria e teste: o guardião confere que nada sai da área,
   que frase não cai sobre foto e que o Pandinha não cobre nada.
 
+**Como o estúdio se organiza (setembro de 2026).** A tela tem dois lados com papéis fixos, e é assim
+que ela cresce sem virar uma pilha de controles:
+
+- **A peça, à esquerda.** A caneca em 360°, as vistas, o zoom, as cores do interior e da alça (num
+  bloco que abre) e a arte aberta. Tudo o que é da peça mora junto da peça.
+- **A arte, à direita, em abas.** Modelo, Fotos, Frases e Enfeites, ou Modelo e Minha arte quando a
+  pessoa traz a arte pronta. Cada aba mostra só o seu tipo de item, com a contagem ao lado do nome.
+  Um item é um cartão que abre no lugar, com os controles dele dentro, e só um fica aberto por vez.
+- **A ocasião é um seletor, não uma parede de botões.** As categorias vêm agrupadas (Datas
+  comemorativas, Momentos, Do dia a dia, Sua arte) e há busca por nome. A lista abre com seis modelos
+  e cresce sob pedido. Dá para acrescentar ocasiões sem mexer no layout.
+- **Clicar na caneca abre a aba do item.** A peça e o painel falam a mesma língua: escolher pela peça
+  leva ao cartão certo, e escolher pelo cartão contorna o item na arte aberta.
+- **Cadeado na prévia, fechado por padrão.** Com ele fechado, arrastar na caneca só gira a peça: um
+  toque escolhe o item, mas nada sai do lugar sem querer. Abrindo o cadeado, arrastar move o item.
+
 **Desfazer, alças e modelos da pessoa (setembro de 2026).** O editor guarda até 60 passos: desfazer e
 refazer valem para mover, escrever, trocar cor, acrescentar e apagar, inclusive a foto tirada de um
 espaço, que volta com o passo. Gestos seguidos do mesmo tipo contam como um passo só. Na vista aberta,
@@ -826,6 +842,7 @@ adereço pequeno no Pandinha em datas comemorativas, com aprovação prévia (6.
 | Data | Versão | O que mudou |
 |---|---|---|
 | set/2026 | 1.0 | Primeira edição, consolidando a identidade aplicada no site (paleta, tipografia, logo, mascote, tom de voz, aplicações, governança). |
+| set/2026 | 2.9 | Estúdio reorganizado para crescer: a peça de um lado (com as cores junto dela), a arte do outro em abas por tipo de item, ocasião em seletor agrupado com busca, cartões que abrem no lugar e cadeado na prévia, fechado por padrão, para ninguém arrastar a arte sem querer (10.3). |
 | set/2026 | 2.8 | Editor ganha desfazer e refazer (até 60 passos, com a foto voltando junto), alças de girar e redimensionar na vista aberta, e "Meus modelos": a pessoa guarda a própria montagem naquele navegador, sem as fotos (10.3). |
 | set/2026 | 2.7 | A arte da caneca vira camadas editáveis: clicar e arrastar em cima da própria caneca, acrescentar foto, frase, enfeite e Pandinha do acervo, escolher fonte e cor da paleta, mudar ordem e duplicar (10.3). Seis modelos novos e cinco categorias novas (Professores, Casamento, Bebê, Pet, Amizade), somando 14 artes. Caminho de ida e volta com o Canva: gabarito, atalho e importação da arte pronta. |
 | set/2026 | 2.6 | Modelos de arte da caneca por ocasião (Namorados, Aniversário, Natal, Mães, Pais, Só fotos): artes de volta inteira com até seis espaços de foto, frases editáveis e enfeites da paleta, com o Pandinha adesivo em lugar livre (10.3). A página passa a informar a medida da arte (21 × 9 cm, 2480 × 1063 px a 300 dpi) e a entregar o gabarito em PNG para quem monta no Canva. |

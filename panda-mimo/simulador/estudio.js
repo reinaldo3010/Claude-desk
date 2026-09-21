@@ -1,10 +1,11 @@
 /**
- * Estúdio da caneca: liga o formulário à arte em camadas (modelos.js), ao editor de arte
- * (arte.js) e à prévia 3D (caneca-3d.js).
+ * Estúdio da caneca: liga a página à arte em camadas (modelos.js), ao editor de arte (arte.js)
+ * e à prévia 3D (caneca-3d.js).
  *
- * A pessoa edita em cima da própria caneca: clica para escolher um item, arrasta para mover,
- * solta uma foto onde quiser. O painel ao lado mostra o mesmo item, com texto, fonte, cor,
- * tamanho e ordem.
+ * O painel é dividido em abas, uma para cada coisa que a pessoa pode mexer: Modelo, Fotos,
+ * Frases e Enfeites (ou Minha arte, quando ela traz a arte pronta). Cada item da arte é um
+ * cartão que abre no lugar, com os controles dele dentro. Clicar em cima da caneca escolhe o
+ * item e já abre a aba dele, então a peça e o painel falam a mesma língua.
  *
  * Nada sai deste navegador: as fotos ficam em memória e só viram arquivo quando a pessoa baixa
  * a prévia, a arte plana, o gabarito ou o projeto. O pedido segue pelo WhatsApp, com as escolhas
@@ -13,7 +14,7 @@
 import { createMugViewer, MUG_SPEC } from './caneca-3d.js';
 import { loadArtwork, composeArtwork, exportPrintArtwork, exportGuideArtwork, tamanhoRecomendado, printAreaOf } from './arte.js';
 import {
-  CATEGORIAS, ADESIVOS, ENFEITES, CORES_DE_ARTE, FONTES, FORMAS_DE_FOTO, ROTULOS,
+  CATEGORIAS, ADESIVOS, ENFEITES, CORES_DE_ARTE, FONTES, FORMAS_DE_FOTO,
   modeloPorId, modelosDaCategoria, novaArte, desenhaArte, desenhaForma, camadaEm,
   alcasDaCamada, medidorDeTexto, cor,
 } from './modelos.js';
@@ -23,9 +24,9 @@ const CERAMICA = Object.freeze({
   branca: '#ffffff', preta: '#1d1b19', vermelha: '#b7262b', amarela: '#f0c233', rosa: '#f3a4b7', azul: '#1f5aa3',
 });
 const PRESETS = Object.freeze({
-  branca: { inside: 'branca', handle: 'branca' },
-  preta: { inside: 'preta', handle: 'preta' },
-  rosa: { inside: 'rosa', handle: 'rosa' },
+  branca: { inside: 'branca', handle: 'branca', nome: 'Toda branca' },
+  preta: { inside: 'preta', handle: 'preta', nome: 'Preto e branco' },
+  rosa: { inside: 'rosa', handle: 'rosa', nome: 'Toque rosa' },
 });
 const LAYOUTS = { front: 'só na frente', both: 'nos dois lados', wrap: 'ao redor' };
 const LETRAS = { Fredoka: 'Redondinha', Caveat: 'Manuscrita', Nunito: 'Simples' };
@@ -35,27 +36,38 @@ const PROJETO_TIPO = 'panda-mimo/caneca';
 const PROJETO_VERSAO = 4;
 const MEUS_MODELOS = 'pm_caneca_meus_modelos';
 const PASSOS_GUARDADOS = 60;
+const VISIVEIS_DE_INICIO = 6;
 const LIMITES = Object.freeze({
   fraseTamanho: [3, 22], enfeiteTamanho: [0.04, 0.5], adesivoTamanho: [0.06, 0.6],
   fotoLargura: [0.06, 0.6], giro: [-180, 180],
+});
+
+/** As abas do painel, na ordem em que aparecem. */
+const ABAS = Object.freeze({
+  modelo: { rotulo: 'Modelo', painel: 'painel-modelo', dica: 'Escolha um modelo pronto para a ocasião, ou traga a sua arte.' },
+  fotos: { rotulo: 'Fotos', painel: 'painel-fotos', dica: 'Coloque suas fotos nos espaços. Toque numa foto para ajustar.' },
+  frases: { rotulo: 'Frases', painel: 'painel-frases', dica: 'Escreva do seu jeito. Cada frase tem letra, cor e tamanho próprios.' },
+  enfeites: { rotulo: 'Enfeites', painel: 'painel-enfeites', dica: 'Corações, flores, estrelas e o Pandinha para enfeitar a volta.' },
+  arte: { rotulo: 'Minha arte', painel: 'painel-arte', dica: 'Sua arte pronta na caneca: escolha o arquivo e ajuste o tamanho.' },
 });
 
 const $ = (id) => document.getElementById(id);
 const el = {
   viewport: $('mug-viewport'), loading: $('viewer-loading'), fallback: $('viewer-fallback'), retry: $('viewer-retry'),
   zoom: $('mug-zoom'), flat: $('flat-art'), flatDetails: $('flat-details'),
-  form: $('mug-form'), inside: $('inside-color'), handle: $('handle-color'),
-  categories: $('model-categories'), models: $('model-list'), moreModels: $('model-more'),
-  templateMode: $('template-mode'), templateName: $('template-name'),
-  camadas: $('camadas'), props: $('camada-props'),
+  travar: $('travar'), travarTexto: $('travar-texto'), cadeadoArco: $('cadeado-arco'), gesto: $('studio-gesture'),
+  form: $('mug-form'), inside: $('inside-color'), handle: $('handle-color'), pecaResumo: $('peca-resumo'),
+  abas: $('abas'), dicaAba: $('dica-aba'), acoesArte: $('acoes-arte'),
   desfazer: $('desfazer'), refazer: $('refazer'),
   salvarModelo: $('salvar-modelo'), apagarModelo: $('apagar-modelo'), formMeuModelo: $('form-meu-modelo'),
   nomeMeuModelo: $('nome-meu-modelo'), confirmarMeuModelo: $('confirmar-meu-modelo'), cancelarMeuModelo: $('cancelar-meu-modelo'),
-  addFoto: $('add-foto'), addFrase: $('add-frase'), addEnfeite: $('add-enfeite'), addPandinha: $('add-pandinha'),
-  freeMode: $('free-mode'), freeName: $('free-name'),
+  categoria: $('categoria-modelo'), busca: $('busca-modelo'), resultado: $('resultado-modelos'),
+  models: $('model-list'), moreModels: $('model-more'),
+  listaFotos: $('lista-fotos'), listaFrases: $('lista-frases'), listaEnfeites: $('lista-enfeites'),
+  gradeEnfeites: $('grade-enfeites'),
+  addFoto: $('add-foto'), addFrase: $('add-frase'), addPandinha: $('add-pandinha'),
   drop: $('art-drop'), file: $('art-file'), choose: $('choose-art'), fileInfo: $('art-file-info'), fileName: $('art-file-name'),
   remove: $('remove-art'), example: $('use-example'), error: $('art-error'),
-  adjustments: $('art-adjustments'), adjustTarget: $('adjust-target'),
   scale: $('art-scale'), x: $('art-x'), y: $('art-y'), rotation: $('art-rotation'),
   scaleOut: $('scale-value'), xOut: $('x-value'), yOut: $('y-value'), rotationOut: $('rotation-value'), reset: $('reset-art'),
   name: $('art-name'), font: $('art-font'), panda: $('art-panda'),
@@ -73,16 +85,21 @@ const state = {
 };
 let arte = null;              // arte em camadas (null = arte livre, a pessoa trouxe a dela)
 let modeloAtual = null;
+let abaAtual = 'modelo';
 let categoria = 'todos';
+let busca = '';
 let mostrarTodosOsModelos = false;
 let artwork = null;           // arte livre: { image, width, height, name, dispose }
 let artworkBlob = null;
 const fotos = new Map();      // id da camada de foto → { asset, blob }
 const lixeira = new Map();    // fotos tiradas da arte, guardadas para o desfazer
-const historico = { passado: [], futuro: [], ultimaChave: '', ultimoInstante: 0 };
 const adesivos = new Map();   // arquivo → Image já carregada
+const historico = { passado: [], futuro: [], ultimaChave: '', ultimoInstante: 0 };
 let selecionada = null;       // id da camada em edição
-let arrasto = null;           // { id, dx, dy } enquanto o dedo está pressionado
+let arrasto = null;           // gesto em andamento (mover, redimensionar ou girar)
+// A arte nasce travada: na caneca, arrastar gira a peça. Quem quiser mover um item abre o cadeado.
+let travado = true;
+let toqueNaCaneca = null;
 let destinoDoArquivo = { tipo: 'livre' };
 let viewer = null;
 let pandaImage = null;
@@ -100,6 +117,7 @@ const ALTURA_MM = MUG_SPEC.heightMm;
 const clamp = (valor, min, max) => Math.min(max, Math.max(min, valor));
 const clone = (valor) => (typeof structuredClone === 'function' ? structuredClone(valor) : JSON.parse(JSON.stringify(valor)));
 const novoId = () => `c${(contador += 1)}`;
+const semAcento = (texto) => String(texto || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
 function loadImage(url) {
   return new Promise((resolve, reject) => {
@@ -127,12 +145,12 @@ function setError(message) {
   el.error.textContent = message || '';
   el.error.hidden = !message;
 }
-function slug(text) {
-  return String(text || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-|-$/g, '').toLowerCase();
-}
+const slug = (texto) => semAcento(texto).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const optionLabel = (select, value) => select.querySelector(`option[value="${value}"]`)?.textContent || value;
 const camadaPorId = (id) => arte?.camadas.find((camada) => camada.id === id) || null;
-const camadasDeFoto = () => (arte ? arte.camadas.filter((camada) => camada.tipo === 'foto') : []);
+const camadasDo = (tipo) => (arte ? arte.camadas.filter((camada) => (tipo === 'enfeites'
+  ? camada.tipo === 'enfeite' || camada.tipo === 'adesivo'
+  : camada.tipo === tipo)) : []);
 const hasContent = () => Boolean(arte || artwork || state.name || state.withPanda);
 
 /** Ponto da arte, em milímetros, a partir da fração da área de impressão. */
@@ -197,10 +215,10 @@ function aplicaRetrato(retratoSalvo) {
   for (const id of querem) {
     if (!fotos.has(id) && lixeira.has(id)) { fotos.set(id, lixeira.get(id)); lixeira.delete(id); }
   }
-  if (!arte.camadas.some((camada) => camada.id === selecionada)) selecionada = arte.camadas.at(-1)?.id || null;
+  if (!arte.camadas.some((camada) => camada.id === selecionada)) selecionada = null;
   historico.ultimaChave = '';
-  montaCamadas();
-  montaPropriedades();
+  montaAbas();
+  montaListas();
   marcaModeloEscolhido();
   atualizaHistorico();
   schedule();
@@ -266,7 +284,7 @@ function salvaModeloAtual() {
   meusModelos = [meu, ...meusModelos].slice(0, 30);
   if (!guardaMeusModelos()) {
     meusModelos = meusModelos.filter((m) => m.id !== meu.id);
-    setStatus('Este navegador não deixou guardar o modelo. Salve o projeto em arquivo no passo 4.');
+    setStatus('Este navegador não deixou guardar o modelo. Salve o projeto em arquivo no fim da página.');
     return;
   }
   arte.modelo = meu.id;
@@ -275,7 +293,6 @@ function salvaModeloAtual() {
   el.nomeMeuModelo.value = '';
   montaCategorias();
   montaModelos();
-  marcaModeloEscolhido();
   atualizaModo();
   setStatus(`"${nome}" entrou em Meus modelos. Ele fica só neste navegador.`);
 }
@@ -288,7 +305,6 @@ function apagaMeuModelo() {
   if (categoria === 'meus' && !meusModelos.length) categoria = 'todos';
   montaCategorias();
   montaModelos();
-  marcaModeloEscolhido();
   atualizaModo();
   setStatus(`"${nome}" saiu de Meus modelos. A arte continua aqui na tela.`);
 }
@@ -413,7 +429,7 @@ function orderMessage() {
   const lines = ['Oi, Panda Mimo! Montei uma caneca no site 🐼', '• Caneca reta de 325 ml, branca por fora'];
   lines.push(`• Interior: ${optionLabel(el.inside, state.inside)} · Alça: ${optionLabel(el.handle, state.handle)}`);
   if (arte) {
-    const espacos = camadasDeFoto();
+    const espacos = camadasDo('foto');
     const escolhidas = espacos.filter((camada) => fotos.get(camada.id)?.asset);
     lines.push(`• Modelo: ${modeloAtual?.nome || 'arte montada aqui'} (arte ao redor)`);
     lines.push(`• Fotos escolhidas: ${escolhidas.length} de ${espacos.length}`);
@@ -425,7 +441,7 @@ function orderMessage() {
     if (artwork) lines.push(`• Arte: ${artwork.name}, ${LAYOUTS[state.layout]}`);
     if (state.name) lines.push(`• Nome ou frase: "${state.name}" (letra ${LETRAS[state.fontFamily] || state.fontFamily})`);
   }
-  const temPandinha = arte ? arte.camadas.some((camada) => camada.tipo === 'adesivo') && state.withPanda : state.withPanda;
+  const temPandinha = arte ? arte.camadas.some((camada) => camada.tipo === 'adesivo') : state.withPanda;
   lines.push(temPandinha ? '• Com o Pandinha' : '• Sem o Pandinha');
   lines.push('Vou anexar a prévia aqui na conversa.');
   return lines.join('\n');
@@ -455,20 +471,51 @@ function showFallback(error) {
   if (error) console.warn(error.message);
 }
 
-/** O dedo em cima da caneca: escolhe, arrasta e abre para editar. */
-function aoPonteiro({ tipo, ponto }) {
+/**
+ * O cadeado da prévia. Fechado, arrastar na caneca só gira a peça: ninguém empurra a arte sem
+ * querer. Um toque curto continua escolhendo o item, porque isso não muda nada na arte.
+ */
+function atualizaCadeado() {
+  el.travar.setAttribute('aria-pressed', String(travado));
+  el.travarTexto.textContent = travado ? 'Arte travada' : 'Arte livre';
+  el.travar.setAttribute('aria-label', travado
+    ? 'Arte travada. Abra o cadeado para mover os itens arrastando na caneca.'
+    : 'Arte livre. Feche o cadeado para só girar a caneca.');
+  // Cadeado aberto: o arco sai do lugar e fica de lado.
+  el.cadeadoArco?.setAttribute('d', travado
+    ? 'M8.4 10.5V7.8a3.6 3.6 0 0 1 7.2 0v2.7'
+    : 'M8.4 10.5V7.8a3.6 3.6 0 0 1 7.2 0');
+  el.gesto.textContent = travado
+    ? 'Arraste para girar a caneca. Abra o cadeado para mover os itens com o dedo.'
+    : 'Arraste um item para mover. Fora dele, a caneca gira.';
+}
+
+function alternaCadeado() {
+  travado = !travado;
+  toqueNaCaneca = null;
+  arrasto = null;
+  atualizaCadeado();
+}
+
+/** O dedo em cima da caneca: escolhe, arrasta e abre a aba do item. */
+function aoPonteiro({ tipo, ponto, event }) {
   if (!arte || !ponto) {
     if (tipo === 'soltou') arrasto = null;
     return false;
   }
   const fracao = fracaoDoPonto3D(ponto);
-  if (tipo === 'passou') return Boolean(camadaEm(arte, pontoMm(fracao), areaMm, medidor));
+  if (tipo === 'passou') return !travado && Boolean(camadaEm(arte, pontoMm(fracao), areaMm, medidor));
   if (tipo === 'apertou') {
     const camada = camadaEm(arte, pontoMm(fracao), areaMm, medidor);
     if (!camada) return false;
+    if (travado) {
+      // Guarda o toque e deixa o giro acontecer; se o dedo mal andou, isso vira uma escolha.
+      toqueNaCaneca = { id: camada.id, x: event?.clientX ?? 0, y: event?.clientY ?? 0 };
+      return false;
+    }
     seleciona(camada.id, { mostrarPainel: true });
     registra(`mover:${camada.id}`);
-    arrasto = { id: camada.id, dx: camada.x - fracao.x, dy: camada.y - fracao.y };
+    arrasto = { tipo: 'mover', id: camada.id, dx: camada.x - fracao.x, dy: camada.y - fracao.y };
     return true;
   }
   if (tipo === 'moveu' && arrasto) {
@@ -477,13 +524,18 @@ function aoPonteiro({ tipo, ponto }) {
   }
   if (tipo === 'soltou') {
     arrasto = null;
+    if (toqueNaCaneca) {
+      const andou = Math.hypot((event?.clientX ?? 0) - toqueNaCaneca.x, (event?.clientY ?? 0) - toqueNaCaneca.y);
+      if (andou < 6 && camadaPorId(toqueNaCaneca.id)) seleciona(toqueNaCaneca.id, { mostrarPainel: true });
+      toqueNaCaneca = null;
+    }
     return false;
   }
   if (tipo === 'dobrou') {
     const camada = camadaEm(arte, pontoMm(fracao), areaMm, medidor);
     if (camada) {
-      seleciona(camada.id);
-      el.props.querySelector('input[type="text"], select, button')?.focus();
+      seleciona(camada.id, { mostrarPainel: true });
+      document.querySelector(`[data-corpo="${camada.id}"] input, [data-corpo="${camada.id}"] select, [data-corpo="${camada.id}"] button`)?.focus();
     }
   }
   return false;
@@ -521,7 +573,121 @@ async function startViewer() {
   }
 }
 
-/* ---------- modelos ---------- */
+/* ---------- abas ---------- */
+const abasVisiveis = () => (arte ? ['modelo', 'fotos', 'frases', 'enfeites'] : ['modelo', 'arte']);
+
+function contaDaAba(id) {
+  if (!arte) return null;
+  if (id === 'fotos') return camadasDo('foto').length;
+  if (id === 'frases') return camadasDo('frase').length;
+  if (id === 'enfeites') return camadasDo('enfeites').length;
+  return null;
+}
+
+function montaAbas() {
+  const visiveis = abasVisiveis();
+  if (!visiveis.includes(abaAtual)) abaAtual = 'modelo';
+  el.abas.replaceChildren(...visiveis.map((id) => {
+    const aba = ABAS[id];
+    const botao = document.createElement('button');
+    botao.type = 'button';
+    botao.id = `aba-${id}`;
+    botao.dataset.aba = id;
+    botao.setAttribute('role', 'tab');
+    botao.setAttribute('aria-controls', aba.painel);
+    botao.setAttribute('aria-selected', String(abaAtual === id));
+    botao.tabIndex = abaAtual === id ? 0 : -1;
+    const nome = document.createElement('span');
+    nome.textContent = aba.rotulo;
+    botao.appendChild(nome);
+    const conta = contaDaAba(id);
+    if (conta !== null) {
+      const marca = document.createElement('small');
+      marca.className = 'studio-aba__conta';
+      marca.textContent = String(conta);
+      botao.appendChild(marca);
+    }
+    botao.addEventListener('click', () => mostraAba(id));
+    return botao;
+  }));
+  atualizaPaineis();
+}
+
+function atualizaPaineis() {
+  for (const [id, aba] of Object.entries(ABAS)) {
+    const painel = $(aba.painel);
+    if (painel) painel.hidden = id !== abaAtual;
+  }
+  el.dicaAba.textContent = ABAS[abaAtual]?.dica || '';
+  el.acoesArte.hidden = !arte || abaAtual === 'modelo';
+  if (el.acoesArte.hidden) el.formMeuModelo.hidden = true;
+}
+
+function mostraAba(id, { foco = false } = {}) {
+  if (!abasVisiveis().includes(id)) return;
+  abaAtual = id;
+  for (const botao of el.abas.children) {
+    const ativa = botao.dataset.aba === id;
+    botao.setAttribute('aria-selected', String(ativa));
+    botao.tabIndex = ativa ? 0 : -1;
+    if (ativa && foco) botao.focus();
+  }
+  atualizaPaineis();
+}
+
+function andaNasAbas(event) {
+  if (!['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(event.key)) return;
+  const visiveis = abasVisiveis();
+  const atual = visiveis.indexOf(abaAtual);
+  let destino = atual;
+  if (event.key === 'ArrowRight') destino = (atual + 1) % visiveis.length;
+  if (event.key === 'ArrowLeft') destino = (atual - 1 + visiveis.length) % visiveis.length;
+  if (event.key === 'Home') destino = 0;
+  if (event.key === 'End') destino = visiveis.length - 1;
+  event.preventDefault();
+  mostraAba(visiveis[destino], { foco: true });
+}
+
+const abaDaCamada = (camada) => (camada.tipo === 'foto' ? 'fotos' : camada.tipo === 'frase' ? 'frases' : 'enfeites');
+
+/* ---------- aba modelo ---------- */
+function montaCategorias() {
+  const opcoes = [];
+  const todos = document.createElement('option');
+  todos.value = 'todos';
+  todos.textContent = 'Todos os modelos';
+  opcoes.push(todos);
+  if (meusModelos.length) {
+    const grupo = document.createElement('optgroup');
+    grupo.label = 'Sua arte';
+    const meus = document.createElement('option');
+    meus.value = 'meus';
+    meus.textContent = `Meus modelos (${meusModelos.length})`;
+    grupo.appendChild(meus);
+    opcoes.push(grupo);
+  }
+  const porGrupo = new Map();
+  for (const item of CATEGORIAS) {
+    if (item.id === 'livre') continue;
+    if (!porGrupo.has(item.grupo)) porGrupo.set(item.grupo, []);
+    porGrupo.get(item.grupo).push(item);
+  }
+  for (const [nome, itens] of porGrupo) {
+    const grupo = document.createElement('optgroup');
+    grupo.label = nome;
+    for (const item of itens) {
+      const opcao = document.createElement('option');
+      opcao.value = item.id;
+      opcao.textContent = item.nome;
+      grupo.appendChild(opcao);
+    }
+    opcoes.push(grupo);
+  }
+  el.categoria.replaceChildren(...opcoes);
+  el.categoria.value = [...el.categoria.options].some((o) => o.value === categoria) ? categoria : 'todos';
+  categoria = el.categoria.value;
+}
+
 function desenhaMiniatura(canvas, modelo) {
   const context = canvas.getContext('2d');
   if (!context) return;
@@ -555,7 +721,7 @@ function cartaoDeModelo(modelo) {
   }
   const nome = document.createElement('span');
   nome.className = 'studio-model__nome';
-  nome.textContent = modelo ? modelo.nome : 'Sem modelo';
+  nome.textContent = modelo ? modelo.nome : 'Trazer a minha arte';
   const descricao = document.createElement('small');
   descricao.textContent = modelo ? modelo.descricao : 'Sua arte pronta, do jeito que você fez';
   button.append(figura, nome, descricao);
@@ -563,40 +729,21 @@ function cartaoDeModelo(modelo) {
   return button;
 }
 
-function montaCategorias() {
-  const lista = [
-    { id: 'todos', nome: 'Todos' },
-    ...(meusModelos.length ? [{ id: 'meus', nome: 'Meus modelos' }] : []),
-    ...CATEGORIAS.filter((c) => c.id !== 'livre'),
-  ];
-  el.categories.replaceChildren(...lista.map((item) => {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.dataset.categoria = item.id;
-    button.textContent = item.nome;
-    button.setAttribute('aria-pressed', String(categoria === item.id));
-    button.addEventListener('click', () => {
-      categoria = item.id;
-      mostrarTodosOsModelos = false;
-      for (const outro of el.categories.children) outro.setAttribute('aria-pressed', String(outro.dataset.categoria === categoria));
-      montaModelos();
-    });
-    return button;
-  }));
-}
-
-const VISIVEIS_DE_INICIO = 6;
-
 function montaModelos() {
-  const lista = listaDeModelos(categoria);
-  // Com um modelo escolhido que está mais para baixo, a lista já abre inteira.
-  const escondido = arte && !lista.slice(0, VISIVEIS_DE_INICIO).some((m) => m.id === arte.modelo) && lista.some((m) => m.id === arte.modelo);
+  const filtrados = listaDeModelos(categoria).filter((modelo) => !busca
+    || semAcento(`${modelo.nome} ${modelo.descricao}`).includes(busca));
+  const escondido = arte && filtrados.slice(0, VISIVEIS_DE_INICIO).every((m) => m.id !== arte.modelo)
+    && filtrados.some((m) => m.id === arte.modelo);
   const todos = mostrarTodosOsModelos || escondido;
-  const visiveis = todos ? lista : lista.slice(0, VISIVEIS_DE_INICIO);
-  el.models.replaceChildren(cartaoDeModelo(null), ...visiveis.map(cartaoDeModelo));
-  const sobram = lista.length - visiveis.length;
+  const visiveis = todos ? filtrados : filtrados.slice(0, VISIVEIS_DE_INICIO);
+  const semModelo = categoria === 'todos' && !busca ? [cartaoDeModelo(null)] : [];
+  el.models.replaceChildren(...semModelo, ...visiveis.map(cartaoDeModelo));
+  const sobram = filtrados.length - visiveis.length;
   el.moreModels.textContent = sobram ? `Ver mais ${sobram} ${sobram === 1 ? 'modelo' : 'modelos'}` : 'Ver menos modelos';
-  el.moreModels.hidden = lista.length <= VISIVEIS_DE_INICIO;
+  el.moreModels.hidden = filtrados.length <= VISIVEIS_DE_INICIO;
+  el.resultado.textContent = filtrados.length
+    ? `${filtrados.length} ${filtrados.length === 1 ? 'modelo' : 'modelos'}${busca ? ` com "${el.busca.value.trim()}"` : ''}.`
+    : 'Nada com esse nome. Tente outra palavra ou escolha outra ocasião.';
 }
 
 function marcaModeloEscolhido() {
@@ -617,54 +764,60 @@ async function garanteAdesivos() {
       console.warn(erro.message);
     }
   }
-  if (mudou) { schedule(); montaModelos(); marcaModeloEscolhido(); }
+  if (mudou) { schedule(); montaModelos(); marcaModeloEscolhido(); montaListas(); }
 }
 
 function escolheModelo(id) {
   const modelo = id ? acheModelo(id) : null;
-  if (modelo ? arte?.modelo === modelo.id : arte === null) return;
+  if (modelo ? arte?.modelo === modelo.id : arte === null) {
+    if (!modelo) mostraAba('arte');
+    return;
+  }
   for (const item of fotos.values()) item.asset?.dispose();
   fotos.clear();
+  lixeira.clear();
   modeloAtual = modelo;
   arte = modelo ? novaArte(modelo) : null;
-  selecionada = arte ? (camadasDeFoto()[0]?.id || arte.camadas[0]?.id || null) : null;
+  selecionada = null;
+  if (arte) { state.withPanda = true; contador = arte.camadas.length + 10; }
   setError('');
   setStatus('');
   limpaHistorico();
   marcaModeloEscolhido();
   atualizaModo();
-  // Com um modelo na mão, a vista aberta já abre: dá para arrastar as coisas ali também.
-  if (modelo && el.flatDetails) el.flatDetails.open = true;
+  mostraAba(arte ? 'fotos' : 'arte');
+  // Na tela larga, a vista aberta já abre: dá para arrastar e usar as alças ali.
+  if (arte && el.flatDetails && window.innerWidth >= 850) el.flatDetails.open = true;
   garanteAdesivos();
   schedule();
 }
 
 function atualizaModo() {
-  el.templateMode.hidden = !arte;
-  el.freeMode.hidden = Boolean(arte);
-  el.freeName.hidden = Boolean(arte);
-  el.adjustments.hidden = Boolean(arte);
-  el.templateName.textContent = modeloAtual ? `${modeloAtual.nome}: ${modeloAtual.descricao}.` : '';
   el.apagarModelo.hidden = !(arte && ehMeuModelo(arte.modelo));
-  el.salvarModelo.hidden = !arte;
   if (!arte) el.formMeuModelo.hidden = true;
-  atualizaHistorico();
-  montaCamadas();
-  montaPropriedades();
+  montaAbas();
+  montaListas();
   if (!arte) syncRangeOutputs();
 }
 
-/* ---------- camadas ---------- */
+/* ---------- cartões de camada ---------- */
 function rotuloDaCamada(camada) {
-  if (camada.tipo === 'frase') return String(camada.texto || 'Frase').slice(0, 30) || 'Frase';
+  if (camada.tipo === 'frase') return String(camada.texto || '').trim().slice(0, 34) || 'Frase sem texto';
   if (camada.tipo === 'foto') return camada.rotulo || 'Foto';
   if (camada.tipo === 'enfeite') return ENFEITES.find((e) => e.forma === camada.forma)?.nome || 'Enfeite';
   return 'Pandinha';
 }
 
+function subtituloDaCamada(camada) {
+  if (camada.tipo === 'foto') return fotos.get(camada.id)?.asset ? fotos.get(camada.id).asset.name : 'Toque para escolher a foto';
+  if (camada.tipo === 'frase') return `${LETRAS[camada.fonte] || camada.fonte} · ${CORES_DE_ARTE.find((c) => c.token === camada.cor)?.nome || 'cor da marca'}`;
+  if (camada.tipo === 'adesivo') return ADESIVOS.find((a) => a.arquivo === camada.arquivo)?.nome || 'Pandinha';
+  return CORES_DE_ARTE.find((c) => c.token === camada.cor)?.nome || 'Enfeite';
+}
+
 function icone(camada) {
   const span = document.createElement('span');
-  span.className = 'studio-camada__icone';
+  span.className = 'studio-item__icone';
   span.setAttribute('aria-hidden', 'true');
   if (camada.tipo === 'foto') {
     const item = fotos.get(camada.id);
@@ -678,7 +831,7 @@ function icone(camada) {
       return span;
     }
     span.textContent = '+';
-    span.classList.add('studio-camada__icone--vazio');
+    span.classList.add('studio-item__icone--vazio');
     return span;
   }
   if (camada.tipo === 'enfeite') {
@@ -692,65 +845,17 @@ function icone(camada) {
     span.appendChild(canvas);
     return span;
   }
-  if (camada.tipo === 'adesivo') {
-    const imagem = adesivos.get(camada.arquivo);
-    if (imagem) {
-      const img = document.createElement('img');
-      img.src = camada.arquivo;
-      img.alt = '';
-      span.appendChild(img);
-      return span;
-    }
+  if (camada.tipo === 'adesivo' && adesivos.has(camada.arquivo)) {
+    const img = document.createElement('img');
+    img.src = camada.arquivo;
+    img.alt = '';
+    span.appendChild(img);
+    return span;
   }
   span.textContent = camada.tipo === 'frase' ? 'Aa' : '🐼';
   return span;
 }
 
-function montaCamadas() {
-  if (!arte) { el.camadas.replaceChildren(); return; }
-  // A lista mostra de cima para baixo o que está na frente na arte.
-  const itens = [...arte.camadas].reverse().map((camada) => {
-    const li = document.createElement('li');
-    const botao = document.createElement('button');
-    botao.type = 'button';
-    botao.className = 'studio-camada';
-    botao.dataset.camada = camada.id;
-    botao.setAttribute('aria-pressed', String(selecionada === camada.id));
-    const textos = document.createElement('span');
-    textos.className = 'studio-camada__texto';
-    const titulo = document.createElement('span');
-    titulo.textContent = rotuloDaCamada(camada);
-    const tipo = document.createElement('small');
-    if (camada.tipo === 'foto' && !fotos.get(camada.id)?.asset) tipo.textContent = 'Escolher foto';
-    else if (camada.tipo === 'adesivo') tipo.textContent = ADESIVOS.find((a) => a.arquivo === camada.arquivo)?.nome || ROTULOS.adesivo;
-    else tipo.textContent = ROTULOS[camada.tipo];
-    textos.append(titulo, tipo);
-    botao.append(icone(camada), textos);
-    botao.addEventListener('click', () => {
-      seleciona(camada.id);
-      if (camada.tipo === 'foto' && !fotos.get(camada.id)?.asset) pedeArquivo({ tipo: 'camada', id: camada.id });
-    });
-    li.appendChild(botao);
-    return li;
-  });
-  el.camadas.replaceChildren(...itens);
-}
-
-function seleciona(id, { mostrarPainel = false } = {}) {
-  selecionada = id;
-  for (const botao of el.camadas.querySelectorAll('.studio-camada')) {
-    botao.setAttribute('aria-pressed', String(botao.dataset.camada === id));
-  }
-  montaPropriedades();
-  // Escolheu clicando na caneca: o painel do item vem para onde a pessoa consegue ver.
-  if (mostrarPainel) {
-    const caixa = el.props.getBoundingClientRect();
-    if (caixa.top < 0 || caixa.bottom > window.innerHeight) el.props.scrollIntoView({ block: 'center', behavior: 'smooth' });
-  }
-  schedule();
-}
-
-/* --- construtores de campo do painel de propriedades --- */
 function campo(rotulo, controle, classe = '') {
   const label = document.createElement('label');
   label.className = `studio-campo ${classe}`.trim();
@@ -829,29 +934,16 @@ function botao(texto, aoClicar, classe = 'studio-text-button') {
   return elemento;
 }
 
-function montaPropriedades() {
-  if (!arte) { el.props.replaceChildren(); return; }
-  const camada = camadaPorId(selecionada);
-  if (!camada) {
-    const aviso = document.createElement('p');
-    aviso.className = 'studio-help';
-    aviso.textContent = 'Clique num item da caneca ou da lista para editar.';
-    el.props.replaceChildren(aviso);
-    return;
-  }
+/** Os controles de uma camada, que aparecem dentro do cartão dela. */
+function camposDaCamada(camada) {
   const partes = [];
-  const titulo = document.createElement('p');
-  titulo.className = 'studio-props__titulo';
-  titulo.textContent = `Editando: ${rotuloDaCamada(camada)}`;
-  partes.push(titulo);
-
   if (camada.tipo === 'frase') {
-    partes.push(campoTexto('Frase', camada.texto || '', 40, (valor) => {
+    partes.push(campoTexto('O que está escrito', camada.texto || '', 40, (valor) => {
       registra(`texto:${camada.id}`);
       const iguais = camada.grupo ? arte.camadas.filter((c) => c.grupo === camada.grupo) : [camada];
       for (const alvo of iguais) alvo.texto = valor;
-      const botaoDaLista = el.camadas.querySelector(`[data-camada="${camada.id}"] .studio-camada__texto > span`);
-      if (botaoDaLista) botaoDaLista.textContent = rotuloDaCamada(camada);
+      const titulo = el.listaFrases.querySelector(`[data-camada="${camada.id}"] .studio-item__texto > span`);
+      if (titulo) titulo.textContent = rotuloDaCamada(camada);
       schedule();
     }));
     if (camada.grupo) {
@@ -860,7 +952,7 @@ function montaPropriedades() {
       nota.textContent = 'Esta frase se repete na volta da caneca: mudou aqui, mudou nas outras.';
       partes.push(nota);
     }
-    partes.push(campoSelect('Jeito da letra', FONTES, camada.fonte, (valor) => { registra(`fonte:${camada.id}`); camada.fonte = valor; schedule(); }));
+    partes.push(campoSelect('Jeito da letra', FONTES, camada.fonte, (valor) => { registra(`fonte:${camada.id}`); camada.fonte = valor; montaListas(); schedule(); }));
     partes.push(campoCores(camada.cor, (token) => { registra(`cor:${camada.id}`); camada.cor = token; schedule(); }));
     partes.push(campoRange('Tamanho da letra', camada.tamanho, LIMITES.fraseTamanho, 0.5, (valor) => { registra(`tamanho:${camada.id}`); camada.tamanho = valor; schedule(); }));
   }
@@ -868,7 +960,7 @@ function montaPropriedades() {
   if (camada.tipo === 'foto') {
     const item = fotos.get(camada.id);
     const acoes = document.createElement('div');
-    acoes.className = 'studio-props__acoes';
+    acoes.className = 'studio-item__acoes';
     acoes.append(botao(item?.asset ? 'Trocar foto' : 'Escolher foto', () => pedeArquivo({ tipo: 'camada', id: camada.id })));
     if (item?.asset) acoes.append(botao('Tirar a foto', () => tiraFoto(camada.id)));
     partes.push(acoes);
@@ -881,45 +973,28 @@ function montaPropriedades() {
       schedule();
     }));
     if (item?.asset) {
+      // O enquadramento fino fica recolhido: o cartão continua curto para quem só quer a foto ali.
       const ajuste = camada.ajuste || (camada.ajuste = { scale: 1, offsetX: 0, offsetY: 0 });
-      partes.push(campoRange('Aproximar a foto', ajuste.scale, [1, 3], 0.01, (valor) => { registra(`enquadra:${camada.id}`); ajuste.scale = valor; schedule(); }));
-      partes.push(campoRange('Foto para os lados', ajuste.offsetX, [-1, 1], 0.01, (valor) => { registra(`enquadra:${camada.id}`); ajuste.offsetX = valor; schedule(); }));
-      partes.push(campoRange('Foto para cima ou para baixo', ajuste.offsetY, [-1, 1], 0.01, (valor) => { registra(`enquadra:${camada.id}`); ajuste.offsetY = valor; schedule(); }));
+      const bloco = document.createElement('details');
+      bloco.className = 'studio-ajuste-fino';
+      const titulo = document.createElement('summary');
+      titulo.textContent = 'Enquadrar a foto';
+      bloco.append(titulo,
+        campoRange('Aproximar', ajuste.scale, [1, 3], 0.01, (valor) => { registra(`enquadra:${camada.id}`); ajuste.scale = valor; schedule(); }),
+        campoRange('Para os lados', ajuste.offsetX, [-1, 1], 0.01, (valor) => { registra(`enquadra:${camada.id}`); ajuste.offsetX = valor; schedule(); }),
+        campoRange('Para cima ou para baixo', ajuste.offsetY, [-1, 1], 0.01, (valor) => { registra(`enquadra:${camada.id}`); ajuste.offsetY = valor; schedule(); }));
+      partes.push(bloco);
     }
   }
 
   if (camada.tipo === 'enfeite') {
-    const grade = document.createElement('div');
-    grade.className = 'studio-formas';
-    grade.setAttribute('role', 'group');
-    grade.setAttribute('aria-label', 'Desenho do enfeite');
-    for (const item of ENFEITES) {
-      const botaoForma = document.createElement('button');
-      botaoForma.type = 'button';
-      botaoForma.className = 'studio-forma';
-      botaoForma.title = item.nome;
-      botaoForma.setAttribute('aria-label', item.nome);
-      botaoForma.setAttribute('aria-pressed', String(camada.forma === item.forma));
-      const canvas = document.createElement('canvas');
-      canvas.width = canvas.height = 56;
-      canvas.setAttribute('aria-hidden', 'true');
-      const context = canvas.getContext('2d');
-      if (context) {
-        context.translate(28, 28);
-        desenhaForma(context, item.forma, 40, cor(camada.cor));
-      }
-      botaoForma.appendChild(canvas);
-      botaoForma.addEventListener('click', () => {
-        registra(`forma:${camada.id}`);
-        camada.forma = item.forma;
-        montaCamadas();
-        montaPropriedades();
-        schedule();
-      });
-      grade.appendChild(botaoForma);
-    }
-    partes.push(grade);
-    partes.push(campoCores(camada.cor, (token) => { registra(`cor:${camada.id}`); camada.cor = token; montaCamadas(); montaPropriedades(); schedule(); }));
+    partes.push(campoSelect('Desenho', ENFEITES.map((e) => ({ valor: e.forma, nome: e.nome })), camada.forma, (valor) => {
+      registra(`forma:${camada.id}`);
+      camada.forma = valor;
+      montaListas();
+      schedule();
+    }));
+    partes.push(campoCores(camada.cor, (token) => { registra(`cor:${camada.id}`); camada.cor = token; montaListas(); schedule(); }));
     partes.push(campoRange('Tamanho', camada.tamanho, LIMITES.enfeiteTamanho, 0.005, (valor) => { registra(`tamanho:${camada.id}`); camada.tamanho = valor; schedule(); }));
   }
 
@@ -928,7 +1003,7 @@ function montaPropriedades() {
       registra(`pose:${camada.id}`);
       camada.arquivo = valor;
       await garanteAdesivos();
-      montaCamadas();
+      montaListas();
       schedule();
     }));
     partes.push(campoRange('Tamanho', camada.tamanho, LIMITES.adesivoTamanho, 0.005, (valor) => { registra(`tamanho:${camada.id}`); camada.tamanho = valor; schedule(); }));
@@ -941,7 +1016,7 @@ function montaPropriedades() {
   partes.push(campoRange('Inclinação', camada.rotacao || 0, LIMITES.giro, 1, (valor) => { registra(`giro:${camada.id}`); camada.rotacao = valor; schedule(); }));
 
   const ordem = document.createElement('div');
-  ordem.className = 'studio-props__acoes';
+  ordem.className = 'studio-item__acoes';
   ordem.append(
     botao('Trazer para frente', () => mudaOrdem(camada.id, 1)),
     botao('Mandar para trás', () => mudaOrdem(camada.id, -1)),
@@ -949,7 +1024,92 @@ function montaPropriedades() {
   if (camada.tipo !== 'adesivo') ordem.append(botao('Duplicar', () => duplica(camada.id)));
   ordem.append(botao('Apagar', () => apaga(camada.id)));
   partes.push(ordem);
-  el.props.replaceChildren(...partes);
+  return partes;
+}
+
+function cartaoDeCamada(camada) {
+  const aberto = selecionada === camada.id;
+  const li = document.createElement('li');
+  li.className = 'studio-item';
+  if (aberto) li.classList.add('studio-item--aberto');
+  const cabeca = document.createElement('button');
+  cabeca.type = 'button';
+  cabeca.className = 'studio-item__cabeca';
+  cabeca.dataset.camada = camada.id;
+  cabeca.setAttribute('aria-expanded', String(aberto));
+  cabeca.setAttribute('aria-controls', `corpo-${camada.id}`);
+  const textos = document.createElement('span');
+  textos.className = 'studio-item__texto';
+  const titulo = document.createElement('span');
+  titulo.textContent = rotuloDaCamada(camada);
+  const sub = document.createElement('small');
+  sub.textContent = subtituloDaCamada(camada);
+  textos.append(titulo, sub);
+  const seta = document.createElement('span');
+  seta.className = 'studio-item__seta';
+  seta.setAttribute('aria-hidden', 'true');
+  seta.textContent = aberto ? '−' : '+';
+  cabeca.append(icone(camada), textos, seta);
+  cabeca.addEventListener('click', () => {
+    if (selecionada === camada.id) { seleciona(null); return; }
+    seleciona(camada.id);
+    if (camada.tipo === 'foto' && !fotos.get(camada.id)?.asset) pedeArquivo({ tipo: 'camada', id: camada.id });
+  });
+  li.appendChild(cabeca);
+  const corpo = document.createElement('div');
+  corpo.className = 'studio-item__corpo';
+  corpo.id = `corpo-${camada.id}`;
+  corpo.dataset.corpo = camada.id;
+  corpo.hidden = !aberto;
+  if (aberto) corpo.append(...camposDaCamada(camada));
+  li.appendChild(corpo);
+  return li;
+}
+
+function vazio(mensagem) {
+  const li = document.createElement('li');
+  li.className = 'studio-vazio';
+  li.textContent = mensagem;
+  return li;
+}
+
+function montaListas() {
+  if (!arte) {
+    el.listaFotos.replaceChildren();
+    el.listaFrases.replaceChildren();
+    el.listaEnfeites.replaceChildren();
+    return;
+  }
+  const fotosDaArte = camadasDo('foto');
+  const frases = camadasDo('frase');
+  const enfeites = camadasDo('enfeites');
+  el.listaFotos.replaceChildren(...(fotosDaArte.length
+    ? fotosDaArte.map(cartaoDeCamada)
+    : [vazio('Este modelo não tem espaço de foto. Toque em "Acrescentar foto" para abrir um.')]));
+  el.listaFrases.replaceChildren(...(frases.length
+    ? frases.map(cartaoDeCamada)
+    : [vazio('Nenhuma frase por enquanto. Toque em "Acrescentar frase".')]));
+  el.listaEnfeites.replaceChildren(...(enfeites.length
+    ? enfeites.map(cartaoDeCamada)
+    : [vazio('Nenhum enfeite por enquanto. Toque num desenho aí em cima.')]));
+  for (const botaoDaAba of el.abas.children) {
+    const conta = contaDaAba(botaoDaAba.dataset.aba);
+    const marca = botaoDaAba.querySelector('.studio-aba__conta');
+    if (marca && conta !== null) marca.textContent = String(conta);
+  }
+}
+
+function seleciona(id, { mostrarPainel = false } = {}) {
+  selecionada = id;
+  const camada = camadaPorId(id);
+  if (camada) mostraAba(abaDaCamada(camada));
+  montaListas();
+  if (camada && mostrarPainel) {
+    const cartao = document.querySelector(`[data-camada="${id}"]`);
+    const caixa = cartao?.getBoundingClientRect();
+    if (caixa && (caixa.top < 0 || caixa.bottom > window.innerHeight)) cartao.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }
+  schedule();
 }
 
 function mudaOrdem(id, direcao) {
@@ -959,7 +1119,7 @@ function mudaOrdem(id, direcao) {
   if (indice < 0 || destino < 0 || destino >= arte.camadas.length) return;
   const [camada] = arte.camadas.splice(indice, 1);
   arte.camadas.splice(destino, 0, camada);
-  montaCamadas();
+  montaListas();
   schedule();
 }
 
@@ -977,8 +1137,6 @@ function duplica(id) {
   }
   arte.camadas.push(copia);
   seleciona(copia.id);
-  montaCamadas();
-  schedule();
 }
 
 function apaga(id) {
@@ -987,9 +1145,9 @@ function apaga(id) {
   if (indice < 0) return;
   const [camada] = arte.camadas.splice(indice, 1);
   if (camada.tipo === 'foto') tiraFoto(id, false);
-  selecionada = arte.camadas[Math.min(indice, arte.camadas.length - 1)]?.id || null;
-  montaCamadas();
-  montaPropriedades();
+  selecionada = null;
+  montaAbas();
+  montaListas();
   schedule();
 }
 
@@ -1004,9 +1162,8 @@ function lugarLivre() {
 function acrescenta(camada) {
   registra('estrutura');
   arte.camadas.push(camada);
-  montaCamadas();
+  montaAbas();
   seleciona(camada.id);
-  schedule();
   return camada;
 }
 
@@ -1014,7 +1171,7 @@ function adicionaFoto() {
   if (!arte) return;
   const lugar = lugarLivre();
   const camada = acrescenta({
-    id: novoId(), tipo: 'foto', rotulo: `Foto ${camadasDeFoto().length + 1}`, forma: 'arredondado',
+    id: novoId(), tipo: 'foto', rotulo: `Foto ${camadasDo('foto').length + 1}`, forma: 'arredondado',
     x: lugar.x, y: 0.45, largura: 0.24, altura: 0.6, rotacao: 0, ajuste: { scale: 1, offsetX: 0, offsetY: 0 },
   });
   pedeArquivo({ tipo: 'camada', id: camada.id });
@@ -1027,32 +1184,51 @@ function adicionaFrase() {
     id: novoId(), tipo: 'frase', rotulo: 'Frase', texto: 'escreva aqui',
     x: lugar.x, y: 0.5, tamanho: 10, largura: 0.28, fonte: 'Caveat', cor: '--hand-ink', rotacao: 0,
   });
-  el.props.querySelector('input[type="text"]')?.focus();
+  document.querySelector(`[data-corpo="${selecionada}"] input[type="text"]`)?.focus();
 }
 
-function adicionaEnfeite() {
+function adicionaEnfeite(forma) {
   if (!arte) return;
   const lugar = lugarLivre();
   acrescenta({
-    id: novoId(), tipo: 'enfeite', forma: 'coracao', cor: '--peach-deep',
+    id: novoId(), tipo: 'enfeite', forma, cor: '--peach-deep',
     x: lugar.x, y: 0.5, tamanho: 0.14, rotacao: 0,
   });
 }
 
 async function adicionaPandinha() {
   if (!arte) return;
-  el.panda.checked = true;
-  state.withPanda = true;
   const existente = arte.camadas.find((camada) => camada.tipo === 'adesivo');
-  if (existente) { seleciona(existente.id); return; }
+  if (existente) { seleciona(existente.id, { mostrarPainel: true }); return; }
   const lugar = lugarLivre();
   acrescenta({
     id: novoId(), tipo: 'adesivo', rotulo: 'Pandinha', arquivo: ADESIVOS[0].arquivo,
     x: lugar.x, y: 0.78, tamanho: 0.18, rotacao: 0,
   });
   await garanteAdesivos();
-  montaCamadas();
+  montaListas();
   schedule();
+}
+
+function montaGradeDeEnfeites() {
+  el.gradeEnfeites.replaceChildren(...ENFEITES.map((item) => {
+    const botaoForma = document.createElement('button');
+    botaoForma.type = 'button';
+    botaoForma.className = 'studio-forma';
+    botaoForma.title = `Acrescentar ${item.nome.toLowerCase()}`;
+    botaoForma.setAttribute('aria-label', `Acrescentar ${item.nome.toLowerCase()}`);
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = 56;
+    canvas.setAttribute('aria-hidden', 'true');
+    const context = canvas.getContext('2d');
+    if (context) {
+      context.translate(28, 28);
+      desenhaForma(context, item.forma, 40, cor('--peach-deep'));
+    }
+    botaoForma.appendChild(canvas);
+    botaoForma.addEventListener('click', () => adicionaEnfeite(item.forma));
+    return botaoForma;
+  }));
 }
 
 /* ---------- fotos ---------- */
@@ -1075,8 +1251,7 @@ function tiraFoto(id, redesenhar = true) {
   const camada = camadaPorId(id);
   if (camada?.ajuste) Object.assign(camada.ajuste, { scale: 1, offsetX: 0, offsetY: 0 });
   if (redesenhar) {
-    montaCamadas();
-    montaPropriedades();
+    montaListas();
     schedule();
   }
 }
@@ -1094,7 +1269,6 @@ async function handleFile(file, destino = destinoDoArquivo) {
       if (anterior) lixeira.set(`${destino.id}:${Date.now()}`, anterior);
       fotos.set(destino.id, { asset, blob: file });
       seleciona(destino.id);
-      montaCamadas();
     } else {
       artwork?.dispose();
       artwork = asset;
@@ -1121,14 +1295,14 @@ async function soltaNaCaneca(event) {
     if (camada?.tipo === 'foto') destino = { tipo: 'camada', id: camada.id };
     else {
       const nova = acrescenta({
-        id: novoId(), tipo: 'foto', rotulo: `Foto ${camadasDeFoto().length + 1}`, forma: 'arredondado',
+        id: novoId(), tipo: 'foto', rotulo: `Foto ${camadasDo('foto').length + 1}`, forma: 'arredondado',
         x: clamp(fracao.x, 0.06, 0.94), y: clamp(fracao.y, 0.1, 0.9), largura: 0.24, altura: 0.6,
         rotacao: 0, ajuste: { scale: 1, offsetX: 0, offsetY: 0 },
       });
       destino = { tipo: 'camada', id: nova.id };
     }
   } else {
-    const vazia = camadasDeFoto().find((camada) => !fotos.get(camada.id)?.asset);
+    const vazia = camadasDo('foto').find((camada) => !fotos.get(camada.id)?.asset);
     destino = vazia ? { tipo: 'camada', id: vazia.id } : null;
   }
   if (destino) await handleFile(arquivo, destino);
@@ -1186,10 +1360,14 @@ function resetAdjustments() {
 }
 
 function markPreset() {
+  let nome = `Interior ${optionLabel(el.inside, state.inside).toLowerCase()} · alça ${optionLabel(el.handle, state.handle).toLowerCase()}`;
   for (const button of presetButtons) {
     const preset = PRESETS[button.dataset.preset];
-    button.setAttribute('aria-pressed', String(preset.inside === state.inside && preset.handle === state.handle));
+    const igual = preset.inside === state.inside && preset.handle === state.handle;
+    button.setAttribute('aria-pressed', String(igual));
+    if (igual) nome = preset.nome;
   }
+  if (el.pecaResumo) el.pecaResumo.textContent = nome;
 }
 
 function setColors(inside, handle) {
@@ -1203,7 +1381,7 @@ function setColors(inside, handle) {
 function readTextOptions() {
   state.name = el.name.value.trim();
   state.fontFamily = el.font.value;
-  state.withPanda = el.panda.checked;
+  if (!arte) state.withPanda = el.panda.checked;
   schedule();
 }
 
@@ -1234,6 +1412,7 @@ async function importaDoCanva(file) {
   resetAdjustments();
   await handleFile(file, { tipo: 'livre' });
   if (!artwork) return;
+  mostraAba('arte');
   const proporcao = artwork.width / artwork.height;
   const certa = MUG_SPEC.printWidthMm / MUG_SPEC.printHeightMm;
   if (Math.abs(proporcao - certa) / certa > 0.03) {
@@ -1330,13 +1509,16 @@ async function openProject(file) {
       arte = { ...project.arte, camadas: project.arte.camadas.map((camada) => ({ ...camada })) };
       modeloAtual = acheModelo(arte.modelo);
       contador = arte.camadas.length + 10;
-      selecionada = arte.camadas[0]?.id || null;
+      selecionada = null;
+      state.withPanda = true;
+      limpaHistorico();
       marcaModeloEscolhido();
       atualizaModo();
       await garanteAdesivos();
       for (const [id, registro] of Object.entries(project.fotos || {})) {
         if (registro?.dados) await handleFile(await arquivoDeDados(registro), { tipo: 'camada', id });
       }
+      mostraAba('fotos');
     } else {
       escolheModelo(null);
       if (LAYOUTS[c.layout]) { state.layout = c.layout; el.form.elements.layout.value = c.layout; }
@@ -1349,6 +1531,7 @@ async function openProject(file) {
       if (registro?.dados) await handleFile(await arquivoDeDados(registro), { tipo: 'livre' });
       else removeArtwork();
     }
+    limpaHistorico();
     schedule();
     setStatus('Projeto aberto. Continue de onde parou.');
   } catch (error) {
@@ -1402,7 +1585,6 @@ function gira(gesto, ponto) {
   graus = ((graus + 180) % 360 + 360) % 360 - 180;
   for (const marco of [-180, -90, 0, 90, 180]) if (Math.abs(graus - marco) < 4) graus = marco;
   gesto.camada.rotacao = Math.round(graus);
-  montaPropriedades();
   schedule();
 }
 
@@ -1453,8 +1635,9 @@ function ligaVistaAberta() {
   });
   const solta = (event) => {
     if (!arrasto) return;
+    const mexeuNaForma = arrasto.tipo !== 'mover';
     arrasto = null;
-    montaPropriedades();
+    if (mexeuNaForma) montaListas();
     soltaPonteiro(event);
   };
   el.flat.addEventListener('pointerup', solta);
@@ -1470,7 +1653,7 @@ function ligaVistaAberta() {
     if (camada?.tipo === 'foto') await handleFile(arquivo, { tipo: 'camada', id: camada.id });
     else {
       const nova = acrescenta({
-        id: novoId(), tipo: 'foto', rotulo: `Foto ${camadasDeFoto().length + 1}`, forma: 'arredondado',
+        id: novoId(), tipo: 'foto', rotulo: `Foto ${camadasDo('foto').length + 1}`, forma: 'arredondado',
         x: clamp(fracao.x, 0.06, 0.94), y: clamp(fracao.y, 0.1, 0.9), largura: 0.24, altura: 0.6,
         rotacao: 0, ajuste: { scale: 1, offsetX: 0, offsetY: 0 },
       });
@@ -1492,10 +1675,47 @@ function bind() {
   el.inside.addEventListener('change', () => setColors(el.inside.value, null));
   el.handle.addEventListener('change', () => setColors(null, el.handle.value));
 
+  el.travar.addEventListener('click', alternaCadeado);
+  el.abas.addEventListener('keydown', andaNasAbas);
+  el.categoria.addEventListener('change', () => {
+    categoria = el.categoria.value;
+    mostrarTodosOsModelos = false;
+    montaModelos();
+  });
+  el.busca.addEventListener('input', () => {
+    busca = semAcento(el.busca.value.trim());
+    mostrarTodosOsModelos = false;
+    montaModelos();
+  });
+  el.moreModels.addEventListener('click', () => { mostrarTodosOsModelos = !mostrarTodosOsModelos; montaModelos(); });
+
   el.addFoto.addEventListener('click', adicionaFoto);
   el.addFrase.addEventListener('click', adicionaFrase);
-  el.addEnfeite.addEventListener('click', adicionaEnfeite);
   el.addPandinha.addEventListener('click', adicionaPandinha);
+
+  el.desfazer.addEventListener('click', desfaz);
+  el.refazer.addEventListener('click', refaz);
+  el.salvarModelo.addEventListener('click', () => {
+    el.formMeuModelo.hidden = !el.formMeuModelo.hidden;
+    if (!el.formMeuModelo.hidden) {
+      el.nomeMeuModelo.value = modeloAtual?.nome ? `${modeloAtual.nome} do meu jeito` : 'Meu modelo';
+      el.nomeMeuModelo.focus();
+      el.nomeMeuModelo.select();
+    }
+  });
+  el.confirmarMeuModelo.addEventListener('click', salvaModeloAtual);
+  el.nomeMeuModelo.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') { event.preventDefault(); salvaModeloAtual(); }
+  });
+  el.cancelarMeuModelo.addEventListener('click', () => { el.formMeuModelo.hidden = true; });
+  el.apagarModelo.addEventListener('click', apagaMeuModelo);
+  // Ctrl+Z e Ctrl+Shift+Z, menos quando a pessoa está digitando (lá o desfazer é do campo).
+  document.addEventListener('keydown', (event) => {
+    if (!arte || !(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== 'z') return;
+    if (/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName || '')) return;
+    event.preventDefault();
+    if (event.shiftKey) refaz(); else desfaz();
+  });
 
   el.choose.addEventListener('click', () => pedeArquivo({ tipo: 'livre' }));
   el.file.addEventListener('change', () => handleFile(el.file.files?.[0]));
@@ -1525,30 +1745,6 @@ function bind() {
   el.font.addEventListener('change', readTextOptions);
   el.panda.addEventListener('change', readTextOptions);
 
-  el.moreModels.addEventListener('click', () => { mostrarTodosOsModelos = !mostrarTodosOsModelos; montaModelos(); });
-  el.desfazer.addEventListener('click', desfaz);
-  el.refazer.addEventListener('click', refaz);
-  el.salvarModelo.addEventListener('click', () => {
-    el.formMeuModelo.hidden = !el.formMeuModelo.hidden;
-    if (!el.formMeuModelo.hidden) {
-      el.nomeMeuModelo.value = modeloAtual?.nome ? `${modeloAtual.nome} do meu jeito` : 'Meu modelo';
-      el.nomeMeuModelo.focus();
-      el.nomeMeuModelo.select();
-    }
-  });
-  el.confirmarMeuModelo.addEventListener('click', salvaModeloAtual);
-  el.nomeMeuModelo.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') { event.preventDefault(); salvaModeloAtual(); }
-  });
-  el.cancelarMeuModelo.addEventListener('click', () => { el.formMeuModelo.hidden = true; });
-  el.apagarModelo.addEventListener('click', apagaMeuModelo);
-  // Ctrl+Z e Ctrl+Shift+Z, menos quando a pessoa está digitando (lá o desfazer é do campo).
-  document.addEventListener('keydown', (event) => {
-    if (!arte || !(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== 'z') return;
-    if (/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName || '')) return;
-    event.preventDefault();
-    if (event.shiftKey) refaz(); else desfaz();
-  });
   el.saveGuide.addEventListener('click', saveGuide);
   el.importarCanva.addEventListener('click', () => { el.canvaFile.value = ''; el.canvaFile.click(); });
   el.canvaFile.addEventListener('change', () => importaDoCanva(el.canvaFile.files?.[0]));
@@ -1574,6 +1770,8 @@ async function init() {
   el.sizeGuide.textContent = `${medida.larguraCm.toFixed(0)} × ${medida.alturaCm.toFixed(0)} cm (${medida.larguraPx} × ${medida.alturaPx} px a ${medida.dpi} dpi)`;
   montaCategorias();
   montaModelos();
+  montaGradeDeEnfeites();
+  atualizaCadeado();
   atualizaModo();
   markPreset();
   syncRangeOutputs();

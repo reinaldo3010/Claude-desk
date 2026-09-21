@@ -62,6 +62,12 @@ Os modelos ficam em `simulador/modelos.js`, descritos em fração da área de im
 copie um item da lista e rode `npm run test:arte`, que confere se tudo cabe na área, se nada se sobrepõe
 e se cores e fontes são as da marca.
 
+**Como a tela se organiza:** à esquerda a peça (caneca em 360°, vistas, zoom, cores do interior e da
+alça, arte aberta) e o cadeado que, fechado, impede arrastar a arte sem querer; à direita a arte, em
+abas (Modelo, Fotos, Frases, Enfeites, ou Modelo e Minha arte). Cada item é um cartão que abre no
+lugar, e clicar na caneca abre a aba do item tocado. A ocasião é um seletor agrupado com busca, então
+dá para acrescentar categorias sem inchar a tela.
+
 **Desfazer, alças e modelos seus:** o editor guarda até 60 passos (`Ctrl+Z` e `Ctrl+Shift+Z` também
 funcionam), a camada escolhida mostra alças na vista aberta para girar e redimensionar puxando, e o
 botão "Salvar como meu modelo" guarda a montagem em "Meus modelos", só naquele navegador

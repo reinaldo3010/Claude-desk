@@ -61,19 +61,23 @@ export const FORMAS_DE_FOTO = Object.freeze([
   { valor: 'retangulo', nome: 'Reto' },
 ]);
 
+/**
+ * As ocasiões vêm agrupadas: o seletor do site monta um grupo por vez, então a lista pode
+ * crescer sem virar uma parede de botões.
+ */
 export const CATEGORIAS = Object.freeze([
-  { id: 'livre', nome: 'Sem modelo', descricao: 'Sua arte pronta, do jeito que você fez' },
-  { id: 'namorados', nome: 'Namorados', descricao: 'Aniversário de namoro, casamento, Dia dos Namorados' },
-  { id: 'aniversario', nome: 'Aniversário', descricao: 'Parabéns com foto e idade' },
-  { id: 'natal', nome: 'Natal', descricao: 'Fim de ano e amigo secreto' },
-  { id: 'maes', nome: 'Dia das Mães', descricao: 'Pra mãe, a avó, a madrinha' },
-  { id: 'pais', nome: 'Dia dos Pais', descricao: 'Pro pai, o avô, o padrinho' },
-  { id: 'professores', nome: 'Professores', descricao: 'Fim de ano letivo e Dia dos Professores' },
-  { id: 'casamento', nome: 'Casamento', descricao: 'Convite de padrinhos e lembrança dos noivos' },
-  { id: 'bebe', nome: 'Bebê', descricao: 'Chá de bebê, chegada e primeiro aninho' },
-  { id: 'pet', nome: 'Pet', descricao: 'Pro cachorro, o gato, o bichinho da casa' },
-  { id: 'amizade', nome: 'Amizade', descricao: 'Amiga, formatura, time do trabalho' },
-  { id: 'fotos', nome: 'Só fotos', descricao: 'Várias fotos ao redor, sem data' },
+  { id: 'livre', grupo: 'Sua arte', nome: 'Sem modelo', descricao: 'Sua arte pronta, do jeito que você fez' },
+  { id: 'natal', grupo: 'Datas comemorativas', nome: 'Natal', descricao: 'Fim de ano e amigo secreto' },
+  { id: 'maes', grupo: 'Datas comemorativas', nome: 'Dia das Mães', descricao: 'Pra mãe, a avó, a madrinha' },
+  { id: 'pais', grupo: 'Datas comemorativas', nome: 'Dia dos Pais', descricao: 'Pro pai, o avô, o padrinho' },
+  { id: 'namorados', grupo: 'Datas comemorativas', nome: 'Namorados', descricao: 'Aniversário de namoro e Dia dos Namorados' },
+  { id: 'professores', grupo: 'Datas comemorativas', nome: 'Professores', descricao: 'Fim de ano letivo e Dia dos Professores' },
+  { id: 'aniversario', grupo: 'Momentos', nome: 'Aniversário', descricao: 'Parabéns com foto e idade' },
+  { id: 'casamento', grupo: 'Momentos', nome: 'Casamento', descricao: 'Convite de padrinhos e lembrança dos noivos' },
+  { id: 'bebe', grupo: 'Momentos', nome: 'Bebê', descricao: 'Chá de bebê, chegada e primeiro aninho' },
+  { id: 'amizade', grupo: 'Momentos', nome: 'Amizade e formatura', descricao: 'Amiga, turma, time do trabalho' },
+  { id: 'pet', grupo: 'Do dia a dia', nome: 'Pet', descricao: 'Pro cachorro, o gato, o bichinho da casa' },
+  { id: 'fotos', grupo: 'Do dia a dia', nome: 'Só fotos', descricao: 'Várias fotos ao redor, sem data' },
 ]);
 
 /* Formas dos enfeites, desenhadas em milímetros e centradas na origem. */

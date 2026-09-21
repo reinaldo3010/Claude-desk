@@ -68,7 +68,10 @@ indicada é 2480 × 1063 px).
 Depois, `audit.mjs` sobe um servidor http próprio (`servidor.mjs`; por `file://` o canvas fica
 bloqueado) e abre `caneca-3d.html` em 390 e 1280 px. Modo livre: o 3D fica pronto em 15 s, a arte de
 exemplo entra e aparece na vista aberta, nome e cores vão para a mensagem do WhatsApp, o botão de vista
-fica marcado e arquivo falso gera aviso. Modo modelo: a categoria filtra a lista, as camadas aparecem,
+fica marcado e arquivo falso gera aviso. Modo modelo: o seletor de ocasião vem agrupado e filtra, a busca por nome acha o modelo certo, as abas
+aparecem com a contagem de cada tipo e só um container fica aberto; o cadeado começa fechado e
+arrastar na caneca não mexe na arte, mas um toque escolhe o item e abre a aba dele; destravado, o
+arrasto move. As camadas aparecem,
 duas fotos entram pela janela de arquivo, clicar na caneca escolhe o item que está ali, arrastar move,
 acrescentar frase e enfeite funciona, o segundo "+ Pandinha" não cria um segundo mascote, tirar a foto
 volta a avisar do espaço vazio, desfazer e refazer voltam o passo inteiro, puxar o canto na arte aberta
