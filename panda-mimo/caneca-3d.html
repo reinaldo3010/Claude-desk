@@ -89,6 +89,7 @@
         <summary>Ver a arte aberta <span>área de 21 × 9 cm</span></summary>
         <div class="studio-flat__paper"><canvas id="flat-art" width="840" height="360" role="img" aria-label="Arte plana dentro da área de personalização"></canvas></div>
         <p>Esta é a área que envolve a caneca, com um espaço livre junto à alça. Puxe um canto para aumentar e o botão de cima para girar.</p>
+        <label class="studio-check"><input type="checkbox" id="mostrar-margem" checked> Mostrar a margem de segurança</label>
       </details>
       <div class="studio-caption"><span class="hand">Só uma prévia, tá?</span><p>Modelo de referência de 325 ml. A gente confere a peça, a combinação de cores e a arte final antes de produzir.</p></div>
     </section>
@@ -97,6 +98,13 @@
     <aside class="studio-controls" aria-label="Montar a arte da caneca">
       <form id="mug-form" autocomplete="off">
         <p class="studio-intro">Escolha um modelo, coloque as fotos e escreva do seu jeito. Clique em cima da caneca para mexer em qualquer item.</p>
+        <div class="studio-rascunho" id="rascunho" hidden>
+          <p id="rascunho-texto">Você tem um rascunho guardado neste aparelho.</p>
+          <div class="studio-rascunho__acoes">
+            <button type="button" class="studio-text-button" id="rascunho-continuar">Continuar de onde parei</button>
+            <button type="button" class="studio-text-button" id="rascunho-apagar">Começar do zero</button>
+          </div>
+        </div>
 
         <div class="studio-abas" id="abas" role="tablist" aria-label="Partes da arte"></div>
         <p class="studio-dica" id="dica-aba"></p>
@@ -133,6 +141,7 @@
           <p class="studio-help" id="resultado-modelos" role="status"></p>
           <div class="studio-models" id="model-list" role="group" aria-label="Modelos de arte"></div>
           <button type="button" class="studio-text-button" id="model-more" hidden></button>
+          <div class="studio-fundo-arte" id="fundo-arte" hidden></div>
 
           <details class="studio-guide" id="bloco-canva">
             <summary>Quer montar a arte no Canva?</summary>
@@ -167,6 +176,8 @@
         <div class="studio-painel" id="painel-enfeites" role="tabpanel" aria-labelledby="aba-enfeites" tabindex="0" hidden>
           <p class="studio-help">Toque num desenho para acrescentar na caneca.</p>
           <div class="studio-formas" id="grade-enfeites" role="group" aria-label="Desenhos para acrescentar"></div>
+          <p class="studio-help">Do acervo da Panda Mimo:</p>
+          <div class="studio-elementos" id="grade-elementos" role="group" aria-label="Elementos da marca para acrescentar"></div>
           <button type="button" class="studio-acrescentar" id="add-pandinha">+ Pandinha</button>
           <ul class="studio-itens" id="lista-enfeites"></ul>
         </div>
@@ -206,7 +217,26 @@
           <a class="btn btn--dark js-wa" id="mug-order" href="index.html#contato" data-msg="Oi, Panda Mimo! Montei uma caneca no site 🐼">Pedir esse mimo no WhatsApp</a>
           <p class="studio-help">Baixe a prévia e anexe na conversa. Nada é produzido sem o seu "pode fazer".</p>
           <div class="studio-save-buttons"><button type="button" class="btn btn--ghost btn--sm" id="save-preview" disabled>Baixar prévia</button><button type="button" class="btn btn--ghost btn--sm" id="save-print">Baixar arte plana</button></div>
-          <button type="button" class="studio-text-button" id="save-video" hidden>Baixar vídeo da caneca girando</button>
+          <button type="button" class="btn btn--ghost btn--sm" id="compartilhar" hidden>Mandar a prévia direto</button>
+          <div class="studio-extras">
+            <button type="button" class="studio-text-button" id="save-video" hidden>Baixar vídeo da caneca girando</button>
+            <button type="button" class="studio-text-button" id="save-4k">Baixar prévia em 4K</button>
+            <button type="button" class="studio-text-button" id="copiar-link">Copiar link da montagem</button>
+          </div>
+          <details class="studio-lote" id="lote">
+            <summary>Vários nomes de uma vez</summary>
+            <p class="studio-help">Para turma, padrinhos ou brinde de empresa: escreva um nome por linha e a gente gera uma arte para cada um, num arquivo só.</p>
+            <label class="studio-campo" for="lote-frase">Qual frase troca de nome
+              <select id="lote-frase"></select>
+            </label>
+            <label class="studio-campo" for="lote-nomes">Nomes, um por linha
+              <textarea id="lote-nomes" rows="5" placeholder="Malu&#10;Theo&#10;Dona Cleide"></textarea>
+            </label>
+            <div class="studio-lote__acoes">
+              <button type="button" class="studio-text-button" id="lote-gerar">Gerar as artes</button>
+              <span class="studio-help" id="lote-status" role="status"></span>
+            </div>
+          </details>
           <button type="button" class="studio-text-button" id="save-project">Salvar tudo em um arquivo</button>
           <p class="studio-help" id="save-status" role="status"></p>
         </section>

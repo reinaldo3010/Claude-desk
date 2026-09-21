@@ -184,6 +184,35 @@ export function desenhaForma(ctx, forma, tamanho, tinta) {
 }
 
 /**
+ * Elementos do acervo da marca que entram na arte de quem monta: são as mesmas ilustrações do
+ * site, com fundo transparente (manual 9). Nenhum deles tem texto ou logo: o que leva palavra
+ * é composto no editor, com as letras da biblioteca.
+ */
+export const ELEMENTOS = Object.freeze([
+  { arquivo: 'assets/coracao-costura.webp', nome: 'Coração de costura' },
+  { arquivo: 'assets/laco.webp', nome: 'Laço' },
+  { arquivo: 'assets/flor-nitida.webp', nome: 'Margarida' },
+  { arquivo: 'assets/folha.webp', nome: 'Folhinha' },
+  { arquivo: 'assets/pata-rosa.webp', nome: 'Patinha rosa' },
+  { arquivo: 'assets/pata-preta.webp', nome: 'Patinha preta' },
+  { arquivo: 'assets/sino.webp', nome: 'Sininho' },
+  { arquivo: 'assets/ic-presente.webp', nome: 'Presente' },
+]);
+
+/** Tratamentos de foto: o mesmo filtro vale na prévia e no arquivo de impressão. */
+export const FILTROS = Object.freeze([
+  { valor: 'nenhum', nome: 'Como está', css: 'none' },
+  { valor: 'pb', nome: 'Preto e branco', css: 'grayscale(1)' },
+  { valor: 'sepia', nome: 'Sépia', css: 'sepia(0.75) saturate(1.2)' },
+  { valor: 'claro', nome: 'Mais clara', css: 'brightness(1.16) saturate(0.96)' },
+  { valor: 'escuro', nome: 'Mais escura', css: 'brightness(0.86)' },
+  { valor: 'contraste', nome: 'Mais contraste', css: 'contrast(1.28) saturate(1.08)' },
+  { valor: 'suave', nome: 'Desbotada', css: 'saturate(0.55) brightness(1.06)' },
+]);
+
+const filtroCss = (valor) => FILTROS.find((f) => f.valor === valor)?.css || 'none';
+
+/**
  * Poses do Pandinha adesivo já aprovadas no acervo (manual 6.3). O 3D de cena (6.5) não entra
  * em peça de cliente, e vale sempre um Pandinha por caneca (6.4).
  */
@@ -425,12 +454,12 @@ export function novaArte(modelo) {
   };
 }
 
-export const ROTULOS = Object.freeze({ foto: 'Foto', frase: 'Frase', enfeite: 'Enfeite', adesivo: 'Pandinha' });
+export const ROTULOS = Object.freeze({ foto: 'Foto', frase: 'Frase', enfeite: 'Enfeite', adesivo: 'Pandinha', elemento: 'Elemento da marca' });
 
 /** Retângulo da camada em milímetros, já sem rotação (a rotação entra no teste de clique). */
 export function caixaDaCamada(camada, printArea, medidor) {
   const centroX = printArea.x + camada.x * printArea.width;
-  const centroY = printArea.y + camada.y * printArea.height;
+  let centroY = printArea.y + camada.y * printArea.height;
   let largura;
   let altura;
   if (camada.tipo === 'foto') {
@@ -441,6 +470,17 @@ export function caixaDaCamada(camada, printArea, medidor) {
     const medida = medidor ? medidor(camada) : limite;
     largura = Math.max(2, Math.min(limite, medida));
     altura = camada.tamanho * 1.35;
+    // Frase em arco ocupa outro pedaço da área: a corda é mais curta e a barriga da curva
+    // desce (arco positivo) ou sobe (negativo). A caixa acompanha, senão as alças mentem.
+    const arco = Number(camada.arco) || 0;
+    if (Math.abs(arco) > 1) {
+      const angulo = Math.abs(arco) * Math.PI / 180;
+      const raio = largura / angulo;
+      const barriga = raio * (1 - Math.cos(Math.min(angulo, Math.PI * 2) / 2));
+      largura = Math.min(largura, 2 * raio * Math.sin(Math.min(angulo, Math.PI) / 2)) + camada.tamanho * 0.8;
+      altura += barriga;
+      centroY += (arco > 0 ? 1 : -1) * barriga / 2;
+    }
   } else {
     largura = camada.tamanho * printArea.height;
     altura = largura;
@@ -538,6 +578,8 @@ function desenhaFoto(ctx, camada, caixa, foto) {
     ctx.save();
     caminhoDaForma(ctx, camada.forma, caixa);
     ctx.clip();
+    // O filtro é do desenho, não do arquivo: a foto original continua intacta na memória.
+    if (camada.filtro && camada.filtro !== 'nenhum') ctx.filter = filtroCss(camada.filtro);
     const larguraPx = foto.image.naturalWidth || foto.image.width || foto.width;
     const alturaPx = foto.image.naturalHeight || foto.image.height || foto.height;
     if (larguraPx && alturaPx) {
@@ -578,17 +620,59 @@ function desenhaEnfeite(ctx, camada, caixa) {
   ctx.restore();
 }
 
+/**
+ * Texto em arco: cada letra vai girada no seu pedaço da curva, como nas canecas de letreiro.
+ * Arco positivo sobe (sorriso ao contrário), negativo desce. Arco zero desenha reto.
+ */
+function desenhaEmArco(ctx, texto, graus) {
+  const angulo = Math.abs(graus) * Math.PI / 180;
+  const letras = [...texto];
+  const larguras = letras.map((letra) => ctx.measureText(letra).width);
+  const total = larguras.reduce((soma, valor) => soma + valor, 0);
+  if (!total) return;
+  const raio = total / angulo;
+  const paraCima = graus > 0;
+  let percorrido = 0;
+  for (let i = 0; i < letras.length; i += 1) {
+    const meio = percorrido + larguras[i] / 2;
+    const passo = (meio / total - 0.5) * angulo;
+    percorrido += larguras[i];
+    ctx.save();
+    if (paraCima) {
+      ctx.rotate(passo);
+      ctx.translate(0, -raio);
+    } else {
+      ctx.rotate(-passo);
+      ctx.translate(0, raio);
+      ctx.rotate(Math.PI);
+    }
+    ctx.fillText(letras[i], 0, 0);
+    ctx.restore();
+  }
+}
+
 function desenhaFrase(ctx, camada, caixa, printArea) {
   const texto = String(camada.texto ?? '').trim();
   if (!texto) return;
+  const arco = Number(camada.arco) || 0;
+  // O texto nasce no ponto da camada; a caixa é que se desloca para abraçar a curva.
+  const origemX = printArea.x + camada.x * printArea.width;
+  const origemY = printArea.y + camada.y * printArea.height;
   ctx.save();
-  ctx.translate(caixa.centroX, caixa.centroY);
+  ctx.translate(origemX, origemY);
   ctx.rotate((camada.rotacao || 0) * Math.PI / 180);
   ctx.fillStyle = cor(camada.cor);
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ajustaFonte(ctx, texto, camada.fonte, camada.tamanho, camada.largura * printArea.width);
-  ctx.fillText(texto, 0, 0);
+  if (Math.abs(arco) > 1) {
+    // O centro do arco fica onde estava o meio do texto: a frase cresce para fora dali.
+    const raio = ctx.measureText(texto).width / (Math.abs(arco) * Math.PI / 180);
+    ctx.translate(0, arco > 0 ? raio : -raio);
+    desenhaEmArco(ctx, texto, arco);
+  } else {
+    ctx.fillText(texto, 0, 0);
+  }
   ctx.restore();
 }
 
@@ -649,7 +733,7 @@ export function desenhaArte(ctx, arte, printArea, dados = {}) {
     if (camada.tipo === 'foto') desenhaFoto(ctx, camada, caixa, dados.fotos?.[camada.id]);
     else if (camada.tipo === 'frase') desenhaFrase(ctx, camada, caixa, printArea);
     else if (camada.tipo === 'enfeite') desenhaEnfeite(ctx, camada, caixa);
-    else if (camada.tipo === 'adesivo') desenhaAdesivo(ctx, camada, caixa, dados.imagens?.[camada.arquivo]);
+    else if (camada.tipo === 'adesivo' || camada.tipo === 'elemento') desenhaAdesivo(ctx, camada, caixa, dados.imagens?.[camada.arquivo]);
   }
   ctx.restore();
   return caixas;

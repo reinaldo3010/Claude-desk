@@ -766,12 +766,34 @@ export async function createMugViewer(container, { onError, onReady, onChange, o
       controls.update();
       requestRender();
     },
-    capture() {
+    /**
+     * Foto da prévia. Com `largura`, desenha maior do que a tela (4K para post e anúncio)
+     * e volta ao tamanho de antes.
+     */
+    capture({ largura } = {}) {
       return new Promise((resolve, reject) => {
         if (disposed || contextLost) { reject(new Error('A prévia 3D está indisponível.')); return; }
+        const larguraAntes = width, alturaAntes = height, pixelAntes = renderer.getPixelRatio();
+        const grande = Number.isFinite(largura) && largura > larguraAntes;
+        if (grande) {
+          const alta = Math.round(largura * alturaAntes / larguraAntes);
+          renderer.setPixelRatio(1);
+          renderer.setSize(largura, alta, false);
+          camera.aspect = largura / alta;
+          camera.updateProjectionMatrix();
+        }
         // Read immediately after drawing; no permanent preserveDrawingBuffer cost.
         renderer.render(scene, camera);
-        canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('Não foi possível salvar a prévia.')), 'image/png');
+        canvas.toBlob((blob) => {
+          if (grande) {
+            renderer.setPixelRatio(pixelAntes);
+            renderer.setSize(larguraAntes, alturaAntes, false);
+            camera.aspect = larguraAntes / alturaAntes;
+            camera.updateProjectionMatrix();
+            requestRender();
+          }
+          if (blob) resolve(blob); else reject(new Error('Não foi possível salvar a prévia.'));
+        }, 'image/png');
       });
     },
     resize,

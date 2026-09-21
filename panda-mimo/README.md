@@ -68,6 +68,18 @@ abas (Modelo, Fotos, Frases, Enfeites, ou Modelo e Minha arte). Cada item é um 
 lugar, e clicar na caneca abre a aba do item tocado. A ocasião é um seletor agrupado com busca, então
 dá para acrescentar categorias sem inchar a tela.
 
+**Ferramentas da arte:** frase em arco acompanhando a curva da caneca, elementos do acervo da marca
+(coração de costura, laço, margarida, folhinha, patinhas, sininho, presente), tratamento de foto (preto
+e branco, sépia, mais clara, mais escura, contraste, desbotada), recorte do fundo claro, cor do fundo da
+arte, centralizar na frente, no meio, no verso e na altura, e a margem de segurança à vista.
+
+**Não se perde e dá para mandar:** o rascunho fica no aparelho (IndexedDB, `simulador/rascunho.js`) e é
+oferecido de volta ao voltar à página; "Copiar link da montagem" põe a arte inteira no endereço, sem as
+fotos; a prévia sai também em 4K e, no celular, vai direto pelo compartilhamento do aparelho.
+
+**Vários nomes de uma vez:** uma lista de nomes vira uma arte de 300 dpi por nome, entregues num ZIP
+montado no próprio navegador (`simulador/zip.js`). É o caminho de turma, padrinhos e brinde de empresa.
+
 **Desfazer, alças e modelos seus:** o editor guarda até 60 passos (`Ctrl+Z` e `Ctrl+Shift+Z` também
 funcionam), a camada escolhida mostra alças na vista aberta para girar e redimensionar puxando, e o
 botão "Salvar como meu modelo" guarda a montagem em "Meus modelos", só naquele navegador

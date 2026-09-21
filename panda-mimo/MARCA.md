@@ -568,6 +568,31 @@ que ela cresce sem virar uma pilha de controles:
 - **Cadeado na prévia, fechado por padrão.** Com ele fechado, arrastar na caneca só gira a peça: um
   toque escolhe o item, mas nada sai do lugar sem querer. Abrindo o cadeado, arrastar move o item.
 
+**O que dá para fazer com a arte (setembro de 2026).** Além de mover, escrever e trocar cor:
+
+- **Frase em arco.** A frase acompanha a curva da caneca, como nos letreiros. O arco vai de um lado
+  ao outro e a caixa de seleção acompanha a curva.
+- **Elementos do acervo.** Coração de costura, laço, margarida, folhinha, patinhas, sininho e presente
+  entram na arte. São as mesmas ilustrações do site (manual 9), com fundo transparente: nada de
+  clipart genérico de banco de imagem, que apagaria a identidade.
+- **Tratamento de foto.** Preto e branco, sépia, mais clara, mais escura, mais contraste e desbotada.
+  O filtro é do desenho: o arquivo da pessoa não é alterado.
+- **Tirar o fundo claro.** Para foto de fundo liso (estúdio, papel, parede clara), o site recorta a
+  partir das bordas. Se a foto for de cena, ele avisa em vez de estragar a imagem, e dá para voltar
+  atrás a qualquer momento.
+- **Cor do fundo da arte.** O mesmo modelo muda de clima trocando o fundo, dentro da paleta.
+- **Centralizar na frente, no meio, no verso e na altura**, para acertar sem precisar de pontaria.
+- **Margem de segurança à vista** na arte aberta: 5 mm em toda a volta, que é o que a produção pede.
+
+**Como o trabalho não se perde (setembro de 2026).** O rascunho fica guardado no próprio aparelho
+(IndexedDB) e é oferecido de volta ao voltar à página, com a hora em que parou. O botão "Copiar link da
+montagem" gera um endereço com a arte inteira, sem as fotos, para mandar a ideia a outra pessoa. Nada
+disso vai para servidor nosso: fotos e rascunho ficam no aparelho de quem monta, e a página diz isso.
+
+**Para vender em quantidade (setembro de 2026).** "Vários nomes de uma vez" recebe uma lista, troca a
+frase escolhida em cada arte e entrega tudo num arquivo só, com uma arte de 300 dpi por nome. É o
+caminho de turma de escola, padrinhos e brinde de empresa, que a seção 11.7 já prevê.
+
 **Desfazer, alças e modelos da pessoa (setembro de 2026).** O editor guarda até 60 passos: desfazer e
 refazer valem para mover, escrever, trocar cor, acrescentar e apagar, inclusive a foto tirada de um
 espaço, que volta com o passo. Gestos seguidos do mesmo tipo contam como um passo só. Na vista aberta,
@@ -586,7 +611,8 @@ banco de imagem.
 
 **Vídeo da caneca girando.** Onde o navegador permite, a página grava uma volta completa em WebM (cinco
 segundos) para mandar no WhatsApp ou postar. É a prévia em movimento, com a mesma cena e o mesmo
-acabamento que estão na tela.
+acabamento que estão na tela. A prévia parada também sai em 4K, para post e anúncio, e no celular dá
+para mandar direto pelo compartilhamento do aparelho, sem baixar e anexar.
 
 **Arte trazida de fora (Canva).** A página informa a medida da volta inteira, 21 × 9 cm, que é
 2480 × 1063 px a 300 dpi. "Levar minha arte para o Canva" baixa a arte como ela está, na medida certa, e
@@ -873,6 +899,7 @@ adereço pequeno no Pandinha em datas comemorativas, com aprovação prévia (6.
 | Data | Versão | O que mudou |
 |---|---|---|
 | set/2026 | 1.0 | Primeira edição, consolidando a identidade aplicada no site (paleta, tipografia, logo, mascote, tom de voz, aplicações, governança). |
+| set/2026 | 2.11 | Arte ganha frase em arco, elementos do acervo da marca, tratamento e recorte de fundo de foto, cor de fundo, centralizar e margem de segurança à vista; o trabalho passa a ficar guardado no aparelho como rascunho, com link da montagem para mandar a ideia; prévia em 4K, compartilhamento direto no celular e "vários nomes de uma vez" entregando uma arte por nome num arquivo só (10.3). |
 | set/2026 | 2.10 | Estúdio ganha cena na prévia (fundo claro, mesa de madeira, mesa clara e caixa de presente kraft), acabamento brilhante ou fosco e vídeo da caneca girando em WebM (10.3); biblioteca de 15 letras para a arte do cliente, com as doze novas em OFL servidas do nosso endereço (8.1.1); "Levar minha arte para o Canva" passa a baixar a arte junto. Guardião ganha a trava do padrão visual dos campos. |
 | set/2026 | 2.9 | Estúdio reorganizado para crescer: a peça de um lado (com as cores junto dela), a arte do outro em abas por tipo de item, ocasião em seletor agrupado com busca, cartões que abrem no lugar e cadeado na prévia, fechado por padrão, para ninguém arrastar a arte sem querer (10.3). |
 | set/2026 | 2.8 | Editor ganha desfazer e refazer (até 60 passos, com a foto voltando junto), alças de girar e redimensionar na vista aberta, e "Meus modelos": a pessoa guarda a própria montagem naquele navegador, sem as fotos (10.3). |

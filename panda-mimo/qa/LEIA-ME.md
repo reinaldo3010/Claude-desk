@@ -87,6 +87,12 @@ marca. Foi assim que se pegou o dia em que os seletores de cor da peça mudaram 
 aparência crua do navegador. Um defeito de prova (um campo sem borda e com fonte serifada) confirma que
 a regra reprova de verdade.
 
+Entram também: a curva da frase e o "centralizar no verso" mudando a arte, os elementos do acervo
+entrando como camada, a cor de fundo da arte, o tratamento preto e branco da foto e o botão de tirar o
+fundo claro; "vários nomes de uma vez" gerando o arquivo com uma arte por nome; a prévia em 4K; o link
+da montagem indo para a área de transferência; e o rascunho, que depois de recarregar a página volta
+com exatamente o que estava na tela.
+
 Entram na mesma passada: a biblioteca de letras (a lista aparece, a letra escolhida carrega do nosso
 endereço e muda a arte), a cena e o acabamento da prévia (o resumo acompanha a escolha e o botão do
 vídeo aparece) e o "Levar minha arte para o Canva" (baixa o PNG em 2480 × 1063).

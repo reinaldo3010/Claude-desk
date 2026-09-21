@@ -14,10 +14,12 @@
 import { createMugViewer, MUG_SPEC, CENARIOS, ACABAMENTOS } from './caneca-3d.js';
 import { loadArtwork, composeArtwork, exportPrintArtwork, exportGuideArtwork, tamanhoRecomendado, printAreaOf } from './arte.js';
 import { FONTES_DA_ARTE, carregaFontes, fontePorValor } from './fontes.js';
+import { fazZip } from './zip.js';
+import { salvaRascunho, leRascunho, apagaRascunho, quandoFoi } from './rascunho.js';
 import {
-  CATEGORIAS, ADESIVOS, ENFEITES, CORES_DE_ARTE, FORMAS_DE_FOTO,
+  CATEGORIAS, ADESIVOS, ELEMENTOS, ENFEITES, FILTROS, CORES_DE_ARTE, FORMAS_DE_FOTO,
   modeloPorId, modelosDaCategoria, novaArte, desenhaArte, desenhaForma, camadaEm,
-  alcasDaCamada, medidorDeTexto, cor,
+  alcasDaCamada, medidorDeTexto, cor, FRENTE, VERSO,
 } from './modelos.js';
 
 // Cores da cerâmica: dado físico da peça (manual 7.4), não cor de interface.
@@ -40,8 +42,14 @@ const PASSOS_GUARDADOS = 60;
 const VISIVEIS_DE_INICIO = 6;
 const LIMITES = Object.freeze({
   fraseTamanho: [3, 22], enfeiteTamanho: [0.04, 0.5], adesivoTamanho: [0.06, 0.6],
-  fotoLargura: [0.06, 0.6], giro: [-180, 180],
+  fotoLargura: [0.06, 0.6], giro: [-180, 180], arco: [-180, 180],
 });
+/** Onde um item se encaixa na volta: frente, meio (lado oposto à alça) e verso. */
+const LUGARES = Object.freeze([
+  { nome: 'Centralizar na frente', x: FRENTE },
+  { nome: 'Centralizar no meio', x: 0.5 },
+  { nome: 'Centralizar no verso', x: VERSO },
+]);
 
 /** As abas do painel, na ordem em que aparecem. */
 const ABAS = Object.freeze({
@@ -66,7 +74,8 @@ const el = {
   categoria: $('categoria-modelo'), busca: $('busca-modelo'), resultado: $('resultado-modelos'),
   models: $('model-list'), moreModels: $('model-more'),
   listaFotos: $('lista-fotos'), listaFrases: $('lista-frases'), listaEnfeites: $('lista-enfeites'),
-  gradeEnfeites: $('grade-enfeites'),
+  gradeEnfeites: $('grade-enfeites'), gradeElementos: $('grade-elementos'), fundoArte: $('fundo-arte'),
+  mostrarMargem: $('mostrar-margem'),
   addFoto: $('add-foto'), addFrase: $('add-frase'), addPandinha: $('add-pandinha'),
   drop: $('art-drop'), file: $('art-file'), choose: $('choose-art'), fileInfo: $('art-file-info'), fileName: $('art-file-name'),
   remove: $('remove-art'), example: $('use-example'), error: $('art-error'),
@@ -75,6 +84,9 @@ const el = {
   name: $('art-name'), font: $('art-font'), panda: $('art-panda'),
   sizeGuide: $('size-guide'), saveGuide: $('save-guide'), abrirCanva: $('abrir-canva'),
   canvaFile: $('canva-file'), importarCanva: $('importar-canva'),
+  rascunho: $('rascunho'), rascunhoTexto: $('rascunho-texto'), rascunhoContinuar: $('rascunho-continuar'), rascunhoApagar: $('rascunho-apagar'),
+  compartilhar: $('compartilhar'), save4k: $('save-4k'), copiarLink: $('copiar-link'),
+  lote: $('lote'), loteFrase: $('lote-frase'), loteNomes: $('lote-nomes'), loteGerar: $('lote-gerar'), loteStatus: $('lote-status'),
   warnings: $('art-warnings'), savePreview: $('save-preview'), savePrint: $('save-print'), saveProject: $('save-project'),
   saveStatus: $('save-status'), order: $('mug-order'),
 };
@@ -154,7 +166,7 @@ const slug = (texto) => semAcento(texto).replace(/[^a-z0-9]+/g, '-').replace(/^-
 const optionLabel = (select, value) => select.querySelector(`option[value="${value}"]`)?.textContent || value;
 const camadaPorId = (id) => arte?.camadas.find((camada) => camada.id === id) || null;
 const camadasDo = (tipo) => (arte ? arte.camadas.filter((camada) => (tipo === 'enfeites'
-  ? camada.tipo === 'enfeite' || camada.tipo === 'adesivo'
+  ? camada.tipo === 'enfeite' || camada.tipo === 'adesivo' || camada.tipo === 'elemento'
   : camada.tipo === tipo)) : []);
 const hasContent = () => Boolean(arte || artwork || state.name || state.withPanda);
 
@@ -337,6 +349,8 @@ function render() {
   el.warnings.textContent = warnings.join(' ');
   el.savePrint.disabled = !hasContent();
   updateOrderLink();
+  montaSeletorDeLote();
+  guardaRascunho();
 }
 
 function drawFlat(source, placement) {
@@ -363,6 +377,18 @@ function drawFlat(source, placement) {
     context.moveTo(x, 0);
     context.lineTo(x, el.flat.height);
     context.stroke();
+  }
+  // Margem de segurança: 5 mm de folga em toda a volta, o que a produção pede.
+  if (el.mostrarMargem?.checked) {
+    const folga = 5 / area.width * el.flat.width;
+    const folgaY = 5 / area.height * el.flat.height;
+    context.save();
+    context.strokeStyle = cor('--peach-deep');
+    context.globalAlpha = 0.6;
+    context.setLineDash([4, 5]);
+    context.lineWidth = 1.5;
+    context.strokeRect(folga, folgaY, el.flat.width - folga * 2, el.flat.height - folgaY * 2);
+    context.restore();
   }
   context.restore();
   // Contorno e alças de quem está sendo editado. Ficam só aqui: não entram na textura,
@@ -844,6 +870,7 @@ function atualizaModo() {
   if (!arte) el.formMeuModelo.hidden = true;
   montaAbas();
   montaListas();
+  montaFundoDaArte();
   if (!arte) syncRangeOutputs();
 }
 
@@ -1038,6 +1065,7 @@ function camposDaCamada(camada) {
     }));
     partes.push(campoCores(camada.cor, (token) => { registra(`cor:${camada.id}`); camada.cor = token; schedule(); }));
     partes.push(campoRange('Tamanho da letra', camada.tamanho, LIMITES.fraseTamanho, 0.5, (valor) => { registra(`tamanho:${camada.id}`); camada.tamanho = valor; schedule(); }));
+    partes.push(campoRange('Curva da frase', camada.arco || 0, LIMITES.arco, 1, (valor) => { registra(`arco:${camada.id}`); camada.arco = valor; schedule(); }));
   }
 
   if (camada.tipo === 'foto') {
@@ -1048,6 +1076,19 @@ function camposDaCamada(camada) {
     if (item?.asset) acoes.append(botao('Tirar a foto', () => tiraFoto(camada.id)));
     partes.push(acoes);
     partes.push(campoSelect('Formato', FORMAS_DE_FOTO, camada.forma, (valor) => { registra(`forma:${camada.id}`); camada.forma = valor; schedule(); }));
+    if (item?.asset) {
+      partes.push(campoSelect('Tratamento', FILTROS.map((f) => ({ valor: f.valor, nome: f.nome })), camada.filtro || 'nenhum', (valor) => {
+        registra(`filtro:${camada.id}`);
+        camada.filtro = valor;
+        schedule();
+      }));
+      const fundo = document.createElement('div');
+      fundo.className = 'studio-item__acoes';
+      fundo.append(item.original
+        ? botao('Voltar o fundo da foto', () => voltaOFundo(camada.id))
+        : botao('Tirar o fundo claro', () => tiraOFundo(camada.id)));
+      partes.push(fundo);
+    }
     partes.push(campoRange('Tamanho', camada.largura, LIMITES.fotoLargura, 0.005, (valor) => {
       registra(`tamanho:${camada.id}`);
       const proporcao = camada.altura / camada.largura;
@@ -1097,6 +1138,22 @@ function camposDaCamada(camada) {
   }
 
   partes.push(campoRange('Inclinação', camada.rotacao || 0, LIMITES.giro, 1, (valor) => { registra(`giro:${camada.id}`); camada.rotacao = valor; schedule(); }));
+
+  const lugares = document.createElement('div');
+  lugares.className = 'studio-item__acoes';
+  for (const lugar of LUGARES) {
+    lugares.append(botao(lugar.nome, () => {
+      registra(`lugar:${camada.id}`);
+      camada.x = lugar.x;
+      schedule();
+    }));
+  }
+  lugares.append(botao('Centralizar na altura', () => {
+    registra(`lugar:${camada.id}`);
+    camada.y = 0.5;
+    schedule();
+  }));
+  partes.push(lugares);
 
   const ordem = document.createElement('div');
   ordem.className = 'studio-item__acoes';
@@ -1279,6 +1336,16 @@ function adicionaEnfeite(forma) {
   });
 }
 
+function adicionaElemento(arquivo) {
+  if (!arte) return;
+  const lugar = lugarLivre();
+  acrescenta({
+    id: novoId(), tipo: 'elemento', arquivo, rotulo: ELEMENTOS.find((e) => e.arquivo === arquivo)?.nome || 'Elemento',
+    x: lugar.x, y: 0.5, tamanho: 0.2, rotacao: 0,
+  });
+  garanteAdesivos();
+}
+
 async function adicionaPandinha() {
   if (!arte) return;
   const existente = arte.camadas.find((camada) => camada.tipo === 'adesivo');
@@ -1304,6 +1371,61 @@ function montaSeletorDeLetras() {
   el.font.value = state.fontFamily;
 }
 
+function montaGradeDeElementos() {
+  el.gradeElementos.replaceChildren(...ELEMENTOS.map((item) => {
+    const botaoElemento = document.createElement('button');
+    botaoElemento.type = 'button';
+    botaoElemento.className = 'studio-elemento';
+    botaoElemento.title = `Acrescentar ${item.nome.toLowerCase()}`;
+    botaoElemento.setAttribute('aria-label', `Acrescentar ${item.nome.toLowerCase()}`);
+    const img = document.createElement('img');
+    img.src = item.arquivo;
+    img.alt = '';
+    img.loading = 'lazy';
+    botaoElemento.appendChild(img);
+    botaoElemento.addEventListener('click', () => adicionaElemento(item.arquivo));
+    return botaoElemento;
+  }));
+}
+
+/** A cor de fundo da arte: o mesmo modelo muda de clima trocando só isso. */
+function montaFundoDaArte() {
+  el.fundoArte.hidden = !arte;
+  if (!arte) { el.fundoArte.replaceChildren(); return; }
+  const titulo = document.createElement('p');
+  titulo.className = 'studio-campo';
+  const texto = document.createElement('span');
+  texto.textContent = 'Cor do fundo da arte';
+  titulo.appendChild(texto);
+  const grupo = document.createElement('div');
+  grupo.className = 'studio-cores';
+  grupo.setAttribute('role', 'group');
+  grupo.setAttribute('aria-label', 'Cor do fundo da arte');
+  const opcoes = [{ token: '--white', nome: 'Branco' }, { token: '--paper', nome: 'Papel' }, { token: '--cream', nome: 'Creme' },
+    { token: '--sand-soft', nome: 'Areia clara' }, { token: '--sand', nome: 'Areia' }, { token: '--peach', nome: 'Pêssego' },
+    { token: '--sage', nome: 'Sálvia' }, { token: '--kraft', nome: 'Kraft' }];
+  for (const item of opcoes) {
+    const botaoCor = document.createElement('button');
+    botaoCor.type = 'button';
+    botaoCor.className = 'studio-cor';
+    botaoCor.style.setProperty('--tinta', `var(${item.token})`);
+    botaoCor.title = item.nome;
+    botaoCor.setAttribute('aria-label', `Fundo ${item.nome.toLowerCase()}`);
+    botaoCor.setAttribute('aria-pressed', String(arte.fundo === item.token));
+    botaoCor.addEventListener('click', () => {
+      registra('fundo-da-arte');
+      arte.fundo = item.token;
+      for (const outro of grupo.children) outro.setAttribute('aria-pressed', String(outro === botaoCor));
+      montaModelos();
+      marcaModeloEscolhido();
+      schedule();
+    });
+    grupo.appendChild(botaoCor);
+  }
+  titulo.appendChild(grupo);
+  el.fundoArte.replaceChildren(titulo);
+}
+
 function montaGradeDeEnfeites() {
   el.gradeEnfeites.replaceChildren(...ENFEITES.map((item) => {
     const botaoForma = document.createElement('button');
@@ -1326,6 +1448,73 @@ function montaGradeDeEnfeites() {
 }
 
 /* ---------- fotos ---------- */
+/**
+ * Tira o fundo liso e claro de uma foto, a partir das bordas. Funciona em foto de estúdio, de
+ * produto ou de pet em fundo de papel; em foto de cena, o aviso explica que não dá.
+ * O original fica guardado: dá para voltar atrás a qualquer momento.
+ */
+async function tiraOFundo(id) {
+  const item = fotos.get(id);
+  if (!item?.asset) return;
+  setStatus('Tirando o fundo da foto…');
+  try {
+    const { width, height, image } = item.asset;
+    const tela = document.createElement('canvas');
+    tela.width = width;
+    tela.height = height;
+    const contexto = tela.getContext('2d', { willReadFrequently: true });
+    contexto.drawImage(image, 0, 0, width, height);
+    const dados = contexto.getImageData(0, 0, width, height);
+    const px = dados.data;
+    const cantos = [0, (width - 1) * 4, (height - 1) * width * 4, ((height - 1) * width + width - 1) * 4];
+    const base = [0, 1, 2].map((canal) => Math.round(cantos.reduce((soma, i) => soma + px[i + canal], 0) / cantos.length));
+    const tolerancia = 62;
+    const parecido = (i) => Math.hypot(px[i] - base[0], px[i + 1] - base[1], px[i + 2] - base[2]) < tolerancia;
+    const visitado = new Uint8Array(width * height);
+    const fila = [];
+    for (let x = 0; x < width; x += 1) { fila.push(x, (height - 1) * width + x); }
+    for (let y = 0; y < height; y += 1) { fila.push(y * width, y * width + width - 1); }
+    let apagados = 0;
+    while (fila.length) {
+      const ponto = fila.pop();
+      if (visitado[ponto]) continue;
+      visitado[ponto] = 1;
+      const i = ponto * 4;
+      if (!parecido(i)) continue;
+      px[i + 3] = 0;
+      apagados += 1;
+      const x = ponto % width;
+      const y = (ponto - x) / width;
+      if (x > 0) fila.push(ponto - 1);
+      if (x < width - 1) fila.push(ponto + 1);
+      if (y > 0) fila.push(ponto - width);
+      if (y < height - 1) fila.push(ponto + width);
+    }
+    const fatia = apagados / (width * height);
+    if (fatia < 0.02) { setStatus('O fundo desta foto não é liso o bastante para sair sozinho. Tente recortar num formato (círculo ou coração).'); return; }
+    if (fatia > 0.94) { setStatus('Quase tudo saiu junto com o fundo, então nada foi mudado. Esta foto precisa de recorte à mão.'); return; }
+    contexto.putImageData(dados, 0, 0);
+    const recortada = typeof createImageBitmap === 'function' ? await createImageBitmap(tela) : tela;
+    registra(`fundo:${id}`);
+    fotos.set(id, { ...item, original: item.asset, asset: { ...item.asset, image: recortada } });
+    montaListas();
+    schedule();
+    setStatus(`Fundo tirado (${Math.round(fatia * 100)}% da foto). Se não ficou bom, dá para voltar atrás.`);
+  } catch (erro) {
+    setStatus(erro.message || 'Não foi possível tirar o fundo desta foto.');
+  }
+}
+
+function voltaOFundo(id) {
+  const item = fotos.get(id);
+  if (!item?.original) return;
+  registra(`fundo:${id}`);
+  fotos.set(id, { ...item, asset: item.original, original: null });
+  montaListas();
+  schedule();
+  setStatus('Fundo da foto de volta como estava.');
+}
+
 function pedeArquivo(destino) {
   destinoDoArquivo = destino;
   el.file.value = '';
@@ -1537,6 +1726,138 @@ async function importaDoCanva(file) {
   }
 }
 
+/* ---------- rascunho: o trabalho não se perde ao fechar a aba ---------- */
+let rascunhoPendente = 0;
+
+function montagemAtual() {
+  return {
+    versao: PROJETO_VERSAO,
+    escolhas: { ...state },
+    arte: arte ? { ...arte, camadas: arte.camadas.map((camada) => ({ ...camada })) } : null,
+    cena: cenaAtual,
+    acabamento: acabamentoAtual,
+  };
+}
+
+function guardaRascunho() {
+  clearTimeout(rascunhoPendente);
+  rascunhoPendente = setTimeout(async () => {
+    const fotosSalvas = {};
+    for (const [id, item] of fotos) if (item.blob) fotosSalvas[id] = item.blob;
+    await salvaRascunho({ ...montagemAtual(), fotos: fotosSalvas, arteLivre: artworkBlob || null, nomeDaArte: artwork?.name || '' });
+  }, 1200);
+}
+
+async function ofereceRascunho() {
+  const guardado = await leRascunho();
+  if (!guardado || (!guardado.arte && !guardado.arteLivre)) return;
+  el.rascunhoTexto.textContent = `Você começou uma caneca ${quandoFoi(guardado.salvoEm)} e ela ficou guardada neste aparelho.`;
+  el.rascunho.hidden = false;
+  el.rascunhoContinuar.onclick = async () => {
+    el.rascunho.hidden = true;
+    await aplicaMontagem(guardado);
+    setStatus('Rascunho aberto. Continue de onde parou.');
+  };
+  el.rascunhoApagar.onclick = async () => {
+    el.rascunho.hidden = true;
+    await apagaRascunho();
+    setStatus('Rascunho apagado. Comece à vontade.');
+  };
+}
+
+/** Coloca na tela uma montagem guardada (rascunho, projeto em arquivo ou link). */
+async function aplicaMontagem(dados, { fotos: fotosDoArquivo = null } = {}) {
+  const c = dados.escolhas || {};
+  setColors(c.inside, c.handle);
+  el.name.value = String(c.name || '').slice(0, 24);
+  el.font.value = fontePorValor(c.fontFamily) ? c.fontFamily : 'Fredoka';
+  el.panda.checked = c.withPanda !== false;
+  readTextOptions();
+  if (dados.cena) { cenaAtual = dados.cena; viewer?.setCenario(cenaAtual); }
+  if (dados.acabamento) { acabamentoAtual = dados.acabamento; viewer?.setAcabamento(acabamentoAtual); }
+  montaCenas();
+  if (dados.arte?.camadas?.length) {
+    escolheModelo(dados.arte.modelo || null);
+    arte = { ...dados.arte, camadas: dados.arte.camadas.map((camada) => ({ ...camada })) };
+    modeloAtual = acheModelo(arte.modelo);
+    contador = arte.camadas.length + 10;
+    selecionada = null;
+    state.withPanda = true;
+    limpaHistorico();
+    marcaModeloEscolhido();
+    atualizaModo();
+    await garanteAdesivos();
+    await garanteFontes();
+    const guardadas = fotosDoArquivo || dados.fotos || {};
+    for (const [id, guardada] of Object.entries(guardadas)) {
+      const arquivo = guardada instanceof Blob
+        ? new File([guardada], 'foto.webp', { type: guardada.type || 'image/webp' })
+        : await arquivoDeDados(guardada);
+      await handleFile(arquivo, { tipo: 'camada', id });
+    }
+    mostraAba('fotos');
+  } else {
+    escolheModelo(null);
+    if (LAYOUTS[c.layout]) { state.layout = c.layout; el.form.elements.layout.value = c.layout; }
+    el.scale.value = String(Math.round((Number(c.scale) || 1) * 100));
+    el.x.value = String(Math.round((Number(c.offsetX) || 0) * 100));
+    el.y.value = String(Math.round((Number(c.offsetY) || 0) * 100));
+    el.rotation.value = String(Math.round(Number(c.rotation) || 0));
+    readAdjustments();
+    const livre = dados.arteLivre;
+    if (livre instanceof Blob) await handleFile(new File([livre], dados.nomeDaArte || 'Minha arte', { type: livre.type }), { tipo: 'livre' });
+    else if (livre?.dados) await handleFile(await arquivoDeDados(livre), { tipo: 'livre' });
+    else removeArtwork();
+  }
+  limpaHistorico();
+  schedule();
+}
+
+/* ---------- link da montagem (sem as fotos) ---------- */
+const paraBase64Url = (bytes) => btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const deBase64Url = (texto) => Uint8Array.from(atob(texto.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
+
+async function comprime(texto) {
+  const bytes = new TextEncoder().encode(texto);
+  if (typeof CompressionStream !== 'function') return { bytes, cru: true };
+  const fluxo = new Blob([bytes]).stream().pipeThrough(new CompressionStream('deflate-raw'));
+  return { bytes: new Uint8Array(await new Response(fluxo).arrayBuffer()), cru: false };
+}
+
+async function descomprime(bytes, cru) {
+  if (cru || typeof DecompressionStream !== 'function') return new TextDecoder().decode(bytes);
+  const fluxo = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+  return new TextDecoder().decode(await new Response(fluxo).arrayBuffer());
+}
+
+async function copiaLink() {
+  try {
+    const { bytes, cru } = await comprime(JSON.stringify(montagemAtual()));
+    const endereco = `${location.origin}${location.pathname}#${cru ? 'j' : 'm'}=${paraBase64Url(bytes)}`;
+    if (endereco.length > 60000) { setStatus('Esta montagem ficou grande demais para um link. Salve o projeto em arquivo.'); return; }
+    await navigator.clipboard.writeText(endereco);
+    setStatus('Link copiado. Ele leva a montagem, mas não as fotos: quem abrir coloca as dele.');
+  } catch {
+    setStatus('Este navegador não deixou copiar. Use "Salvar tudo em um arquivo".');
+  }
+}
+
+async function abreLinkDaMontagem() {
+  const marca = location.hash.match(/^#([jm])=(.+)$/);
+  if (!marca) return false;
+  try {
+    const texto = await descomprime(deBase64Url(marca[2]), marca[1] === 'j');
+    const dados = JSON.parse(texto);
+    if (!dados?.escolhas) return false;
+    await aplicaMontagem(dados);
+    setStatus('Montagem aberta pelo link. As fotos ficam com quem montou: escolha as suas.');
+    history.replaceState(null, '', location.pathname);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /* ---------- salvar ---------- */
 async function savePreview() {
   if (!viewer) return;
@@ -1570,6 +1891,86 @@ async function saveVideo() {
   } finally {
     el.saveVideo.textContent = rotulo;
     el.saveVideo.disabled = false;
+  }
+}
+
+/** Manda a prévia direto pelo aparelho (WhatsApp, e-mail, o que a pessoa escolher). */
+async function compartilha() {
+  if (!viewer) return;
+  el.compartilhar.disabled = true;
+  try {
+    const blob = await viewer.capture();
+    const arquivo = new File([blob], 'caneca-panda-mimo.png', { type: 'image/png' });
+    if (!navigator.canShare?.({ files: [arquivo] })) {
+      setStatus('Este aparelho não compartilha arquivo direto. Baixe a prévia e anexe na conversa.');
+      return;
+    }
+    await navigator.share({ files: [arquivo], text: orderMessage(), title: 'Minha caneca Panda Mimo' });
+    setStatus('Prévia mandada. É só escolher a conversa.');
+  } catch (error) {
+    if (error?.name !== 'AbortError') setStatus('Não deu para compartilhar agora. Baixe a prévia e anexe na conversa.');
+  } finally {
+    el.compartilhar.disabled = false;
+  }
+}
+
+async function savePreview4k() {
+  if (!viewer) return;
+  el.save4k.disabled = true;
+  setStatus('Preparando a prévia grande…');
+  try {
+    const blob = await viewer.capture({ largura: 3840 });
+    download(blob, `caneca-panda-mimo-previa-4k${modeloAtual ? `-${slug(modeloAtual.nome)}` : ''}.png`);
+    setStatus('Prévia em 4K salva, boa para post e anúncio.');
+  } catch (error) {
+    setStatus(error.message || 'Não foi possível salvar a prévia grande agora.');
+  } finally {
+    el.save4k.disabled = false;
+  }
+}
+
+/* ---------- vários nomes de uma vez ---------- */
+function montaSeletorDeLote() {
+  const frases = camadasDo('frase');
+  el.loteFrase.replaceChildren(...frases.map((camada) => {
+    const opcao = document.createElement('option');
+    opcao.value = camada.id;
+    opcao.textContent = `${camada.rotulo || 'Frase'}: "${String(camada.texto || '').slice(0, 24)}"`;
+    return opcao;
+  }));
+  el.lote.hidden = !arte || !frases.length;
+}
+
+async function geraLote() {
+  const nomes = [...new Set(el.loteNomes.value.split(/\r?\n/).map((linha) => linha.trim()).filter(Boolean))];
+  if (!arte || !nomes.length) { el.loteStatus.textContent = 'Escreva ao menos um nome.'; return; }
+  if (nomes.length > 60) { el.loteStatus.textContent = 'São até 60 nomes por vez. Faça em duas levas.'; return; }
+  const camada = camadaPorId(el.loteFrase.value);
+  if (!camada) { el.loteStatus.textContent = 'Escolha qual frase troca de nome.'; return; }
+  el.loteGerar.disabled = true;
+  const original = camada.texto;
+  const irmas = camada.grupo ? arte.camadas.filter((c) => c.grupo === camada.grupo) : [camada];
+  try {
+    const arquivos = [];
+    for (let i = 0; i < nomes.length; i += 1) {
+      el.loteStatus.textContent = `Gerando ${i + 1} de ${nomes.length}…`;
+      for (const irma of irmas) irma.texto = nomes[i];
+      // eslint-disable-next-line no-await-in-loop
+      const { blob } = await exportPrintArtwork(opcoesDeComposicao());
+      // eslint-disable-next-line no-await-in-loop
+      const dados = new Uint8Array(await blob.arrayBuffer());
+      arquivos.push({ nome: `${String(i + 1).padStart(2, '0')}-${slug(nomes[i]) || 'nome'}.png`, dados });
+    }
+    download(fazZip(arquivos), `canecas-panda-mimo-${arquivos.length}-nomes.zip`);
+    el.loteStatus.textContent = `${arquivos.length} artes num arquivo só, prontas para a produção.`;
+    setStatus(`${arquivos.length} artes geradas. Mande o arquivo junto com o pedido no WhatsApp.`);
+  } catch (erro) {
+    el.loteStatus.textContent = erro.message || 'Não foi possível gerar as artes agora.';
+  } finally {
+    for (const irma of irmas) irma.texto = original;
+    el.loteGerar.disabled = false;
+    montaListas();
+    schedule();
   }
 }
 
@@ -1825,6 +2226,7 @@ function bind() {
     montaModelos();
   });
   el.moreModels.addEventListener('click', () => { mostrarTodosOsModelos = !mostrarTodosOsModelos; montaModelos(); });
+  el.mostrarMargem.addEventListener('change', schedule);
 
   el.addFoto.addEventListener('click', adicionaFoto);
   el.addFrase.addEventListener('click', adicionaFrase);
@@ -1889,6 +2291,10 @@ function bind() {
   el.canvaFile.addEventListener('change', () => importaDoCanva(el.canvaFile.files?.[0]));
   el.savePreview.addEventListener('click', savePreview);
   el.saveVideo.addEventListener('click', saveVideo);
+  el.save4k.addEventListener('click', savePreview4k);
+  el.compartilhar.addEventListener('click', compartilha);
+  el.copiarLink.addEventListener('click', copiaLink);
+  el.loteGerar.addEventListener('click', geraLote);
   el.savePrint.addEventListener('click', savePrint);
   el.saveProject.addEventListener('click', saveProject);
   el.form.addEventListener('submit', (event) => event.preventDefault());
@@ -1911,6 +2317,7 @@ async function init() {
   montaCategorias();
   montaModelos();
   montaGradeDeEnfeites();
+  montaGradeDeElementos();
   montaSeletorDeLetras();
   montaCenas();
   atualizaCadeado();
@@ -1927,6 +2334,10 @@ async function init() {
   } else console.warn(panda.reason?.message);
   render();
   await startViewer();
+  // Link de montagem tem prioridade; sem ele, o rascunho deste aparelho é oferecido.
+  if (!(await abreLinkDaMontagem())) await ofereceRascunho();
+  el.compartilhar.hidden = typeof navigator.canShare !== 'function'
+    || !navigator.canShare({ files: [new File([new Blob(['x'])], 'x.png', { type: 'image/png' })] });
 }
 
 init();
