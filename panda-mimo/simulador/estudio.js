@@ -14,10 +14,11 @@
 import { createMugViewer, MUG_SPEC, CENARIOS, ACABAMENTOS } from './caneca-3d.js';
 import { loadArtwork, composeArtwork, exportPrintArtwork, exportGuideArtwork, tamanhoRecomendado, printAreaOf } from './arte.js';
 import { FONTES_DA_ARTE, carregaFontes, fontePorValor } from './fontes.js';
+import { vetorEsportivo, TAMANHO_DA_ILUSTRACAO } from './esportes.js';
 import { fazZip } from './zip.js';
 import { salvaRascunho, leRascunho, apagaRascunho, quandoFoi } from './rascunho.js';
 import {
-  CATEGORIAS, ADESIVOS, ELEMENTOS, ENFEITES, FILTROS, CORES_DE_ARTE, FORMAS_DE_FOTO,
+  gruposDeCategorias, ADESIVOS, ELEMENTOS, ENFEITES, FILTROS, CORES_DE_ARTE, FORMAS_DE_FOTO,
   modeloPorId, modelosDaCategoria, novaArte, desenhaArte, desenhaForma, camadaEm,
   alcasDaCamada, medidorDeTexto, cor, FRENTE, VERSO,
 } from './modelos.js';
@@ -730,13 +731,7 @@ function montaCategorias() {
     grupo.appendChild(meus);
     opcoes.push(grupo);
   }
-  const porGrupo = new Map();
-  for (const item of CATEGORIAS) {
-    if (item.id === 'livre') continue;
-    if (!porGrupo.has(item.grupo)) porGrupo.set(item.grupo, []);
-    porGrupo.get(item.grupo).push(item);
-  }
-  for (const [nome, itens] of porGrupo) {
+  for (const [nome, itens] of gruposDeCategorias()) {
     const grupo = document.createElement('optgroup');
     grupo.label = nome;
     for (const item of itens) {
@@ -875,10 +870,15 @@ function atualizaModo() {
 }
 
 /* ---------- cartões de camada ---------- */
+/** Ilustração de coleção cresce mais que enfeite: ela nasce larga e a pessoa costuma querer maior. */
+function limiteDeTamanho(camada) {
+  return vetorEsportivo(camada.forma) ? TAMANHO_DA_ILUSTRACAO : LIMITES.enfeiteTamanho;
+}
+
 function rotuloDaCamada(camada) {
   if (camada.tipo === 'frase') return String(camada.texto || '').trim().slice(0, 34) || 'Frase sem texto';
   if (camada.tipo === 'foto') return camada.rotulo || 'Foto';
-  if (camada.tipo === 'enfeite') return ENFEITES.find((e) => e.forma === camada.forma)?.nome || 'Enfeite';
+  if (camada.tipo === 'enfeite') return ENFEITES.find((e) => e.forma === camada.forma)?.nome || camada.rotulo || 'Enfeite';
   return 'Pandinha';
 }
 
@@ -1112,14 +1112,19 @@ function camposDaCamada(camada) {
   }
 
   if (camada.tipo === 'enfeite') {
-    partes.push(campoSelect('Desenho', ENFEITES.map((e) => ({ valor: e.forma, nome: e.nome })), camada.forma, (valor) => {
+    // A ilustração de uma coleção não está na lista de enfeites: ela entra como a opção de cima,
+    // para a pessoa poder trocá-la por um enfeite simples sem perder de vista o que está ali.
+    const desenhos = ENFEITES.map((e) => ({ valor: e.forma, nome: e.nome }));
+    if (!desenhos.some((d) => d.valor === camada.forma)) desenhos.unshift({ valor: camada.forma, nome: camada.rotulo || 'Ilustração do modelo' });
+    partes.push(campoSelect('Desenho', desenhos, camada.forma, (valor) => {
       registra(`forma:${camada.id}`);
       camada.forma = valor;
       montaListas();
       schedule();
     }));
     partes.push(campoCores(camada.cor, (token) => { registra(`cor:${camada.id}`); camada.cor = token; montaListas(); schedule(); }));
-    partes.push(campoRange('Tamanho', camada.tamanho, LIMITES.enfeiteTamanho, 0.005, (valor) => { registra(`tamanho:${camada.id}`); camada.tamanho = valor; schedule(); }));
+    const limites = limiteDeTamanho(camada);
+    partes.push(campoRange('Tamanho', camada.tamanho, limites, 0.005, (valor) => { registra(`tamanho:${camada.id}`); camada.tamanho = valor; schedule(); }));
   }
 
   if (camada.tipo === 'adesivo') {
@@ -2110,7 +2115,7 @@ function redimensiona(gesto, ponto) {
     camada.largura = clamp(gesto.base.largura * fator, LIMITES.fotoLargura[0], LIMITES.fotoLargura[1]);
     camada.altura = clamp(gesto.base.altura * fator, 0.06, 1);
   } else {
-    const limite = camada.tipo === 'adesivo' ? LIMITES.adesivoTamanho : LIMITES.enfeiteTamanho;
+    const limite = camada.tipo === 'adesivo' ? LIMITES.adesivoTamanho : limiteDeTamanho(camada);
     camada.tamanho = clamp(gesto.base.tamanho * fator, limite[0], limite[1]);
   }
   schedule();

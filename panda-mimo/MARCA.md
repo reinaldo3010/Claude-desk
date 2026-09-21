@@ -485,6 +485,25 @@ sistema de terceiros), use **Nunito para tudo** e mantenha o manuscrito só como
 Ícones (`ic-*.webp`, `badge-*.webp`): traço arredondado, duas cores (nanquim + pêssego), fundo
 transparente. Ícones novos seguem esse desenho; não misturar com bibliotecas de ícones de linha fina.
 
+### 9.1 Ilustrações das coleções de arte (setembro de 2026)
+
+As coleções de modelos do estúdio da caneca trazem ilustrações próprias — uma bicicleta, uma
+chuteira, uma flor de lótus — que não são elemento de interface nem adesivo do acervo: elas vivem
+**dentro da arte do cliente**, e por isso têm regra própria.
+
+| Regra | Por quê |
+|---|---|
+| **Desenhadas por curvas**, nunca por imagem. Os caminhos ficam em `simulador/<coleção>-dados.js`. | A mesma ilustração vai para a prévia na tela e para o arquivo de 300 dpi. Bitmap ampliado embaça na sublimação. |
+| **Cor só por token da paleta** (`--sage`, `--kraft`…), nunca valor solto. | A ilustração acompanha o `styles.css` como o resto do site; mudou o token, mudou a arte. Teste unitário reprova hexadecimal solto no arquivo de dados. |
+| **Uma tinta principal**, que a pessoa troca pela paleta. As outras cores ficam fixas. | Dá personalização sem deixar a peça sair com cor de fora da marca. |
+| **Entram na arte como camada comum** (tipo `enfeite`): mover, girar, redimensionar, recolorir, duplicar, apagar. | É a promessa do estúdio: nada na arte é intocável. |
+| **A forma em si não se edita.** Não há edição de nós. | A bicicleta continua sendo uma bicicleta; o estúdio não é o Illustrator. |
+| Traço arredondado, poucas cores, silhueta cheia. Nada de linha fina de biblioteca genérica. | Mesma linguagem dos ícones e dos adesivos puffy. |
+
+A primeira coleção assim é a **esportiva**: 137 ilustrações em seis modalidades (treino funcional,
+musculação, ciclismo, corrida, yoga e pilates, futebol), 24 modelos. Coleção nova segue estas
+mesmas regras e entra com prova visual das artes no tamanho de uso.
+
 ---
 
 ## 10. Fotografia e imagem de produto
@@ -899,6 +918,7 @@ adereço pequeno no Pandinha em datas comemorativas, com aprovação prévia (6.
 | Data | Versão | O que mudou |
 |---|---|---|
 | set/2026 | 1.0 | Primeira edição, consolidando a identidade aplicada no site (paleta, tipografia, logo, mascote, tom de voz, aplicações, governança). |
+| set/2026 | 2.12 | Coleções de arte com ilustração própria (9.1): a coleção esportiva entra com 24 modelos em seis modalidades e 137 ilustrações desenhadas por curvas, que entram na arte como camada editável e pintam só por token da paleta. O seletor de ocasião passa a ter ordem de grupos decidida à mão, para o catálogo crescer sem embaralhar a tela (10.3). |
 | set/2026 | 2.11 | Arte ganha frase em arco, elementos do acervo da marca, tratamento e recorte de fundo de foto, cor de fundo, centralizar e margem de segurança à vista; o trabalho passa a ficar guardado no aparelho como rascunho, com link da montagem para mandar a ideia; prévia em 4K, compartilhamento direto no celular e "vários nomes de uma vez" entregando uma arte por nome num arquivo só (10.3). |
 | set/2026 | 2.10 | Estúdio ganha cena na prévia (fundo claro, mesa de madeira, mesa clara e caixa de presente kraft), acabamento brilhante ou fosco e vídeo da caneca girando em WebM (10.3); biblioteca de 15 letras para a arte do cliente, com as doze novas em OFL servidas do nosso endereço (8.1.1); "Levar minha arte para o Canva" passa a baixar a arte junto. Guardião ganha a trava do padrão visual dos campos. |
 | set/2026 | 2.9 | Estúdio reorganizado para crescer: a peça de um lado (com as cores junto dela), a arte do outro em abas por tipo de item, ocasião em seletor agrupado com busca, cartões que abrem no lugar e cadeado na prévia, fechado por padrão, para ninguém arrastar a arte sem querer (10.3). |

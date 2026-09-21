@@ -16,27 +16,15 @@
 // Onde a frente (u=.25) e o verso (u=.75) caem dentro da área de impressão da caneca padrão:
 // a volta tem PI*82 mm e a área impressa, 210 mm centrados nela.
 import { pesoDaFonte } from './fontes.js';
+import { cor } from './paleta.js';
+import { MODELOS_ESPORTES, CATEGORIAS_ESPORTES } from './esportes-dados.js';
+import { vetorEsportivo, desenhaVetorEsportivo } from './esportes.js';
 
 const VOLTA_MM = Math.PI * 82, AREA_MM = 210;
 export const FRENTE = (0.25 * VOLTA_MM - (VOLTA_MM - AREA_MM) / 2) / AREA_MM;
 export const VERSO = 1 - FRENTE;
 
-const PALETA = Object.freeze({
-  '--ink': '#171512', '--ink-soft': '#4A443D', '--paper': '#FBF6EF', '--cream': '#F6F4EF',
-  '--sand': '#E7D8C3', '--sand-soft': '#F1E7D8', '--kraft': '#C9A57E', '--peach': '#FFB59C',
-  '--peach-deep': '#E8916F', '--peach-ink': '#A25030', '--hand-ink': '#CB6B44',
-  '--sage': '#A8C5A2', '--sage-deep': '#6E8C67', '--white': '#FFFDF8',
-});
-
-/** Um token da paleta vira cor; na página vem do styles.css, fora dela do valor de reserva. */
-export function cor(token) {
-  if (typeof token !== 'string' || !token.startsWith('--')) return token || PALETA['--ink'];
-  if (typeof getComputedStyle === 'function' && typeof document !== 'undefined') {
-    const lido = getComputedStyle(document.documentElement).getPropertyValue(token).trim();
-    if (lido) return lido;
-  }
-  return PALETA[token] || PALETA['--ink'];
-}
+export { cor } from './paleta.js';
 
 /** Cores que a pessoa escolhe para uma frase ou um enfeite: só a paleta, só o que se lê na cerâmica. */
 export const CORES_DE_ARTE = Object.freeze([
@@ -72,9 +60,37 @@ export const CATEGORIAS = Object.freeze([
   { id: 'casamento', grupo: 'Momentos', nome: 'Casamento', descricao: 'Convite de padrinhos e lembrança dos noivos' },
   { id: 'bebe', grupo: 'Momentos', nome: 'Bebê', descricao: 'Chá de bebê, chegada e primeiro aninho' },
   { id: 'amizade', grupo: 'Momentos', nome: 'Amizade e formatura', descricao: 'Amiga, turma, time do trabalho' },
+  ...CATEGORIAS_ESPORTES,
   { id: 'pet', grupo: 'Do dia a dia', nome: 'Pet', descricao: 'Pro cachorro, o gato, o bichinho da casa' },
   { id: 'fotos', grupo: 'Do dia a dia', nome: 'Só fotos', descricao: 'Várias fotos ao redor, sem data' },
 ]);
+
+/*
+  A ordem dos grupos no seletor, decidida a mão: primeiro a data que a pessoa veio procurar, depois
+  o momento, depois o gosto de quem vai ganhar, e por último o dia a dia. Grupo novo entra aqui;
+  o que ficar de fora cai no fim, mas o teste avisa para não esquecer.
+*/
+export const ORDEM_DOS_GRUPOS = Object.freeze([
+  'Datas comemorativas',
+  'Momentos',
+  'Esportes e movimento',
+  'Do dia a dia',
+]);
+
+/** Os grupos na ordem do seletor, cada um com as suas categorias. */
+export function gruposDeCategorias() {
+  const porGrupo = new Map();
+  for (const item of CATEGORIAS) {
+    if (item.id === 'livre') continue;
+    if (!porGrupo.has(item.grupo)) porGrupo.set(item.grupo, []);
+    porGrupo.get(item.grupo).push(item);
+  }
+  const ordenados = [...porGrupo.keys()].sort((a, b) => {
+    const ia = ORDEM_DOS_GRUPOS.indexOf(a), ib = ORDEM_DOS_GRUPOS.indexOf(b);
+    return (ia < 0 ? ORDEM_DOS_GRUPOS.length : ia) - (ib < 0 ? ORDEM_DOS_GRUPOS.length : ib);
+  });
+  return ordenados.map((nome) => [nome, porGrupo.get(nome)]);
+}
 
 /* Formas dos enfeites, desenhadas em milímetros e centradas na origem. */
 const FORMAS = {
@@ -169,6 +185,7 @@ export const ENFEITES = Object.freeze([
 
 /** Desenha um enfeite solto (miniatura do painel, por exemplo), já centrado. */
 export function desenhaForma(ctx, forma, tamanho, tinta) {
+  if (desenhaVetorEsportivo(ctx, forma, tamanho, tinta)) return;
   const desenha = FORMAS[forma] || FORMAS.coracao;
   if (CONTORNO.has(forma)) {
     ctx.strokeStyle = tinta;
@@ -436,7 +453,7 @@ const MODELOS = [
   },
 ];
 
-export const TEMPLATES = Object.freeze(MODELOS.map((m) => Object.freeze({ ...m, camadas: Object.freeze(m.camadas) })));
+export const TEMPLATES = Object.freeze([...MODELOS, ...MODELOS_ESPORTES].map((m) => Object.freeze({ ...m, camadas: Object.freeze(m.camadas) })));
 export const modeloPorId = (id) => TEMPLATES.find((m) => m.id === id) || null;
 export const modelosDaCategoria = (categoria) =>
   (!categoria || categoria === 'todos' ? TEMPLATES : TEMPLATES.filter((m) => m.categoria === categoria));
@@ -483,7 +500,8 @@ export function caixaDaCamada(camada, printArea, medidor) {
     }
   } else {
     largura = camada.tamanho * printArea.height;
-    altura = largura;
+    const vetor = camada.tipo === 'enfeite' && vetorEsportivo(camada.forma);
+    altura = vetor ? largura * vetor.height / vetor.width : largura;
   }
   return { x: centroX - largura / 2, y: centroY - altura / 2, width: largura, height: altura, centroX, centroY };
 }

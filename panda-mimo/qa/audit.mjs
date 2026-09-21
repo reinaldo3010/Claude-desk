@@ -1113,6 +1113,62 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     await pe.fill('#busca-modelo', '');
     await pe.waitForTimeout(250);
 
+    // Coleção esportiva: as ilustrações precisam chegar como camadas de verdade, com nome próprio,
+    // cor da paleta e tamanho maior que o de um enfeite. Se virarem desenho fixo, a promessa some.
+    await pe.selectOption('#categoria-modelo', 'ciclismo');
+    await pe.waitForTimeout(300);
+    const ciclismo = await pe.$$eval('#model-list .studio-model', (b) => b.map((x) => x.dataset.modelo).filter(Boolean));
+    if (ciclismo.length !== 4 || !ciclismo.every((id) => id.startsWith('esp-cic'))) {
+      failures.push(`[estúdio ${w}] a modalidade Ciclismo mostrou ${ciclismo.join(', ') || 'nada'}`);
+    }
+    await pe.click('[data-modelo="esp-cic-01"]');
+    await pe.waitForTimeout(500);
+    await pe.evaluate(() => document.querySelector('#abas [data-aba="enfeites"]').click());
+    await pe.waitForTimeout(250);
+    const esporte = await pe.evaluate(() => {
+      const itens = [...document.querySelectorAll('#lista-enfeites .studio-item')];
+      return {
+        quantos: itens.length,
+        rotulos: itens.map((i) => i.querySelector('.studio-item__texto span')?.textContent || ''),
+        semNome: itens.filter((i) => !(i.querySelector('.studio-item__texto span')?.textContent || '').trim()).length,
+      };
+    });
+    if (esporte.quantos < 4) failures.push(`[estúdio ${w}] o modelo esportivo trouxe só ${esporte.quantos} ilustrações editáveis`);
+    if (esporte.semNome) failures.push(`[estúdio ${w}] ${esporte.semNome} ilustrações do modelo esportivo ficaram sem nome no painel`);
+    // abrir a primeira ilustração e trocar a cor: a arte tem de mudar, e mudar para cor da paleta
+    const trocaDeCor = await pe.evaluate(async () => {
+      const flat = document.getElementById('flat-art');
+      const assinatura = () => {
+        const d = flat.getContext('2d').getImageData(0, 0, flat.width, flat.height).data;
+        let soma = 0;
+        for (let i = 0; i < d.length; i += 997) soma += d[i] + d[i + 1] * 2 + d[i + 2] * 3;
+        return soma;
+      };
+      document.querySelector('#lista-enfeites .studio-item__cabeca').click();
+      await new Promise((r) => setTimeout(r, 350));
+      const corpo = document.querySelector('#lista-enfeites [data-corpo]');
+      const antes = assinatura();
+      const botoes = [...corpo.querySelectorAll('.studio-cores button')];
+      const alvo = botoes.find((b) => b.getAttribute('aria-pressed') !== 'true');
+      alvo?.click();
+      await new Promise((r) => setTimeout(r, 450));
+      const faixa = corpo.querySelector('input[type="range"]');
+      return {
+        antes,
+        depois: assinatura(),
+        cores: botoes.length,
+        maximo: faixa ? Number(faixa.max) : 0,
+      };
+    });
+    if (trocaDeCor.antes === trocaDeCor.depois) failures.push(`[estúdio ${w}] trocar a cor da ilustração esportiva não mudou a arte`);
+    if (trocaDeCor.cores < 6) failures.push(`[estúdio ${w}] a ilustração esportiva ficou sem a paleta para escolher (${trocaDeCor.cores} cores)`);
+    if (trocaDeCor.maximo < 1) failures.push(`[estúdio ${w}] a ilustração esportiva não pode crescer além de um enfeite (máximo ${trocaDeCor.maximo})`);
+
+    await pe.evaluate(() => document.querySelector('#abas [data-aba="modelo"]').click());
+    await pe.selectOption('#categoria-modelo', 'todos');
+    await pe.waitForTimeout(300);
+    await pe.evaluate(() => { const b = document.getElementById('model-more'); if (b && !b.hidden && b.textContent.startsWith('Ver mais')) b.click(); });
+    await pe.waitForSelector('[data-modelo="namorados-coracoes"]', { state: 'visible' });
     await pe.click('[data-modelo="namorados-coracoes"]');
     await pe.waitForTimeout(500);
     const comModelo = await pe.evaluate(() => ({

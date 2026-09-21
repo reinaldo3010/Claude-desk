@@ -42,7 +42,10 @@ Três armadilhas que já custaram tempo:
 |---|---|
 | `caneca-3d.html` | A página: prévia à esquerda, painel da arte em abas à direita |
 | `simulador/estudio.js` | Liga tudo: abas, cartões, gestos, histórico, salvar, WhatsApp, Canva |
-| `simulador/modelos.js` | A arte em camadas: catálogos, os 14 modelos e o desenho em milímetros |
+| `simulador/modelos.js` | A arte em camadas: catálogos, os 38 modelos e o desenho em milímetros |
+| `simulador/paleta.js` | A paleta da marca num lugar só; todo desenho pede cor por token |
+| `simulador/esportes.js` | Desenha as ilustrações de coleção por curvas, com a tinta escolhida |
+| `simulador/esportes-dados.js` | Os caminhos das 137 ilustrações e os 24 modelos esportivos |
 | `simulador/arte.js` | Compõe a textura, calcula dpi e exporta (300 dpi, gabarito) |
 | `simulador/caneca-3d.js` | A caneca em three.js: geometria, luz, cenas, acabamento, vídeo, clique |
 | `simulador/fontes.js` | Biblioteca de 15 letras (3 da marca + 12 OFL em `assets/fontes/arte/`) |
@@ -52,6 +55,7 @@ Três armadilhas que já custaram tempo:
 | `qa/audit.mjs` | Guardião: site inteiro + estúdio de ponta a ponta |
 | `qa/*-unit.test.mjs` | Testes unitários da arte e dos modelos |
 | `qa/provas.mjs` | Gera as artes dos modelos para revisão visual |
+| `qa/esportes-provas.html` | Catálogo das 24 artes esportivas, desenhado pelo motor do editor |
 
 ## 4. Como a arte funciona (o que não dá para esquecer)
 
@@ -73,9 +77,12 @@ Três armadilhas que já custaram tempo:
 interior e da alça, quatro cenas (fundo claro, mesa de madeira, mesa clara, caixa de presente kraft),
 acabamento brilhante ou fosco, vídeo de cinco segundos girando em WebM, prévia em PNG e em 4K.
 
-**Arte.** 14 modelos em 12 categorias agrupadas, com busca. Camadas de foto, frase, enfeite (9 desenhos),
+**Arte.** 38 modelos em 18 categorias, agrupadas em quatro grupos com ordem decidida à mão
+(`ORDEM_DOS_GRUPOS` em `modelos.js`) e busca. Camadas de foto, frase, enfeite (9 desenhos),
 elemento do acervo (8 ilustrações da marca) e Pandinha (9 poses, um por peça). Biblioteca de 15 letras.
-Cores da paleta. Frase em arco. Tratamento de foto (6 filtros) e recorte do fundo claro. Cor do fundo da
+Cores da paleta. Frase em arco.
+A coleção esportiva acrescenta 137 ilustrações desenhadas por curvas (seis modalidades, 24 modelos),
+que entram na arte como camada comum e pintam só por token — a regra está no manual, seção 9.1. Tratamento de foto (6 filtros) e recorte do fundo claro. Cor do fundo da
 arte. Centralizar na frente, no meio, no verso e na altura. Margem de segurança à vista.
 
 **Edição.** Clique e arrasto na própria caneca (com cadeado, fechado por padrão), alças de girar e
@@ -97,12 +104,23 @@ rascunho automático no aparelho, compartilhamento direto no celular, ida e volt
    modelo de vários megabytes com licença comercial. O recorte atual funciona em fundo liso e avisa
    quando não dá.
 
-## 7. Trabalho de outra sessão no mesmo diretório
+## 7. Como nasce uma coleção nova
 
-No momento desta escrita havia, **sem commit**, uma coleção de esportes feita por outra sessão:
-`simulador/esportes.js`, `simulador/esportes-dados.js` (137 vetores, 24 modelos, 6 categorias) e as
-mudanças que os ligam em `modelos.js` e no teste. Não foram tocados nem commitados aqui. Os testes
-unitários passam com eles no lugar. Antes de mexer nesses arquivos, confirme com quem os escreveu.
+A coleção esportiva é o molde. Uma coleção é:
+
+1. **Um grupo e as suas categorias** em `CATEGORIAS` (`modelos.js`), com o grupo listado em
+   `ORDEM_DOS_GRUPOS` — senão o teste reprova.
+2. **As ilustrações**, como caminhos (`M`, `L`, `C`, `Z`) centrados na origem, num arquivo de dados
+   próprio. Cada uma tem `width`, `height`, `primary` (a tinta que a pessoa troca) e `paths`.
+   **Cor só por token da paleta**; o teste reprova hexadecimal solto.
+3. **Os modelos**, cada um uma lista de camadas em fração da área de impressão: ilustrações (tipo
+   `enfeite`), espaços de foto, frases e a semente dos enfeites de fundo.
+4. **Prova visual e teste.** `npm run provas` desenha as artes em `qa/shots`; o teste unitário
+   confere proporção, edição isolada e redistribuição do fundo.
+
+A coleção esportiva veio de SVGs convertidos por um script em Python que vive fora do repositório
+(`colecao-esportes/adaptar_modelos.py`, na pasta acima). Coleção nova não precisa daquele caminho:
+dá para escrever os caminhos direto no arquivo de dados.
 
 ## 8. Como continuar sem quebrar nada
 

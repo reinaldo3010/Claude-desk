@@ -48,9 +48,17 @@ Enquanto o preço estiver vazio, a tela de detalhe mostra "Valor sob consulta".
 `vendor/three/`, sem CDN), escolher as cores do interior e da alça, escrever um nome e baixar a prévia, a
 arte plana em 300 dpi (210 × 90 mm) ou o projeto para continuar depois.
 
-Há também **modelos de arte por ocasião** (Namorados, Aniversário, Natal, Dia das Mães, Dia dos Pais,
-Professores, Casamento, Bebê, Pet, Amizade e Só fotos): 14 artes que dão a volta inteira na caneca, com
-espaços de foto — de uma a seis — e frases prontas.
+Há também **modelos de arte por ocasião**: 38 artes que dão a volta inteira na caneca, com espaços de
+foto — de uma a seis — e frases prontas, organizadas em quatro grupos no seletor: Datas comemorativas
+(Natal, Mães, Pais, Namorados, Professores), Momentos (Aniversário, Casamento, Bebê, Amizade e
+formatura), Esportes e movimento e Do dia a dia (Pet, Só fotos).
+
+**Coleção esportiva.** Seis modalidades — treino funcional, musculação, ciclismo, corrida, yoga e
+pilates, futebol — com quatro artes cada. As 137 ilustrações da coleção são desenhadas por curvas em
+`simulador/esportes.js`, a partir dos caminhos de `simulador/esportes-dados.js`: entram na arte como
+camadas comuns, então a pessoa move, gira, redimensiona, recolore e apaga cada uma. Não é um editor de
+nós: a bicicleta continua sendo uma bicicleta. As cores saem dos tokens da paleta, como no resto do
+site. Para olhar as 24 no tamanho de uso, abra `qa/esportes-provas.html` com o `npm run servir`.
 
 **A arte é editável em camadas.** A pessoa clica em cima da caneca em 3D para escolher um item e arrasta
 para mover; pode soltar uma foto direto na peça, acrescentar frase, enfeite (coração, flor, estrela,

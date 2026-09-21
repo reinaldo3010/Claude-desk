@@ -1,12 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  gruposDeCategorias, ORDEM_DOS_GRUPOS,
   TEMPLATES, CATEGORIAS, CORES_DE_ARTE, ENFEITES, ADESIVOS, FORMAS_DE_FOTO,
   modeloPorId, modelosDaCategoria, novaArte, desenhaArte, caixaDaCamada, camadaEm, alcasDaCamada,
   medidorDeTexto, FRENTE, VERSO,
 } from '../simulador/modelos.js';
 import { computeArtePlacement, printAreaOf, tamanhoRecomendado } from '../simulador/arte.js';
 import { FONTES_DA_ARTE, pesoDaFonte, ehFonteDaMarca } from '../simulador/fontes.js';
+import { VETORES_ESPORTES } from '../simulador/esportes-dados.js';
 
 const spec = { diameterMm: 82, heightMm: 95, printWidthMm: 210, printHeightMm: 90 };
 const area = printAreaOf(spec);
@@ -48,7 +50,7 @@ test('cada modelo tem identidade própria, categoria conhecida e camadas válida
   const fontes = new Set(FONTES_DA_ARTE.map((f) => f.valor));
   const cores = new Set(CORES_DE_ARTE.map((c) => c.token));
   const formasDeFoto = new Set(FORMAS_DE_FOTO.map((f) => f.valor));
-  const enfeites = new Set(ENFEITES.map((e) => e.forma));
+  const enfeites = new Set([...ENFEITES.map((e) => e.forma), ...Object.keys(VETORES_ESPORTES)]);
   const poses = new Set(ADESIVOS.map((a) => a.arquivo));
   for (const modelo of TEMPLATES) {
     assert.ok(!ids.has(modelo.id), `id repetido: ${modelo.id}`);
@@ -232,4 +234,19 @@ test('a biblioteca de letras tem variedade, peso próprio e arquivo nosso', () =
   // as três da marca continuam disponíveis para a arte
   for (const daMarca of ['Fredoka', 'Caveat', 'Nunito']) assert.ok(ehFonteDaMarca(daMarca));
   assert.equal(pesoDaFonte('Inexistente'), 600, 'letra desconhecida devia cair no peso padrão');
+});
+
+test('o seletor mostra os grupos na ordem decidida, e nenhum grupo entra sem lugar na fila', () => {
+  const grupos = gruposDeCategorias().map(([nome]) => nome);
+  // Todo grupo que existe precisa estar na ordem escrita à mão: grupo novo sem lugar cai no fim,
+  // e é justamente isso que este teste não deixa passar despercebido.
+  for (const nome of grupos) assert.ok(ORDEM_DOS_GRUPOS.includes(nome), `grupo "${nome}" fora de ORDEM_DOS_GRUPOS`);
+  const esperado = ORDEM_DOS_GRUPOS.filter((nome) => grupos.includes(nome));
+  assert.deepEqual(grupos, esperado, 'os grupos saíram fora da ordem combinada');
+  // "Sem modelo" não é uma ocasião: ele é o cartão solto da lista, não uma linha do seletor.
+  assert.ok(!gruposDeCategorias().some(([, itens]) => itens.some((c) => c.id === 'livre')));
+  for (const [nome, itens] of gruposDeCategorias()) {
+    assert.ok(itens.length, `grupo "${nome}" ficou vazio`);
+    for (const categoria of itens) assert.ok(modelosDaCategoria(categoria.id).length, `categoria "${categoria.id}" sem nenhum modelo`);
+  }
 });

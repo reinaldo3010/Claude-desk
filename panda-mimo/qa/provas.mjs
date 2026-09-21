@@ -30,6 +30,10 @@ await p.evaluate(() => { const b = document.getElementById('model-more'); if (b 
 await p.waitForTimeout(400);
 const ids = await p.$$eval('#model-list .studio-model', (b) => b.map((x) => x.dataset.modelo).filter(Boolean));
 for (const id of ids) {
+  // Escolher um modelo troca para a aba das fotos: volta para a dos modelos e reabre a lista inteira.
+  await p.click('#aba-modelo');
+  await p.evaluate(() => { const b = document.getElementById('model-more'); if (b && !b.hidden && b.textContent.startsWith('Ver mais')) b.click(); });
+  await p.waitForSelector(`[data-modelo="${id}"]`, { state: 'visible' });
   await p.click(`[data-modelo="${id}"]`);
   await p.waitForTimeout(300);
   const espacos = await p.$$eval('#camadas .studio-camada', (bs) => bs.filter((b) => b.querySelector('small')?.textContent === 'Escolher foto').length);
