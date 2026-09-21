@@ -48,6 +48,7 @@ Três armadilhas que já custaram tempo:
 | `simulador/colecoes.js` | O balcão das coleções: junta categorias, modelos e ilustrações |
 | `simulador/desenho.js` | O vocabulário de desenho das ilustrações escritas à mão; mede e centra sozinho |
 | `simulador/pets.js` | Coleção de pets: 16 ilustrações e 16 artes |
+| `simulador/datas.js` | Coleção das datas comemorativas: 24 ilustrações e 18 artes |
 | `simulador/esportes.js` | Desenha as ilustrações esportivas, convertidas de SVG |
 | `simulador/esportes-dados.js` | Os caminhos das 137 ilustrações e os 24 modelos esportivos |
 | `simulador/arte.js` | Compõe a textura, calcula dpi e exporta (300 dpi, gabarito) |
@@ -81,13 +82,13 @@ Três armadilhas que já custaram tempo:
 interior e da alça, quatro cenas (fundo claro, mesa de madeira, mesa clara, caixa de presente kraft),
 acabamento brilhante ou fosco, vídeo de cinco segundos girando em WebM, prévia em PNG e em 4K.
 
-**Arte.** 54 modelos em 22 categorias, agrupadas em cinco grupos com ordem decidida à mão
-(`ORDEM_DOS_GRUPOS` em `modelos.js`) e busca. Camadas de foto, frase, enfeite (9 desenhos),
+**Arte.** 72 modelos em 23 categorias, agrupadas em cinco grupos com ordem decidida à mão
+(`ORDEM_DOS_GRUPOS` em `modelos.js`) e busca. Cada assunto tem pelo menos quatro artes, com teste. Camadas de foto, frase, enfeite (9 desenhos),
 elemento do acervo (8 ilustrações da marca) e Pandinha (9 poses, um por peça). Biblioteca de 15 letras.
 Cores da paleta. Frase em arco.
-Duas coleções acrescentam ilustração própria, que entra na arte como camada comum e pinta só por
-token: esportes (137 ilustrações, 24 artes) e pets (16 ilustrações, 16 artes). A regra está no
-manual, seção 9.1. Tratamento de foto (6 filtros) e recorte do fundo claro. Cor do fundo da
+Três coleções acrescentam ilustração própria, que entra na arte como camada comum e pinta só por
+token: datas comemorativas (24 ilustrações), esportes (137) e pets (16). A regra está no manual,
+seção 9.1. Tratamento de foto (6 filtros) e recorte do fundo claro. Cor do fundo da
 arte. Centralizar na frente, no meio, no verso e na altura. Margem de segurança à vista.
 
 **Edição.** Clique e arrasto na própria caneca (com cadeado, fechado por padrão), alças de girar e

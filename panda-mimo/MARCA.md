@@ -500,8 +500,9 @@ chuteira, uma flor de lótus — que não são elemento de interface nem adesivo
 | **A forma em si não se edita.** Não há edição de nós. | A bicicleta continua sendo uma bicicleta; o estúdio não é o Illustrator. |
 | Traço arredondado, poucas cores, silhueta cheia. Nada de linha fina de biblioteca genérica. | Mesma linguagem dos ícones e dos adesivos puffy. |
 
-Duas coleções seguem essa regra hoje: a **esportiva** (137 ilustrações em seis modalidades, 24
-artes) e a de **pets** (16 ilustrações em quatro assuntos, 16 artes). Coleção nova segue as mesmas
+Três coleções seguem essa regra hoje: a **esportiva** (137 ilustrações em seis modalidades, 24
+artes), a de **pets** (16 ilustrações em quatro assuntos, 16 artes) e a das **datas comemorativas**
+(24 ilustrações em seis datas, 18 artes novas sobre as 6 que já existiam). Coleção nova segue as mesmas
 regras e entra com prova visual das artes no tamanho de uso.
 
 E uma regra de composição, que veio de uma crítica do dono aos primeiros modelos: **variar a frase
@@ -922,6 +923,7 @@ adereço pequeno no Pandinha em datas comemorativas, com aprovação prévia (6.
 | Data | Versão | O que mudou |
 |---|---|---|
 | set/2026 | 1.0 | Primeira edição, consolidando a identidade aplicada no site (paleta, tipografia, logo, mascote, tom de voz, aplicações, governança). |
+| set/2026 | 2.14 | Datas comemorativas deixam de ter uma arte cada: 18 artes novas e 24 ilustrações próprias (árvore, guirlanda, buquê, gravata, cadeado, quadro-negro, coelho, ovo e companhia), e a Páscoa entra como data nova (9.1). Cada assunto do seletor passa a ter no mínimo quatro artes, com teste cobrando. |
 | set/2026 | 2.13 | Coleção de pets: 16 artes em quatro assuntos (cachorros, gatos, homenagem ao pet, mãe e pai de pet), com 16 ilustrações próprias escritas no vocabulário de desenho da casa. A seção 9.1 ganha a regra de composição: dentro de uma coleção, cada arte muda de planta — variar a frase não é variar a arte. |
 | set/2026 | 2.12 | Coleções de arte com ilustração própria (9.1): a coleção esportiva entra com 24 modelos em seis modalidades e 137 ilustrações desenhadas por curvas, que entram na arte como camada editável e pintam só por token da paleta. O seletor de ocasião passa a ter ordem de grupos decidida à mão, para o catálogo crescer sem embaralhar a tela (10.3). |
 | set/2026 | 2.11 | Arte ganha frase em arco, elementos do acervo da marca, tratamento e recorte de fundo de foto, cor de fundo, centralizar e margem de segurança à vista; o trabalho passa a ficar guardado no aparelho como rascunho, com link da montagem para mandar a ideia; prévia em 4K, compartilhamento direto no celular e "vários nomes de uma vez" entregando uma arte por nome num arquivo só (10.3). |

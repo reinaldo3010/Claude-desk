@@ -48,7 +48,7 @@ Enquanto o preço estiver vazio, a tela de detalhe mostra "Valor sob consulta".
 `vendor/three/`, sem CDN), escolher as cores do interior e da alça, escrever um nome e baixar a prévia, a
 arte plana em 300 dpi (210 × 90 mm) ou o projeto para continuar depois.
 
-Há também **modelos de arte por ocasião**: 54 artes que dão a volta inteira na caneca, com espaços de
+Há também **modelos de arte por ocasião**: 72 artes que dão a volta inteira na caneca, com espaços de
 foto — de uma a seis — e frases prontas, organizadas em cinco grupos no seletor: Datas comemorativas,
 Momentos, Pets e bichinhos, Esportes e movimento e Do dia a dia.
 
@@ -61,8 +61,12 @@ cores saem dos tokens da paleta, como no resto do site (manual, seção 9.1).
 
 | Coleção | Assuntos | Artes | Ilustrações |
 |---|---|---|---|
+| Datas comemorativas | Natal, Mães, Pais, Namorados, Professores, Páscoa | 24 (6 antigas + 18) | 24, escritas à mão (`simulador/datas.js`) |
 | Esportes e movimento | funcional, musculação, ciclismo, corrida, yoga e pilates, futebol | 24 | 137, convertidas de SVG (`simulador/esportes-dados.js`) |
 | Pets e bichinhos | cachorros, gatos, homenagem ao pet, mãe e pai de pet | 16 | 16, escritas à mão (`simulador/pets.js`) |
+
+Cada assunto tem pelo menos quatro artes, e o teste cobra isso: assunto com uma arte só não dá
+escolha a ninguém.
 
 `simulador/colecoes.js` é o balcão onde as coleções se juntam; coleção nova entra ali em três linhas.
 As ilustrações escritas à mão usam o vocabulário de `simulador/desenho.js` (círculo, elipse,

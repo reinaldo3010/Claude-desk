@@ -1,20 +1,30 @@
 /*
-  O que este arquivo protege: o vocabulário de desenho das coleções (`simulador/desenho.js`) e a
-  coleção de pets, a primeira escrita à mão nesse vocabulário.
+  O que este arquivo protege: o vocabulário de desenho das coleções (`simulador/desenho.js`) e as
+  coleções escritas à mão nesse vocabulário.
 
   As regras vêm da seção 9.1 do manual: desenho por curvas, cor só por token, uma tinta principal,
-  e caixa que acompanha o desenho de verdade — senão a alça de redimensionar mente na mão da pessoa.
+  caixa que acompanha o desenho de verdade — senão a alça de redimensionar mente na mão da pessoa —
+  e composição que muda de arte para arte, porque variar a frase não é variar a arte.
+
+  Coleção nova entra na lista `COLECOES` aqui embaixo e passa a valer para todas as regras.
 */
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { desenhaIlustracao, limitesDaIlustracao, ilustracao } from '../simulador/desenho.js';
-import { ILUSTRACOES_PETS, MODELOS_PETS, CATEGORIAS_PETS } from '../simulador/pets.js';
+import { MODELOS_PETS, CATEGORIAS_PETS } from '../simulador/pets.js';
+import { MODELOS_DATAS } from '../simulador/datas.js';
 import { ILUSTRACOES, proporcaoDaForma, ehIlustracao, TAMANHO_DA_ILUSTRACAO } from '../simulador/colecoes.js';
 import { PALETA } from '../simulador/paleta.js';
-import { TEMPLATES, caixaDaCamada, novaArte, camadaEm } from '../simulador/modelos.js';
+import { TEMPLATES, CATEGORIAS, modelosDaCategoria, caixaDaCamada, novaArte, camadaEm } from '../simulador/modelos.js';
 
 const area = { x: 0, y: 0, width: 210, height: 90 };
+
+/* As coleções escritas à mão. Coleção nova entra aqui. */
+const COLECOES = [
+  { nome: 'Pets e bichinhos', modelos: MODELOS_PETS, arquivo: 'pets.js' },
+  { nome: 'Datas comemorativas', modelos: MODELOS_DATAS, arquivo: 'datas.js' },
+];
 
 /** Um contexto de mentira que anota o que foi pedido, sem desenhar nada de verdade. */
 function contexto() {
@@ -38,7 +48,7 @@ test('o vocabulário de desenho lê os caminhos e recusa o que não sabe ler', (
   assert.equal(quadrado.altura, 20);
   desenhaIlustracao(ctx, quadrado, 40, '--peach');
   const tipos = ctx.chamadas.map((c) => c[0]);
-  assert.deepEqual(tipos.filter((t) => t === 'lineTo').length, 3);
+  assert.equal(tipos.filter((t) => t === 'lineTo').length, 3);
   assert.ok(tipos.includes('closePath'));
 
   // comando relativo do SVG desenharia outra coisa calada: melhor quebrar alto
@@ -90,58 +100,81 @@ test('as ilustrações pintam só com token da paleta, e a tinta escolhida entra
   }
 });
 
-test('o arquivo da coleção de pets não guarda cor solta em lugar nenhum', async () => {
-  const fonte = await readFile(new URL('../simulador/pets.js', import.meta.url), 'utf8');
-  const soltas = [...new Set(fonte.match(/#[0-9A-Fa-f]{3,8}\b/g) || [])];
-  assert.deepEqual(soltas, [], `cor solta em pets.js: ${soltas.join(', ')}`);
+test('nenhum arquivo de coleção guarda cor solta', async () => {
+  for (const { arquivo } of COLECOES) {
+    const fonte = await readFile(new URL(`../simulador/${arquivo}`, import.meta.url), 'utf8');
+    const soltas = [...new Set(fonte.match(/#[0-9A-Fa-f]{3,8}\b/g) || [])];
+    assert.deepEqual(soltas, [], `cor solta em ${arquivo}: ${soltas.join(', ')}`);
+  }
 });
 
-test('a coleção de pets tem quatro assuntos com quatro artes cada, todas no catálogo', () => {
-  assert.equal(CATEGORIAS_PETS.length, 4);
-  assert.equal(MODELOS_PETS.length, 16);
+test('cada assunto do seletor tem pelo menos quatro artes, para a pessoa ter de onde escolher', () => {
   const ids = new Set(TEMPLATES.map((m) => m.id));
-  for (const categoria of CATEGORIAS_PETS) {
-    assert.equal(categoria.grupo, 'Pets e bichinhos');
-    assert.equal(MODELOS_PETS.filter((m) => m.categoria === categoria.id).length, 4, `${categoria.id} não tem quatro artes`);
+  for (const { modelos } of COLECOES) {
+    for (const modelo of modelos) assert.ok(ids.has(modelo.id), `${modelo.id} não chegou ao catálogo`);
   }
-  for (const modelo of MODELOS_PETS) {
-    assert.ok(ids.has(modelo.id), `${modelo.id} não chegou ao catálogo`);
-    assert.ok(modelo.camadas.some((c) => c.tipo === 'foto'), `${modelo.id} sem espaço de foto`);
-    assert.ok(modelo.camadas.some((c) => c.tipo === 'frase'), `${modelo.id} sem frase`);
-    assert.ok(modelo.camadas.filter((c) => c.tipo === 'enfeite').length >= 2, `${modelo.id} com menos de duas ilustrações`);
+  assert.equal(CATEGORIAS_PETS.length, 4);
+  // Um assunto com uma arte só era o que deixava o grupo das datas fraco. Quatro virou o mínimo.
+  // "Sem modelo", "Só fotos" e "Várias fotos do pet" são atalhos, não assunto: ficam de fora.
+  // Os que ainda não chegaram lá ficam nesta lista, à vista. A lista é uma catraca: encheu um
+  // assunto, tira daqui; assunto novo magro entra reprovando, que é o que a gente quer.
+  const AINDA_MAGROS = ['aniversario', 'casamento', 'bebe', 'amizade'];
+  const magros = CATEGORIAS
+    .filter((c) => !['livre', 'fotos', 'pet'].includes(c.id))
+    .filter((c) => modelosDaCategoria(c.id).length < 4)
+    .map((c) => c.id);
+  const novosMagros = magros.filter((id) => !AINDA_MAGROS.includes(id));
+  assert.deepEqual(novosMagros, [], `assunto novo com menos de quatro artes: ${novosMagros.join(', ')}`);
+  const jaCheios = AINDA_MAGROS.filter((id) => !magros.includes(id));
+  assert.deepEqual(jaCheios, [], `estes assuntos já têm quatro artes; tire da lista AINDA_MAGROS: ${jaCheios.join(', ')}`);
+});
+
+test('as artes de uma coleção não repetem a mesma planta: mudam foto, formato e lugar do texto', () => {
+  // Foi a crítica que originou as coleções: variar a frase e chamar de modelo novo não é variedade.
+  for (const { nome, modelos } of COLECOES) {
+    const plantas = new Map();
+    for (const modelo of modelos) {
+      const fotos = modelo.camadas.filter((c) => c.tipo === 'foto');
+      const frases = modelo.camadas.filter((c) => c.tipo === 'frase');
+      const planta = [fotos.length, fotos.map((f) => `${f.forma}@${f.x}`).join('+'), frases.map((f) => f.x).join('+')].join('|');
+      const gemeo = plantas.get(planta);
+      assert.ok(!gemeo, `${nome}: "${modelo.id}" tem a mesma planta de "${gemeo}"`);
+      plantas.set(planta, modelo.id);
+    }
+    const formas = new Set(modelos.flatMap((m) => m.camadas.filter((c) => c.tipo === 'foto').map((c) => c.forma)));
+    assert.ok(formas.size >= 3, `${nome}: a coleção só usa ${formas.size} formato(s) de foto`);
+    const quantidades = new Set(modelos.map((m) => m.camadas.filter((c) => c.tipo === 'foto').length));
+    assert.ok(quantidades.size >= 2, `${nome}: todas as artes têm a mesma quantidade de fotos`);
   }
 });
 
-test('as artes da coleção não repetem a mesma planta: mudam foto, formato e lugar do texto', () => {
-  // Foi a crítica que originou a coleção: variar a frase e chamar de modelo novo não é variedade.
-  const plantas = new Set();
-  for (const modelo of MODELOS_PETS) {
-    const fotos = modelo.camadas.filter((c) => c.tipo === 'foto');
-    const frases = modelo.camadas.filter((c) => c.tipo === 'frase');
-    plantas.add([fotos.length, fotos.map((f) => `${f.forma}@${f.x}`).join('+'), frases.map((f) => f.x).join('+')].join('|'));
-  }
-  assert.equal(plantas.size, MODELOS_PETS.length, 'duas artes da coleção têm exatamente a mesma planta');
-  const formas = new Set(MODELOS_PETS.flatMap((m) => m.camadas.filter((c) => c.tipo === 'foto').map((c) => c.forma)));
-  assert.ok(formas.size >= 3, `a coleção só usa ${formas.size} formato(s) de foto`);
-  const quantidades = new Set(MODELOS_PETS.map((m) => m.camadas.filter((c) => c.tipo === 'foto').length));
-  assert.ok(quantidades.size >= 3, 'todas as artes têm a mesma quantidade de fotos');
-});
-
-test('cada ilustração da coleção pode ser escolhida no clique e cresce mais que um enfeite', () => {
-  for (const modelo of MODELOS_PETS) {
-    const arte = novaArte(modelo);
-    for (const camada of arte.camadas.filter((c) => c.tipo === 'enfeite')) {
-      const caixa = caixaDaCamada(camada, area);
-      const soEla = { ...arte, camadas: [camada] };
-      assert.equal(camadaEm(soEla, { x: caixa.centroX, y: caixa.centroY }, area)?.id, camada.id,
-        `${modelo.id}: o clique no meio de "${camada.rotulo}" não acha a camada`);
-      assert.ok(camada.tamanho <= TAMANHO_DA_ILUSTRACAO[1] && camada.tamanho >= TAMANHO_DA_ILUSTRACAO[0],
-        `${modelo.id}: "${camada.rotulo}" nasce fora do limite de tamanho`);
+test('toda arte de coleção tem foto, frase e pelo menos duas ilustrações', () => {
+  for (const { nome, modelos } of COLECOES) {
+    for (const modelo of modelos) {
+      assert.ok(modelo.camadas.some((c) => c.tipo === 'foto'), `${nome}/${modelo.id} sem espaço de foto`);
+      assert.ok(modelo.camadas.some((c) => c.tipo === 'frase'), `${nome}/${modelo.id} sem frase`);
+      assert.ok(modelo.camadas.filter((c) => c.tipo === 'enfeite').length >= 2, `${nome}/${modelo.id} com menos de duas ilustrações`);
     }
   }
 });
 
-test('nenhuma ilustração da coleção carrega imagem: tudo é curva, na resolução que for', () => {
+test('cada ilustração de coleção pode ser escolhida no clique e cresce mais que um enfeite', () => {
+  for (const { nome, modelos } of COLECOES) {
+    for (const modelo of modelos) {
+      const arte = novaArte(modelo);
+      for (const camada of arte.camadas.filter((c) => c.tipo === 'enfeite')) {
+        const caixa = caixaDaCamada(camada, area);
+        const soEla = { ...arte, camadas: [camada] };
+        assert.equal(camadaEm(soEla, { x: caixa.centroX, y: caixa.centroY }, area)?.id, camada.id,
+          `${nome}/${modelo.id}: o clique no meio de "${camada.rotulo}" não acha a camada`);
+        assert.ok(camada.tamanho <= TAMANHO_DA_ILUSTRACAO[1] && camada.tamanho >= TAMANHO_DA_ILUSTRACAO[0],
+          `${nome}/${modelo.id}: "${camada.rotulo}" nasce fora do limite de tamanho`);
+      }
+    }
+  }
+});
+
+test('nenhuma ilustração de coleção carrega imagem: tudo é curva, na resolução que for', () => {
   for (const [nome, desenho] of Object.entries(ILUSTRACOES)) {
     for (const tamanho of [8, 40, 300]) {
       const ctx = contexto();

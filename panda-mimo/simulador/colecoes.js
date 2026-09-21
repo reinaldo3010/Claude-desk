@@ -12,13 +12,14 @@
 import { MODELOS_ESPORTES, CATEGORIAS_ESPORTES } from './esportes-dados.js';
 import { vetorEsportivo, desenhaVetorEsportivo } from './esportes.js';
 import { ILUSTRACOES_PETS, MODELOS_PETS, CATEGORIAS_PETS } from './pets.js';
+import { ILUSTRACOES_DATAS, MODELOS_DATAS, CATEGORIAS_DATAS } from './datas.js';
 import { desenhaIlustracao } from './desenho.js';
 
 /** As ilustrações escritas à mão, de todas as coleções. */
-export const ILUSTRACOES = Object.freeze({ ...ILUSTRACOES_PETS });
+export const ILUSTRACOES = Object.freeze({ ...ILUSTRACOES_PETS, ...ILUSTRACOES_DATAS });
 
-export const CATEGORIAS_DE_COLECAO = Object.freeze([...CATEGORIAS_ESPORTES, ...CATEGORIAS_PETS]);
-export const MODELOS_DE_COLECAO = Object.freeze([...MODELOS_ESPORTES, ...MODELOS_PETS]);
+export const CATEGORIAS_DE_COLECAO = Object.freeze([...CATEGORIAS_DATAS, ...CATEGORIAS_ESPORTES, ...CATEGORIAS_PETS]);
+export const MODELOS_DE_COLECAO = Object.freeze([...MODELOS_DATAS, ...MODELOS_ESPORTES, ...MODELOS_PETS]);
 
 /** Quanto uma ilustração é mais alta que larga; `null` quando a forma não é de coleção. */
 export function proporcaoDaForma(forma) {
