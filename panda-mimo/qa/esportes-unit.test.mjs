@@ -21,9 +21,14 @@ function context() {
   };
 }
 
-test('24 modelos esportivos nativos preservam os 14 modelos anteriores', () => {
+test('os 24 modelos esportivos entram no catálogo sem empurrar nenhum outro para fora', () => {
   assert.equal(MODELOS_ESPORTES.length,24);
-  assert.equal(TEMPLATES.length,38);
+  const ids = new Set(TEMPLATES.map((m) => m.id));
+  for (const m of MODELOS_ESPORTES) assert.ok(ids.has(m.id), `${m.id} sumiu do catálogo`);
+  // os 14 modelos da casa continuam lá, um a um
+  for (const id of ['namorados-coracoes','namorados-momentos','aniversario-confete','natal-flocos','maes-flores',
+    'pais-melhor','professores-obrigado','casamento-padrinhos','bebe-chegada','pet-amor','amizade-formatura',
+    'fotos-quatro','fotos-tira','cafe-do-dia']) assert.ok(ids.has(id), `${id} sumiu do catálogo`);
   for (const c of CATEGORIAS_ESPORTES) assert.equal(MODELOS_ESPORTES.filter(m=>m.categoria===c.id).length,4);
   for (const m of MODELOS_ESPORTES) {
     assert.equal(m.camadas.filter(c=>c.tipo==='foto').length,1);

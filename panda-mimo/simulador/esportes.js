@@ -11,9 +11,6 @@ import { cor } from './paleta.js';
 
 export const vetorEsportivo = (forma) => VETORES_ESPORTES[forma] || null;
 
-/** Quanto uma ilustração pode crescer: elas são largas, e o limite dos enfeites pequenos aperta. */
-export const TAMANHO_DA_ILUSTRACAO = Object.freeze([0.01, 2.4]);
-
 /** Desenha a ilustração no tamanho pedido; a tinta escolhida entra no lugar da cor principal. */
 export function desenhaVetorEsportivo(ctx, forma, tamanho, tinta) {
   const vetor = vetorEsportivo(forma);

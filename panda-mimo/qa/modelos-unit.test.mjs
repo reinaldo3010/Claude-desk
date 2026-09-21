@@ -8,7 +8,7 @@ import {
 } from '../simulador/modelos.js';
 import { computeArtePlacement, printAreaOf, tamanhoRecomendado } from '../simulador/arte.js';
 import { FONTES_DA_ARTE, pesoDaFonte, ehFonteDaMarca } from '../simulador/fontes.js';
-import { VETORES_ESPORTES } from '../simulador/esportes-dados.js';
+import { ehIlustracao } from '../simulador/colecoes.js';
 
 const spec = { diameterMm: 82, heightMm: 95, printWidthMm: 210, printHeightMm: 90 };
 const area = printAreaOf(spec);
@@ -50,7 +50,7 @@ test('cada modelo tem identidade própria, categoria conhecida e camadas válida
   const fontes = new Set(FONTES_DA_ARTE.map((f) => f.valor));
   const cores = new Set(CORES_DE_ARTE.map((c) => c.token));
   const formasDeFoto = new Set(FORMAS_DE_FOTO.map((f) => f.valor));
-  const enfeites = new Set([...ENFEITES.map((e) => e.forma), ...Object.keys(VETORES_ESPORTES)]);
+  const enfeites = new Set(ENFEITES.map((e) => e.forma));
   const poses = new Set(ADESIVOS.map((a) => a.arquivo));
   for (const modelo of TEMPLATES) {
     assert.ok(!ids.has(modelo.id), `id repetido: ${modelo.id}`);
@@ -69,7 +69,8 @@ test('cada modelo tem identidade própria, categoria conhecida e camadas válida
         assert.ok(String(camada.texto).length <= 40, `${modelo.id}: frase de exemplo maior que o campo`);
       }
       if (camada.tipo === 'foto') assert.ok(formasDeFoto.has(camada.forma), `${modelo.id}: formato de foto desconhecido ${camada.forma}`);
-      if (camada.tipo === 'enfeite') assert.ok(enfeites.has(camada.forma), `${modelo.id}: enfeite desconhecido ${camada.forma}`);
+      if (camada.tipo === 'enfeite') assert.ok(enfeites.has(camada.forma) || ehIlustracao(camada.forma),
+        `${modelo.id}: enfeite desconhecido ${camada.forma}`);
       if (camada.tipo === 'adesivo') assert.ok(poses.has(camada.arquivo), `${modelo.id}: pose do Pandinha fora do acervo (${camada.arquivo})`);
     }
     const pandas = modelo.camadas.filter((c) => c.tipo === 'adesivo');

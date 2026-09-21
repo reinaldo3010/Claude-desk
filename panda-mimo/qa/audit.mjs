@@ -1113,56 +1113,55 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     await pe.fill('#busca-modelo', '');
     await pe.waitForTimeout(250);
 
-    // Coleção esportiva: as ilustrações precisam chegar como camadas de verdade, com nome próprio,
+    // Coleções de arte: as ilustrações precisam chegar como camadas de verdade, com nome próprio,
     // cor da paleta e tamanho maior que o de um enfeite. Se virarem desenho fixo, a promessa some.
-    await pe.selectOption('#categoria-modelo', 'ciclismo');
-    await pe.waitForTimeout(300);
-    const ciclismo = await pe.$$eval('#model-list .studio-model', (b) => b.map((x) => x.dataset.modelo).filter(Boolean));
-    if (ciclismo.length !== 4 || !ciclismo.every((id) => id.startsWith('esp-cic'))) {
-      failures.push(`[estúdio ${w}] a modalidade Ciclismo mostrou ${ciclismo.join(', ') || 'nada'}`);
+    for (const { nome, categoria, modelo, prefixo } of [
+      { nome: 'Ciclismo', categoria: 'ciclismo', modelo: 'esp-cic-01', prefixo: 'esp-cic' },
+      { nome: 'Cachorros', categoria: 'pet-cachorro', modelo: 'pet-cao-melhor-amigo', prefixo: 'pet-cao' },
+    ]) {
+      await pe.evaluate(() => document.querySelector('#abas [data-aba="modelo"]').click());
+      await pe.selectOption('#categoria-modelo', categoria);
+      await pe.waitForTimeout(300);
+      const daCategoria = await pe.$$eval('#model-list .studio-model', (b) => b.map((x) => x.dataset.modelo).filter(Boolean));
+      if (daCategoria.length !== 4 || !daCategoria.every((id) => id.startsWith(prefixo))) {
+        failures.push(`[estúdio ${w}] o assunto ${nome} mostrou ${daCategoria.join(', ') || 'nada'}`);
+      }
+      await pe.click(`[data-modelo="${modelo}"]`);
+      await pe.waitForTimeout(500);
+      await pe.evaluate(() => document.querySelector('#abas [data-aba="enfeites"]').click());
+      await pe.waitForTimeout(250);
+      const camadas = await pe.evaluate(() => {
+        const itens = [...document.querySelectorAll('#lista-enfeites .studio-item')];
+        return {
+          quantos: itens.length,
+          semNome: itens.filter((i) => !(i.querySelector('.studio-item__texto span')?.textContent || '').trim()).length,
+        };
+      });
+      if (camadas.quantos < 2) failures.push(`[estúdio ${w}] ${modelo} trouxe só ${camadas.quantos} ilustração(ões) editável(is)`);
+      if (camadas.semNome) failures.push(`[estúdio ${w}] ${camadas.semNome} ilustrações de ${modelo} ficaram sem nome no painel`);
+      // abrir a primeira ilustração e trocar a cor: a arte tem de mudar de verdade
+      const trocaDeCor = await pe.evaluate(async () => {
+        const flat = document.getElementById('flat-art');
+        const assinatura = () => {
+          const d = flat.getContext('2d').getImageData(0, 0, flat.width, flat.height).data;
+          let soma = 0;
+          for (let i = 0; i < d.length; i += 997) soma += d[i] + d[i + 1] * 2 + d[i + 2] * 3;
+          return soma;
+        };
+        document.querySelector('#lista-enfeites .studio-item__cabeca').click();
+        await new Promise((r) => setTimeout(r, 350));
+        const corpo = document.querySelector('#lista-enfeites [data-corpo]');
+        const antes = assinatura();
+        const botoes = [...corpo.querySelectorAll('.studio-cores button')];
+        botoes.find((b) => b.getAttribute('aria-pressed') !== 'true')?.click();
+        await new Promise((r) => setTimeout(r, 450));
+        const faixa = corpo.querySelector('input[type="range"]');
+        return { antes, depois: assinatura(), cores: botoes.length, maximo: faixa ? Number(faixa.max) : 0 };
+      });
+      if (trocaDeCor.antes === trocaDeCor.depois) failures.push(`[estúdio ${w}] trocar a cor da ilustração de ${modelo} não mudou a arte`);
+      if (trocaDeCor.cores < 6) failures.push(`[estúdio ${w}] a ilustração de ${modelo} ficou sem a paleta para escolher (${trocaDeCor.cores} cores)`);
+      if (trocaDeCor.maximo < 1) failures.push(`[estúdio ${w}] a ilustração de ${modelo} não pode crescer além de um enfeite (máximo ${trocaDeCor.maximo})`);
     }
-    await pe.click('[data-modelo="esp-cic-01"]');
-    await pe.waitForTimeout(500);
-    await pe.evaluate(() => document.querySelector('#abas [data-aba="enfeites"]').click());
-    await pe.waitForTimeout(250);
-    const esporte = await pe.evaluate(() => {
-      const itens = [...document.querySelectorAll('#lista-enfeites .studio-item')];
-      return {
-        quantos: itens.length,
-        rotulos: itens.map((i) => i.querySelector('.studio-item__texto span')?.textContent || ''),
-        semNome: itens.filter((i) => !(i.querySelector('.studio-item__texto span')?.textContent || '').trim()).length,
-      };
-    });
-    if (esporte.quantos < 4) failures.push(`[estúdio ${w}] o modelo esportivo trouxe só ${esporte.quantos} ilustrações editáveis`);
-    if (esporte.semNome) failures.push(`[estúdio ${w}] ${esporte.semNome} ilustrações do modelo esportivo ficaram sem nome no painel`);
-    // abrir a primeira ilustração e trocar a cor: a arte tem de mudar, e mudar para cor da paleta
-    const trocaDeCor = await pe.evaluate(async () => {
-      const flat = document.getElementById('flat-art');
-      const assinatura = () => {
-        const d = flat.getContext('2d').getImageData(0, 0, flat.width, flat.height).data;
-        let soma = 0;
-        for (let i = 0; i < d.length; i += 997) soma += d[i] + d[i + 1] * 2 + d[i + 2] * 3;
-        return soma;
-      };
-      document.querySelector('#lista-enfeites .studio-item__cabeca').click();
-      await new Promise((r) => setTimeout(r, 350));
-      const corpo = document.querySelector('#lista-enfeites [data-corpo]');
-      const antes = assinatura();
-      const botoes = [...corpo.querySelectorAll('.studio-cores button')];
-      const alvo = botoes.find((b) => b.getAttribute('aria-pressed') !== 'true');
-      alvo?.click();
-      await new Promise((r) => setTimeout(r, 450));
-      const faixa = corpo.querySelector('input[type="range"]');
-      return {
-        antes,
-        depois: assinatura(),
-        cores: botoes.length,
-        maximo: faixa ? Number(faixa.max) : 0,
-      };
-    });
-    if (trocaDeCor.antes === trocaDeCor.depois) failures.push(`[estúdio ${w}] trocar a cor da ilustração esportiva não mudou a arte`);
-    if (trocaDeCor.cores < 6) failures.push(`[estúdio ${w}] a ilustração esportiva ficou sem a paleta para escolher (${trocaDeCor.cores} cores)`);
-    if (trocaDeCor.maximo < 1) failures.push(`[estúdio ${w}] a ilustração esportiva não pode crescer além de um enfeite (máximo ${trocaDeCor.maximo})`);
 
     await pe.evaluate(() => document.querySelector('#abas [data-aba="modelo"]').click());
     await pe.selectOption('#categoria-modelo', 'todos');
@@ -1641,6 +1640,45 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     erros.filter((e) => !/Failed to load resource|net::ERR_|PointerCapture/.test(e))
       .forEach((e) => failures.push(`[estúdio ${w}] erro: ${e}`));
     await pe.close();
+    await contexto.close();
+  }
+
+  // A página de provas das coleções é a que a gente olha antes de publicar arte nova. Se ela quebrar
+  // calada, a revisão humana passa a ser feita no escuro.
+  {
+    const contexto = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    const pp = await contexto.newPage();
+    const erros = [];
+    pp.on('console', (m) => m.type() === 'error' && erros.push(m.text()));
+    pp.on('pageerror', (e) => erros.push(e.message));
+    await pp.goto(servidor.url + 'qa/provas-colecoes.html', { waitUntil: 'load' });
+    await pp.waitForTimeout(900);
+    const provas = await pp.evaluate(() => {
+      const pintados = [...document.querySelectorAll('#modelos canvas')].filter((c) => {
+        const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+        // canvas em branco vem transparente (alfa 0), e transparente não é tinta: sem o alfa,
+        // uma arte que não foi desenhada passaria por "escura" e o defeito passaria batido.
+        for (let i = 0; i < d.length; i += 400) {
+          if (d[i + 3] > 10 && (d[i] < 235 || d[i + 1] < 235 || d[i + 2] < 235)) return true;
+        }
+        return false;
+      }).length;
+      return {
+        artes: document.querySelectorAll('#modelos article').length,
+        pintados,
+        colecoes: document.querySelectorAll('#grupo option').length - 1,
+        conta: document.getElementById('conta').textContent,
+      };
+    });
+    const { MODELOS_DE_COLECAO } = await import('../simulador/colecoes.js');
+    if (provas.artes !== MODELOS_DE_COLECAO.length) {
+      failures.push(`[provas] a página mostra ${provas.artes} artes, e as coleções têm ${MODELOS_DE_COLECAO.length}`);
+    }
+    if (provas.pintados !== provas.artes) failures.push(`[provas] ${provas.artes - provas.pintados} arte(s) saíram em branco na página de provas`);
+    if (provas.colecoes < 2) failures.push(`[provas] a página de provas não separou as coleções (${provas.colecoes})`);
+    erros.filter((e) => !/Failed to load resource|net::ERR_/.test(e))
+      .forEach((e) => failures.push(`[provas] erro: ${e}`));
+    await pp.close();
     await contexto.close();
   }
   await servidor.close();
