@@ -426,6 +426,19 @@ No site as três famílias não vêm do Google: são subconjuntos latinos em WOF
 mais rápida. O guardião reprova se uma página pública voltar a carregar fonte externa. Em Canva, Word e
 gráfica, as mesmas fontes se instalam a partir de `marca/kit/fontes/`.
 
+### 8.1.1 As letras da arte do cliente (setembro de 2026)
+As três famílias acima são **a voz da marca**: site, peças de comunicação, embalagem, redes. A arte que
+o cliente monta na caneca é outra coisa: é o presente dele, não a fala da Panda Mimo. Por isso o estúdio
+oferece uma **biblioteca de 15 letras** — as três da marca e mais doze de licença OFL (Lobster, Pacifico,
+Dancing Script, Great Vibes, Playfair Display, Cinzel, Bebas Neue, Amatic SC, Patrick Hand, Indie Flower,
+Baloo 2 e Poppins).
+
+Regras: os arquivos ficam em `assets/fontes/arte/`, servidos do nosso endereço, com a licença de cada
+família ao lado (`OFL-<nome>.txt`); nada é carregado do Google Fonts. Eles só baixam quando alguém abre
+a biblioteca ou usa uma arte que pede aquela letra. Os **modelos prontos da casa continuam só nas três
+letras da marca** — a biblioteca é para quem está montando a própria arte. Montserrat e DM Serif Display
+não entram nunca: são da Seu Mimo Studio.
+
 ### 8.2 Escala (a do site)
 | Papel | Tamanho | Variável |
 |---|---|---|
@@ -549,6 +562,9 @@ que ela cresce sem virar uma pilha de controles:
   e cresce sob pedido. Dá para acrescentar ocasiões sem mexer no layout.
 - **Clicar na caneca abre a aba do item.** A peça e o painel falam a mesma língua: escolher pela peça
   leva ao cartão certo, e escolher pelo cartão contorna o item na arte aberta.
+- **Um só padrão de campo.** Todo seletor e todo campo de texto do estúdio tem o mesmo desenho: canto
+  arredondado, borda de areia, 46 px de altura e a letra da marca. Mudar um controle de lugar não pode
+  devolvê-lo à aparência crua do navegador, e o guardião reprova qualquer campo fora desse padrão.
 - **Cadeado na prévia, fechado por padrão.** Com ele fechado, arrastar na caneca só gira a peça: um
   toque escolhe o item, mas nada sai do lugar sem querer. Abrindo o cadeado, arrastar move o item.
 
@@ -560,10 +576,25 @@ cima gira, encostando sozinho em 0°, 90° e 180°. Quem quiser guardar a própr
 **modelo meu**, que aparece na categoria "Meus modelos" e fica só naquele navegador. O modelo guarda a
 montagem, nunca as fotos da pessoa: quem usar coloca as suas.
 
+**A cena da prévia (setembro de 2026).** A caneca pode aparecer sozinha no fundo claro (padrão), numa
+mesa de madeira, numa mesa clara de linho ou em cima de uma caixa de presente kraft com fita pêssego.
+Também dá para ver o vidrado brilhante (o da peça padrão) ou fosco. Tudo é desenhado na hora, sem
+arquivo de imagem: madeira, linho e papel kraft são texturas geradas em código, nas cores quentes da
+marca. A cena é enfeite da prévia e **não muda a arte**: o arquivo de produção sai igual em qualquer
+cena. Cena nova segue a mesma regra: cor quente da casa, sem logo de terceiros e sem fotografia de
+banco de imagem.
+
+**Vídeo da caneca girando.** Onde o navegador permite, a página grava uma volta completa em WebM (cinco
+segundos) para mandar no WhatsApp ou postar. É a prévia em movimento, com a mesma cena e o mesmo
+acabamento que estão na tela.
+
 **Arte trazida de fora (Canva).** A página informa a medida da volta inteira, 21 × 9 cm, que é
-2480 × 1063 px a 300 dpi, oferece o gabarito em PNG com a margem de segurança de 5 mm e as marcas da
-frente, do verso e da alça, abre o Canva em outra aba e recebe de volta o PNG exportado, aplicando-o ao
-redor da caneca. Se a proporção não bater com a da volta, a página diz isso em vez de cortar em silêncio.
+2480 × 1063 px a 300 dpi. "Levar minha arte para o Canva" baixa a arte como ela está, na medida certa, e
+abre o Canva em outra aba: lá é arrastar o arquivo para dentro do projeto. O Canva não deixa um site de
+fora abrir um projeto já com a arte dentro sem integração oficial, e a página diz isso em vez de
+prometer o que não faz. Quem quiser começar do zero baixa só o gabarito, com a margem de segurança de
+5 mm e as marcas da frente, do verso e da alça. Na volta, "Trazer a arte do Canva" recebe o PNG e
+aplica ao redor da caneca; se a proporção não bater, a página avisa em vez de cortar em silêncio.
 
 ### 10.4 Não fazer
 Sem fundo branco recortado às pressas, sem sombra dura, sem filtro colorido, sem peça cortada pela
@@ -842,6 +873,7 @@ adereço pequeno no Pandinha em datas comemorativas, com aprovação prévia (6.
 | Data | Versão | O que mudou |
 |---|---|---|
 | set/2026 | 1.0 | Primeira edição, consolidando a identidade aplicada no site (paleta, tipografia, logo, mascote, tom de voz, aplicações, governança). |
+| set/2026 | 2.10 | Estúdio ganha cena na prévia (fundo claro, mesa de madeira, mesa clara e caixa de presente kraft), acabamento brilhante ou fosco e vídeo da caneca girando em WebM (10.3); biblioteca de 15 letras para a arte do cliente, com as doze novas em OFL servidas do nosso endereço (8.1.1); "Levar minha arte para o Canva" passa a baixar a arte junto. Guardião ganha a trava do padrão visual dos campos. |
 | set/2026 | 2.9 | Estúdio reorganizado para crescer: a peça de um lado (com as cores junto dela), a arte do outro em abas por tipo de item, ocasião em seletor agrupado com busca, cartões que abrem no lugar e cadeado na prévia, fechado por padrão, para ninguém arrastar a arte sem querer (10.3). |
 | set/2026 | 2.8 | Editor ganha desfazer e refazer (até 60 passos, com a foto voltando junto), alças de girar e redimensionar na vista aberta, e "Meus modelos": a pessoa guarda a própria montagem naquele navegador, sem as fotos (10.3). |
 | set/2026 | 2.7 | A arte da caneca vira camadas editáveis: clicar e arrastar em cima da própria caneca, acrescentar foto, frase, enfeite e Pandinha do acervo, escolher fonte e cor da paleta, mudar ordem e duplicar (10.3). Seis modelos novos e cinco categorias novas (Professores, Casamento, Bebê, Pet, Amizade), somando 14 artes. Caminho de ida e volta com o Canva: gabarito, atalho e importação da arte pronta. |

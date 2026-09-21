@@ -78,6 +78,13 @@
         <div class="studio-color-fields"><label for="inside-color">Interior<select id="inside-color" name="inside"><option value="branca">Branco</option><option value="preta">Preto</option><option value="vermelha">Vermelho</option><option value="amarela">Amarelo</option><option value="rosa">Rosa</option><option value="azul">Azul</option></select></label><label for="handle-color">Alça<select id="handle-color" name="handle"><option value="branca">Branco</option><option value="preta">Preto</option><option value="vermelha">Vermelho</option><option value="amarela">Amarelo</option><option value="rosa">Rosa</option><option value="azul">Azul</option></select></label></div>
       </details>
 
+      <details class="studio-peca" id="peca-cena">
+        <summary><span>Cena e acabamento</span><span class="studio-peca__resumo" id="cena-resumo">Fundo claro · brilhante</span></summary>
+        <p class="studio-help">Veja a caneca como ela vai aparecer na foto do presente.</p>
+        <div class="studio-cenas" id="cenas" role="group" aria-label="Cena da prévia"></div>
+        <div class="studio-cenas" id="acabamentos" role="group" aria-label="Acabamento da cerâmica"></div>
+      </details>
+
       <details class="studio-flat" id="flat-details">
         <summary>Ver a arte aberta <span>área de 21 × 9 cm</span></summary>
         <div class="studio-flat__paper"><canvas id="flat-art" width="840" height="360" role="img" aria-label="Arte plana dentro da área de personalização"></canvas></div>
@@ -131,15 +138,16 @@
             <summary>Quer montar a arte no Canva?</summary>
             <p>A volta inteira da caneca tem <span id="size-guide">21 × 9 cm</span>. Deixe 5 mm de folga em cada borda.</p>
             <ol class="studio-passos">
-              <li>Baixe o gabarito e crie no Canva um design com essa medida.</li>
-              <li>Use o gabarito como fundo e monte sua arte por cima.</li>
-              <li>Exporte em PNG e traga de volta aqui para ver na caneca.</li>
+              <li><strong>Levar minha arte para o Canva</strong> baixa a arte como está e abre o Canva numa aba nova.</li>
+              <li>No Canva, crie um design com essa medida e arraste o arquivo para dentro dele.</li>
+              <li>Termine de mexer lá, exporte em PNG e volte aqui em <strong>Trazer a arte do Canva</strong>.</li>
             </ol>
             <div class="studio-canva">
-              <button type="button" class="studio-text-button" id="save-guide">Baixar o gabarito da arte</button>
-              <a class="studio-text-button" id="abrir-canva" href="https://www.canva.com/" target="_blank" rel="noopener noreferrer">Abrir o Canva em outra aba</a>
+              <a class="studio-text-button" id="abrir-canva" href="https://www.canva.com/" target="_blank" rel="noopener noreferrer">Levar minha arte para o Canva</a>
               <button type="button" class="studio-text-button" id="importar-canva">Trazer a arte do Canva</button>
+              <button type="button" class="studio-text-button" id="save-guide">Baixar só o gabarito</button>
             </div>
+            <p class="studio-help">O Canva não deixa um site de fora abrir um projeto já com a arte dentro, então ela vai como arquivo. É arrastar e soltar lá.</p>
           </details>
         </div>
 
@@ -198,6 +206,7 @@
           <a class="btn btn--dark js-wa" id="mug-order" href="index.html#contato" data-msg="Oi, Panda Mimo! Montei uma caneca no site 🐼">Pedir esse mimo no WhatsApp</a>
           <p class="studio-help">Baixe a prévia e anexe na conversa. Nada é produzido sem o seu "pode fazer".</p>
           <div class="studio-save-buttons"><button type="button" class="btn btn--ghost btn--sm" id="save-preview" disabled>Baixar prévia</button><button type="button" class="btn btn--ghost btn--sm" id="save-print">Baixar arte plana</button></div>
+          <button type="button" class="studio-text-button" id="save-video" hidden>Baixar vídeo da caneca girando</button>
           <button type="button" class="studio-text-button" id="save-project">Salvar tudo em um arquivo</button>
           <p class="studio-help" id="save-status" role="status"></p>
         </section>

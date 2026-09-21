@@ -15,6 +15,8 @@
 
 // Onde a frente (u=.25) e o verso (u=.75) caem dentro da área de impressão da caneca padrão:
 // a volta tem PI*82 mm e a área impressa, 210 mm centrados nela.
+import { pesoDaFonte } from './fontes.js';
+
 const VOLTA_MM = Math.PI * 82, AREA_MM = 210;
 export const FRENTE = (0.25 * VOLTA_MM - (VOLTA_MM - AREA_MM) / 2) / AREA_MM;
 export const VERSO = 1 - FRENTE;
@@ -46,12 +48,6 @@ export const CORES_DE_ARTE = Object.freeze([
   { token: '--sage', nome: 'Sálvia' },
   { token: '--kraft', nome: 'Kraft' },
   { token: '--sand', nome: 'Areia' },
-]);
-
-export const FONTES = Object.freeze([
-  { valor: 'Fredoka', nome: 'Redondinha' },
-  { valor: 'Caveat', nome: 'Manuscrita' },
-  { valor: 'Nunito', nome: 'Simples' },
 ]);
 
 export const FORMAS_DE_FOTO = Object.freeze([
@@ -509,12 +505,13 @@ function caminhoDaForma(ctx, forma, caixa) {
 }
 
 function ajustaFonte(ctx, texto, fonte, tamanho, largura) {
+  const peso = pesoDaFonte(fonte);
   let corpo = tamanho;
-  ctx.font = `600 ${corpo}px "${fonte}"`;
+  ctx.font = `${peso} ${corpo}px "${fonte}"`;
   const medida = ctx.measureText(texto).width;
   if (medida > largura && medida > 0) {
     corpo *= largura / medida;
-    ctx.font = `600 ${corpo}px "${fonte}"`;
+    ctx.font = `${peso} ${corpo}px "${fonte}"`;
   }
   return corpo;
 }
@@ -522,7 +519,7 @@ function ajustaFonte(ctx, texto, fonte, tamanho, largura) {
 /** O medidor usado no teste de clique: mesma conta de largura que o desenho faz. */
 export function medidorDeTexto(ctx) {
   return (camada) => {
-    ctx.font = `600 ${camada.tamanho}px "${camada.fonte}"`;
+    ctx.font = `${pesoDaFonte(camada.fonte)} ${camada.tamanho}px "${camada.fonte}"`;
     return ctx.measureText(String(camada.texto ?? '')).width;
   };
 }

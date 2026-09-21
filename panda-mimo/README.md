@@ -73,9 +73,20 @@ funcionam), a camada escolhida mostra alças na vista aberta para girar e redime
 botão "Salvar como meu modelo" guarda a montagem em "Meus modelos", só naquele navegador
 (`localStorage`, chave `pm_caneca_meus_modelos`), sem as fotos de quem montou.
 
-**Ida e volta com o Canva:** a página diz a medida (21 × 9 cm, ou 2480 × 1063 px a 300 dpi), baixa um
-gabarito em PNG com a margem de segurança e as marcas de frente, verso e alça, abre o Canva em outra aba
-e recebe de volta o PNG exportado, aplicando-o ao redor da caneca.
+**Cena, acabamento e vídeo:** a prévia mostra a caneca sozinha, numa mesa de madeira, numa mesa clara ou
+em cima de uma caixa de presente kraft, com vidrado brilhante ou fosco. Tudo é gerado em código
+(`simulador/caneca-3d.js`), sem arquivo de imagem. Onde o navegador deixa, dá para baixar um vídeo de
+cinco segundos com a caneca girando, em WebM.
+
+**Biblioteca de letras:** 15 opções para a arte do cliente (as três da marca e doze OFL em
+`assets/fontes/arte/`, com a licença de cada uma ao lado). Elas são servidas do próprio site e só baixam
+quando alguém abre a biblioteca. O catálogo está em `simulador/fontes.js`.
+
+**Ida e volta com o Canva:** "Levar minha arte para o Canva" baixa a arte como está (2480 × 1063 px a
+300 dpi) e abre o Canva em outra aba, onde é só arrastar o arquivo para dentro; o Canva não permite abrir
+um projeto já com a arte por link de fora. Quem começa do zero baixa só o gabarito, com a margem de
+segurança e as marcas de frente, verso e alça. "Trazer a arte do Canva" recebe o PNG exportado e aplica
+ao redor da caneca.
 
 Nada é enviado: a imagem fica no navegador. O código está em `simulador/` (`estudio.js` liga a página,
 `modelos.js` descreve e desenha a arte em camadas, `arte.js` compõe e exporta, `caneca-3d.js` desenha a

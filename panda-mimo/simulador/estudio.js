@@ -11,10 +11,11 @@
  * a prévia, a arte plana, o gabarito ou o projeto. O pedido segue pelo WhatsApp, com as escolhas
  * escritas no texto.
  */
-import { createMugViewer, MUG_SPEC } from './caneca-3d.js';
+import { createMugViewer, MUG_SPEC, CENARIOS, ACABAMENTOS } from './caneca-3d.js';
 import { loadArtwork, composeArtwork, exportPrintArtwork, exportGuideArtwork, tamanhoRecomendado, printAreaOf } from './arte.js';
+import { FONTES_DA_ARTE, carregaFontes, fontePorValor } from './fontes.js';
 import {
-  CATEGORIAS, ADESIVOS, ENFEITES, CORES_DE_ARTE, FONTES, FORMAS_DE_FOTO,
+  CATEGORIAS, ADESIVOS, ENFEITES, CORES_DE_ARTE, FORMAS_DE_FOTO,
   modeloPorId, modelosDaCategoria, novaArte, desenhaArte, desenhaForma, camadaEm,
   alcasDaCamada, medidorDeTexto, cor,
 } from './modelos.js';
@@ -29,7 +30,7 @@ const PRESETS = Object.freeze({
   rosa: { inside: 'rosa', handle: 'rosa', nome: 'Toque rosa' },
 });
 const LAYOUTS = { front: 'só na frente', both: 'nos dois lados', wrap: 'ao redor' };
-const LETRAS = { Fredoka: 'Redondinha', Caveat: 'Manuscrita', Nunito: 'Simples' };
+const nomeDaLetra = (familia) => fontePorValor(familia)?.nome || familia;
 const PANDA_ADESIVO = 'assets/panda-coracao.webp';
 const ARTE_EXEMPLO = { url: 'assets/coracao-jeito.webp', nome: 'Arte da Panda Mimo (exemplo)' };
 const PROJETO_TIPO = 'panda-mimo/caneca';
@@ -56,6 +57,7 @@ const el = {
   viewport: $('mug-viewport'), loading: $('viewer-loading'), fallback: $('viewer-fallback'), retry: $('viewer-retry'),
   zoom: $('mug-zoom'), flat: $('flat-art'), flatDetails: $('flat-details'),
   travar: $('travar'), travarTexto: $('travar-texto'), cadeadoArco: $('cadeado-arco'), gesto: $('studio-gesture'),
+  cenas: $('cenas'), acabamentos: $('acabamentos'), cenaResumo: $('cena-resumo'), saveVideo: $('save-video'),
   form: $('mug-form'), inside: $('inside-color'), handle: $('handle-color'), pecaResumo: $('peca-resumo'),
   abas: $('abas'), dicaAba: $('dica-aba'), acoesArte: $('acoes-arte'),
   desfazer: $('desfazer'), refazer: $('refazer'),
@@ -71,7 +73,8 @@ const el = {
   scale: $('art-scale'), x: $('art-x'), y: $('art-y'), rotation: $('art-rotation'),
   scaleOut: $('scale-value'), xOut: $('x-value'), yOut: $('y-value'), rotationOut: $('rotation-value'), reset: $('reset-art'),
   name: $('art-name'), font: $('art-font'), panda: $('art-panda'),
-  sizeGuide: $('size-guide'), saveGuide: $('save-guide'), canvaFile: $('canva-file'), importarCanva: $('importar-canva'),
+  sizeGuide: $('size-guide'), saveGuide: $('save-guide'), abrirCanva: $('abrir-canva'),
+  canvaFile: $('canva-file'), importarCanva: $('importar-canva'),
   warnings: $('art-warnings'), savePreview: $('save-preview'), savePrint: $('save-print'), saveProject: $('save-project'),
   saveStatus: $('save-status'), order: $('mug-order'),
 };
@@ -100,6 +103,8 @@ let arrasto = null;           // gesto em andamento (mover, redimensionar ou gir
 // A arte nasce travada: na caneca, arrastar gira a peça. Quem quiser mover um item abre o cadeado.
 let travado = true;
 let toqueNaCaneca = null;
+let cenaAtual = 'estudio';
+let acabamentoAtual = 'brilhante';
 let destinoDoArquivo = { tipo: 'livre' };
 let viewer = null;
 let pandaImage = null;
@@ -439,7 +444,7 @@ function orderMessage() {
     if (enfeites) lines.push(`• Enfeites acrescentados: ${enfeites}`);
   } else {
     if (artwork) lines.push(`• Arte: ${artwork.name}, ${LAYOUTS[state.layout]}`);
-    if (state.name) lines.push(`• Nome ou frase: "${state.name}" (letra ${LETRAS[state.fontFamily] || state.fontFamily})`);
+    if (state.name) lines.push(`• Nome ou frase: "${state.name}" (letra ${nomeDaLetra(state.fontFamily)})`);
   }
   const temPandinha = arte ? arte.camadas.some((camada) => camada.tipo === 'adesivo') : state.withPanda;
   lines.push(temPandinha ? '• Com o Pandinha' : '• Sem o Pandinha');
@@ -566,11 +571,44 @@ async function startViewer() {
     el.loading.hidden = true;
     el.savePreview.disabled = false;
     applyColors();
+    viewer.setCenario(cenaAtual);
+    viewer.setAcabamento(acabamentoAtual);
     viewer.setZoom(Number(el.zoom.value) / 100);
     viewer.setTexture(textureCanvas);
+    // O vídeo só aparece onde o navegador sabe gravar o canvas.
+    el.saveVideo.hidden = typeof MediaRecorder !== 'function' || !document.createElement('canvas').captureStream;
   } catch (error) {
     showFallback(error);
   }
+}
+
+/* ---------- cena e acabamento da prévia ---------- */
+function montaCenas() {
+  const monta = (alvo, itens, atual, aoEscolher) => {
+    alvo.replaceChildren(...itens.map((item) => {
+      const botao = document.createElement('button');
+      botao.type = 'button';
+      botao.dataset.valor = item.id;
+      botao.textContent = item.nome;
+      botao.title = item.descricao;
+      botao.setAttribute('aria-pressed', String(atual() === item.id));
+      botao.addEventListener('click', () => {
+        aoEscolher(item.id);
+        for (const outro of alvo.children) outro.setAttribute('aria-pressed', String(outro.dataset.valor === item.id));
+        atualizaResumoDaCena();
+      });
+      return botao;
+    }));
+  };
+  monta(el.cenas, CENARIOS, () => cenaAtual, (id) => { cenaAtual = id; viewer?.setCenario(id); });
+  monta(el.acabamentos, ACABAMENTOS, () => acabamentoAtual, (id) => { acabamentoAtual = id; viewer?.setAcabamento(id); });
+  atualizaResumoDaCena();
+}
+
+function atualizaResumoDaCena() {
+  const cena = CENARIOS.find((c) => c.id === cenaAtual)?.nome || 'Fundo claro';
+  const acabamento = ACABAMENTOS.find((a) => a.id === acabamentoAtual)?.nome.toLowerCase() || 'brilhante';
+  if (el.cenaResumo) el.cenaResumo.textContent = `${cena} · ${acabamento}`;
 }
 
 /* ---------- abas ---------- */
@@ -752,6 +790,14 @@ function marcaModeloEscolhido() {
   }
 }
 
+/** Carrega as letras que a arte está usando; sem elas o navegador mede e desenha outra. */
+function garanteFontes() {
+  const usadas = arte
+    ? arte.camadas.filter((camada) => camada.tipo === 'frase').map((camada) => camada.fonte)
+    : [state.fontFamily];
+  return carregaFontes(usadas).then(() => { montaListas(); schedule(); });
+}
+
 async function garanteAdesivos() {
   const arquivos = new Set((arte?.camadas || []).filter((c) => c.tipo === 'adesivo').map((c) => c.arquivo));
   let mudou = false;
@@ -789,6 +835,7 @@ function escolheModelo(id) {
   // Na tela larga, a vista aberta já abre: dá para arrastar e usar as alças ali.
   if (arte && el.flatDetails && window.innerWidth >= 850) el.flatDetails.open = true;
   garanteAdesivos();
+  garanteFontes();
   schedule();
 }
 
@@ -810,7 +857,7 @@ function rotuloDaCamada(camada) {
 
 function subtituloDaCamada(camada) {
   if (camada.tipo === 'foto') return fotos.get(camada.id)?.asset ? fotos.get(camada.id).asset.name : 'Toque para escolher a foto';
-  if (camada.tipo === 'frase') return `${LETRAS[camada.fonte] || camada.fonte} · ${CORES_DE_ARTE.find((c) => c.token === camada.cor)?.nome || 'cor da marca'}`;
+  if (camada.tipo === 'frase') return `${nomeDaLetra(camada.fonte)} · ${CORES_DE_ARTE.find((c) => c.token === camada.cor)?.nome || 'cor da marca'}`;
   if (camada.tipo === 'adesivo') return ADESIVOS.find((a) => a.arquivo === camada.arquivo)?.nome || 'Pandinha';
   return CORES_DE_ARTE.find((c) => c.token === camada.cor)?.nome || 'Enfeite';
 }
@@ -898,6 +945,37 @@ function campoRange(rotulo, valor, [min, max], passo, aoMudar) {
   return campo(rotulo, input, 'studio-campo--range');
 }
 
+/** A biblioteca de letras: cada opção aparece escrita na própria letra. */
+function campoDeLetras(valor, aoMudar) {
+  const grade = document.createElement('div');
+  grade.className = 'studio-letras';
+  grade.setAttribute('role', 'group');
+  grade.setAttribute('aria-label', 'Jeito da letra');
+  for (const fonte of FONTES_DA_ARTE) {
+    const botao = document.createElement('button');
+    botao.type = 'button';
+    botao.className = 'studio-letra';
+    botao.dataset.fonte = fonte.valor;
+    botao.setAttribute('aria-pressed', String(valor === fonte.valor));
+    botao.style.fontFamily = `"${fonte.valor}", var(--f-body)`;
+    botao.style.fontWeight = String(fonte.peso);
+    botao.textContent = fonte.nome;
+    botao.addEventListener('click', () => {
+      for (const outro of grade.children) outro.setAttribute('aria-pressed', String(outro === botao));
+      aoMudar(fonte.valor);
+    });
+    grade.appendChild(botao);
+  }
+  const bloco = document.createElement('div');
+  bloco.className = 'studio-campo';
+  const titulo = document.createElement('span');
+  titulo.textContent = 'Jeito da letra';
+  bloco.append(titulo, grade);
+  // As letras da biblioteca chegam na hora em que alguém abre o cartão, não no carregamento da página.
+  carregaFontes().then(() => schedule());
+  return bloco;
+}
+
 function campoCores(valor, aoMudar) {
   const grupo = document.createElement('div');
   grupo.className = 'studio-cores';
@@ -952,7 +1030,12 @@ function camposDaCamada(camada) {
       nota.textContent = 'Esta frase se repete na volta da caneca: mudou aqui, mudou nas outras.';
       partes.push(nota);
     }
-    partes.push(campoSelect('Jeito da letra', FONTES, camada.fonte, (valor) => { registra(`fonte:${camada.id}`); camada.fonte = valor; montaListas(); schedule(); }));
+    partes.push(campoDeLetras(camada.fonte, (valor) => {
+      registra(`fonte:${camada.id}`);
+      camada.fonte = valor;
+      montaListas();
+      garanteFontes();
+    }));
     partes.push(campoCores(camada.cor, (token) => { registra(`cor:${camada.id}`); camada.cor = token; schedule(); }));
     partes.push(campoRange('Tamanho da letra', camada.tamanho, LIMITES.fraseTamanho, 0.5, (valor) => { registra(`tamanho:${camada.id}`); camada.tamanho = valor; schedule(); }));
   }
@@ -1210,6 +1293,17 @@ async function adicionaPandinha() {
   schedule();
 }
 
+/** O seletor de letra da arte livre usa a mesma biblioteca dos modelos. */
+function montaSeletorDeLetras() {
+  el.font.replaceChildren(...FONTES_DA_ARTE.map((fonte) => {
+    const opcao = document.createElement('option');
+    opcao.value = fonte.valor;
+    opcao.textContent = fonte.nome;
+    return opcao;
+  }));
+  el.font.value = state.fontFamily;
+}
+
 function montaGradeDeEnfeites() {
   el.gradeEnfeites.replaceChildren(...ENFEITES.map((item) => {
     const botaoForma = document.createElement('button');
@@ -1404,6 +1498,27 @@ async function saveGuide() {
   }
 }
 
+/**
+ * Leva a arte para o Canva. O Canva não abre um projeto já com a arte dentro por um link de fora,
+ * então o site baixa o PNG na medida certa e abre o Canva na aba ao lado: lá é arrastar o arquivo.
+ */
+async function levaParaOCanva() {
+  try {
+    if (!hasContent()) {
+      const { blob, larguraPx, alturaPx } = await exportGuideArtwork(MUG_SPEC);
+      download(blob, `gabarito-caneca-panda-mimo-${larguraPx}x${alturaPx}.png`);
+      setStatus(`Ainda não há arte, então baixamos o gabarito (${larguraPx} × ${alturaPx} px). No Canva, crie um design desse tamanho e use o gabarito como fundo.`);
+      return;
+    }
+    setStatus('Preparando sua arte para levar ao Canva…');
+    const { blob, widthPx, heightPx } = await exportPrintArtwork(opcoesDeComposicao());
+    download(blob, `arte-da-caneca-para-o-canva-${widthPx}x${heightPx}.png`);
+    setStatus(`Arte baixada em ${widthPx} × ${heightPx} px. No Canva, crie um design desse tamanho e arraste o arquivo para dentro. Quando terminar, volte aqui em "Trazer a arte do Canva".`);
+  } catch (error) {
+    setStatus(error.message || 'Não foi possível preparar a arte para o Canva agora.');
+  }
+}
+
 async function importaDoCanva(file) {
   if (!file) return;
   escolheModelo(null);
@@ -1434,6 +1549,27 @@ async function savePreview() {
     setStatus(error.message || 'Não foi possível salvar a prévia agora.');
   } finally {
     el.savePreview.disabled = false;
+  }
+}
+
+async function saveVideo() {
+  if (!viewer) return;
+  const rotulo = el.saveVideo.textContent;
+  el.saveVideo.disabled = true;
+  setStatus('Gravando a caneca dando uma volta…');
+  try {
+    const blob = await viewer.gravaVolta({
+      segundos: 5,
+      aoAndar: (t) => { el.saveVideo.textContent = `Gravando… ${Math.round(t * 100)}%`; },
+    });
+    if (!blob) { setStatus('Este navegador não grava vídeo. Baixe a prévia em imagem.'); return; }
+    download(blob, `caneca-panda-mimo-girando${modeloAtual ? `-${slug(modeloAtual.nome)}` : ''}.webm`);
+    setStatus('Vídeo salvo em WebM, pronto para mandar no WhatsApp ou postar.');
+  } catch (error) {
+    setStatus(error.message || 'Não foi possível gravar o vídeo agora.');
+  } finally {
+    el.saveVideo.textContent = rotulo;
+    el.saveVideo.disabled = false;
   }
 }
 
@@ -1501,7 +1637,7 @@ async function openProject(file) {
     const c = project.escolhas;
     setColors(c.inside, c.handle);
     el.name.value = String(c.name || '').slice(0, 24);
-    el.font.value = LETRAS[c.fontFamily] ? c.fontFamily : 'Fredoka';
+    el.font.value = fontePorValor(c.fontFamily) ? c.fontFamily : 'Fredoka';
     el.panda.checked = c.withPanda !== false;
     readTextOptions();
     if (project.arte?.camadas?.length) {
@@ -1515,6 +1651,7 @@ async function openProject(file) {
       marcaModeloEscolhido();
       atualizaModo();
       await garanteAdesivos();
+      await garanteFontes();
       for (const [id, registro] of Object.entries(project.fotos || {})) {
         if (registro?.dados) await handleFile(await arquivoDeDados(registro), { tipo: 'camada', id });
       }
@@ -1742,13 +1879,16 @@ function bind() {
   el.reset.addEventListener('click', resetAdjustments);
   for (const radio of el.form.elements.layout) radio.addEventListener('change', readLayout);
   el.name.addEventListener('input', readTextOptions);
-  el.font.addEventListener('change', readTextOptions);
+  el.font.addEventListener('change', () => { readTextOptions(); garanteFontes(); });
   el.panda.addEventListener('change', readTextOptions);
 
   el.saveGuide.addEventListener('click', saveGuide);
+  // O clique abre o Canva pelo próprio link e, no mesmo gesto, baixa a arte.
+  el.abrirCanva.addEventListener('click', levaParaOCanva);
   el.importarCanva.addEventListener('click', () => { el.canvaFile.value = ''; el.canvaFile.click(); });
   el.canvaFile.addEventListener('change', () => importaDoCanva(el.canvaFile.files?.[0]));
   el.savePreview.addEventListener('click', savePreview);
+  el.saveVideo.addEventListener('click', saveVideo);
   el.savePrint.addEventListener('click', savePrint);
   el.saveProject.addEventListener('click', saveProject);
   el.form.addEventListener('submit', (event) => event.preventDefault());
@@ -1771,6 +1911,8 @@ async function init() {
   montaCategorias();
   montaModelos();
   montaGradeDeEnfeites();
+  montaSeletorDeLetras();
+  montaCenas();
   atualizaCadeado();
   atualizaModo();
   markPreset();

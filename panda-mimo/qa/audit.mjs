@@ -1012,6 +1012,15 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     if (estado.rolagem) failures.push(`[estúdio ${w}] rolagem lateral na página`);
     if (!estado.previa) failures.push(`[estúdio ${w}] "Baixar prévia" continua desligado com o 3D pronto`);
     if (!/^https:\/\/wa\.me\/5511999999999\?text=/.test(estado.zap) || !new URL(estado.zap).searchParams.get('text').includes('Interior: Branco')) failures.push(`[estúdio ${w}] o pedido não leva as escolhas para o WhatsApp (${estado.zap.slice(0, 60)})`);
+    // abre os blocos recolhidos: só assim dá para medir todos os campos da página
+    await pe.evaluate(() => {
+      for (const id of ['peca-cores', 'peca-cena', 'flat-details', 'bloco-canva']) {
+        const bloco = document.getElementById(id);
+        if (bloco) bloco.open = true;
+      }
+    });
+    await pe.waitForTimeout(250);
+
     // a aba "Minha arte" é onde entra a arte pronta de quem não quer modelo
     await pe.click('#abas [data-aba="arte"]');
     await pe.waitForTimeout(250);
@@ -1050,6 +1059,31 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     await pe.waitForTimeout(300);
     const recusa = await pe.evaluate(() => ({ visivel: !document.getElementById('art-error').hidden, texto: document.getElementById('art-error').textContent }));
     if (!recusa.visivel || !recusa.texto) failures.push(`[estúdio ${w}] arquivo inválido não gerou aviso`);
+    // padrão visual dos campos: nenhum controle pode voltar à aparência crua do navegador
+    const campos = await pe.evaluate(() => {
+      const familias = ['Nunito', 'Fredoka'];
+      const fora = [];
+      const visivel = (el) => el.offsetParent !== null || el.getClientRects().length > 0;
+      for (const campo of document.querySelectorAll('select, input[type="text"], input[type="search"], input[type="number"]')) {
+        if (campo.classList.contains('studio-sr-only') || !visivel(campo)) continue;
+        const estilo = getComputedStyle(campo);
+        const raio = parseFloat(estilo.borderTopLeftRadius) || 0;
+        const altura = campo.getBoundingClientRect().height;
+        const borda = parseFloat(estilo.borderTopWidth) || 0;
+        const daCasa = familias.some((f) => estilo.fontFamily.includes(f));
+        if (raio < 8 || altura < 40 || borda < 1 || !daCasa) {
+          fora.push({
+            onde: campo.id || campo.name || campo.className || campo.tagName,
+            raio: Math.round(raio), altura: Math.round(altura), borda, fonte: estilo.fontFamily.split(',')[0],
+          });
+        }
+      }
+      return fora;
+    });
+    if (campos.length) {
+      failures.push(`[estúdio ${w}] campo(s) fora do padrão do site (canto arredondado, 40 px de altura, borda e fonte da marca): ${campos.map((c) => `${c.onde} raio ${c.raio}px altura ${c.altura}px fonte ${c.fonte}`).join(' · ')}`);
+    }
+
     // painel em abas: escolher o modelo, e cada tipo de item no seu container
     await pe.click('#abas [data-aba="modelo"]');
     await pe.waitForTimeout(250);
@@ -1098,14 +1132,20 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     // uma foto em cada espaço, pelo cartão (a mesma janela de arquivo que a pessoa usa)
     const fotoDeTeste = path.resolve(here, '..', 'assets', 'uso-caneca-cafe.webp');
     pe.on('filechooser', async (fc) => { await fc.setFiles(fotoDeTeste); });
+    const vaziosAgora = () => pe.$$eval('#lista-fotos .studio-item__cabeca small', (ss) => ss.filter((s) => s.textContent.startsWith('Toque para escolher')).length);
     for (let i = 0; i < 2; i += 1) {
       await pe.evaluate(() => {
         const alvo = [...document.querySelectorAll('#lista-fotos .studio-item__cabeca')]
           .find((b) => b.querySelector('small')?.textContent.startsWith('Toque para escolher'));
         alvo?.click();
       });
-      await pe.waitForTimeout(900);
+      // espera a foto chegar antes do próximo espaço: a janela de arquivo demora o que demorar
+      await pe.waitForFunction((restam) => [...document.querySelectorAll('#lista-fotos .studio-item__cabeca small')]
+        .filter((s) => s.textContent.startsWith('Toque para escolher')).length === restam, 1 - i, { timeout: 12000 })
+        .catch(() => {});
+      await pe.waitForTimeout(250);
     }
+    if (await vaziosAgora()) failures.push(`[estúdio ${w}] as duas fotos não entraram pelos cartões`);
     await pe.evaluate(() => document.querySelector('#abas [data-aba="frases"]').click());
     await pe.evaluate(() => document.querySelector('#lista-frases .studio-item__cabeca').click());
     await pe.waitForTimeout(300);
@@ -1129,6 +1169,9 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     if (!preenchido.zap.includes('Corações ao redor') || !preenchido.zap.includes('Fotos escolhidas: 2 de 2') || !preenchido.zap.includes('a gente combina mesmo')) {
       failures.push(`[estúdio ${w}] o pedido não leva o modelo, as fotos e a frase escritos`);
     }
+
+    const baixados = [];
+    pe.on('download', (d) => baixados.push(d.suggestedFilename()));
 
     // o cadeado da prévia: travado (padrão) a caneca só gira; destravado, o item se move
     const cadeado = await pe.evaluate(async () => {
@@ -1216,6 +1259,54 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     if (!acrescimos.zap.includes('feito com carinho') || !acrescimos.zap.includes('Enfeites acrescentados')) {
       failures.push(`[estúdio ${w}] o pedido não acompanhou a frase e o enfeite novos`);
     }
+
+    // biblioteca de letras: a lista aparece, a letra escolhida carrega do nosso endereço e muda a arte
+    const letras = await pe.evaluate(async () => {
+      const flat = document.getElementById('flat-art');
+      const assinatura = () => {
+        const d = flat.getContext('2d').getImageData(0, 0, flat.width, flat.height).data;
+        let soma = 0;
+        for (let i = 0; i < d.length; i += 997) soma += d[i];
+        return soma;
+      };
+      document.querySelector('#abas [data-aba="frases"]').click();
+      await new Promise((r) => setTimeout(r, 200));
+      const cabeca = document.querySelector('#lista-frases .studio-item__cabeca');
+      if (cabeca.getAttribute('aria-expanded') !== 'true') cabeca.click();
+      await new Promise((r) => setTimeout(r, 1200));
+      const total = document.querySelectorAll('.studio-letra').length;
+      const antes = assinatura();
+      document.querySelector('.studio-letra[data-fonte="Great Vibes"]')?.click();
+      await new Promise((r) => setTimeout(r, 1200));
+      return {
+        total, mudou: assinatura() !== antes,
+        carregada: document.fonts.check('400 16px "Great Vibes"'),
+        sub: document.querySelector('#lista-frases .studio-item__cabeca small')?.textContent || '',
+      };
+    });
+    if (letras.total < 12) failures.push(`[estúdio ${w}] a biblioteca de letras mostrou só ${letras.total} opções`);
+    if (!letras.carregada) failures.push(`[estúdio ${w}] a letra escolhida não carregou do nosso próprio endereço`);
+    if (!letras.mudou || !/Caligrafia/.test(letras.sub)) failures.push(`[estúdio ${w}] trocar a letra não mudou a arte ("${letras.sub}")`);
+
+    // cena e acabamento da prévia
+    const cena = await pe.evaluate(async () => {
+      document.getElementById('peca-cena').open = true;
+      const cenas = document.querySelectorAll('#cenas button').length;
+      const acabamentos = document.querySelectorAll('#acabamentos button').length;
+      document.querySelector('#cenas [data-valor="madeira"]').click();
+      await new Promise((r) => setTimeout(r, 700));
+      const comCena = document.getElementById('cena-resumo').textContent;
+      document.querySelector('#acabamentos [data-valor="fosco"]').click();
+      await new Promise((r) => setTimeout(r, 500));
+      const comFosco = document.getElementById('cena-resumo').textContent;
+      document.querySelector('#cenas [data-valor="estudio"]').click();
+      document.querySelector('#acabamentos [data-valor="brilhante"]').click();
+      await new Promise((r) => setTimeout(r, 600));
+      return { cenas, acabamentos, comCena, comFosco, video: !document.getElementById('save-video').hidden };
+    });
+    if (cena.cenas < 3 || cena.acabamentos !== 2) failures.push(`[estúdio ${w}] faltam cenas ou acabamentos (${JSON.stringify(cena)})`);
+    if (!/Mesa de madeira/.test(cena.comCena) || !/fosco/.test(cena.comFosco)) failures.push(`[estúdio ${w}] a cena escolhida não aparece no resumo (${cena.comCena} / ${cena.comFosco})`);
+    if (!cena.video) failures.push(`[estúdio ${w}] o botão do vídeo girando não apareceu`);
 
     // desfazer e refazer: o passo volta inteiro
     const historico = await pe.evaluate(async () => {
@@ -1311,6 +1402,17 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     const removido = await pe.$eval('#art-warnings', (e) => e.textContent);
     if (!/falta escolher/.test(removido)) failures.push(`[estúdio ${w}] tirar uma foto não voltou a avisar do espaço vazio`);
 
+    // levar a arte para o Canva: o clique no link baixa o PNG na medida da volta inteira
+    await pe.click('#abas [data-aba="modelo"]');
+    await pe.evaluate(() => { document.getElementById('bloco-canva').open = true; });
+    // o teste não abre o Canva de verdade: tira o destino e fica só com o efeito do clique
+    await pe.$eval('#abrir-canva', (a) => { a.removeAttribute('target'); a.setAttribute('href', '#'); });
+    await pe.click('#abrir-canva');
+    await pe.waitForTimeout(1500);
+    if (!baixados.some((n) => /^arte-da-caneca-para-o-canva-2480x1063\.png$/.test(n))) {
+      failures.push(`[estúdio ${w}] "Levar minha arte para o Canva" não baixou a arte na medida certa (${baixados.join(', ') || 'nada baixado'})`);
+    }
+
     // trazer a arte pronta do Canva: volta para a aba Minha arte, ao redor, com a arte inteira
     await pe.setInputFiles('#canva-file', fotoDeTeste);
     await pe.waitForTimeout(900);
@@ -1328,8 +1430,6 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
 
 
     // exportação da arte plana em 300 dpi, do gabarito e da prévia
-    const baixados = [];
-    pe.on('download', (d) => baixados.push(d.suggestedFilename()));
     await pe.click('#save-print');
     await pe.click('#save-preview');
     // o gabarito mora no bloco do Canva, dentro da aba Modelo

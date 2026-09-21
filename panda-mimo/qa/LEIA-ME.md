@@ -81,6 +81,16 @@ os três arquivos saem ("Baixar arte plana", "Baixar prévia" e o gabarito em 24
 `qa/shots/<largura>/estudio-caneca.png`. A página também passa pelo axe-core e pelas checagens de
 cabeçalho, rodapé e sitemap. Para ver local: `npm run servir` e abra o endereço impresso.
 
+O guardião também trava o **padrão visual dos campos**: todo `select` e todo campo de texto visível da
+página do estúdio precisa ter canto arredondado (8 px ou mais), 40 px de altura, borda e a letra da
+marca. Foi assim que se pegou o dia em que os seletores de cor da peça mudaram de coluna e voltaram à
+aparência crua do navegador. Um defeito de prova (um campo sem borda e com fonte serifada) confirma que
+a regra reprova de verdade.
+
+Entram na mesma passada: a biblioteca de letras (a lista aparece, a letra escolhida carrega do nosso
+endereço e muda a arte), a cena e o acabamento da prévia (o resumo acompanha a escolha e o botão do
+vídeo aparece) e o "Levar minha arte para o Canva" (baixa o PNG em 2480 × 1063).
+
 Para a revisão humana dos modelos, `npm run provas` percorre os 14, preenche as fotos com imagens do
 acervo e salva cada arte aberta (21 × 9 cm) em `qa/shots/`. É por essas provas que se confere cor,
 tamanho de letra e composição no tamanho de uso; o guardião confere as regras, não o gosto.

@@ -1,11 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  TEMPLATES, CATEGORIAS, CORES_DE_ARTE, FONTES, ENFEITES, ADESIVOS, FORMAS_DE_FOTO,
+  TEMPLATES, CATEGORIAS, CORES_DE_ARTE, ENFEITES, ADESIVOS, FORMAS_DE_FOTO,
   modeloPorId, modelosDaCategoria, novaArte, desenhaArte, caixaDaCamada, camadaEm, alcasDaCamada,
   medidorDeTexto, FRENTE, VERSO,
 } from '../simulador/modelos.js';
 import { computeArtePlacement, printAreaOf, tamanhoRecomendado } from '../simulador/arte.js';
+import { FONTES_DA_ARTE, pesoDaFonte, ehFonteDaMarca } from '../simulador/fontes.js';
 
 const spec = { diameterMm: 82, heightMm: 95, printWidthMm: 210, printHeightMm: 90 };
 const area = printAreaOf(spec);
@@ -44,7 +45,7 @@ const medidor = medidorDeTexto(contextoFalso());
 test('cada modelo tem identidade própria, categoria conhecida e camadas válidas', () => {
   const ids = new Set();
   const categorias = new Set(CATEGORIAS.map((c) => c.id));
-  const fontes = new Set(FONTES.map((f) => f.valor));
+  const fontes = new Set(FONTES_DA_ARTE.map((f) => f.valor));
   const cores = new Set(CORES_DE_ARTE.map((c) => c.token));
   const formasDeFoto = new Set(FORMAS_DE_FOTO.map((f) => f.valor));
   const enfeites = new Set(ENFEITES.map((e) => e.forma));
@@ -60,7 +61,8 @@ test('cada modelo tem identidade própria, categoria conhecida e camadas válida
     for (const camada of modelo.camadas) {
       assert.ok(['foto', 'frase', 'enfeite', 'adesivo'].includes(camada.tipo), `${modelo.id}: tipo desconhecido ${camada.tipo}`);
       if (camada.tipo === 'frase') {
-        assert.ok(fontes.has(camada.fonte), `${modelo.id} usa fonte fora da marca: ${camada.fonte}`);
+        assert.ok(fontes.has(camada.fonte), `${modelo.id} usa letra fora da biblioteca: ${camada.fonte}`);
+        assert.ok(ehFonteDaMarca(camada.fonte), `${modelo.id}: modelo pronto da casa usa letra fora da marca (${camada.fonte})`);
         assert.ok(cores.has(camada.cor), `${modelo.id} usa cor fora da paleta: ${camada.cor}`);
         assert.ok(String(camada.texto).length <= 40, `${modelo.id}: frase de exemplo maior que o campo`);
       }
@@ -213,4 +215,21 @@ test('sem espaço em cima, o botão de girar passa para baixo da camada', () => 
   const noMeio = { ...noTopo, y: 0.5 };
   assert.equal(alcasDaCamada(noMeio, area, medidor).giro.acima, true);
   assert.ok(alcasDaCamada(noMeio, area, medidor).giro.y < caixaDaCamada(noMeio, area, medidor).centroY);
+});
+
+test('a biblioteca de letras tem variedade, peso próprio e arquivo nosso', () => {
+  assert.ok(FONTES_DA_ARTE.length >= 12, 'a biblioteca ficou pequena demais');
+  const valores = new Set();
+  for (const fonte of FONTES_DA_ARTE) {
+    assert.ok(!valores.has(fonte.valor), `letra repetida: ${fonte.valor}`);
+    valores.add(fonte.valor);
+    assert.ok(fonte.nome && fonte.valor, 'letra sem nome');
+    assert.ok([400, 500, 600, 700, 800].includes(fonte.peso), `${fonte.valor} com peso estranho (${fonte.peso})`);
+    assert.equal(pesoDaFonte(fonte.valor), fonte.peso);
+    if (fonte.daMarca) assert.ok(!fonte.arquivo, `${fonte.valor} é da marca e já vem no site`);
+    else assert.match(fonte.arquivo, /^assets\/fontes\/arte\/[a-z0-9-]+\.woff2$/, `${fonte.valor} não é servida do nosso endereço`);
+  }
+  // as três da marca continuam disponíveis para a arte
+  for (const daMarca of ['Fredoka', 'Caveat', 'Nunito']) assert.ok(ehFonteDaMarca(daMarca));
+  assert.equal(pesoDaFonte('Inexistente'), 600, 'letra desconhecida devia cair no peso padrão');
 });

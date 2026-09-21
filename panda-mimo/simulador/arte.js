@@ -11,12 +11,13 @@
  */
 
 import { desenhaArte, caixaDaCamada, medidorDeTexto, cor, FRENTE as FRENTE_U, VERSO as VERSO_U } from './modelos.js';
+import { pesoDaFonte, FONTES_DA_ARTE } from './fontes.js';
 
 const MAX_BYTES = 20 * 1024 * 1024;
 const MAX_PIXELS = 40_000_000;
 const DEFAULT_SPEC = Object.freeze({ diameterMm: 82, heightMm: 95, printWidthMm: 210, printHeightMm: 90 });
 const FORMATS = new Set(['image/png', 'image/jpeg', 'image/webp']);
-const FONTS = new Set(['Fredoka', 'Caveat', 'Nunito']);
+const FONTS = new Set(FONTES_DA_ARTE.map((f) => f.valor));
 const EPSILON = 1e-6;
 
 function fileError(message) {
@@ -380,11 +381,12 @@ function drawComposition(canvas, placement, options, cropToPrint = false) {
     const hasLargePanda = withPanda && options.pandaImage && !hasArtwork;
     const centerY = hasArtwork ? area.y + area.height - placement.footerHeight / 2 : area.y + area.height * (hasLargePanda ? 0.8 : 0.5);
     const maxWidth = placement.slotWidth - (withPanda && options.pandaImage && hasArtwork ? 22 : 6);
+    const peso = pesoDaFonte(fontFamily);
     let fontSize = hasArtwork ? 8 : 11;
-    context.font = `600 ${fontSize}px "${fontFamily}"`;
+    context.font = `${peso} ${fontSize}px "${fontFamily}"`;
     const measured = context.measureText(name).width;
     if (measured > maxWidth) fontSize *= maxWidth / measured;
-    context.font = `600 ${fontSize}px "${fontFamily}"`;
+    context.font = `${peso} ${fontSize}px "${fontFamily}"`;
     context.textAlign = 'center';
     context.textBaseline = 'middle';
     for (const center of placement.centers) {

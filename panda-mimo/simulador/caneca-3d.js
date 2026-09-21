@@ -144,6 +144,104 @@ function handleGeometry() {
   return geometry;
 }
 
+/**
+ * Cenas da prévia. Elas existem para a pessoa ver a caneca como presente, não só como peça:
+ * as cores aqui são de madeira, tecido e papel kraft, dados do cenário, não tokens da interface.
+ */
+export const CENARIOS = Object.freeze([
+  { id: 'estudio', nome: 'Fundo claro', descricao: 'Só a caneca, com a sombra' },
+  { id: 'madeira', nome: 'Mesa de madeira', descricao: 'Como na mesa do café' },
+  { id: 'linho', nome: 'Mesa clara', descricao: 'Toalha de linho, luz de manhã' },
+  { id: 'presente', nome: 'Caixa de presente', descricao: 'Em cima da caixa kraft, com fita' },
+]);
+
+export const ACABAMENTOS = Object.freeze([
+  { id: 'brilhante', nome: 'Brilhante', descricao: 'Vidrado de cerâmica, como a peça padrão' },
+  { id: 'fosco', nome: 'Fosco', descricao: 'Sem brilho, toque aveludado' },
+]);
+
+/** Ruído repetível: a mesma madeira em toda visita, sem arquivo de imagem. */
+function ruido(semente) {
+  let s = semente >>> 0;
+  return () => {
+    s = (s + 0x6d2b79f5) >>> 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function texturaDeMadeira() {
+  const lado = 512;
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = lado;
+  const ctx = canvas.getContext('2d');
+  const aleatorio = ruido(7);
+  ctx.fillStyle = '#b3855a';
+  ctx.fillRect(0, 0, lado, lado);
+  for (let i = 0; i < 150; i += 1) {
+    const y = aleatorio() * lado;
+    const escuro = 0.06 + aleatorio() * 0.16;
+    ctx.strokeStyle = `rgba(74, 46, 25, ${escuro})`;
+    ctx.lineWidth = 0.6 + aleatorio() * 3.4;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    for (let x = 0; x <= lado; x += 32) ctx.lineTo(x, y + Math.sin((x / lado) * Math.PI * 2 + i) * (2 + aleatorio() * 5));
+    ctx.stroke();
+  }
+  for (let i = 0; i < 2600; i += 1) {
+    ctx.fillStyle = `rgba(255, 236, 214, ${aleatorio() * 0.06})`;
+    ctx.fillRect(aleatorio() * lado, aleatorio() * lado, 2, 1);
+  }
+  const textura = new THREE.CanvasTexture(canvas);
+  textura.colorSpace = THREE.SRGBColorSpace;
+  textura.wrapS = textura.wrapT = THREE.RepeatWrapping;
+  textura.repeat.set(3, 3);
+  return textura;
+}
+
+function texturaDeLinho() {
+  const lado = 256;
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = lado;
+  const ctx = canvas.getContext('2d');
+  const aleatorio = ruido(23);
+  ctx.fillStyle = '#efe7da';
+  ctx.fillRect(0, 0, lado, lado);
+  for (let i = 0; i < lado; i += 2) {
+    ctx.strokeStyle = `rgba(176, 155, 128, ${0.16 + aleatorio() * 0.18})`;
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(lado, i); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, lado); ctx.stroke();
+  }
+  const textura = new THREE.CanvasTexture(canvas);
+  textura.colorSpace = THREE.SRGBColorSpace;
+  textura.wrapS = textura.wrapT = THREE.RepeatWrapping;
+  textura.repeat.set(3.5, 3.5);
+  return textura;
+}
+
+/** Papel kraft: fibra fina e manchas leves, para a caixa não parecer plástico liso. */
+function texturaDeKraft() {
+  const lado = 256;
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = lado;
+  const ctx = canvas.getContext('2d');
+  const aleatorio = ruido(53);
+  ctx.fillStyle = '#cfa87e';
+  ctx.fillRect(0, 0, lado, lado);
+  for (let i = 0; i < 9000; i += 1) {
+    const claro = aleatorio() > 0.5;
+    ctx.fillStyle = claro ? `rgba(233, 205, 173, ${aleatorio() * 0.5})` : `rgba(120, 82, 48, ${aleatorio() * 0.35})`;
+    ctx.fillRect(aleatorio() * lado, aleatorio() * lado, 1 + aleatorio() * 2, 1);
+  }
+  const textura = new THREE.CanvasTexture(canvas);
+  textura.colorSpace = THREE.SRGBColorSpace;
+  textura.wrapS = textura.wrapT = THREE.RepeatWrapping;
+  textura.repeat.set(2, 2);
+  return textura;
+}
+
 function studioEnvironment(renderer) {
   const studio = new THREE.Scene();
   studio.background = new THREE.Color().setRGB(0.36, 0.36, 0.36);
@@ -283,7 +381,105 @@ export async function createMugViewer(container, { onError, onReady, onChange, o
   floor.rotation.x = -Math.PI / 2;
   floor.position.y = -0.009;
   floor.receiveShadow = true;
-  scene.add(floor, contactShadow());
+  const sombraDeContato = contactShadow();
+  scene.add(floor, sombraDeContato);
+
+  // O cenário vive num grupo à parte: trocar de cena não mexe na caneca nem nas luzes.
+  const cenario = new THREE.Group();
+  scene.add(cenario);
+  let cenaAtual = 'estudio';
+  const guardados = new Map();
+
+  function limpaCenario() {
+    for (const filho of [...cenario.children]) {
+      cenario.remove(filho);
+      filho.geometry?.dispose();
+      if (Array.isArray(filho.material)) filho.material.forEach((m) => m.dispose());
+      else filho.material?.dispose();
+    }
+  }
+
+  function mesa(textura, cor, rugosidade, altura = -0.012) {
+    const material = new THREE.MeshStandardMaterial({ map: textura || null, color: cor, roughness: rugosidade, metalness: 0 });
+    const tampo = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), material);
+    tampo.rotation.x = -Math.PI / 2;
+    tampo.position.y = altura;
+    tampo.receiveShadow = true;
+    return tampo;
+  }
+
+  function parede(corDeCima, corDeBaixo) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 8;
+    canvas.height = 256;
+    const ctx = canvas.getContext('2d');
+    const degrade = ctx.createLinearGradient(0, 0, 0, 256);
+    degrade.addColorStop(0, corDeCima);
+    degrade.addColorStop(1, corDeBaixo);
+    ctx.fillStyle = degrade;
+    ctx.fillRect(0, 0, 8, 256);
+    const textura = new THREE.CanvasTexture(canvas);
+    textura.colorSpace = THREE.SRGBColorSpace;
+    const fundo = new THREE.Mesh(new THREE.PlaneGeometry(40, 20), new THREE.MeshBasicMaterial({ map: textura, toneMapped: false }));
+    fundo.position.set(0, 9.6, -7.5);
+    return fundo;
+  }
+
+  /** A caixa kraft com fita: a caneca fica em cima dela, como sai para presente. */
+  function caixaDePresente() {
+    const grupo = new THREE.Group();
+    const altura = 0.86;
+    if (!guardados.has('kraft')) guardados.set('kraft', texturaDeKraft());
+    const papel = guardados.get('kraft');
+    const kraft = new THREE.MeshStandardMaterial({ map: papel, color: '#e8dcc9', roughness: 0.92, metalness: 0 });
+    const tampa = new THREE.MeshStandardMaterial({ map: papel, color: '#f2e9da', roughness: 0.9, metalness: 0 });
+    const corpo = new THREE.Mesh(new THREE.BoxGeometry(2.75, altura, 2.75), kraft);
+    corpo.position.y = -altura / 2 - 0.012;
+    corpo.castShadow = corpo.receiveShadow = true;
+    const borda = new THREE.Mesh(new THREE.BoxGeometry(2.88, 0.17, 2.88), tampa);
+    borda.position.y = -0.1;
+    borda.castShadow = borda.receiveShadow = true;
+    grupo.add(corpo, borda);
+    const fita = new THREE.MeshStandardMaterial({ color: '#ec9878', roughness: 0.5, metalness: 0 });
+    for (const giro of [0, Math.PI / 2]) {
+      const faixa = new THREE.Mesh(new THREE.BoxGeometry(0.4, altura + 0.22, 2.96), fita);
+      faixa.rotation.y = giro;
+      faixa.position.y = -altura / 2 - 0.012;
+      faixa.castShadow = faixa.receiveShadow = true;
+      grupo.add(faixa);
+    }
+    return grupo;
+  }
+
+  function aplicaCenario(id) {
+    const escolhido = CENARIOS.some((c) => c.id === id) ? id : 'estudio';
+    if (escolhido === cenaAtual && cenario.children.length) return;
+    cenaAtual = escolhido;
+    limpaCenario();
+    const folgas = { estudio: 1, madeira: 1.22, linho: 1.22, presente: 1.62 };
+    const priorFit = fitDistance;
+    folgaDaCena = folgas[escolhido] || 1;
+    if (width && height) { calculaEnquadramento(); reenquadra(priorFit); }
+    // Na caixa de presente a câmera sobe um pouco: é de cima que se vê a caneca dentro do embrulho.
+    if (escolhido === 'presente') {
+      const de = new THREE.Spherical().setFromVector3(camera.position.clone().sub(controls.target));
+      de.phi = Math.min(de.phi, 1.17);
+      camera.position.setFromSpherical(de).add(controls.target);
+      controls.update();
+    }
+    floor.visible = escolhido === 'estudio';
+    sombraDeContato.visible = escolhido !== 'presente';
+    if (escolhido === 'madeira') {
+      if (!guardados.has('madeira')) guardados.set('madeira', texturaDeMadeira());
+      cenario.add(mesa(guardados.get('madeira'), '#ffffff', 0.62), parede('#f2e3d2', '#d9c2a9'));
+    } else if (escolhido === 'linho') {
+      if (!guardados.has('linho')) guardados.set('linho', texturaDeLinho());
+      cenario.add(mesa(guardados.get('linho'), '#ffffff', 0.9), parede('#f7efe4', '#e2d6c6'));
+    } else if (escolhido === 'presente') {
+      cenario.add(caixaDePresente(), mesa(null, '#e2d3bf', 0.85, -1.06), parede('#f7eee3', '#e0cdb8'));
+    }
+    requestRender();
+  }
 
   const controls = new OrbitControls(camera, canvas);
   controls.target.copy(TARGET);
@@ -364,7 +560,7 @@ export async function createMugViewer(container, { onError, onReady, onChange, o
   container.addEventListener('dblclick', aoBaterDuasVezes, true);
 
   let frame = 0, transition = null, texture = null;
-  let fitDistance = 4.8, zoom = 1;
+  let fitDistance = 4.8, zoom = 1, folgaDaCena = 1;
   let width = 0, height = 0;
   const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
@@ -412,6 +608,23 @@ export async function createMugViewer(container, { onError, onReady, onChange, o
     requestRender();
   }
 
+  /** A distância que enquadra a peça; com cenário, ela abre para a mesa e a caixa aparecerem. */
+  function calculaEnquadramento() {
+    const halfFov = THREE.MathUtils.degToRad(camera.fov / 2);
+    // Space for the handle and shadow in portrait as well as landscape layouts.
+    const base = Math.max(2.32 / (2 * Math.tan(halfFov)), 2.98 / (2 * Math.tan(halfFov) * camera.aspect));
+    fitDistance = Math.max(4.05, base) * folgaDaCena;
+    controls.minDistance = fitDistance / 1.55;
+    controls.maxDistance = fitDistance / 0.64;
+  }
+
+  function reenquadra(priorFit) {
+    const offset = camera.position.clone().sub(controls.target);
+    if (offset.length() > 0.1) camera.position.copy(offset.multiplyScalar(fitDistance / priorFit)).add(controls.target);
+    transition = null;
+    requestRender();
+  }
+
   function resize() {
     if (disposed) return;
     const bounds = container.getBoundingClientRect();
@@ -423,17 +636,9 @@ export async function createMugViewer(container, { onError, onReady, onChange, o
     height = nextHeight;
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
-    const halfFov = THREE.MathUtils.degToRad(camera.fov / 2);
-    // Space for the handle and shadow in portrait as well as landscape layouts.
-    fitDistance = Math.max(2.32 / (2 * Math.tan(halfFov)), 2.98 / (2 * Math.tan(halfFov) * camera.aspect));
-    fitDistance = Math.max(4.05, fitDistance);
-    controls.minDistance = fitDistance / 1.55;
-    controls.maxDistance = fitDistance / 0.64;
-    const offset = camera.position.clone().sub(controls.target);
-    if (offset.length() > 0.1) camera.position.copy(offset.multiplyScalar(fitDistance / priorFit)).add(controls.target);
-    transition = null;
+    calculaEnquadramento();
+    reenquadra(priorFit);
     renderer.setSize(width, height, false);
-    requestRender();
   }
 
   const resizeObserver = new ResizeObserver(resize);
@@ -484,6 +689,59 @@ export async function createMugViewer(container, { onError, onReady, onChange, o
       }
       requestRender();
     },
+    /** Troca a cena de fundo: só a caneca, mesa de madeira, mesa clara ou caixa de presente. */
+    setCenario(id) { if (!disposed) aplicaCenario(id); },
+    /** Vidrado brilhante (padrão) ou fosco. Muda só o material, nunca a cor da peça. */
+    setAcabamento(id) {
+      if (disposed) return;
+      const fosco = id === 'fosco';
+      for (const material of [exterior, interior, handleMaterial]) {
+        material.roughness = fosco ? 0.62 : 0.235;
+        material.clearcoat = fosco ? 0.08 : 0.72;
+        material.clearcoatRoughness = fosco ? 0.6 : 0.145;
+        material.envMapIntensity = fosco ? 0.45 : 0.70;
+        material.needsUpdate = true;
+      }
+      interior.roughness = fosco ? 0.66 : 0.255;
+      requestRender();
+    },
+    /**
+     * Grava a caneca dando uma volta inteira, em WebM, para mandar no WhatsApp ou nas redes.
+     * Sem MediaRecorder no navegador, devolve null e a página esconde o botão.
+     */
+    async gravaVolta({ segundos = 5, aoAndar } = {}) {
+      if (disposed || contextLost || typeof MediaRecorder !== 'function' || !canvas.captureStream) return null;
+      const tipo = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm']
+        .find((t) => MediaRecorder.isTypeSupported?.(t));
+      if (!tipo) return null;
+      transition = null;
+      const partida = new THREE.Spherical().setFromVector3(camera.position.clone().sub(controls.target));
+      const gravador = new MediaRecorder(canvas.captureStream(30), { mimeType: tipo, videoBitsPerSecond: 6_000_000 });
+      const pedacos = [];
+      gravador.ondataavailable = (evento) => { if (evento.data.size) pedacos.push(evento.data); };
+      const pronto = new Promise((resolve) => { gravador.onstop = resolve; });
+      gravador.start();
+      const inicio = performance.now();
+      const duracao = Math.max(2, Math.min(12, segundos)) * 1000;
+      await new Promise((resolve) => {
+        const passo = (agora) => {
+          const t = Math.min(1, (agora - inicio) / duracao);
+          const volta = new THREE.Spherical(partida.radius, partida.phi, partida.theta + t * TAU);
+          camera.position.setFromSpherical(volta).add(controls.target);
+          controls.update();
+          renderer.render(scene, camera);
+          aoAndar?.(t);
+          if (t < 1) requestAnimationFrame(passo); else resolve();
+        };
+        requestAnimationFrame(passo);
+      });
+      gravador.stop();
+      await pronto;
+      camera.position.setFromSpherical(partida).add(controls.target);
+      controls.update();
+      requestRender();
+      return pedacos.length ? new Blob(pedacos, { type: tipo.split(';')[0] }) : null;
+    },
     setColors({ inside, handle: color } = {}) {
       if (disposed) return;
       if (inside) interior.color.set(inside);
@@ -532,6 +790,8 @@ export async function createMugViewer(container, { onError, onReady, onChange, o
       container.removeEventListener('pointercancel', aoSoltar, true);
       container.removeEventListener('dblclick', aoBaterDuasVezes, true);
       controls.dispose();
+      limpaCenario();
+      guardados.forEach((textura) => textura.dispose());
       texture?.dispose();
       const geometries = new Set(), materials = new Set(), maps = new Set();
       scene.traverse((object) => {
