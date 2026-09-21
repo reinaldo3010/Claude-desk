@@ -44,7 +44,14 @@ Três armadilhas que já custaram tempo:
 | `simulador/estudio.js` | Liga tudo: abas, cartões, gestos, histórico, salvar, WhatsApp, Canva |
 | `simulador/modelos.js` | A arte em camadas: catálogos, os 38 modelos e o desenho em milímetros |
 | `simulador/paleta.js` | A paleta da marca num lugar só; todo desenho pede cor por token |
-| `simulador/esportes.js` | Desenha as ilustrações de coleção por curvas, com a tinta escolhida |
+| `simulador/camadas.js` | Os atalhos para escrever uma camada: `foto`, `fotoRedonda`, `frase`, `ilustra`, `panda` |
+| `simulador/colecoes.js` | O balcão das coleções: junta categorias, modelos e ilustrações |
+| `simulador/desenho.js` | O vocabulário de desenho das ilustrações escritas à mão; mede e centra sozinho |
+| `simulador/pets.js` | Coleção de pets: 16 ilustrações e 16 artes |
+| `simulador/datas.js` | Coleção das datas comemorativas: 24 ilustrações e 18 artes |
+| `simulador/bebe.js` | Coleção de bebê e maternidade: 13 ilustrações e 15 artes |
+| `simulador/convites.js` | Coleção de convites e agradecimentos: 14 ilustrações e 15 artes |
+| `simulador/esportes.js` | Desenha as ilustrações esportivas, convertidas de SVG |
 | `simulador/esportes-dados.js` | Os caminhos das 137 ilustrações e os 24 modelos esportivos |
 | `simulador/arte.js` | Compõe a textura, calcula dpi e exporta (300 dpi, gabarito) |
 | `simulador/caneca-3d.js` | A caneca em three.js: geometria, luz, cenas, acabamento, vídeo, clique |
@@ -54,8 +61,8 @@ Três armadilhas que já custaram tempo:
 | `simulador/estudio.css` | Estilo do estúdio, sobre os tokens de `styles.css` |
 | `qa/audit.mjs` | Guardião: site inteiro + estúdio de ponta a ponta |
 | `qa/*-unit.test.mjs` | Testes unitários da arte e dos modelos |
-| `qa/provas.mjs` | Gera as artes dos modelos para revisão visual |
-| `qa/esportes-provas.html` | Catálogo das 24 artes esportivas, desenhado pelo motor do editor |
+| `qa/provas.mjs` | Gera as artes dos modelos para revisão visual, em `qa/shots` |
+| `qa/provas-colecoes.html` | Catálogo das artes das coleções, com filtro por coleção e assunto |
 
 ## 4. Como a arte funciona (o que não dá para esquecer)
 
@@ -77,12 +84,13 @@ Três armadilhas que já custaram tempo:
 interior e da alça, quatro cenas (fundo claro, mesa de madeira, mesa clara, caixa de presente kraft),
 acabamento brilhante ou fosco, vídeo de cinco segundos girando em WebM, prévia em PNG e em 4K.
 
-**Arte.** 38 modelos em 18 categorias, agrupadas em quatro grupos com ordem decidida à mão
-(`ORDEM_DOS_GRUPOS` em `modelos.js`) e busca. Camadas de foto, frase, enfeite (9 desenhos),
+**Arte.** 102 modelos em 29 categorias, agrupadas em sete grupos com ordem decidida à mão
+(`ORDEM_DOS_GRUPOS` em `modelos.js`) e busca. Cada assunto tem pelo menos quatro artes, com teste. Camadas de foto, frase, enfeite (9 desenhos),
 elemento do acervo (8 ilustrações da marca) e Pandinha (9 poses, um por peça). Biblioteca de 15 letras.
 Cores da paleta. Frase em arco.
-A coleção esportiva acrescenta 137 ilustrações desenhadas por curvas (seis modalidades, 24 modelos),
-que entram na arte como camada comum e pintam só por token — a regra está no manual, seção 9.1. Tratamento de foto (6 filtros) e recorte do fundo claro. Cor do fundo da
+Cinco coleções acrescentam ilustração própria, que entra na arte como camada comum e pinta só por
+token: datas comemorativas (24), bebê e maternidade (13), convites e agradecimentos (14),
+esportes (137) e pets (16). A regra está no manual, seção 9.1. Tratamento de foto (6 filtros) e recorte do fundo claro. Cor do fundo da
 arte. Centralizar na frente, no meio, no verso e na altura. Margem de segurança à vista.
 
 **Edição.** Clique e arrasto na própria caneca (com cadeado, fechado por padrão), alças de girar e
@@ -106,21 +114,28 @@ rascunho automático no aparelho, compartilhamento direto no celular, ida e volt
 
 ## 7. Como nasce uma coleção nova
 
-A coleção esportiva é o molde. Uma coleção é:
+`simulador/pets.js` é o molde: um arquivo só, com as ilustrações em cima e os modelos embaixo.
 
-1. **Um grupo e as suas categorias** em `CATEGORIAS` (`modelos.js`), com o grupo listado em
-   `ORDEM_DOS_GRUPOS` — senão o teste reprova.
-2. **As ilustrações**, como caminhos (`M`, `L`, `C`, `Z`) centrados na origem, num arquivo de dados
-   próprio. Cada uma tem `width`, `height`, `primary` (a tinta que a pessoa troca) e `paths`.
-   **Cor só por token da paleta**; o teste reprova hexadecimal solto.
-3. **Os modelos**, cada um uma lista de camadas em fração da área de impressão: ilustrações (tipo
-   `enfeite`), espaços de foto, frases e a semente dos enfeites de fundo.
-4. **Prova visual e teste.** `npm run provas` desenha as artes em `qa/shots`; o teste unitário
-   confere proporção, edição isolada e redistribuição do fundo.
+1. **As ilustrações.** Cada uma é `ilustracao({ primary, partes })`, com as partes no vocabulário de
+   `desenho.js`: `{ circulo }`, `{ elipse }`, `{ retangulo }`, `{ linha }` e `{ d: 'M … C … Z' }`
+   (só comandos maiúsculos; o minúsculo do SVG é relativo e o código recusa). Coordenadas em volta
+   da origem, y para baixo — **o tamanho e o centro são medidos sozinhos**, não se declara nada.
+   Cor só por token da paleta, e a cor `primary` é a que a pessoa troca.
+2. **As categorias**, todas com o mesmo `grupo`, e o grupo listado em `ORDEM_DOS_GRUPOS`
+   (`modelos.js`) — senão o teste reprova.
+3. **Os modelos**, com os atalhos de `camadas.js`: `ilustra`, `foto`, `fotoRedonda`, `frase`. Tudo em
+   fração da área de impressão. Cada arte muda de planta; repetir a planta e trocar a frase reprova.
+4. **Registrar no balcão**: três linhas em `simulador/colecoes.js`.
+5. **Olhar e testar.** `npm run servir` e `qa/provas-colecoes.html` para ver as artes no tamanho de
+   uso; `npm run test:arte` para conferir tamanho, sobreposição, cor e proporção.
 
-A coleção esportiva veio de SVGs convertidos por um script em Python que vive fora do repositório
-(`colecao-esportes/adaptar_modelos.py`, na pasta acima). Coleção nova não precisa daquele caminho:
-dá para escrever os caminhos direto no arquivo de dados.
+O jeito de trabalhar que funcionou: desenhar, **olhar**, corrigir. As primeiras versões das
+ilustrações sempre têm alguma coisa fora do lugar, e isso só aparece olhando.
+
+A coleção esportiva seguiu outro caminho: veio de SVGs convertidos por um script em Python que vive
+fora do repositório (`colecao-esportes/adaptar_modelos.py`, na pasta acima). Por isso o formato dela
+é outro — lista de comandos em vez de partes. Os dois formatos convivem no balcão de propósito;
+coleção nova não precisa do Python.
 
 ## 8. Como continuar sem quebrar nada
 
@@ -129,7 +144,8 @@ dá para escrever os caminhos direto no arquivo de dados.
 3. Toda regra nova de marca entra no manual **e** no histórico do fim dele.
 4. Toda regressão que passar despercebida vira checagem no guardião, com defeito de prova para
    confirmar que a checagem reprova de verdade.
-5. Modelo novo: copie um item de `MODELOS` em `modelos.js` e rode `npm run test:arte`.
+5. Modelo novo: copie um item de `MODELOS` em `modelos.js` e rode `npm run test:arte`. Coleção
+   nova: seção 7 aqui em cima.
 6. Antes de publicar, olhe as provas (`npm run provas`) no tamanho de uso. O guardião confere regras,
    não gosto.
 

@@ -500,9 +500,14 @@ chuteira, uma flor de lótus — que não são elemento de interface nem adesivo
 | **A forma em si não se edita.** Não há edição de nós. | A bicicleta continua sendo uma bicicleta; o estúdio não é o Illustrator. |
 | Traço arredondado, poucas cores, silhueta cheia. Nada de linha fina de biblioteca genérica. | Mesma linguagem dos ícones e dos adesivos puffy. |
 
-A primeira coleção assim é a **esportiva**: 137 ilustrações em seis modalidades (treino funcional,
-musculação, ciclismo, corrida, yoga e pilates, futebol), 24 modelos. Coleção nova segue estas
-mesmas regras e entra com prova visual das artes no tamanho de uso.
+Cinco coleções seguem essa regra hoje: **esportes** (137 ilustrações, 24 artes), **pets** (16
+ilustrações, 16 artes), **datas comemorativas** (24 ilustrações, 24 artes), **bebê e maternidade**
+(13 ilustrações, 16 artes) e **convites e agradecimentos** (14 ilustrações, 16 artes). Coleção nova segue as mesmas
+regras e entra com prova visual das artes no tamanho de uso.
+
+E uma regra de composição, que veio de uma crítica do dono aos primeiros modelos: **variar a frase
+não é variar a arte.** Dentro de uma coleção, cada arte muda de planta — quantas fotos tem, o
+formato delas e onde o texto fica. O teste reprova duas artes com a mesma planta.
 
 ---
 
@@ -918,6 +923,9 @@ adereço pequeno no Pandinha em datas comemorativas, com aprovação prévia (6.
 | Data | Versão | O que mudou |
 |---|---|---|
 | set/2026 | 1.0 | Primeira edição, consolidando a identidade aplicada no site (paleta, tipografia, logo, mascote, tom de voz, aplicações, governança). |
+| set/2026 | 2.15 | Duas coleções novas no seletor: Bebê e maternidade (chegada, chá de bebê, chá revelação, gravidez e primeiro Dia das Mães) e Convites e agradecimentos (padrinhos de casamento e de batismo, madrinhas e daminhas, agradecimento), com 27 ilustrações próprias (9.1). "Bebê" e "Casamento" saem de Momentos e passam a encabeçar os grupos novos. |
+| set/2026 | 2.14 | Datas comemorativas deixam de ter uma arte cada: 18 artes novas e 24 ilustrações próprias (árvore, guirlanda, buquê, gravata, cadeado, quadro-negro, coelho, ovo e companhia), e a Páscoa entra como data nova (9.1). Cada assunto do seletor passa a ter no mínimo quatro artes, com teste cobrando. |
+| set/2026 | 2.13 | Coleção de pets: 16 artes em quatro assuntos (cachorros, gatos, homenagem ao pet, mãe e pai de pet), com 16 ilustrações próprias escritas no vocabulário de desenho da casa. A seção 9.1 ganha a regra de composição: dentro de uma coleção, cada arte muda de planta — variar a frase não é variar a arte. |
 | set/2026 | 2.12 | Coleções de arte com ilustração própria (9.1): a coleção esportiva entra com 24 modelos em seis modalidades e 137 ilustrações desenhadas por curvas, que entram na arte como camada editável e pintam só por token da paleta. O seletor de ocasião passa a ter ordem de grupos decidida à mão, para o catálogo crescer sem embaralhar a tela (10.3). |
 | set/2026 | 2.11 | Arte ganha frase em arco, elementos do acervo da marca, tratamento e recorte de fundo de foto, cor de fundo, centralizar e margem de segurança à vista; o trabalho passa a ficar guardado no aparelho como rascunho, com link da montagem para mandar a ideia; prévia em 4K, compartilhamento direto no celular e "vários nomes de uma vez" entregando uma arte por nome num arquivo só (10.3). |
 | set/2026 | 2.10 | Estúdio ganha cena na prévia (fundo claro, mesa de madeira, mesa clara e caixa de presente kraft), acabamento brilhante ou fosco e vídeo da caneca girando em WebM (10.3); biblioteca de 15 letras para a arte do cliente, com as doze novas em OFL servidas do nosso endereço (8.1.1); "Levar minha arte para o Canva" passa a baixar a arte junto. Guardião ganha a trava do padrão visual dos campos. |

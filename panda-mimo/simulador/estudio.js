@@ -14,7 +14,7 @@
 import { createMugViewer, MUG_SPEC, CENARIOS, ACABAMENTOS } from './caneca-3d.js';
 import { loadArtwork, composeArtwork, exportPrintArtwork, exportGuideArtwork, tamanhoRecomendado, printAreaOf } from './arte.js';
 import { FONTES_DA_ARTE, carregaFontes, fontePorValor } from './fontes.js';
-import { vetorEsportivo, TAMANHO_DA_ILUSTRACAO } from './esportes.js';
+import { ehIlustracao, TAMANHO_DA_ILUSTRACAO } from './colecoes.js';
 import { fazZip } from './zip.js';
 import { salvaRascunho, leRascunho, apagaRascunho, quandoFoi } from './rascunho.js';
 import {
@@ -872,7 +872,7 @@ function atualizaModo() {
 /* ---------- cartões de camada ---------- */
 /** Ilustração de coleção cresce mais que enfeite: ela nasce larga e a pessoa costuma querer maior. */
 function limiteDeTamanho(camada) {
-  return vetorEsportivo(camada.forma) ? TAMANHO_DA_ILUSTRACAO : LIMITES.enfeiteTamanho;
+  return ehIlustracao(camada.forma) ? TAMANHO_DA_ILUSTRACAO : LIMITES.enfeiteTamanho;
 }
 
 function rotuloDaCamada(camada) {

@@ -48,17 +48,36 @@ Enquanto o preço estiver vazio, a tela de detalhe mostra "Valor sob consulta".
 `vendor/three/`, sem CDN), escolher as cores do interior e da alça, escrever um nome e baixar a prévia, a
 arte plana em 300 dpi (210 × 90 mm) ou o projeto para continuar depois.
 
-Há também **modelos de arte por ocasião**: 38 artes que dão a volta inteira na caneca, com espaços de
-foto — de uma a seis — e frases prontas, organizadas em quatro grupos no seletor: Datas comemorativas
-(Natal, Mães, Pais, Namorados, Professores), Momentos (Aniversário, Casamento, Bebê, Amizade e
-formatura), Esportes e movimento e Do dia a dia (Pet, Só fotos).
+Há também **modelos de arte por ocasião**: 102 artes que dão a volta inteira na caneca, com espaços
+de foto — de uma a seis — e frases prontas, organizadas em sete grupos no seletor: Datas
+comemorativas, Momentos, Bebê e maternidade, Convites e agradecimentos, Pets e bichinhos, Esportes e
+movimento e Do dia a dia.
 
-**Coleção esportiva.** Seis modalidades — treino funcional, musculação, ciclismo, corrida, yoga e
-pilates, futebol — com quatro artes cada. As 137 ilustrações da coleção são desenhadas por curvas em
-`simulador/esportes.js`, a partir dos caminhos de `simulador/esportes-dados.js`: entram na arte como
-camadas comuns, então a pessoa move, gira, redimensiona, recolore e apaga cada uma. Não é um editor de
-nós: a bicicleta continua sendo uma bicicleta. As cores saem dos tokens da paleta, como no resto do
-site. Para olhar as 24 no tamanho de uso, abra `qa/esportes-provas.html` com o `npm run servir`.
+### Coleções de arte
+
+Uma coleção é um grupo do seletor com as suas categorias, os seus modelos e as suas **ilustrações
+próprias**. As ilustrações entram na arte como camadas comuns: a pessoa move, gira, redimensiona,
+recolore e apaga cada uma. Não é um editor de nós — a bicicleta continua sendo uma bicicleta. As
+cores saem dos tokens da paleta, como no resto do site (manual, seção 9.1).
+
+| Coleção | Assuntos | Artes | Ilustrações |
+|---|---|---|---|
+| Datas comemorativas | Natal, Mães, Pais, Namorados, Professores, Páscoa | 24 | 24, escritas à mão (`simulador/datas.js`) |
+| Bebê e maternidade | chegada, chá de bebê, chá revelação, gravidez e primeiro Dia das Mães | 16 | 13, escritas à mão (`simulador/bebe.js`) |
+| Convites e agradecimentos | padrinhos de casamento e de batismo, madrinhas e daminhas, agradecimento | 16 | 14, escritas à mão (`simulador/convites.js`) |
+| Esportes e movimento | funcional, musculação, ciclismo, corrida, yoga e pilates, futebol | 24 | 137, convertidas de SVG (`simulador/esportes-dados.js`) |
+| Pets e bichinhos | cachorros, gatos, homenagem ao pet, mãe e pai de pet | 16 | 16, escritas à mão (`simulador/pets.js`) |
+
+Cada assunto tem pelo menos quatro artes, e o teste cobra isso: assunto com uma arte só não dá
+escolha a ninguém.
+
+`simulador/colecoes.js` é o balcão onde as coleções se juntam; coleção nova entra ali em três linhas.
+As ilustrações escritas à mão usam o vocabulário de `simulador/desenho.js` (círculo, elipse,
+retângulo, linha e caminho), que **mede e centra o desenho sozinho** — nada de contar coordenada na
+mão para a caixa de seleção bater.
+
+Para olhar as artes no tamanho de uso, suba o site com `npm run servir` e abra
+`qa/provas-colecoes.html`, que filtra por coleção e por assunto.
 
 **A arte é editável em camadas.** A pessoa clica em cima da caneca em 3D para escolher um item e arrasta
 para mover; pode soltar uma foto direto na peça, acrescentar frase, enfeite (coração, flor, estrela,

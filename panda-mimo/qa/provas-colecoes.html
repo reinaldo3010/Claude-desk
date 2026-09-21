@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="pt-BR">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Provas das coleções de arte — Panda Mimo</title>
+<link rel="stylesheet" href="../styles.css">
+<style>
+body{padding:32px;background:var(--paper);color:var(--ink)}main{max-width:1320px;margin:auto}
+h1,h2{font-family:Fredoka,sans-serif}h1{font-size:36px}p{margin:16px 0}
+.filtros{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end}
+label{display:block;font:600 .9rem var(--f-body)}
+select{width:100%;display:block;margin-top:6px;border:1.5px solid var(--sand);border-radius:10px;padding:10px 12px;
+  background:var(--paper);color:var(--ink);font:600 1rem var(--f-body);min-height:46px}
+#modelos{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:24px}
+article{padding:18px;border:1px solid var(--sand);border-radius:16px;background:var(--white)}
+h2{font-size:20px;margin:0 0 4px}canvas{width:100%;height:auto}small{color:var(--sage-deep)}
+@media(max-width:760px){body{padding:16px}#modelos{grid-template-columns:1fr}}
+</style>
+<main>
+  <h1>Provas das coleções de arte</h1>
+  <p>Cada arte aqui é desenhada pelo mesmo motor do estúdio, na medida de uso (21 × 9 cm). Serve para
+     a revisão humana antes de publicar: o guardião confere regra, não gosto.</p>
+  <div class="filtros">
+    <div><label for="grupo">Coleção</label><select id="grupo"><option value="todos">Todas as coleções</option></select></div>
+    <div><label for="categoria">Assunto</label><select id="categoria"><option value="todos">Todos os assuntos</option></select></div>
+  </div>
+  <p><a href="../caneca-3d.html">Abrir o estúdio para personalizar</a></p>
+  <p id="conta"></p>
+  <section id="modelos" aria-label="Provas das artes"></section>
+</main>
+<script type="module">
+import { CATEGORIAS_DE_COLECAO, MODELOS_DE_COLECAO } from '../simulador/colecoes.js';
+import { CATEGORIAS, novaArte, desenhaArte } from '../simulador/modelos.js';
+await document.fonts.ready;
+await Promise.all(['600 14px Fredoka', '600 14px Nunito', '600 14px Caveat'].map((f) => document.fonts.load(f)));
+
+const elGrupo = document.getElementById('grupo');
+const elCategoria = document.getElementById('categoria');
+const lista = document.getElementById('modelos');
+const conta = document.getElementById('conta');
+const todasAsCategorias = [...CATEGORIAS_DE_COLECAO, ...CATEGORIAS];
+const categoria = (id) => todasAsCategorias.find((c) => c.id === id) || null;
+const nomeDaCategoria = (id) => categoria(id)?.nome || id;
+
+const grupoDosModelos = new Set(MODELOS_DE_COLECAO.map((m) => categoria(m.categoria)?.grupo).filter(Boolean));
+for (const nome of grupoDosModelos) {
+  elGrupo.append(new Option(nome, nome));
+}
+
+function montaCategorias() {
+  const usadas = new Set(MODELOS_DE_COLECAO.map((m) => m.categoria));
+  const cabem = todasAsCategorias.filter((c) => usadas.has(c.id))
+    .filter((c) => elGrupo.value === 'todos' || c.grupo === elGrupo.value);
+  const escolhido = elCategoria.value;
+  elCategoria.replaceChildren(new Option('Todos os assuntos', 'todos'), ...cabem.map((c) => new Option(c.nome, c.id)));
+  elCategoria.value = cabem.some((c) => c.id === escolhido) ? escolhido : 'todos';
+}
+
+function desenha() {
+  const modelos = MODELOS_DE_COLECAO.filter((m) => (elGrupo.value === 'todos' || categoria(m.categoria)?.grupo === elGrupo.value)
+    && (elCategoria.value === 'todos' || m.categoria === elCategoria.value));
+  conta.textContent = `${modelos.length} ${modelos.length === 1 ? 'arte' : 'artes'}.`;
+  lista.replaceChildren();
+  for (const m of modelos) {
+    const cartao = document.createElement('article');
+    const titulo = document.createElement('h2');
+    const legenda = document.createElement('small');
+    const canvas = document.createElement('canvas');
+    titulo.textContent = m.nome;
+    legenda.textContent = `${nomeDaCategoria(m.categoria)} · ${m.id} · ${m.camadas.length} camadas editáveis`;
+    canvas.width = 1260;
+    canvas.height = 540;
+    canvas.setAttribute('role', 'img');
+    canvas.setAttribute('aria-label', `${m.nome} — arte aberta`);
+    const ctx = canvas.getContext('2d');
+    ctx.scale(6, 6);
+    desenhaArte(ctx, novaArte(m), { x: 0, y: 0, width: 210, height: 90 });
+    cartao.append(titulo, legenda, canvas);
+    lista.append(cartao);
+  }
+}
+
+elGrupo.addEventListener('change', () => { montaCategorias(); desenha(); });
+elCategoria.addEventListener('change', desenha);
+montaCategorias();
+desenha();
+</script>
+</html>

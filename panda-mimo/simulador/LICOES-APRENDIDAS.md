@@ -63,3 +63,24 @@ repetir. Companheiro de `COMECE-AQUI.md`.
   identidade da marca. Isso está registrado para não voltar como "ideia nova".
 - **O diretório pode ter trabalho de outra sessão.** Confira `git status` antes de `git add -A`, e
   nunca commite o que não é seu sem perguntar.
+
+## Das coleções de arte
+
+- **Declarar o tamanho da ilustração na mão dá caixa errada.** As dezesseis primeiras ilustrações
+  de pets tinham a caixa declarada maior que o desenho, e a alça de redimensionar pegava no vazio.
+  A correção foi `ilustracao()` medir o desenho e centrar sozinho. Ninguém conta coordenada na mão.
+- **A curva não chega no ponto de controle.** Medir uma bézier pelos pontos de controle infla a
+  caixa; `limitesDaIlustracao` amostra a curva. Há teste para isso, com número apertado dos dois lados.
+- **Comando minúsculo de SVG é relativo.** Aceitar `l` como se fosse `L` desenha outra coisa em
+  silêncio. O código recusa alto, no desenho e na medida.
+- **Canvas em branco vem transparente, e transparente passa por escuro.** A primeira versão da
+  checagem "a arte saiu em branco" olhava só o RGB: alfa 0 dá (0,0,0), que parece tinta preta. O
+  defeito de prova passou batido até a checagem olhar o alfa.
+- **Cor clara demais some no fundo claro.** As pegadas em areia sobre papel praticamente não
+  apareciam na prova. Ilustração decorativa em fundo claro pede pelo menos kraft.
+- **Desenhar, olhar, corrigir.** Toda ilustração saiu errada em algum detalhe na primeira versão —
+  orelha de cachorro que virava orelha de urso, boca de peixe no meio do corpo. Só apareceu olhando
+  a prova. Vale renderizar a folha de contato antes de montar os modelos.
+- **Coleção nova não pode pular para a frente do seletor.** Ao entrar, a coleção esportiva ficou
+  antes das datas comemorativas porque foi espalhada no topo do array. A ordem dos grupos passou a
+  ser uma lista escrita à mão (`ORDEM_DOS_GRUPOS`), com teste.

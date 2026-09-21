@@ -17,8 +17,8 @@
 // a volta tem PI*82 mm e a área impressa, 210 mm centrados nela.
 import { pesoDaFonte } from './fontes.js';
 import { cor } from './paleta.js';
-import { MODELOS_ESPORTES, CATEGORIAS_ESPORTES } from './esportes-dados.js';
-import { vetorEsportivo, desenhaVetorEsportivo } from './esportes.js';
+import { foto, frase, panda } from './camadas.js';
+import { CATEGORIAS_DE_COLECAO, MODELOS_DE_COLECAO, proporcaoDaForma, desenhaIlustracaoDeColecao } from './colecoes.js';
 
 const VOLTA_MM = Math.PI * 82, AREA_MM = 210;
 export const FRENTE = (0.25 * VOLTA_MM - (VOLTA_MM - AREA_MM) / 2) / AREA_MM;
@@ -57,11 +57,11 @@ export const CATEGORIAS = Object.freeze([
   { id: 'namorados', grupo: 'Datas comemorativas', nome: 'Namorados', descricao: 'Aniversário de namoro e Dia dos Namorados' },
   { id: 'professores', grupo: 'Datas comemorativas', nome: 'Professores', descricao: 'Fim de ano letivo e Dia dos Professores' },
   { id: 'aniversario', grupo: 'Momentos', nome: 'Aniversário', descricao: 'Parabéns com foto e idade' },
-  { id: 'casamento', grupo: 'Momentos', nome: 'Casamento', descricao: 'Convite de padrinhos e lembrança dos noivos' },
-  { id: 'bebe', grupo: 'Momentos', nome: 'Bebê', descricao: 'Chá de bebê, chegada e primeiro aninho' },
+  { id: 'bebe', grupo: 'Bebê e maternidade', nome: 'Chegada do bebê', descricao: 'A chegada, o nome e os pezinhos' },
+  { id: 'casamento', grupo: 'Convites e agradecimentos', nome: 'Padrinhos de casamento', descricao: 'Convite de padrinhos e lembrança dos noivos' },
   { id: 'amizade', grupo: 'Momentos', nome: 'Amizade e formatura', descricao: 'Amiga, turma, time do trabalho' },
-  ...CATEGORIAS_ESPORTES,
-  { id: 'pet', grupo: 'Do dia a dia', nome: 'Pet', descricao: 'Pro cachorro, o gato, o bichinho da casa' },
+  { id: 'pet', grupo: 'Pets e bichinhos', nome: 'Várias fotos do pet', descricao: 'Três fotos do bichinho e o nome' },
+  ...CATEGORIAS_DE_COLECAO,
   { id: 'fotos', grupo: 'Do dia a dia', nome: 'Só fotos', descricao: 'Várias fotos ao redor, sem data' },
 ]);
 
@@ -73,6 +73,9 @@ export const CATEGORIAS = Object.freeze([
 export const ORDEM_DOS_GRUPOS = Object.freeze([
   'Datas comemorativas',
   'Momentos',
+  'Bebê e maternidade',
+  'Convites e agradecimentos',
+  'Pets e bichinhos',
   'Esportes e movimento',
   'Do dia a dia',
 ]);
@@ -185,7 +188,7 @@ export const ENFEITES = Object.freeze([
 
 /** Desenha um enfeite solto (miniatura do painel, por exemplo), já centrado. */
 export function desenhaForma(ctx, forma, tamanho, tinta) {
-  if (desenhaVetorEsportivo(ctx, forma, tamanho, tinta)) return;
+  if (desenhaIlustracaoDeColecao(ctx, forma, tamanho, tinta)) return;
   const desenha = FORMAS[forma] || FORMAS.coracao;
   if (CONTORNO.has(forma)) {
     ctx.strokeStyle = tinta;
@@ -257,12 +260,6 @@ function sorteio(semente) {
 }
 
 /* Atalhos para escrever os modelos sem repetição. */
-const foto = (id, rotulo, forma, x, y, largura, altura) =>
-  ({ id, tipo: 'foto', rotulo, forma, x, y, largura, altura, rotacao: 0, ajuste: { scale: 1, offsetX: 0, offsetY: 0 } });
-const frase = (id, rotulo, texto, x, y, tamanho, extra = {}) =>
-  ({ id, tipo: 'frase', rotulo, texto, x, y, tamanho, largura: 0.3, fonte: 'Caveat', cor: '--hand-ink', rotacao: 0, ...extra });
-const panda = (x, y, tamanho = 0.15, arquivo = 'assets/panda-coracao.webp') =>
-  ({ id: 'pandinha', tipo: 'adesivo', rotulo: 'Pandinha', arquivo, x, y, tamanho, rotacao: 0 });
 
 const MODELOS = [
   {
@@ -453,7 +450,7 @@ const MODELOS = [
   },
 ];
 
-export const TEMPLATES = Object.freeze([...MODELOS, ...MODELOS_ESPORTES].map((m) => Object.freeze({ ...m, camadas: Object.freeze(m.camadas) })));
+export const TEMPLATES = Object.freeze([...MODELOS, ...MODELOS_DE_COLECAO].map((m) => Object.freeze({ ...m, camadas: Object.freeze(m.camadas) })));
 export const modeloPorId = (id) => TEMPLATES.find((m) => m.id === id) || null;
 export const modelosDaCategoria = (categoria) =>
   (!categoria || categoria === 'todos' ? TEMPLATES : TEMPLATES.filter((m) => m.categoria === categoria));
@@ -500,8 +497,9 @@ export function caixaDaCamada(camada, printArea, medidor) {
     }
   } else {
     largura = camada.tamanho * printArea.height;
-    const vetor = camada.tipo === 'enfeite' && vetorEsportivo(camada.forma);
-    altura = vetor ? largura * vetor.height / vetor.width : largura;
+    // Ilustração de coleção não é quadrada: a caixa acompanha a proporção do desenho.
+    const proporcao = camada.tipo === 'enfeite' ? proporcaoDaForma(camada.forma) : null;
+    altura = proporcao ? largura * proporcao : largura;
   }
   return { x: centroX - largura / 2, y: centroY - altura / 2, width: largura, height: altura, centroX, centroY };
 }
