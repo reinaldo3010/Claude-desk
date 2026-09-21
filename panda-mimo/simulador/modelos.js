@@ -1,10 +1,13 @@
 /**
- * Modelos de arte da caneca: artes de volta inteira (360°) com espaços de foto e frases editáveis.
+ * Arte da caneca em camadas: fotos, frases, enfeites e o Pandinha, livres na volta inteira.
  *
  * Toda medida é fração da área de impressão (210 × 90 mm), então o mesmo desenho serve para a
- * prévia 3D, para a arte aberta na tela e para o arquivo de 300 dpi, sem recalcular nada.
+ * prévia 3D, para a vista aberta e para o arquivo de 300 dpi, sem recalcular nada.
  * x=0 é a borda esquerda da área (junto da alça) e x=1 a direita; y=0 é o topo.
  * A frente da caneca fica em x≈0,193 e o verso em x≈0,807 (marcas de dobra da arte aberta).
+ *
+ * Um modelo é só um conjunto inicial de camadas: depois de escolhido, tudo nele pode ser movido,
+ * reescrito, trocado de cor, duplicado ou apagado, e camadas novas podem entrar.
  *
  * Cores saem da paleta da marca (manual, seção 7). Os valores abaixo são o valor de reserva usado
  * quando não há CSS (testes em Node); na página, cada token é lido de styles.css.
@@ -33,13 +36,43 @@ export function cor(token) {
   return PALETA[token] || PALETA['--ink'];
 }
 
+/** Cores que a pessoa escolhe para uma frase ou um enfeite: só a paleta, só o que se lê na cerâmica. */
+export const CORES_DE_ARTE = Object.freeze([
+  { token: '--ink', nome: 'Nanquim' },
+  { token: '--peach-ink', nome: 'Pêssego escuro' },
+  { token: '--hand-ink', nome: 'Pêssego' },
+  { token: '--peach', nome: 'Pêssego claro' },
+  { token: '--sage-deep', nome: 'Sálvia escura' },
+  { token: '--sage', nome: 'Sálvia' },
+  { token: '--kraft', nome: 'Kraft' },
+  { token: '--sand', nome: 'Areia' },
+]);
+
+export const FONTES = Object.freeze([
+  { valor: 'Fredoka', nome: 'Redondinha' },
+  { valor: 'Caveat', nome: 'Manuscrita' },
+  { valor: 'Nunito', nome: 'Simples' },
+]);
+
+export const FORMAS_DE_FOTO = Object.freeze([
+  { valor: 'arredondado', nome: 'Quadro' },
+  { valor: 'circulo', nome: 'Círculo' },
+  { valor: 'coracao', nome: 'Coração' },
+  { valor: 'retangulo', nome: 'Reto' },
+]);
+
 export const CATEGORIAS = Object.freeze([
-  { id: 'livre', nome: 'Sem modelo', descricao: 'Sua foto sozinha, do seu jeito' },
+  { id: 'livre', nome: 'Sem modelo', descricao: 'Sua arte pronta, do jeito que você fez' },
   { id: 'namorados', nome: 'Namorados', descricao: 'Aniversário de namoro, casamento, Dia dos Namorados' },
   { id: 'aniversario', nome: 'Aniversário', descricao: 'Parabéns com foto e idade' },
   { id: 'natal', nome: 'Natal', descricao: 'Fim de ano e amigo secreto' },
   { id: 'maes', nome: 'Dia das Mães', descricao: 'Pra mãe, a avó, a madrinha' },
   { id: 'pais', nome: 'Dia dos Pais', descricao: 'Pro pai, o avô, o padrinho' },
+  { id: 'professores', nome: 'Professores', descricao: 'Fim de ano letivo e Dia dos Professores' },
+  { id: 'casamento', nome: 'Casamento', descricao: 'Convite de padrinhos e lembrança dos noivos' },
+  { id: 'bebe', nome: 'Bebê', descricao: 'Chá de bebê, chegada e primeiro aninho' },
+  { id: 'pet', nome: 'Pet', descricao: 'Pro cachorro, o gato, o bichinho da casa' },
+  { id: 'amizade', nome: 'Amizade', descricao: 'Amiga, formatura, time do trabalho' },
   { id: 'fotos', nome: 'Só fotos', descricao: 'Várias fotos ao redor, sem data' },
 ]);
 
@@ -96,8 +129,75 @@ const FORMAS = {
     ctx.quadraticCurveTo(-t * 0.36, 0, 0, -t * 0.42);
     ctx.closePath();
   },
+  pata(ctx, t) {
+    ctx.beginPath();
+    ctx.ellipse(0, t * 0.16, t * 0.26, t * 0.22, 0, 0, Math.PI * 2);
+    for (const [dx, dy, r, giro] of [[-0.26, -0.16, 0.11, -0.4], [-0.09, -0.3, 0.1, -0.15], [0.09, -0.3, 0.1, 0.15], [0.26, -0.16, 0.11, 0.4]]) {
+      ctx.moveTo((dx + r) * t, dy * t);
+      ctx.ellipse(dx * t, dy * t, r * t, r * t * 1.25, giro, 0, Math.PI * 2);
+    }
+    ctx.closePath();
+  },
+  xicara(ctx, t) {
+    ctx.beginPath();
+    ctx.moveTo(-t * 0.3, -t * 0.22);
+    ctx.lineTo(t * 0.22, -t * 0.22);
+    ctx.lineTo(t * 0.16, t * 0.3);
+    ctx.quadraticCurveTo(-t * 0.07, t * 0.38, -t * 0.24, t * 0.3);
+    ctx.closePath();
+    ctx.moveTo(t * 0.22, -t * 0.12);
+    ctx.quadraticCurveTo(t * 0.46, -t * 0.02, t * 0.19, t * 0.12);
+    ctx.lineTo(t * 0.2, t * 0.02);
+    ctx.quadraticCurveTo(t * 0.34, -t * 0.02, t * 0.21, -t * 0.06);
+    ctx.closePath();
+  },
 };
 const CONTORNO = new Set(['floco']);
+
+/** Enfeites que a pessoa pode acrescentar, na ordem em que aparecem no painel. */
+export const ENFEITES = Object.freeze([
+  { forma: 'coracao', nome: 'Coração' },
+  { forma: 'flor', nome: 'Flor' },
+  { forma: 'estrela', nome: 'Estrela' },
+  { forma: 'bolinha', nome: 'Bolinha' },
+  { forma: 'pata', nome: 'Patinha' },
+  { forma: 'floco', nome: 'Floco de neve' },
+  { forma: 'confete', nome: 'Confete' },
+  { forma: 'folha', nome: 'Folha' },
+  { forma: 'xicara', nome: 'Xícara' },
+]);
+
+/** Desenha um enfeite solto (miniatura do painel, por exemplo), já centrado. */
+export function desenhaForma(ctx, forma, tamanho, tinta) {
+  const desenha = FORMAS[forma] || FORMAS.coracao;
+  if (CONTORNO.has(forma)) {
+    ctx.strokeStyle = tinta;
+    ctx.lineWidth = Math.max(0.35, tamanho * 0.07);
+    ctx.lineCap = 'round';
+    desenha(ctx, tamanho);
+    ctx.stroke();
+  } else {
+    ctx.fillStyle = tinta;
+    desenha(ctx, tamanho);
+    ctx.fill();
+  }
+}
+
+/**
+ * Poses do Pandinha adesivo já aprovadas no acervo (manual 6.3). O 3D de cena (6.5) não entra
+ * em peça de cliente, e vale sempre um Pandinha por caneca (6.4).
+ */
+export const ADESIVOS = Object.freeze([
+  { arquivo: 'assets/panda-coracao.webp', nome: 'Abraçando um coração' },
+  { arquivo: 'assets/panda-joinha.webp', nome: 'Fazendo joinha' },
+  { arquivo: 'assets/panda-presente.webp', nome: 'Com um presente' },
+  { arquivo: 'assets/panda-presente-2.webp', nome: 'Abrindo o presente' },
+  { arquivo: 'assets/panda-caixa.webp', nome: 'Dentro da caixa' },
+  { arquivo: 'assets/panda-carrinho.webp', nome: 'No carrinho' },
+  { arquivo: 'assets/panda-copo.webp', nome: 'Com o copo' },
+  { arquivo: 'assets/panda-dormindo.webp', nome: 'Dormindo' },
+  { arquivo: 'assets/panda-carinha.webp', nome: 'Só a carinha' },
+]);
 
 /** Sorteio sempre igual para o mesmo modelo: a arte nunca muda entre a prévia e o arquivo final. */
 function sorteio(semente) {
@@ -110,33 +210,41 @@ function sorteio(semente) {
   };
 }
 
+/* Atalhos para escrever os modelos sem repetição. */
+const foto = (id, rotulo, forma, x, y, largura, altura) =>
+  ({ id, tipo: 'foto', rotulo, forma, x, y, largura, altura, rotacao: 0, ajuste: { scale: 1, offsetX: 0, offsetY: 0 } });
+const frase = (id, rotulo, texto, x, y, tamanho, extra = {}) =>
+  ({ id, tipo: 'frase', rotulo, texto, x, y, tamanho, largura: 0.3, fonte: 'Caveat', cor: '--hand-ink', rotacao: 0, ...extra });
+const panda = (x, y, tamanho = 0.15, arquivo = 'assets/panda-coracao.webp') =>
+  ({ id: 'pandinha', tipo: 'adesivo', rotulo: 'Pandinha', arquivo, x, y, tamanho, rotacao: 0 });
+
 const MODELOS = [
   {
     id: 'namorados-coracoes', categoria: 'namorados', nome: 'Corações ao redor',
     descricao: 'Duas fotos e uma frase, com corações em toda a volta',
     fundo: '--paper', semente: 12,
     enfeites: { formas: ['coracao', 'bolinha'], cores: ['--peach', '--peach-deep', '--sand'], quantidade: 46, tamanho: [3.5, 9] },
-    fotos: [
-      { id: 'a', rotulo: 'Foto da frente', forma: 'coracao', x: FRENTE, y: 0.44, largura: 0.30, altura: 0.72 },
-      { id: 'b', rotulo: 'Foto do verso', forma: 'coracao', x: VERSO, y: 0.44, largura: 0.30, altura: 0.72 },
-    ],
-    textos: [
-      { id: 'principal', rotulo: 'Frase do meio', valor: 'a gente combina', max: 22, fonte: 'Caveat', cor: '--hand-ink', x: 0.5, y: 0.42, largura: 0.20, tamanho: 13 },
-      { id: 'data', rotulo: 'Data ou nome', valor: 'desde 2019', max: 18, fonte: 'Fredoka', cor: '--ink', x: 0.5, y: 0.62, largura: 0.18, tamanho: 6 },
+    camadas: [
+      foto('a', 'Foto da frente', 'coracao', FRENTE, 0.44, 0.30, 0.72),
+      foto('b', 'Foto do verso', 'coracao', VERSO, 0.44, 0.30, 0.72),
+      frase('principal', 'Frase do meio', 'a gente combina', 0.5, 0.42, 13, { largura: 0.2 }),
+      frase('data', 'Data ou nome', 'desde 2019', 0.5, 0.62, 6, { largura: 0.18, fonte: 'Fredoka', cor: '--ink' }),
+      panda(0.5, 0.88, 0.16),
     ],
   },
   {
-    id: 'namorados-momentos', panda: 0.5, categoria: 'namorados', nome: 'Nossos momentos',
+    id: 'namorados-momentos', categoria: 'namorados', nome: 'Nossos momentos',
     descricao: 'Três fotos em fila com uma frase embaixo',
     fundo: '--cream', semente: 27,
     enfeites: { formas: ['coracao'], cores: ['--peach', '--sand'], quantidade: 26, tamanho: [3, 6.5] },
-    fotos: [
-      { id: 'a', rotulo: 'Primeira foto', forma: 'arredondado', x: FRENTE, y: 0.40, largura: 0.26, altura: 0.60 },
-      { id: 'b', rotulo: 'Segunda foto', forma: 'arredondado', x: 0.5, y: 0.40, largura: 0.26, altura: 0.60 },
-      { id: 'c', rotulo: 'Terceira foto', forma: 'arredondado', x: VERSO, y: 0.40, largura: 0.26, altura: 0.60 },
-    ],
-    textos: [
-      { id: 'principal', rotulo: 'Frase de baixo', valor: 'nossos momentos', max: 26, fonte: 'Caveat', cor: '--hand-ink', x: FRENTE, y: 0.85, largura: 0.28, tamanho: 9, repetir: [FRENTE, 0.5, VERSO] },
+    camadas: [
+      foto('a', 'Primeira foto', 'arredondado', FRENTE, 0.40, 0.26, 0.60),
+      foto('b', 'Segunda foto', 'arredondado', 0.5, 0.40, 0.26, 0.60),
+      foto('c', 'Terceira foto', 'arredondado', VERSO, 0.40, 0.26, 0.60),
+      frase('f1', 'Frase da primeira', 'nossos momentos', FRENTE, 0.85, 9, { largura: 0.26, grupo: 'legenda' }),
+      frase('f2', 'Frase da segunda', 'nossos momentos', 0.5, 0.85, 9, { largura: 0.26, grupo: 'legenda' }),
+      frase('f3', 'Frase da terceira', 'nossos momentos', VERSO, 0.85, 9, { largura: 0.26, grupo: 'legenda' }),
+      panda(0.345, 0.86, 0.14),
     ],
   },
   {
@@ -144,12 +252,11 @@ const MODELOS = [
     descricao: 'Uma foto grande, nome e idade, com confete na volta toda',
     fundo: '--paper', semente: 41,
     enfeites: { formas: ['confete', 'bolinha', 'estrela'], cores: ['--peach', '--sage', '--kraft', '--peach-deep'], quantidade: 58, tamanho: [3, 8] },
-    fotos: [
-      { id: 'a', rotulo: 'Foto do aniversariante', forma: 'circulo', x: FRENTE, y: 0.46, largura: 0.28, altura: 0.68 },
-    ],
-    textos: [
-      { id: 'principal', rotulo: 'Parabéns para', valor: 'Parabéns, Malu!', max: 24, fonte: 'Caveat', cor: '--hand-ink', x: VERSO, y: 0.40, largura: 0.30, tamanho: 13 },
-      { id: 'idade', rotulo: 'Idade ou data', valor: '25 anos', max: 16, fonte: 'Fredoka', cor: '--ink', x: VERSO, y: 0.64, largura: 0.22, tamanho: 7 },
+    camadas: [
+      foto('a', 'Foto do aniversariante', 'circulo', FRENTE, 0.46, 0.28, 0.68),
+      frase('principal', 'Parabéns para', 'Parabéns, Malu!', VERSO, 0.40, 13, { largura: 0.3 }),
+      frase('idade', 'Idade ou data', '25 anos', VERSO, 0.64, 7, { largura: 0.22, fonte: 'Fredoka', cor: '--ink' }),
+      panda(0.5, 0.86, 0.16, 'assets/panda-presente.webp'),
     ],
   },
   {
@@ -157,13 +264,12 @@ const MODELOS = [
     descricao: 'Duas fotos, flocos de neve e o recado de fim de ano',
     fundo: '--cream', semente: 63,
     enfeites: { formas: ['floco', 'bolinha'], cores: ['--sage-deep', '--peach', '--kraft'], quantidade: 44, tamanho: [4, 9] },
-    fotos: [
-      { id: 'a', rotulo: 'Foto da frente', forma: 'circulo', x: FRENTE, y: 0.45, largura: 0.26, altura: 0.64 },
-      { id: 'b', rotulo: 'Foto do verso', forma: 'circulo', x: VERSO, y: 0.45, largura: 0.26, altura: 0.64 },
-    ],
-    textos: [
-      { id: 'principal', rotulo: 'Frase do meio', valor: 'Feliz Natal', max: 20, fonte: 'Caveat', cor: '--sage-deep', x: 0.5, y: 0.40, largura: 0.20, tamanho: 13 },
-      { id: 'assinatura', rotulo: 'Assinatura', valor: 'da nossa família pra sua', max: 30, fonte: 'Fredoka', cor: '--ink', x: 0.5, y: 0.63, largura: 0.22, tamanho: 5 },
+    camadas: [
+      foto('a', 'Foto da frente', 'circulo', FRENTE, 0.45, 0.26, 0.64),
+      foto('b', 'Foto do verso', 'circulo', VERSO, 0.45, 0.26, 0.64),
+      frase('principal', 'Frase do meio', 'Feliz Natal', 0.5, 0.40, 13, { largura: 0.2, cor: '--sage-deep' }),
+      frase('assinatura', 'Assinatura', 'da nossa família pra sua', 0.5, 0.63, 5, { largura: 0.22, fonte: 'Fredoka', cor: '--ink' }),
+      panda(0.5, 0.86, 0.15),
     ],
   },
   {
@@ -171,12 +277,11 @@ const MODELOS = [
     descricao: 'Uma foto em coração, flores na volta e duas frases',
     fundo: '--paper', semente: 84,
     enfeites: { formas: ['flor', 'folha', 'bolinha'], cores: ['--peach', '--sage', '--sand'], quantidade: 48, tamanho: [4, 10] },
-    fotos: [
-      { id: 'a', rotulo: 'Foto com a mãe', forma: 'coracao', x: FRENTE, y: 0.45, largura: 0.30, altura: 0.72 },
-    ],
-    textos: [
-      { id: 'principal', rotulo: 'Frase principal', valor: 'melhor mãe do mundo', max: 26, fonte: 'Caveat', cor: '--hand-ink', x: VERSO, y: 0.42, largura: 0.30, tamanho: 12 },
-      { id: 'assinatura', rotulo: 'Assinatura', valor: 'te amo, mãe', max: 20, fonte: 'Fredoka', cor: '--ink', x: VERSO, y: 0.66, largura: 0.22, tamanho: 6 },
+    camadas: [
+      foto('a', 'Foto com a mãe', 'coracao', FRENTE, 0.45, 0.30, 0.72),
+      frase('principal', 'Frase principal', 'melhor mãe do mundo', VERSO, 0.42, 12, { largura: 0.3 }),
+      frase('assinatura', 'Assinatura', 'te amo, mãe', VERSO, 0.66, 6, { largura: 0.22, fonte: 'Fredoka', cor: '--ink' }),
+      panda(0.5, 0.86, 0.15),
     ],
   },
   {
@@ -184,75 +289,178 @@ const MODELOS = [
     descricao: 'Uma foto quadrada, frase grande e assinatura',
     fundo: '--cream', semente: 105,
     enfeites: { formas: ['estrela', 'bolinha'], cores: ['--kraft', '--sand', '--sage'], quantidade: 36, tamanho: [3.5, 8] },
-    fotos: [
-      { id: 'a', rotulo: 'Foto com o pai', forma: 'arredondado', x: FRENTE, y: 0.45, largura: 0.27, altura: 0.66 },
-    ],
-    textos: [
-      { id: 'principal', rotulo: 'Frase principal', valor: 'melhor pai do mundo', max: 26, fonte: 'Caveat', cor: '--peach-ink', x: VERSO, y: 0.42, largura: 0.30, tamanho: 12 },
-      { id: 'assinatura', rotulo: 'Assinatura', valor: 'obrigado por tudo', max: 24, fonte: 'Fredoka', cor: '--ink', x: VERSO, y: 0.66, largura: 0.24, tamanho: 6 },
+    camadas: [
+      foto('a', 'Foto com o pai', 'arredondado', FRENTE, 0.45, 0.27, 0.66),
+      frase('principal', 'Frase principal', 'melhor pai do mundo', VERSO, 0.42, 12, { largura: 0.3, cor: '--peach-ink' }),
+      frase('assinatura', 'Assinatura', 'obrigado por tudo', VERSO, 0.66, 6, { largura: 0.24, fonte: 'Fredoka', cor: '--ink' }),
+      panda(0.5, 0.86, 0.15, 'assets/panda-joinha.webp'),
     ],
   },
   {
-    id: 'fotos-quatro', panda: 0.5, categoria: 'fotos', nome: 'Quatro fotos',
-    descricao: 'Quatro fotos dando a volta, com uma frase curta',
+    id: 'professores-obrigado', categoria: 'professores', nome: 'Pra quem ensina',
+    descricao: 'Uma foto da turma, frase de agradecimento e o nome',
     fundo: '--paper', semente: 126,
-    enfeites: { formas: ['bolinha'], cores: ['--sand', '--peach'], quantidade: 22, tamanho: [2.5, 5] },
-    fotos: [
-      { id: 'a', rotulo: 'Foto 1', forma: 'arredondado', x: 0.125, y: 0.42, largura: 0.20, altura: 0.60 },
-      { id: 'b', rotulo: 'Foto 2', forma: 'arredondado', x: 0.375, y: 0.42, largura: 0.20, altura: 0.60 },
-      { id: 'c', rotulo: 'Foto 3', forma: 'arredondado', x: 0.625, y: 0.42, largura: 0.20, altura: 0.60 },
-      { id: 'd', rotulo: 'Foto 4', forma: 'arredondado', x: 0.875, y: 0.42, largura: 0.20, altura: 0.60 },
-    ],
-    textos: [
-      { id: 'principal', rotulo: 'Frase de baixo', valor: 'a gente junto', max: 22, fonte: 'Caveat', cor: '--hand-ink', x: 0.125, y: 0.86, largura: 0.22, tamanho: 8, repetir: [0.125, 0.375, 0.625, 0.875] },
+    enfeites: { formas: ['estrela', 'bolinha', 'folha'], cores: ['--sage', '--peach', '--kraft'], quantidade: 40, tamanho: [3.5, 8] },
+    camadas: [
+      foto('a', 'Foto da turma', 'arredondado', FRENTE, 0.45, 0.28, 0.66),
+      frase('principal', 'Frase principal', 'obrigada por ensinar', VERSO, 0.40, 11, { largura: 0.3, cor: '--sage-deep' }),
+      frase('assinatura', 'Nome ou turma', 'Turma do 3º ano', VERSO, 0.64, 6, { largura: 0.24, fonte: 'Fredoka', cor: '--ink' }),
+      panda(0.5, 0.86, 0.15),
     ],
   },
   {
-    id: 'fotos-tira', panda: 0.5, categoria: 'fotos', nome: 'Tira de fotos',
-    descricao: 'Seis fotos pequenas em duas fileiras, como uma tira de fotos',
+    id: 'casamento-padrinhos', categoria: 'casamento', nome: 'Convite de padrinhos',
+    descricao: 'A pergunta na frente, a foto no verso e a data',
     fundo: '--cream', semente: 147,
-    enfeites: { formas: ['bolinha'], cores: ['--sand'], quantidade: 14, tamanho: [2, 4] },
-    fotos: [
-      { id: 'a', rotulo: 'Foto 1 (de cima)', forma: 'arredondado', x: 0.18, y: 0.29, largura: 0.20, altura: 0.40 },
-      { id: 'b', rotulo: 'Foto 2 (de cima)', forma: 'arredondado', x: 0.50, y: 0.29, largura: 0.20, altura: 0.40 },
-      { id: 'c', rotulo: 'Foto 3 (de cima)', forma: 'arredondado', x: 0.82, y: 0.29, largura: 0.20, altura: 0.40 },
-      { id: 'd', rotulo: 'Foto 4 (de baixo)', forma: 'arredondado', x: 0.18, y: 0.73, largura: 0.20, altura: 0.40 },
-      { id: 'e', rotulo: 'Foto 5 (de baixo)', forma: 'arredondado', x: 0.50, y: 0.73, largura: 0.20, altura: 0.40 },
-      { id: 'f', rotulo: 'Foto 6 (de baixo)', forma: 'arredondado', x: 0.82, y: 0.73, largura: 0.20, altura: 0.40 },
+    enfeites: { formas: ['flor', 'folha', 'coracao'], cores: ['--sage', '--peach', '--sand'], quantidade: 42, tamanho: [4, 9] },
+    camadas: [
+      frase('convite', 'A pergunta', 'você aceita ser meu padrinho?', FRENTE, 0.38, 9, { largura: 0.3 }),
+      frase('nomes', 'Nomes dos noivos', 'Ana & Léo', FRENTE, 0.62, 7, { largura: 0.22, fonte: 'Fredoka', cor: '--ink' }),
+      foto('a', 'Foto dos noivos', 'circulo', VERSO, 0.44, 0.26, 0.64),
+      frase('data', 'Data do casamento', '12 · 09 · 2027', VERSO, 0.87, 5, { largura: 0.22, fonte: 'Fredoka', cor: '--ink' }),
+      panda(0.5, 0.86, 0.15),
     ],
-    textos: [],
+  },
+  {
+    id: 'bebe-chegada', categoria: 'bebe', nome: 'Chegou gente nova',
+    descricao: 'Foto do bebê, nome e a data de chegada',
+    fundo: '--paper', semente: 168,
+    enfeites: { formas: ['bolinha', 'estrela', 'coracao'], cores: ['--sage', '--peach', '--sand'], quantidade: 44, tamanho: [3, 7] },
+    camadas: [
+      foto('a', 'Foto do bebê', 'circulo', FRENTE, 0.45, 0.26, 0.64),
+      frase('principal', 'Nome do bebê', 'Theo chegou!', VERSO, 0.40, 12, { largura: 0.28, cor: '--sage-deep' }),
+      frase('data', 'Data ou peso', '14 de março de 2027', VERSO, 0.64, 5.5, { largura: 0.26, fonte: 'Fredoka', cor: '--ink' }),
+      panda(0.5, 0.86, 0.15, 'assets/panda-dormindo.webp'),
+    ],
+  },
+  {
+    id: 'pet-amor', categoria: 'pet', nome: 'Meu melhor amigo',
+    descricao: 'Três fotos do bichinho, patinhas na volta e o nome',
+    fundo: '--cream', semente: 189,
+    enfeites: { formas: ['pata', 'coracao', 'bolinha'], cores: ['--kraft', '--peach', '--sand'], quantidade: 40, tamanho: [3.5, 8] },
+    camadas: [
+      foto('a', 'Foto 1', 'circulo', 0.18, 0.42, 0.20, 0.56),
+      foto('b', 'Foto 2', 'circulo', 0.5, 0.42, 0.20, 0.56),
+      foto('c', 'Foto 3', 'circulo', 0.82, 0.42, 0.20, 0.56),
+      frase('f1', 'Nome do pet', 'Nina', 0.18, 0.85, 8, { largura: 0.18, grupo: 'nome' }),
+      frase('f2', 'Nome do pet (meio)', 'Nina', 0.5, 0.85, 8, { largura: 0.18, grupo: 'nome' }),
+      frase('f3', 'Nome do pet (fim)', 'Nina', 0.82, 0.85, 8, { largura: 0.18, grupo: 'nome' }),
+      panda(0.34, 0.85, 0.13),
+    ],
+  },
+  {
+    id: 'amizade-formatura', categoria: 'amizade', nome: 'A gente conseguiu',
+    descricao: 'Quatro fotos da turma e uma frase de comemoração',
+    fundo: '--paper', semente: 210,
+    enfeites: { formas: ['estrela', 'confete', 'bolinha'], cores: ['--peach', '--sage', '--kraft'], quantidade: 50, tamanho: [3, 7.5] },
+    camadas: [
+      foto('a', 'Foto 1', 'arredondado', 0.125, 0.40, 0.19, 0.56),
+      foto('b', 'Foto 2', 'arredondado', 0.375, 0.40, 0.19, 0.56),
+      foto('c', 'Foto 3', 'arredondado', 0.625, 0.40, 0.19, 0.56),
+      foto('d', 'Foto 4', 'arredondado', 0.875, 0.40, 0.19, 0.56),
+      frase('f1', 'Frase 1', 'a gente conseguiu', 0.25, 0.84, 8, { largura: 0.22, grupo: 'legenda' }),
+      frase('f2', 'Frase 2', 'a gente conseguiu', 0.75, 0.84, 8, { largura: 0.22, grupo: 'legenda' }),
+      panda(0.5, 0.84, 0.14),
+    ],
+  },
+  {
+    id: 'fotos-quatro', categoria: 'fotos', nome: 'Quatro fotos',
+    descricao: 'Quatro fotos dando a volta, com uma frase curta',
+    fundo: '--paper', semente: 231,
+    enfeites: { formas: ['bolinha'], cores: ['--sand', '--peach'], quantidade: 22, tamanho: [2.5, 5] },
+    camadas: [
+      foto('a', 'Foto 1', 'arredondado', 0.125, 0.42, 0.20, 0.60),
+      foto('b', 'Foto 2', 'arredondado', 0.375, 0.42, 0.20, 0.60),
+      foto('c', 'Foto 3', 'arredondado', 0.625, 0.42, 0.20, 0.60),
+      foto('d', 'Foto 4', 'arredondado', 0.875, 0.42, 0.20, 0.60),
+      frase('f1', 'Frase 1', 'a gente junto', 0.125, 0.86, 8, { largura: 0.2, grupo: 'legenda' }),
+      frase('f2', 'Frase 2', 'a gente junto', 0.375, 0.86, 8, { largura: 0.2, grupo: 'legenda' }),
+      frase('f3', 'Frase 3', 'a gente junto', 0.625, 0.86, 8, { largura: 0.2, grupo: 'legenda' }),
+      frase('f4', 'Frase 4', 'a gente junto', 0.875, 0.86, 8, { largura: 0.2, grupo: 'legenda' }),
+    ],
+  },
+  {
+    id: 'fotos-tira', categoria: 'fotos', nome: 'Tira de fotos',
+    descricao: 'Seis fotos pequenas em duas fileiras, como uma tira de fotos',
+    fundo: '--cream', semente: 252,
+    enfeites: { formas: ['bolinha'], cores: ['--sand'], quantidade: 14, tamanho: [2, 4] },
+    camadas: [
+      foto('a', 'Foto 1 (de cima)', 'arredondado', 0.18, 0.29, 0.20, 0.40),
+      foto('b', 'Foto 2 (de cima)', 'arredondado', 0.50, 0.29, 0.20, 0.40),
+      foto('c', 'Foto 3 (de cima)', 'arredondado', 0.82, 0.29, 0.20, 0.40),
+      foto('d', 'Foto 4 (de baixo)', 'arredondado', 0.18, 0.73, 0.20, 0.40),
+      foto('e', 'Foto 5 (de baixo)', 'arredondado', 0.50, 0.73, 0.20, 0.40),
+      foto('f', 'Foto 6 (de baixo)', 'arredondado', 0.82, 0.73, 0.20, 0.40),
+    ],
+  },
+  {
+    id: 'cafe-do-dia', categoria: 'fotos', nome: 'Primeiro o café',
+    descricao: 'Uma frase grande na frente e uma foto no verso',
+    fundo: '--paper', semente: 273,
+    enfeites: { formas: ['xicara', 'bolinha', 'coracao'], cores: ['--kraft', '--sand', '--peach'], quantidade: 36, tamanho: [3.5, 8] },
+    camadas: [
+      frase('principal', 'Frase principal', 'primeiro o café', FRENTE, 0.42, 14, { largura: 0.3, cor: '--peach-ink' }),
+      frase('assinatura', 'Frase de baixo', 'depois a gente conversa', FRENTE, 0.68, 5.5, { largura: 0.26, fonte: 'Fredoka', cor: '--ink' }),
+      foto('a', 'Foto do verso', 'circulo', VERSO, 0.45, 0.24, 0.60),
+      panda(0.5, 0.86, 0.15, 'assets/panda-copo.webp'),
+    ],
   },
 ];
 
-export const TEMPLATES = Object.freeze(MODELOS.map((m) => Object.freeze({
-  ...m,
-  fotos: Object.freeze(m.fotos.map((f) => Object.freeze({ ...f }))),
-  textos: Object.freeze(m.textos.map((t) => Object.freeze({ ...t }))),
-})));
-
+export const TEMPLATES = Object.freeze(MODELOS.map((m) => Object.freeze({ ...m, camadas: Object.freeze(m.camadas) })));
 export const modeloPorId = (id) => TEMPLATES.find((m) => m.id === id) || null;
 export const modelosDaCategoria = (categoria) =>
   (!categoria || categoria === 'todos' ? TEMPLATES : TEMPLATES.filter((m) => m.categoria === categoria));
 
-/** Retângulos em mm de cada espaço de foto e de cada frase, dentro da área de impressão. */
-export function geometriaDoModelo(modelo, printArea) {
-  const caixa = (item, largura, altura) => ({
-    x: printArea.x + (item.x - largura / 2) * printArea.width,
-    y: printArea.y + (item.y - altura / 2) * printArea.height,
-    width: largura * printArea.width,
-    height: altura * printArea.height,
-  });
+const clone = (valor) => (typeof structuredClone === 'function' ? structuredClone(valor) : JSON.parse(JSON.stringify(valor)));
+
+/** Uma arte editável a partir de um modelo: daqui para a frente tudo nela pode mudar. */
+export function novaArte(modelo) {
   return {
-    fotos: modelo.fotos.map((foto) => ({ ...foto, caixa: caixa(foto, foto.largura, foto.altura) })),
-    textos: modelo.textos.map((texto) => ({
-      ...texto,
-      posicoes: (texto.repetir || [texto.x]).map((x) => ({
-        x: printArea.x + x * printArea.width,
-        y: printArea.y + texto.y * printArea.height,
-        largura: texto.largura * printArea.width,
-      })),
-    })),
+    modelo: modelo.id,
+    fundo: modelo.fundo,
+    semente: modelo.semente,
+    enfeites: clone(modelo.enfeites || null),
+    camadas: clone(modelo.camadas),
   };
+}
+
+export const ROTULOS = Object.freeze({ foto: 'Foto', frase: 'Frase', enfeite: 'Enfeite', adesivo: 'Pandinha' });
+
+/** Retângulo da camada em milímetros, já sem rotação (a rotação entra no teste de clique). */
+export function caixaDaCamada(camada, printArea, medidor) {
+  const centroX = printArea.x + camada.x * printArea.width;
+  const centroY = printArea.y + camada.y * printArea.height;
+  let largura;
+  let altura;
+  if (camada.tipo === 'foto') {
+    largura = camada.largura * printArea.width;
+    altura = camada.altura * printArea.height;
+  } else if (camada.tipo === 'frase') {
+    const limite = camada.largura * printArea.width;
+    const medida = medidor ? medidor(camada) : limite;
+    largura = Math.max(2, Math.min(limite, medida));
+    altura = camada.tamanho * 1.35;
+  } else {
+    largura = camada.tamanho * printArea.height;
+    altura = largura;
+  }
+  return { x: centroX - largura / 2, y: centroY - altura / 2, width: largura, height: altura, centroX, centroY };
+}
+
+/** Quem está debaixo do dedo: a camada mais de cima cujo retângulo (girado) contém o ponto. */
+export function camadaEm(arte, ponto, printArea, medidor, folgaMm = 1.5) {
+  for (let i = arte.camadas.length - 1; i >= 0; i -= 1) {
+    const camada = arte.camadas[i];
+    const caixa = caixaDaCamada(camada, printArea, medidor);
+    const angulo = -(camada.rotacao || 0) * Math.PI / 180;
+    const dx = ponto.x - caixa.centroX;
+    const dy = ponto.y - caixa.centroY;
+    const px = dx * Math.cos(angulo) - dy * Math.sin(angulo);
+    const py = dx * Math.sin(angulo) + dy * Math.cos(angulo);
+    if (Math.abs(px) <= caixa.width / 2 + folgaMm && Math.abs(py) <= caixa.height / 2 + folgaMm) return camada;
+  }
+  return null;
 }
 
 function caminhoDaForma(ctx, forma, caixa) {
@@ -267,77 +475,131 @@ function caminhoDaForma(ctx, forma, caixa) {
     ctx.bezierCurveTo(x + w * 0.92, y - h * 0.10, x + w * 1.10, y + h * 0.52, cx, y + h);
   } else {
     const r = Math.min(w, h) * (forma === 'arredondado' ? 0.16 : 0.02);
-    ctx.roundRect ? ctx.roundRect(x, y, w, h, r) : ctx.rect(x, y, w, h);
+    if (ctx.roundRect) ctx.roundRect(x, y, w, h, r); else ctx.rect(x, y, w, h);
   }
   ctx.closePath();
-}
-
-function desenhaFotoNoEspaco(ctx, espaco, foto) {
-  const caixa = espaco.caixa;
-  ctx.save();
-  caminhoDaForma(ctx, espaco.forma, caixa);
-  ctx.clip();
-  const larguraPx = foto.image.naturalWidth || foto.image.width;
-  const alturaPx = foto.image.naturalHeight || foto.image.height;
-  if (larguraPx && alturaPx) {
-    // Cobre o espaço inteiro (sem esticar) e aceita o ajuste de quem está montando.
-    const escala = Math.max(caixa.width / larguraPx, caixa.height / alturaPx) * (foto.scale || 1);
-    const w = larguraPx * escala, h = alturaPx * escala;
-    ctx.translate(caixa.x + caixa.width / 2 + (foto.offsetX || 0) * caixa.width / 2,
-      caixa.y + caixa.height / 2 + (foto.offsetY || 0) * caixa.height / 2);
-    ctx.rotate((foto.rotation || 0) * Math.PI / 180);
-    ctx.drawImage(foto.image, -w / 2, -h / 2, w, h);
-  }
-  ctx.restore();
-}
-
-function desenhaEspacoVazio(ctx, espaco) {
-  const caixa = espaco.caixa;
-  ctx.save();
-  ctx.fillStyle = cor('--sand-soft');
-  caminhoDaForma(ctx, espaco.forma, caixa);
-  ctx.fill();
-  ctx.strokeStyle = cor('--kraft');
-  ctx.lineWidth = 0.6;
-  ctx.setLineDash([2.2, 2.2]);
-  ctx.stroke();
-  ctx.restore();
 }
 
 function ajustaFonte(ctx, texto, fonte, tamanho, largura) {
   let corpo = tamanho;
   ctx.font = `600 ${corpo}px "${fonte}"`;
   const medida = ctx.measureText(texto).width;
-  if (medida > largura) {
+  if (medida > largura && medida > 0) {
     corpo *= largura / medida;
     ctx.font = `600 ${corpo}px "${fonte}"`;
   }
   return corpo;
 }
 
-/**
- * Desenha o modelo dentro da área de impressão, em milímetros.
- * @param {CanvasRenderingContext2D} ctx já transformado para milímetros e recortado na área
- * @param {object} modelo item de TEMPLATES
- * @param {{x:number,y:number,width:number,height:number}} printArea área útil em mm
- * @param {{textos?:Object, fotos?:Object, placeholder?:boolean, pandaImage?:CanvasImageSource}} dados
- */
-export function desenhaModelo(ctx, modelo, printArea, dados = {}) {
-  const geometria = geometriaDoModelo(modelo, printArea);
+/** O medidor usado no teste de clique: mesma conta de largura que o desenho faz. */
+export function medidorDeTexto(ctx) {
+  return (camada) => {
+    ctx.font = `600 ${camada.tamanho}px "${camada.fonte}"`;
+    return ctx.measureText(String(camada.texto ?? '')).width;
+  };
+}
+
+function desenhaFoto(ctx, camada, caixa, foto) {
   ctx.save();
-  ctx.fillStyle = cor(modelo.fundo);
+  ctx.translate(caixa.centroX, caixa.centroY);
+  ctx.rotate((camada.rotacao || 0) * Math.PI / 180);
+  ctx.translate(-caixa.centroX, -caixa.centroY);
+  if (foto?.image) {
+    ctx.save();
+    ctx.fillStyle = cor('--white');
+    caminhoDaForma(ctx, camada.forma, caixa);
+    ctx.fill();
+    ctx.restore();
+    ctx.save();
+    caminhoDaForma(ctx, camada.forma, caixa);
+    ctx.clip();
+    const larguraPx = foto.image.naturalWidth || foto.image.width || foto.width;
+    const alturaPx = foto.image.naturalHeight || foto.image.height || foto.height;
+    if (larguraPx && alturaPx) {
+      const ajuste = camada.ajuste || {};
+      // Cobre o espaço inteiro (sem esticar) e aceita o enquadramento de quem está montando.
+      const escala = Math.max(caixa.width / larguraPx, caixa.height / alturaPx) * (ajuste.scale || 1);
+      const w = larguraPx * escala, h = alturaPx * escala;
+      ctx.translate(caixa.centroX + (ajuste.offsetX || 0) * caixa.width / 2, caixa.centroY + (ajuste.offsetY || 0) * caixa.height / 2);
+      ctx.drawImage(foto.image, -w / 2, -h / 2, w, h);
+    }
+    ctx.restore();
+    ctx.save();
+    ctx.strokeStyle = cor('--white');
+    ctx.lineWidth = 1.1;
+    caminhoDaForma(ctx, camada.forma, caixa);
+    ctx.stroke();
+    ctx.restore();
+  } else {
+    ctx.save();
+    ctx.fillStyle = cor('--sand-soft');
+    caminhoDaForma(ctx, camada.forma, caixa);
+    ctx.fill();
+    ctx.strokeStyle = cor('--kraft');
+    ctx.lineWidth = 0.6;
+    ctx.setLineDash([2.2, 2.2]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+function desenhaEnfeite(ctx, camada, caixa) {
+  ctx.save();
+  ctx.translate(caixa.centroX, caixa.centroY);
+  ctx.rotate((camada.rotacao || 0) * Math.PI / 180);
+  desenhaForma(ctx, camada.forma, caixa.width, cor(camada.cor));
+  ctx.restore();
+}
+
+function desenhaFrase(ctx, camada, caixa, printArea) {
+  const texto = String(camada.texto ?? '').trim();
+  if (!texto) return;
+  ctx.save();
+  ctx.translate(caixa.centroX, caixa.centroY);
+  ctx.rotate((camada.rotacao || 0) * Math.PI / 180);
+  ctx.fillStyle = cor(camada.cor);
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ajustaFonte(ctx, texto, camada.fonte, camada.tamanho, camada.largura * printArea.width);
+  ctx.fillText(texto, 0, 0);
+  ctx.restore();
+}
+
+function desenhaAdesivo(ctx, camada, caixa, imagem) {
+  if (!imagem) return;
+  ctx.save();
+  ctx.translate(caixa.centroX, caixa.centroY);
+  ctx.rotate((camada.rotacao || 0) * Math.PI / 180);
+  const largura = caixa.width;
+  const proporcao = (imagem.naturalHeight || imagem.height || 1) / (imagem.naturalWidth || imagem.width || 1);
+  const altura = largura * proporcao;
+  ctx.drawImage(imagem, -largura / 2, -altura / 2, largura, altura);
+  ctx.restore();
+}
+
+/**
+ * Desenha a arte inteira dentro da área de impressão, em milímetros.
+ * @param {CanvasRenderingContext2D} ctx já transformado para milímetros
+ * @param {{fundo:string, semente:number, enfeites:object, camadas:Array}} arte
+ * @param {{x:number,y:number,width:number,height:number}} printArea área útil em mm
+ * @param {{fotos?:Object, imagens?:Object, semPandinha?:boolean}} dados
+ * @returns {Array<{camada:object, caixa:object}>} onde cada camada ficou, para o clique e o contorno
+ */
+export function desenhaArte(ctx, arte, printArea, dados = {}) {
+  const medidor = medidorDeTexto(ctx);
+  const visiveis = arte.camadas.filter((camada) => !(dados.semPandinha && camada.tipo === 'adesivo'));
+  const caixas = visiveis.map((camada) => ({ camada, caixa: caixaDaCamada(camada, printArea, medidor) }));
+  ctx.save();
+  ctx.fillStyle = cor(arte.fundo);
   ctx.fillRect(printArea.x, printArea.y, printArea.width, printArea.height);
 
-  // Enfeites: sempre no mesmo lugar, longe das fotos e das frases.
-  const reservados = [
-    ...geometria.fotos.map((f) => f.caixa),
-    ...geometria.textos.flatMap((t) => t.posicoes.map((p) => ({
-      x: p.x - p.largura / 2, y: p.y - t.tamanho * 0.8, width: p.largura, height: t.tamanho * 1.7,
-    }))),
-  ];
-  const conf = modelo.enfeites;
+  // Enfeites do fundo: sempre no mesmo lugar, longe das fotos e das frases.
+  const conf = arte.enfeites;
   if (conf?.quantidade) {
-    const aleatorio = sorteio(modelo.semente || 1);
+    const reservados = caixas.map((item) => item.caixa);
+    const aleatorio = sorteio(arte.semente || 1);
     const folga = 1.5;
     for (let i = 0, postos = 0; i < conf.quantidade * 6 && postos < conf.quantidade; i += 1) {
       const t = conf.tamanho[0] + aleatorio() * (conf.tamanho[1] - conf.tamanho[0]);
@@ -353,67 +615,17 @@ export function desenhaModelo(ctx, modelo, printArea, dados = {}) {
       ctx.translate(px, py);
       ctx.rotate((aleatorio() - 0.5) * 0.9);
       ctx.globalAlpha = 0.55 + aleatorio() * 0.45;
-      if (CONTORNO.has(forma)) {
-        ctx.strokeStyle = tinta;
-        ctx.lineWidth = Math.max(0.35, t * 0.07);
-        ctx.lineCap = 'round';
-        FORMAS[forma](ctx, t);
-        ctx.stroke();
-      } else {
-        ctx.fillStyle = tinta;
-        FORMAS[forma](ctx, t);
-        ctx.fill();
-      }
+      desenhaForma(ctx, forma, t, tinta);
       ctx.restore();
     }
   }
 
-  // Fotos: moldura clara por baixo, imagem recortada na forma, contorno por cima.
-  for (const espaco of geometria.fotos) {
-    const foto = dados.fotos?.[espaco.id];
-    if (foto?.image) {
-      ctx.save();
-      ctx.fillStyle = cor('--white');
-      caminhoDaForma(ctx, espaco.forma, espaco.caixa);
-      ctx.fill();
-      ctx.restore();
-      desenhaFotoNoEspaco(ctx, espaco, foto);
-      ctx.save();
-      ctx.strokeStyle = cor('--white');
-      ctx.lineWidth = 1.1;
-      caminhoDaForma(ctx, espaco.forma, espaco.caixa);
-      ctx.stroke();
-      ctx.restore();
-    } else if (dados.placeholder !== false) {
-      desenhaEspacoVazio(ctx, espaco);
-    }
-  }
-
-  // Frases.
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  for (const texto of geometria.textos) {
-    const valor = (dados.textos?.[texto.id] ?? texto.valor ?? '').trim();
-    if (!valor) continue;
-    ctx.fillStyle = cor(texto.cor);
-    for (const posicao of texto.posicoes) {
-      ajustaFonte(ctx, valor, texto.fonte, texto.tamanho, posicao.largura);
-      ctx.fillText(valor, posicao.x, posicao.y);
-    }
-  }
-
-  // Um Pandinha por peça (manual 6.4), inteiro e num lugar livre: ele acompanha, não atrapalha.
-  if (dados.pandaImage) {
-    const lado = Math.min(13, printArea.height * 0.17);
-    const y = printArea.y + printArea.height - lado - 1.5;
-    const candidatos = [modelo.panda, 0.5, 0.31, 0.69, 0.06, 0.94].filter((v) => typeof v === 'number');
-    const livre = candidatos.find((fracao) => {
-      const x = printArea.x + fracao * printArea.width - lado / 2;
-      return !reservados.some((r) => x + lado > r.x && x < r.x + r.width && y + lado > r.y && y < r.y + r.height);
-    });
-    // Sem espaço livre, ele fica de fora: melhor sem Pandinha do que cortando uma foto.
-    if (livre !== undefined) ctx.drawImage(dados.pandaImage, printArea.x + livre * printArea.width - lado / 2, y, lado, lado);
+  for (const { camada, caixa } of caixas) {
+    if (camada.tipo === 'foto') desenhaFoto(ctx, camada, caixa, dados.fotos?.[camada.id]);
+    else if (camada.tipo === 'frase') desenhaFrase(ctx, camada, caixa, printArea);
+    else if (camada.tipo === 'enfeite') desenhaEnfeite(ctx, camada, caixa);
+    else if (camada.tipo === 'adesivo') desenhaAdesivo(ctx, camada, caixa, dados.imagens?.[camada.arquivo]);
   }
   ctx.restore();
-  return geometria;
+  return caixas;
 }

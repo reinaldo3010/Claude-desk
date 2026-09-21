@@ -60,17 +60,27 @@ uma nova fonte aprovada é necessária antes de prometer definição adicional.
 ## Estúdio da caneca em 360° — setembro de 2026
 
 `npm test` começa pelos testes unitários (`qa/*-unit.test.mjs`): a arte livre (geometria em mm, dpi
-efetivo, corte, recusa de arquivo inválido, exportação em 300 dpi) e os modelos de ocasião (nada sai da
-área, frase não cai sobre foto, o Pandinha não cobre nada, o desenho é sempre igual, o dpi sai do
-tamanho do espaço e a medida indicada é 2480 × 1063 px). Depois, `audit.mjs` sobe um servidor http
-próprio (`servidor.mjs`; por `file://` o canvas fica bloqueado) e abre `caneca-3d.html` em 390 e 1280 px:
-o 3D precisa ficar pronto em 15 s, a arte de exemplo entra e aparece na arte plana, nome e cores vão para
-a mensagem do WhatsApp, o botão de vista fica marcado e arquivo falso gera aviso. Depois troca para um
-modelo de ocasião: a categoria filtra a lista, os espaços de foto e as frases aparecem, duas fotos
-entram arrastando, a frase reescrita vai para o pedido, remover uma foto volta a avisar, e os três
-arquivos saem ("Baixar arte plana", "Baixar prévia" e o gabarito em 2480 × 1063 px). Captura em `qa/shots/<largura>/estudio-caneca.png`. A página
-também passa pelo axe-core e pelas checagens de cabeçalho, rodapé e sitemap. Para ver local:
-`npm run servir` e abra o endereço impresso.
+efetivo, corte, recusa de arquivo inválido, exportação em 300 dpi) e a arte em camadas (nada sai da
+área, frase não cai sobre foto, o Pandinha não cobre nada, o clique acha a camada de cima, editar uma
+arte não altera o modelo de origem, cores e fontes são as da marca, o desenho é sempre igual e a medida
+indicada é 2480 × 1063 px).
+
+Depois, `audit.mjs` sobe um servidor http próprio (`servidor.mjs`; por `file://` o canvas fica
+bloqueado) e abre `caneca-3d.html` em 390 e 1280 px. Modo livre: o 3D fica pronto em 15 s, a arte de
+exemplo entra e aparece na vista aberta, nome e cores vão para a mensagem do WhatsApp, o botão de vista
+fica marcado e arquivo falso gera aviso. Modo modelo: a categoria filtra a lista, as camadas aparecem,
+duas fotos entram pela janela de arquivo, clicar na caneca escolhe o item que está ali, arrastar move,
+acrescentar frase e enfeite funciona, o segundo "+ Pandinha" não cria um segundo mascote, tirar a foto
+volta a avisar do espaço vazio, e a arte do Canva volta para o modo livre aplicada ao redor. No fim,
+os três arquivos saem ("Baixar arte plana", "Baixar prévia" e o gabarito em 2480 × 1063 px). Captura em
+`qa/shots/<largura>/estudio-caneca.png`. A página também passa pelo axe-core e pelas checagens de
+cabeçalho, rodapé e sitemap. Para ver local: `npm run servir` e abra o endereço impresso.
+
+Para a revisão humana dos modelos, `npm run provas` percorre os 14, preenche as fotos com imagens do
+acervo e salva cada arte aberta (21 × 9 cm) em `qa/shots/`. É por essas provas que se confere cor,
+tamanho de letra e composição no tamanho de uso; o guardião confere as regras, não o gosto.
+O axe-core também foi rodado com o editor em uso (modelo escolhido, frase e enfeite acrescentados),
+em 390 e 1280 px, sem violações.
 
 ## Revisão humana obrigatória
 

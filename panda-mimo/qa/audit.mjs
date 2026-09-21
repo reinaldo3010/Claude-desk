@@ -1047,9 +1047,9 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     await pe.waitForTimeout(300);
     const recusa = await pe.evaluate(() => ({ visivel: !document.getElementById('art-error').hidden, texto: document.getElementById('art-error').textContent }));
     if (!recusa.visivel || !recusa.texto) failures.push(`[estúdio ${w}] arquivo inválido não gerou aviso`);
-    // modelos de arte: categorias, espaços de foto, frases e a arte de volta inteira
+    // modelos de arte: categorias, camadas, edição em cima da caneca e caminho do Canva
     const categorias = await pe.$$eval('#model-categories button', (b) => b.map((x) => x.textContent.trim()));
-    if (categorias.length < 5) failures.push(`[estúdio ${w}] faltam categorias de modelo (${categorias.join(', ')})`);
+    if (categorias.length < 8) failures.push(`[estúdio ${w}] faltam categorias de modelo (${categorias.join(', ')})`);
     await pe.click('#model-categories button[data-categoria="natal"]');
     await pe.waitForTimeout(250);
     const soNatal = await pe.$$eval('#model-list .studio-model', (b) => b.map((x) => x.dataset.modelo));
@@ -1058,27 +1058,28 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     await pe.click('[data-modelo="namorados-coracoes"]');
     await pe.waitForTimeout(400);
     const comModelo = await pe.evaluate(() => ({
-      espacos: document.querySelectorAll('#photo-slots .studio-slot__pick').length,
-      frases: document.querySelectorAll('#model-texts input').length,
+      camadas: document.querySelectorAll('#camadas .studio-camada').length,
+      vazias: [...document.querySelectorAll('#camadas .studio-camada small')].filter((s) => s.textContent === 'Escolher foto').length,
       livreEscondido: document.getElementById('free-mode').hidden,
+      props: document.getElementById('camada-props').textContent,
       aviso: document.getElementById('art-warnings').textContent,
     }));
-    if (comModelo.espacos !== 2 || comModelo.frases !== 2) failures.push(`[estúdio ${w}] o modelo escolhido não abriu 2 espaços de foto e 2 frases (${JSON.stringify(comModelo)})`);
+    if (comModelo.camadas !== 5 || comModelo.vazias !== 2) failures.push(`[estúdio ${w}] o modelo escolhido não abriu as 5 camadas com 2 fotos a escolher (${JSON.stringify(comModelo)})`);
     if (!comModelo.livreEscondido) failures.push(`[estúdio ${w}] a área de arte livre continuou visível com um modelo escolhido`);
+    if (!/Editando:/.test(comModelo.props)) failures.push(`[estúdio ${w}] o painel de edição não abriu com o modelo`);
     if (!/falta escolher/.test(comModelo.aviso)) failures.push(`[estúdio ${w}] o modelo com espaços vazios não avisou ("${comModelo.aviso}")`);
-    // uma foto em cada espaço, pelo arrastar e soltar
-    for (const indice of [0, 1]) {
-      await pe.evaluate(async (i) => {
-        const r = await fetch('assets/uso-caneca-cafe.webp');
-        const arquivo = new File([await r.blob()], `foto-${i + 1}.webp`, { type: 'image/webp' });
-        document.querySelectorAll('#photo-slots .studio-slot__pick')[i].click();
-        const dt = new DataTransfer();
-        dt.items.add(arquivo);
-        document.getElementById('photo-slots').dispatchEvent(new DragEvent('drop', { dataTransfer: dt, bubbles: true }));
-      }, indice);
-      await pe.waitForTimeout(500);
+
+    // uma foto em cada espaço, pela lista (a mesma janela de arquivo que a pessoa usa)
+    const fotoDeTeste = path.resolve(here, '..', 'assets', 'uso-caneca-cafe.webp');
+    pe.on('filechooser', async (fc) => { await fc.setFiles(fotoDeTeste); });
+    for (let i = 0; i < 2; i += 1) {
+      await pe.evaluate(() => {
+        const alvo = [...document.querySelectorAll('#camadas .studio-camada')].find((b) => b.querySelector('small')?.textContent === 'Escolher foto');
+        alvo?.click();
+      });
+      await pe.waitForTimeout(800);
     }
-    await pe.fill('#texto-principal', 'a gente combina mesmo');
+    await pe.fill('#camada-props input[type="text"]', 'a gente combina mesmo').catch(() => {});
     await pe.waitForTimeout(500);
     const preenchido = await pe.evaluate(() => {
       const c = document.getElementById('flat-art');
@@ -1087,24 +1088,104 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
       for (let i = 0; i < d.length; i += 16) if (d[i] < 235 || d[i + 1] < 235 || d[i + 2] < 235) pintados += 1;
       return {
         pintados,
-        nomes: [...document.querySelectorAll('#photo-slots .studio-slot__texto small')].map((s) => s.textContent),
+        vazias: [...document.querySelectorAll('#camadas .studio-camada small')].filter((s) => s.textContent === 'Escolher foto').length,
         aviso: document.getElementById('art-warnings').textContent,
         zap: new URL(document.getElementById('mug-order').href).searchParams.get('text') || '',
-        ajuste: !document.getElementById('art-scale').disabled,
       };
     });
     if (preenchido.pintados < 2000) failures.push(`[estúdio ${w}] a arte do modelo não apareceu na vista aberta`);
-    if (!preenchido.nomes.every((n) => /foto-\d\.webp/.test(n))) failures.push(`[estúdio ${w}] os espaços de foto não guardaram as fotos (${preenchido.nomes.join(', ')})`);
+    if (preenchido.vazias) failures.push(`[estúdio ${w}] ficaram ${preenchido.vazias} espaços sem foto depois de escolher as duas`);
     if (/falta escolher/.test(preenchido.aviso)) failures.push(`[estúdio ${w}] o aviso de espaço vazio continuou depois de preencher tudo`);
-    if (!preenchido.zap.includes('Corações ao redor') || !preenchido.zap.includes('Fotos escolhidas: 2 de 2') || !preenchido.zap.includes('a gente combina mesmo')) {
-      failures.push(`[estúdio ${w}] o pedido não leva o modelo, as fotos e a frase escritos`);
+    if (!preenchido.zap.includes('Corações ao redor') || !preenchido.zap.includes('Fotos escolhidas: 2 de 2')) {
+      failures.push(`[estúdio ${w}] o pedido não leva o modelo e as fotos escritos`);
     }
-    if (!preenchido.ajuste) failures.push(`[estúdio ${w}] os controles de ajuste não ligaram para a foto escolhida`);
-    // remover uma foto volta o aviso e o espaço vazio
-    await pe.click('#photo-slots .studio-slot:first-child .studio-slot__acoes button:last-child');
-    await pe.waitForTimeout(400);
-    const removido = await pe.evaluate(() => document.getElementById('art-warnings').textContent);
-    if (!/falta escolher/.test(removido)) failures.push(`[estúdio ${w}] remover uma foto não voltou a avisar do espaço vazio`);
+
+    // editar em cima da caneca: clicar escolhe a camada, arrastar muda a arte
+    const edicaoDireta = await pe.evaluate(async () => {
+      const flat = document.getElementById('flat-art');
+      const assinatura = () => {
+        const d = flat.getContext('2d').getImageData(0, 0, flat.width, flat.height).data;
+        let soma = 0;
+        for (let i = 0; i < d.length; i += 997) soma += d[i];
+        return soma;
+      };
+      document.querySelectorAll('#camadas .studio-camada')[0].click();
+      await new Promise((r) => setTimeout(r, 250));
+      const antesDoClique = document.getElementById('camada-props').textContent.slice(0, 40);
+      const antes = assinatura();
+      const canvas = document.querySelector('canvas.mug-3d-canvas');
+      const caixa = canvas.getBoundingClientRect();
+      const cx = caixa.left + caixa.width / 2;
+      const cy = caixa.top + caixa.height / 2;
+      const evento = (tipo, x, y) => canvas.dispatchEvent(new PointerEvent(tipo, { clientX: x, clientY: y, bubbles: true, cancelable: true, pointerId: 1, button: 0, buttons: 1 }));
+      evento('pointerdown', cx, cy);
+      await new Promise((r) => setTimeout(r, 120));
+      const depoisDoClique = document.getElementById('camada-props').textContent.slice(0, 40);
+      evento('pointermove', cx, cy - 40);
+      await new Promise((r) => setTimeout(r, 250));
+      evento('pointerup', cx, cy - 40);
+      await new Promise((r) => setTimeout(r, 350));
+      return { antesDoClique, depoisDoClique, mudou: assinatura() !== antes };
+    });
+    if (edicaoDireta.antesDoClique === edicaoDireta.depoisDoClique) failures.push(`[estúdio ${w}] clicar na caneca não escolheu o item que está ali`);
+    if (!edicaoDireta.mudou) failures.push(`[estúdio ${w}] arrastar em cima da caneca não moveu nada`);
+
+    // acrescentar frase, enfeite e Pandinha (um só, como manda o manual)
+    const acrescimos = await pe.evaluate(async () => {
+      const conta = () => document.querySelectorAll('#camadas .studio-camada').length;
+      const inicio = conta();
+      document.getElementById('add-frase').click();
+      await new Promise((r) => setTimeout(r, 250));
+      const campo = document.querySelector('#camada-props input[type="text"]');
+      campo.value = 'feito com carinho';
+      campo.dispatchEvent(new Event('input'));
+      document.querySelectorAll('#camada-props .studio-cor')[3].click();
+      await new Promise((r) => setTimeout(r, 200));
+      document.getElementById('add-enfeite').click();
+      await new Promise((r) => setTimeout(r, 250));
+      const formas = document.querySelectorAll('#camada-props .studio-forma').length;
+      document.querySelectorAll('#camada-props .studio-forma')[1].click();
+      await new Promise((r) => setTimeout(r, 200));
+      document.getElementById('add-pandinha').click();
+      await new Promise((r) => setTimeout(r, 400));
+      const comUm = conta();
+      document.getElementById('add-pandinha').click();
+      await new Promise((r) => setTimeout(r, 400));
+      return { inicio, formas, comUm, depois: conta(), zap: new URL(document.getElementById('mug-order').href).searchParams.get('text') || '' };
+    });
+    if (acrescimos.depois !== acrescimos.inicio + 2) failures.push(`[estúdio ${w}] acrescentar frase e enfeite não deu certo (${JSON.stringify(acrescimos)})`);
+    if (acrescimos.comUm !== acrescimos.depois) failures.push(`[estúdio ${w}] o segundo clique em "+ Pandinha" criou outro Pandinha (manual 6.4)`);
+    if (acrescimos.formas < 6) failures.push(`[estúdio ${w}] o painel do enfeite mostrou só ${acrescimos.formas} desenhos`);
+    if (!acrescimos.zap.includes('feito com carinho') || !acrescimos.zap.includes('Enfeites acrescentados')) {
+      failures.push(`[estúdio ${w}] o pedido não acompanhou a frase e o enfeite novos`);
+    }
+
+    // apagar volta a avisar do espaço vazio
+    await pe.evaluate(async () => {
+      const foto = [...document.querySelectorAll('#camadas .studio-camada')].find((b) => b.querySelector('small')?.textContent === 'Foto');
+      foto?.click();
+      await new Promise((r) => setTimeout(r, 250));
+      [...document.querySelectorAll('#camada-props button')].find((b) => b.textContent === 'Tirar a foto')?.click();
+    });
+    await pe.waitForTimeout(500);
+    const removido = await pe.$eval('#art-warnings', (e) => e.textContent);
+    if (!/falta escolher/.test(removido)) failures.push(`[estúdio ${w}] tirar uma foto não voltou a avisar do espaço vazio`);
+
+    // trazer a arte pronta do Canva: volta para o modo livre, ao redor, com a arte inteira
+    await pe.setInputFiles('#canva-file', fotoDeTeste);
+    await pe.waitForTimeout(900);
+    const doCanva = await pe.evaluate(() => ({
+      livre: !document.getElementById('free-mode').hidden,
+      camadas: document.querySelectorAll('#camadas .studio-camada').length,
+      layout: document.querySelector('input[name="layout"]:checked')?.value,
+      status: document.getElementById('save-status').textContent,
+      arquivo: document.getElementById('art-file-name').textContent,
+    }));
+    if (!doCanva.livre || doCanva.camadas) failures.push(`[estúdio ${w}] a arte do Canva não voltou para o modo sem modelo (${JSON.stringify(doCanva)})`);
+    if (doCanva.layout !== 'wrap') failures.push(`[estúdio ${w}] a arte do Canva não foi aplicada ao redor da caneca`);
+    if (!/Canva|proporção/i.test(doCanva.status)) failures.push(`[estúdio ${w}] a arte do Canva entrou sem dizer o que aconteceu ("${doCanva.status}")`);
+    if (!doCanva.arquivo) failures.push(`[estúdio ${w}] a arte do Canva não aparece como arquivo escolhido`);
+
 
     // exportação da arte plana em 300 dpi, do gabarito e da prévia
     const baixados = [];

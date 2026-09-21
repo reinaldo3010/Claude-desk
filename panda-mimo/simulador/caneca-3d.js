@@ -207,7 +207,7 @@ function ceramicMaterial(color = '#ffffff') {
   });
 }
 
-export async function createMugViewer(container, { onError, onReady, onChange } = {}) {
+export async function createMugViewer(container, { onError, onReady, onChange, onPointer } = {}) {
   if (!(container instanceof HTMLElement)) throw new TypeError('A área da prévia não foi encontrada.');
   let renderer;
   try {
@@ -302,6 +302,63 @@ export async function createMugViewer(container, { onError, onReady, onChange } 
   canvas.style.touchAction = 'pan-y';
 
   let disposed = false, visible = true, contextLost = false;
+
+  /**
+   * Onde o dedo tocou a cerâmica, em coordenadas da arte: u dá a volta (u=.25 é a frente)
+   * e v sobe da base para a borda. Só a parede de fora conta; o interior é ignorado.
+   */
+  const raycaster = new THREE.Raycaster();
+  const ponteiro = new THREE.Vector2();
+  function pontoDaCaneca(event) {
+    const bounds = canvas.getBoundingClientRect();
+    if (!bounds.width || !bounds.height) return null;
+    ponteiro.set(((event.clientX - bounds.left) / bounds.width) * 2 - 1, -((event.clientY - bounds.top) / bounds.height) * 2 + 1);
+    raycaster.setFromCamera(ponteiro, camera);
+    for (const hit of raycaster.intersectObject(body, false)) {
+      if (hit.uv && hit.face?.materialIndex === 0) return { u: hit.uv.x, v: hit.uv.y };
+    }
+    return null;
+  }
+
+  // Os ouvintes ficam no contêiner, em captura: assim eles decidem antes do OrbitControls
+  // se o gesto é "arrastar a arte" ou "girar a caneca".
+  let arrastando = false;
+  function aoApertar(event) {
+    if (!onPointer || event.button > 0 || disposed) return;
+    if (onPointer({ tipo: 'apertou', ponto: pontoDaCaneca(event), event })) {
+      arrastando = true;
+      controls.enabled = false;
+      try { canvas.setPointerCapture(event.pointerId); } catch { /* navegador sem captura de ponteiro */ }
+      event.stopPropagation();
+      event.preventDefault();
+    }
+  }
+  function aoMover(event) {
+    if (!onPointer || disposed) return;
+    if (arrastando) {
+      onPointer({ tipo: 'moveu', ponto: pontoDaCaneca(event), event });
+      event.stopPropagation();
+      return;
+    }
+    canvas.style.cursor = onPointer({ tipo: 'passou', ponto: pontoDaCaneca(event), event }) ? 'grab' : '';
+  }
+  function aoSoltar(event) {
+    if (!arrastando) return;
+    arrastando = false;
+    controls.enabled = true;
+    try { canvas.releasePointerCapture(event.pointerId); } catch { /* idem */ }
+    onPointer?.({ tipo: 'soltou', ponto: pontoDaCaneca(event), event });
+  }
+  function aoBaterDuasVezes(event) {
+    if (!onPointer || disposed) return;
+    onPointer({ tipo: 'dobrou', ponto: pontoDaCaneca(event), event });
+  }
+  container.addEventListener('pointerdown', aoApertar, true);
+  container.addEventListener('pointermove', aoMover, true);
+  container.addEventListener('pointerup', aoSoltar, true);
+  container.addEventListener('pointercancel', aoSoltar, true);
+  container.addEventListener('dblclick', aoBaterDuasVezes, true);
+
   let frame = 0, transition = null, texture = null;
   let fitDistance = 4.8, zoom = 1;
   let width = 0, height = 0;
@@ -430,6 +487,14 @@ export async function createMugViewer(container, { onError, onReady, onChange } 
       requestRender();
     },
     setView(view) { if (!disposed) { orient(view); onChange?.({ type: 'view', view }); } },
+    /** Onde um evento do mouse/dedo caiu na cerâmica, ou null se passou fora da peça. */
+    pontoEm(event) { return disposed ? null : pontoDaCaneca(event); },
+    /** O u (0..1) do pedaço da caneca virado para quem está olhando: onde algo novo deve nascer. */
+    frenteVisivel() {
+      const direcao = camera.position.clone().sub(controls.target);
+      const angulo = Math.atan2(direcao.z, direcao.x);
+      return ((1 - angulo / TAU) % 1 + 1) % 1;
+    },
     setZoom(value) {
       if (disposed || !Number.isFinite(Number(value))) return;
       zoom = THREE.MathUtils.clamp(Number(value), 0.75, 1.4);
@@ -457,6 +522,11 @@ export async function createMugViewer(container, { onError, onReady, onChange } 
       document.removeEventListener('visibilitychange', visibilityChanged);
       canvas.removeEventListener('webglcontextlost', lost);
       canvas.removeEventListener('webglcontextrestored', restored);
+      container.removeEventListener('pointerdown', aoApertar, true);
+      container.removeEventListener('pointermove', aoMover, true);
+      container.removeEventListener('pointerup', aoSoltar, true);
+      container.removeEventListener('pointercancel', aoSoltar, true);
+      container.removeEventListener('dblclick', aoBaterDuasVezes, true);
       controls.dispose();
       texture?.dispose();
       const geometries = new Set(), materials = new Set(), maps = new Set();

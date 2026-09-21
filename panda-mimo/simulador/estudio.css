@@ -79,6 +79,38 @@ input[type="range"] { accent-color:var(--peach-ink); cursor:pointer; min-height:
 .studio-finish > .btn { margin-block:16px 12px; width:100%; }
 .studio-finish #save-status:not(:empty) { padding-top:9px; }
 .studio-page .footer { margin-top:24px; padding-top:2.4rem; }
+/* edição da arte: barra, lista de camadas e painel de propriedades */
+.studio-dica { background:var(--sand-soft); border-radius:var(--r-sm); padding:10px 12px; margin:12px 0; }
+.studio-toolbar { display:flex; flex-wrap:wrap; gap:6px; margin:12px 0; }
+.studio-toolbar button { flex:1 1 auto; border:1.5px solid var(--sand); border-radius:999px; background:var(--paper); padding:9px 12px; font-weight:800; font-size:.8rem; cursor:pointer; min-height:44px; }
+.studio-toolbar button:hover { border-color:var(--peach-ink); color:var(--peach-ink); }
+.studio-camadas { display:grid; gap:6px; margin:12px 0; padding:0; list-style:none; }
+.studio-camada { display:flex; align-items:center; gap:10px; width:100%; border:1px solid var(--sand); border-radius:var(--r-sm); background:var(--paper); padding:7px 10px; cursor:pointer; font:inherit; color:inherit; text-align:left; min-height:52px; }
+.studio-camada[aria-pressed="true"] { border-color:var(--peach-ink); background:var(--sand-soft); }
+.studio-camada__icone { flex:0 0 40px; width:40px; height:40px; border-radius:8px; border:1px solid var(--sand); background:var(--white); display:grid; place-items:center; overflow:hidden; font-weight:800; font-size:.85rem; color:var(--peach-ink); }
+.studio-camada__icone canvas,.studio-camada__icone img { display:block; width:100%; height:100%; object-fit:contain; }
+.studio-camada__icone--vazio { border-style:dashed; border-color:var(--kraft); }
+.studio-camada__texto { display:grid; gap:2px; min-width:0; }
+.studio-camada__texto > span { font-weight:800; font-size:.85rem; overflow-wrap:anywhere; }
+.studio-camada__texto small { font-size:.72rem; color:var(--ink-soft); }
+.studio-props { border:1px solid var(--sand); border-radius:var(--r-sm); background:var(--paper); padding:13px 14px; display:grid; gap:11px; }
+.studio-props:empty { display:none; }
+.studio-props__titulo { font-weight:800; font-size:.85rem; }
+.studio-props__acoes { display:flex; flex-wrap:wrap; gap:14px; }
+.studio-campo { display:grid; gap:5px; font-weight:800; font-size:.8rem; }
+.studio-campo--range input { width:100%; margin:0; }
+.studio-props select,.studio-props input[type="text"] { width:100%; border:1.5px solid var(--sand); border-radius:10px; padding:9px 11px; background:var(--white); color:var(--ink); font:600 .95rem var(--f-body); min-height:44px; }
+.studio-cores { display:flex; flex-wrap:wrap; gap:6px; }
+.studio-cor { width:34px; height:34px; border-radius:50%; border:2px solid var(--sand); background:var(--tinta); cursor:pointer; padding:0; }
+.studio-cor[aria-pressed="true"] { border-color:var(--ink); box-shadow:0 0 0 2px var(--paper) inset; }
+.studio-formas { display:flex; flex-wrap:wrap; gap:6px; }
+.studio-forma { width:46px; height:46px; display:grid; place-items:center; border:1.5px solid var(--sand); border-radius:10px; background:var(--white); cursor:pointer; padding:0; }
+.studio-forma[aria-pressed="true"] { border-color:var(--peach-ink); background:var(--sand-soft); }
+.studio-forma canvas { display:block; width:28px; height:28px; }
+.studio-passos { margin:10px 0; padding-left:18px; list-style:decimal; font-size:.8rem; color:var(--ink-soft); line-height:1.6; }
+.studio-canva { display:flex; flex-wrap:wrap; gap:14px; }
+.studio-flat canvas { touch-action:none; }
+
 /* modelos de arte: categorias, cartões, espaços de foto e frases */
 .studio-categories { display:flex; flex-wrap:wrap; gap:5px; margin:15px 0 14px; }
 .studio-categories button { border:1px solid var(--sand); border-radius:999px; padding:7px 12px; background:var(--paper); font-weight:700; font-size:.78rem; cursor:pointer; min-height:38px; }

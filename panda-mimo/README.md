@@ -48,15 +48,28 @@ Enquanto o preço estiver vazio, a tela de detalhe mostra "Valor sob consulta".
 `vendor/three/`, sem CDN), escolher as cores do interior e da alça, escrever um nome e baixar a prévia, a
 arte plana em 300 dpi (210 × 90 mm) ou o projeto para continuar depois.
 
-Há também **modelos de arte por ocasião** (Namorados, Aniversário, Natal, Dia das Mães, Dia dos Pais e
-Só fotos): artes que dão a volta inteira na caneca, com espaços de foto — de uma a seis — e frases que
-a pessoa reescreve. Eles ficam em `simulador/modelos.js`, descritos em fração da área de impressão; para
-criar um novo, copie um item da lista e rode `npm run test:arte`, que confere se tudo cabe na área e se
-nada se sobrepõe. Para quem prefere montar a arte no Canva, a página diz a medida (21 × 9 cm, ou
-2480 × 1063 px a 300 dpi) e baixa um gabarito em PNG com a margem de segurança. Nada é enviado: a imagem fica no
-navegador. O código está em `simulador/` (`estudio.js` liga a página, `arte.js` compõe a arte em
-milímetros, `caneca-3d.js` desenha a caneca). Para abrir localmente use `npm run servir`, porque por
-`file://` o navegador bloqueia o canvas. As medidas da caneca ficam em `MUG_SPEC` (`simulador/caneca-3d.js`).
+Há também **modelos de arte por ocasião** (Namorados, Aniversário, Natal, Dia das Mães, Dia dos Pais,
+Professores, Casamento, Bebê, Pet, Amizade e Só fotos): 14 artes que dão a volta inteira na caneca, com
+espaços de foto — de uma a seis — e frases prontas.
+
+**A arte é editável em camadas.** A pessoa clica em cima da caneca em 3D para escolher um item e arrasta
+para mover; pode soltar uma foto direto na peça, acrescentar frase, enfeite (coração, flor, estrela,
+patinha, floco, confete, folha, xícara) e o Pandinha em qualquer uma das nove poses do acervo, trocar
+fonte e cor pela paleta da marca, mudar tamanho, inclinação e ordem, duplicar e apagar. A mesma edição
+funciona arrastando na vista aberta.
+
+Os modelos ficam em `simulador/modelos.js`, descritos em fração da área de impressão; para criar um novo,
+copie um item da lista e rode `npm run test:arte`, que confere se tudo cabe na área, se nada se sobrepõe
+e se cores e fontes são as da marca.
+
+**Ida e volta com o Canva:** a página diz a medida (21 × 9 cm, ou 2480 × 1063 px a 300 dpi), baixa um
+gabarito em PNG com a margem de segurança e as marcas de frente, verso e alça, abre o Canva em outra aba
+e recebe de volta o PNG exportado, aplicando-o ao redor da caneca.
+
+Nada é enviado: a imagem fica no navegador. O código está em `simulador/` (`estudio.js` liga a página,
+`modelos.js` descreve e desenha a arte em camadas, `arte.js` compõe e exporta, `caneca-3d.js` desenha a
+caneca e diz onde o dedo tocou). Para abrir localmente use `npm run servir`, porque por `file://` o
+navegador bloqueia o canvas. As medidas da caneca ficam em `MUG_SPEC` (`simulador/caneca-3d.js`).
 
 ## Manual da marca
 

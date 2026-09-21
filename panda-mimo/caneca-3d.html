@@ -83,6 +83,7 @@
           <p class="studio-help">Artes que dão a volta inteira na caneca, com espaço pras suas fotos e frases que você pode trocar. Ou comece do zero com a sua arte pronta.</p>
           <div class="studio-categories" id="model-categories" role="group" aria-label="Ocasiões"></div>
           <div class="studio-models" id="model-list" role="group" aria-label="Modelos de arte"></div>
+          <button type="button" class="studio-text-button" id="model-more" hidden></button>
         </section>
 
         <section class="studio-control-section" aria-labelledby="arte-heading">
@@ -90,8 +91,15 @@
 
           <div id="template-mode" hidden>
             <p class="studio-help" id="template-name"></p>
-            <div class="studio-slots" id="photo-slots" role="group" aria-label="Espaços de foto deste modelo"></div>
-            <div class="studio-texts" id="model-texts"></div>
+            <p class="studio-help studio-dica">Clique em cima da caneca para escolher um item. Arraste para mudar de lugar. Tudo o que está aqui pode ser trocado, movido ou apagado.</p>
+            <div class="studio-toolbar" role="group" aria-label="Acrescentar na arte">
+              <button type="button" id="add-foto">+ Foto</button>
+              <button type="button" id="add-frase">+ Frase</button>
+              <button type="button" id="add-enfeite">+ Enfeite</button>
+              <button type="button" id="add-pandinha">+ Pandinha</button>
+            </div>
+            <ul class="studio-camadas" id="camadas" aria-label="Itens da arte"></ul>
+            <div class="studio-props" id="camada-props"></div>
           </div>
 
           <div id="free-mode">
@@ -111,11 +119,21 @@
 
           <div class="studio-guide">
             <p><strong>Quer montar a arte no Canva?</strong> A volta inteira da caneca tem <span id="size-guide">21 × 9 cm</span>. Deixe 5 mm de folga em cada borda.</p>
-            <button type="button" class="studio-text-button" id="save-guide">Baixar o gabarito da arte</button>
+            <ol class="studio-passos">
+              <li>Baixe o gabarito e crie no Canva um design com essa medida.</li>
+              <li>Use o gabarito como fundo e monte sua arte por cima.</li>
+              <li>Exporte em PNG e traga de volta aqui para ver na caneca.</li>
+            </ol>
+            <div class="studio-canva">
+              <button type="button" class="studio-text-button" id="save-guide">Baixar o gabarito da arte</button>
+              <a class="studio-text-button" id="abrir-canva" href="https://www.canva.com/" target="_blank" rel="noopener noreferrer">Abrir o Canva em outra aba</a>
+              <button type="button" class="studio-text-button" id="importar-canva">Trazer a arte do Canva</button>
+            </div>
+            <input id="canva-file" class="studio-sr-only" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Arte pronta, do Canva ou de outro programa">
           </div>
         </section>
 
-        <details class="studio-control-section studio-options" id="art-adjustments">
+        <details class="studio-control-section studio-options" id="art-adjustments" hidden>
           <summary><span>Ajustar tamanho e posição</span><span aria-hidden="true">+</span></summary>
           <p class="studio-help" id="adjust-target">Ajusta a arte que está na caneca.</p>
           <div class="studio-ranges"><label for="art-scale">Tamanho <output id="scale-value" for="art-scale">100%</output><input id="art-scale" type="range" min="20" max="250" value="100" step="1"></label><label for="art-x">Para os lados <output id="x-value" for="art-x">0</output><input id="art-x" type="range" min="-100" max="100" value="0" step="1"></label><label for="art-y">Para cima ou para baixo <output id="y-value" for="art-y">0</output><input id="art-y" type="range" min="-100" max="100" value="0" step="1"></label><label for="art-rotation">Inclinação <output id="rotation-value" for="art-rotation">0°</output><input id="art-rotation" type="range" min="-180" max="180" value="0" step="1"></label></div>

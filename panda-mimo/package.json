@@ -8,7 +8,8 @@
     "test:arte": "node --test qa/*-unit.test.mjs",
     "servir": "node qa/servidor.mjs",
     "test:nitidez": "node qa/nitidez.mjs",
-    "shots": "node qa/audit.mjs --shots"
+    "shots": "node qa/audit.mjs --shots",
+    "provas": "node qa/provas.mjs qa/shots"
   },
   "devDependencies": {
     "playwright": "1.55.0",

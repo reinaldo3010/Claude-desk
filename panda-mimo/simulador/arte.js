@@ -3,14 +3,14 @@
  *
  * Coordenadas físicas, em mm, usam origem no canto superior esquerdo da parede
  * desenrolada. A costura u=0/1 fica na alça; frente u=.25, verso u=.75.
- * composeArtwork() entrega uma textura branca de toda a circunferência. Com um modelo
- * escolhido (modelos.js), a mesma função desenha a arte de volta inteira com os espaços
- * de foto e as frases daquele modelo.
+ * composeArtwork() entrega uma textura branca de toda a circunferência. Com uma arte em
+ * camadas (modelos.js), a mesma função desenha a volta inteira: fotos, frases, enfeites
+ * e o Pandinha, cada um no lugar em que a pessoa deixou.
  * exportPrintArtwork() desenha a mesma composição diretamente em 300 dpi,
  * recortada na área imprimível, sem guias, perspectiva ou espelhamento.
  */
 
-import { desenhaModelo, geometriaDoModelo, cor, FRENTE as FRENTE_U, VERSO as VERSO_U } from './modelos.js';
+import { desenhaArte, caixaDaCamada, medidorDeTexto, cor, FRENTE as FRENTE_U, VERSO as VERSO_U } from './modelos.js';
 
 const MAX_BYTES = 20 * 1024 * 1024;
 const MAX_PIXELS = 40_000_000;
@@ -267,38 +267,41 @@ function mergedState(options) {
   };
 }
 
-/** Geometria e avisos de um modelo: dpi de cada foto e espaços ainda vazios. */
-export function computeTemplatePlacement(template, state = {}, spec = {}, photos = {}) {
+/**
+ * Geometria e avisos de uma arte em camadas: dpi de cada foto e espaços ainda vazios.
+ * O medidor de texto vem de um canvas qualquer; sem canvas, a caixa da frase usa o limite.
+ */
+export function computeArtePlacement(arte, state = {}, spec = {}, fotos = {}, medidor = null) {
   const normalized = normalizedState(state);
   const { canvasMm, printArea } = physicalSpec(spec);
-  const geometry = geometriaDoModelo(template, printArea);
-  const slots = geometry.fotos.map((espaco) => {
-    const foto = photos[espaco.id];
+  const slots = arte.camadas.filter((camada) => camada.tipo === 'foto').map((camada) => {
+    const caixa = caixaDaCamada(camada, printArea, medidor);
+    const foto = fotos[camada.id];
     const larguraPx = positive(foto?.width, 0);
     const alturaPx = positive(foto?.height, 0);
     const preenchido = Boolean(foto?.image) && larguraPx > EPSILON && alturaPx > EPSILON;
     // A foto cobre o espaço: o lado que "sobra" é cortado, e o dpi sai do lado que manda.
     const escala = preenchido
-      ? Math.max(espaco.caixa.width / larguraPx, espaco.caixa.height / alturaPx) * clamp(number(foto.scale, 1), 0.2, 2.5)
+      ? Math.max(caixa.width / larguraPx, caixa.height / alturaPx) * clamp(number(camada.ajuste?.scale, 1), 0.2, 2.5)
       : 0;
     return {
-      id: espaco.id, rotulo: espaco.rotulo, caixa: espaco.caixa, preenchido,
+      id: camada.id, rotulo: camada.rotulo, caixa, preenchido,
       effectiveDpi: preenchido ? 25.4 / escala : null,
     };
   });
   return {
-    canvasMm, printArea, template: template.id, geometry, slots,
+    canvasMm, printArea, arte, slots,
     state: normalized,
-    vazios: slots.filter((s) => !s.preenchido).map((s) => s.rotulo),
-    effectiveDpi: slots.filter((s) => s.preenchido).reduce((menor, s) => (menor === null ? s.effectiveDpi : Math.min(menor, s.effectiveDpi)), null),
+    vazios: slots.filter((slot) => !slot.preenchido).map((slot) => slot.rotulo),
+    effectiveDpi: slots.filter((slot) => slot.preenchido).reduce((menor, slot) => (menor === null ? slot.effectiveDpi : Math.min(menor, slot.effectiveDpi)), null),
   };
 }
 
-function templateWarnings(placement) {
+function arteWarnings(placement) {
   const warnings = [];
-  const baixas = placement.slots.filter((s) => s.preenchido && s.effectiveDpi < 150);
+  const baixas = placement.slots.filter((slot) => slot.preenchido && slot.effectiveDpi < 150);
   if (baixas.length) {
-    warnings.push(`${baixas.length === 1 ? 'Uma foto está' : `${baixas.length} fotos estão`} com cerca de ${Math.max(1, Math.round(Math.min(...baixas.map((s) => s.effectiveDpi))))} dpi neste tamanho. Fotos maiores deixam a impressão mais nítida.`);
+    warnings.push(`${baixas.length === 1 ? 'Uma foto está' : `${baixas.length} fotos estão`} com cerca de ${Math.max(1, Math.round(Math.min(...baixas.map((slot) => slot.effectiveDpi))))} dpi neste tamanho. Fotos maiores deixam a impressão mais nítida.`);
   }
   if (placement.vazios.length) {
     warnings.push(`Ainda falta escolher: ${placement.vazios.join(', ')}. Espaço vazio sai impresso como fundo.`);
@@ -307,7 +310,7 @@ function templateWarnings(placement) {
 }
 
 function warningsFor(placement) {
-  if (placement.template) return templateWarnings(placement);
+  if (placement.arte) return arteWarnings(placement);
   const warnings = [];
   if (placement.effectiveDpi !== null && placement.effectiveDpi < 150) {
     warnings.push(`A imagem tem cerca de ${Math.max(1, Math.round(placement.effectiveDpi))} dpi neste tamanho. Uma imagem maior deixa a impressão mais nítida.`);
@@ -350,12 +353,11 @@ function drawComposition(canvas, placement, options, cropToPrint = false) {
   context.beginPath();
   context.rect(area.x, area.y, area.width, area.height);
   context.clip();
-  if (options.template) {
-    desenhaModelo(context, options.template, area, {
-      textos: options.templateTexts,
-      fotos: options.templatePhotos,
-      placeholder: options.placeholder,
-      pandaImage: placement.state.withPanda ? options.pandaImage : null,
+  if (options.arte) {
+    desenhaArte(context, options.arte, area, {
+      fotos: options.fotos,
+      imagens: options.imagens,
+      semPandinha: !placement.state.withPanda,
     });
     context.restore();
     context.setTransform(1, 0, 0, 1, 0, 0);
@@ -410,8 +412,8 @@ function drawComposition(canvas, placement, options, cropToPrint = false) {
  * @returns {{canvas:HTMLCanvasElement, placement:object, warnings:string[]}}
  */
 export function composeArtwork(options = {}, canvas) {
-  const placement = options.template
-    ? computeTemplatePlacement(options.template, mergedState(options), options.spec, options.templatePhotos)
+  const placement = options.arte
+    ? computeArtePlacement(options.arte, mergedState(options), options.spec, options.fotos, options.medidor)
     : computePlacement(options.artwork, mergedState(options), options.spec);
   const width = Math.round(clamp(number(options.widthPx, 2048), 256, 4096));
   const height = Math.max(1, Math.round(width * placement.canvasMm.height / placement.canvasMm.width));
@@ -456,8 +458,8 @@ async function pngAtDpi(blob, dpi) {
 
 /** Output: print-only PNG, 300 dpi metadata, artwork at the same mm placement as the preview. */
 export async function exportPrintArtwork(options = {}) {
-  const placement = options.template
-    ? computeTemplatePlacement(options.template, mergedState(options), options.spec, options.templatePhotos)
+  const placement = options.arte
+    ? computeArtePlacement(options.arte, mergedState(options), options.spec, options.fotos, options.medidor)
     : computePlacement(options.artwork, mergedState(options), options.spec);
   const dpi = 300;
   const widthPx = Math.round(placement.printArea.width / 25.4 * dpi);
