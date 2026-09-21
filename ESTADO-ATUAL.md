@@ -9,11 +9,21 @@ Frente aberta, o que ficou pronto e o que vem a seguir. Atualizado em 21 de sete
 **Frente:** estúdio da caneca em 360° da Panda Mimo (`panda-mimo/caneca-3d.html`) e as **coleções de
 arte** que enchem o catálogo de modelos.
 
-**Branches:**
-- `main` — já tem o estúdio inteiro e a coleção esportiva. **Nada publicado ainda:** a publicação sai
-  de um push da `main` no GitHub, e este repositório aponta para uma cópia local.
-- `colecoes-de-arte` — a frente de agora: a coleção de pets e a infraestrutura que faz coleção nova
-  ser barata de escrever.
+**Publicado em 21/09/2026**, com o estúdio no ar pela primeira vez:
+<https://reinaldo3010.github.io/Claude-desk/caneca-3d.html>
+
+**O caminho até o ar tem três pernas**, e a do meio costuma ser esquecida:
+
+1. este repositório (`Downloads/imagens site panda mimo/Claude-desk-simulador`), onde o trabalho é
+   feito e mesclado na `main`;
+2. o repositório do dono (`OneDrive - MINGARDI & ELIAS/Área de Trabalho/Claude-desk`), que é o
+   `origin` daqui. Como ele está com a `main` aberta, não dá para empurrar direto: de lá se puxa,
+   com `git pull --ff-only <caminho deste repositório> main`;
+3. o GitHub (`reinaldo3010/Claude-desk`). O `git push origin main` de lá dispara o workflow
+   "Panda Mimo · publicar no GitHub Pages". Leva uns cinco minutos para o ar.
+
+**Antes de publicar de novo:** o WhatsApp do site ainda é o número de reserva (`5500000000000`), em
+`script.js`. Quem clicar em "fazer o pedido" no estúdio não chega em ninguém.
 
 ## O catálogo hoje
 
@@ -34,7 +44,7 @@ Cada assunto tem pelo menos quatro artes, e o teste cobra. As exceções ficam n
 
 ## Como está a qualidade
 
-- 38 testes unitários (`npm run test:arte`), verdes.
+- 39 testes unitários (`npm run test:arte`), verdes.
 - Guardião funcional em 390 e 1280 px, verde, cobrindo o site, o estúdio de ponta a ponta, as duas
   coleções e a página de provas.
 - Nitidez em sete combinações de tela e densidade, verde. axe-core sem violação.
@@ -76,7 +86,7 @@ tem uma categoria só. Vale quando o catálogo crescer mais.
    (mágica, cônica, alça de coração, 15 oz) e a área de impressão de cada uma.
 2. **Decidir a cena "caixa de presente".** Foi refeita; o dono quer olhar antes de manter.
 3. **Trocar o número do WhatsApp** pelo real, no painel ou em `script.js`.
-4. **Publicar.** Depois de revisar as provas visuais. O push da `main` no GitHub é o que publica.
+4. **Republicar** depois de trocar o WhatsApp: o caminho das três pernas está no começo deste arquivo.
 
 ### 3. Ideias recusadas de propósito
 
