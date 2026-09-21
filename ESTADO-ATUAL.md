@@ -17,15 +17,20 @@ arte** que enchem o catálogo de modelos.
 
 ## O catálogo hoje
 
-54 modelos, em cinco grupos no seletor (a ordem é escrita à mão em `ORDEM_DOS_GRUPOS`):
+102 modelos, em sete grupos no seletor (a ordem é escrita à mão em `ORDEM_DOS_GRUPOS`):
 
 | Grupo | Assuntos | Artes |
 |---|---|---|
-| Datas comemorativas | Natal, Mães, Pais, Namorados, Professores | 6 |
-| Momentos | Aniversário, Casamento, Bebê, Amizade e formatura | 4 |
+| Datas comemorativas | Natal, Mães, Pais, Namorados, Professores, Páscoa | 24 |
+| Momentos | Aniversário, Amizade e formatura | 2 |
+| Bebê e maternidade | Chegada, Chá de bebê, Chá revelação, Gravidez e primeiro Dia das Mães | 16 |
+| Convites e agradecimentos | Padrinhos de casamento, Padrinhos de batismo, Madrinhas e daminhas, Agradecimento | 16 |
 | Pets e bichinhos | Várias fotos, Cachorros, Gatos, Homenagem, Mãe e pai de pet | 17 |
 | Esportes e movimento | funcional, musculação, ciclismo, corrida, yoga e pilates, futebol | 24 |
 | Do dia a dia | Só fotos | 3 |
+
+Cada assunto tem pelo menos quatro artes, e o teste cobra. As exceções ficam numa lista à vista
+(`AINDA_MAGROS` em `qa/colecoes-unit.test.mjs`): hoje só Aniversário e Amizade e formatura.
 
 ## Como está a qualidade
 
@@ -53,14 +58,13 @@ Em ordem de valor, na minha leitura — o dono decide a ordem de verdade:
 |---|---|---|
 | Profissões e vocações | professor, enfermagem, medicina, direito, veterinária, engenharia, quem empreende | não existe |
 | Pessoas especiais | amiga, casal, mãe, pai, avós, irmãos, filhos, colegas | não existe |
-| Datas comemorativas | falta Páscoa; as cinco que existem têm **uma arte cada** | fraca |
-| Celebrações e novas fases | noivado, batizado, formatura, aposentadoria, casa nova | quase não existe |
-| Bebê e maternidade | chá de bebê, chá revelação, anúncio de gravidez, primeiro Dia das Mães | 1 arte |
-| Convites e agradecimentos | padrinhos de casamento e de batismo, madrinhas, daminhas, agradecimento | 1 arte |
+| Celebrações e novas fases | aniversário, noivado, formatura, aposentadoria, casa nova | Aniversário e Amizade com 1 arte cada |
 | Hobbies e paixões | livros, café, música, games, viagens, jardinagem, culinária, fotografia | 1 arte |
 | Humor e personalidade | frases engraçadas, signo, jeito de ser, piada entre amigos | não existe |
 | Fé e espiritualidade | frases de fé, celebrações, símbolos | não existe |
 | Empresas e equipes | boas-vindas, reconhecimento, evento, brinde, conquista | não existe |
+
+Prontas: datas comemorativas, bebê e maternidade, convites e agradecimentos, pets, esportes.
 
 Uma ideia registrada e ainda não feita: **uma arte pode aparecer em mais de um caminho** (a caneca da
 amiga ciclista podia estar em Esportes → Ciclismo *e* em Pessoas especiais → Amigas). Hoje cada arte
