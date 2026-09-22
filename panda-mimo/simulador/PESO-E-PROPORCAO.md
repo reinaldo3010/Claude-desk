@@ -51,3 +51,39 @@ velho.
 O primeiro corte moveu o bloco dos ajustes com um script que procurava o `</div>` do layout e pegou
 outro, enfiando a seção no meio da prévia. As contagens de tags continuavam batendo, então nada
 gritou. O arquivo foi restaurado do commit e a mudança refeita ancorada em `</main>`, que é único.
+
+
+---
+
+## A sobreposição que o dono viu num print
+
+Depois de publicada a faixa de ajustes, a prévia passou a **cobrir** a faixa em janelas mais baixas.
+
+**A causa:** sobrou na coluna da peça um `max-height: calc(100vh - 36px)` do desenho anterior, de
+quando ela precisava rolar por dentro. Com os ajustes fora da coluna o limite perdeu a função, e
+virou armadilha: em janela baixa o conteúdo passa do limite e vaza para fora da caixa. Como a coluna
+é `position: sticky`, ou seja, elemento posicionado, **o que vaza pinta acima do conteúdo estático**
+mesmo vindo antes no documento.
+
+| janela | invasão antes | depois |
+|---|---|---|
+| 1366 × 768 | 0 px | 0 px |
+| 1337 × 660 | 23 px | 0 px |
+| 1280 × 580 | 103 px | 0 px |
+
+Só aparecia em janela baixa, e as medições vinham sendo feitas a 768 — onde a coluna (675 px) ainda
+cabe. **Foi o dono quem viu.**
+
+A checagem nova varre a página em três alturas de janela e reprova se a prévia cobrir a faixa de
+ajustes, a área de fechamento ou o rodapé. Confirmada com o defeito reinserido: acusa os mesmos
+23 px e 103 px.
+
+**Lição:** `max-height` sem `overflow` não corta nada — só muda o tamanho da caixa e deixa o conteúdo
+vazar. Num elemento posicionado, o que vaza cobre o que vem depois.
+
+## Uma checagem frágil por tempo fixo
+
+No mesmo lote, o bloco da arte do Canva falhou sozinho: ele esperava 900 ms cravados pela mensagem de
+status, mas os downloads logo acima (prévia, arte plana, vídeo, 4K) escrevem no **mesmo campo**, e um
+deles terminando tarde sobrescrevia a mensagem. O caminho foi reproduzido à mão e a mensagem aparece
+na hora e fica estável. A checagem passou a esperar a condição em vez de cravar tempo.

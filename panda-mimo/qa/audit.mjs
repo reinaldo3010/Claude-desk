@@ -1675,7 +1675,11 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
 
     // trazer a arte pronta do Canva: volta para a aba Minha arte, ao redor, com a arte inteira
     await pe.setInputFiles('#canva-file', fotoDeTeste);
-    await pe.waitForTimeout(900);
+    // Espera a mensagem em vez de cravar um tempo: os downloads logo acima escrevem no mesmo campo
+    // de status, e um deles terminando tarde sobrescrevia a mensagem do Canva. A falha era da
+    // checagem, não do produto — e um tempo fixo aqui volta a mentir no primeiro dia lento.
+    await pe.waitForFunction(() => /Canva|proporção/i.test(document.getElementById('save-status')?.textContent || ''),
+      { timeout: 8000 }).catch(() => {});
     const doCanva = await pe.evaluate(() => ({
       abas: [...document.querySelectorAll('#abas button')].map((b) => b.dataset.aba),
       ativa: document.querySelector('#abas [aria-selected="true"]')?.dataset.aba,
@@ -1736,6 +1740,41 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     erros.filter((e) => !/Failed to load resource|net::ERR_|PointerCapture/.test(e))
       .forEach((e) => failures.push(`[estúdio ${w}] erro: ${e}`));
     await pe.close();
+    await contexto.close();
+  }
+
+  // A prévia gruda no topo, e elemento posicionado pinta ACIMA do conteúdo estático mesmo vindo antes
+  // no documento. Bastou um `max-height` sobrando na coluna para o conteúdo vazar da caixa e a caneca
+  // cobrir a faixa de ajustes logo abaixo — o dono viu antes da gente, num print. A janela baixa é o
+  // caso que revela: é onde a coluna encosta no limite da tela.
+  for (const [nome, w4, h4] of [['1366x768', 1366, 768], ['1337x660', 1337, 660], ['1280x580', 1280, 580]]) {
+    const contexto = await browser.newContext({ viewport: { width: w4, height: h4 } });
+    const ps = await contexto.newPage();
+    await ps.goto(servidor.url + 'caneca-3d.html', { waitUntil: 'load' });
+    await ps.waitForTimeout(800);
+    const choque = await ps.evaluate(async () => {
+      const peca = document.querySelector('.studio-preview');
+      const abaixo = ['.studio-preview-extra', '.studio-finish', 'footer'].map((s2) => document.querySelector(s2)).filter(Boolean);
+      let pior = { invade: 0, sobre: null };
+      for (let y = 0; y <= document.documentElement.scrollHeight; y += 60) {
+        window.scrollTo({ top: y, behavior: 'instant' });
+        await new Promise((r) => setTimeout(r, 30));
+        const rp = peca.getBoundingClientRect();
+        for (const alvo of abaixo) {
+          const ra = alvo.getBoundingClientRect();
+          const invade = Math.min(rp.bottom, ra.bottom) - Math.max(rp.top, ra.top);
+          if (invade > 2 && rp.right > ra.left && rp.left < ra.right && invade > pior.invade) {
+            pior = { invade: Math.round(invade), sobre: (alvo.className || alvo.tagName).toString().slice(0, 28), scroll: y };
+          }
+        }
+      }
+      const col = document.querySelector('.studio-coluna-peca');
+      return { pior, transborda: col.scrollHeight > Math.round(col.getBoundingClientRect().height) + 2 };
+    });
+    if (choque.pior.invade > 2) {
+      failures.push(`[sobreposição ${nome}] a prévia cobre ${choque.pior.sobre} em ${choque.pior.invade} px (rolagem ${choque.pior.scroll})`);
+    }
+    if (choque.transborda) failures.push(`[sobreposição ${nome}] o conteúdo da coluna da peça vaza para fora da caixa`);
     await contexto.close();
   }
 

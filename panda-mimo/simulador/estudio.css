@@ -22,10 +22,11 @@
 */
 .studio-coluna-peca {
   display:flex; flex-direction:column; gap:0; min-width:0; position:sticky; top:18px;
-  /* Cabe na tela sem rolar por dentro. O que fazia a coluna estourar eram os ajustes da peça, que
-     desceram para baixo do layout: com eles ali, a coluna é só a caneca e os controles de vista.
-     Some uma das três áreas de rolagem que existiam ao mesmo tempo (página, coluna e lista). */
-  max-height:calc(100vh - 36px);
+  /* Sem limite de altura de propósito. Havia um `max-height` aqui de quando os ajustes da peça
+     moravam dentro da coluna e ela precisava rolar por dentro. Com os ajustes numa faixa própria, a
+     coluna é só a caneca e os controles de vista — e o limite virou armadilha: em janela baixa o
+     conteúdo passava do limite, vazava para fora da caixa e, como elemento posicionado pinta acima
+     do conteúdo estático, a prévia cobria a faixa de ajustes logo abaixo. */
 }
 .studio-preview { border:1px solid var(--sand); border-radius:var(--r-lg); background:var(--cream); min-width:0; }
 .studio-preview__bar { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:22px 24px 0; color:var(--ink-soft); font-size:.83rem; }
