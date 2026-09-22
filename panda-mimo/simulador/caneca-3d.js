@@ -505,6 +505,34 @@ export async function createMugViewer(container, { onError, onReady, onChange, o
     O ouvinte é de captura: ele decide antes de o OrbitControls ver o evento. Com enableZoom em falso
     o controle ignora a roda e não chama preventDefault, então a página rola como em qualquer lugar.
   */
+  /*
+    Teclado na caneca. O rótulo dizia "arraste para girar", o que não serve para quem não usa mouse.
+    As setas giram e aproximam; os botões de vista continuam sendo o caminho rápido para frente,
+    verso, alça e interior. Sem isso, girar a peça era gesto de mouse e mais nada.
+  */
+  canvas.tabIndex = 0;
+  canvas.setAttribute('role', 'application');
+  canvas.setAttribute('aria-label',
+    'Caneca em três dimensões. Use as setas para girar, e mais e menos para aproximar. Os botões de vista levam direto a cada lado.');
+  canvas.addEventListener('keydown', (evento) => {
+    const passo = evento.shiftKey ? 0.22 : 0.08;
+    const esferica = new THREE.Spherical().setFromVector3(camera.position.clone().sub(controls.target));
+    let mexeu = true;
+    if (evento.key === 'ArrowLeft') esferica.theta -= passo;
+    else if (evento.key === 'ArrowRight') esferica.theta += passo;
+    else if (evento.key === 'ArrowUp') esferica.phi = Math.max(controls.minPolarAngle, esferica.phi - passo * 0.6);
+    else if (evento.key === 'ArrowDown') esferica.phi = Math.min(controls.maxPolarAngle, esferica.phi + passo * 0.6);
+    else if (evento.key === '+' || evento.key === '=') esferica.radius = Math.max(controls.minDistance, esferica.radius - 0.4);
+    else if (evento.key === '-' || evento.key === '_') esferica.radius = Math.min(controls.maxDistance, esferica.radius + 0.4);
+    else mexeu = false;
+    if (!mexeu) return;
+    evento.preventDefault();
+    transition = null;
+    camera.position.setFromSpherical(esferica).add(controls.target);
+    controls.update();
+    requestRender();
+  });
+
   const comModificador = (evento) => evento.ctrlKey || evento.metaKey;
   canvas.addEventListener('wheel', (evento) => {
     controls.enableZoom = comModificador(evento);

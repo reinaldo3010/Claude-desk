@@ -2,7 +2,8 @@
 .studio-topbar { border-bottom:1px solid var(--sand); background:var(--paper); }
 .studio-topbar__in { display:flex; align-items:center; justify-content:space-between; min-height:94px; gap:1rem; }
 .studio-topbar .brand { width:192px; }
-.studio-back { display:flex; align-items:center; gap:.6rem; font-size:.9rem; text-decoration:none; font-weight:700; }
+/* 44 px de alvo pelo padding: a tipografia e o alinhamento da barra do topo não mudam. */
+.studio-back { display:flex; align-items:center; gap:.6rem; font-size:.9rem; text-decoration:none; font-weight:700; min-height:44px; padding-inline:.2rem; }
 .studio-back:hover { color:var(--peach-ink); }
 .studio-main { padding-block:36px 48px; }
 .studio-heading { display:flex; align-items:center; justify-content:space-between; gap:24px; margin-bottom:30px; }
@@ -19,11 +20,18 @@
   O vão é zero e as bordas emendam porque cada bloco tem `border-top` de divisória e a legenda fecha
   a base arredondada: com vão entre eles, as divisórias ficam soltas e a base não fecha nada.
 */
-.studio-coluna-peca { display:flex; flex-direction:column; gap:0; min-width:0; position:sticky; top:18px; }
+.studio-coluna-peca {
+  display:flex; flex-direction:column; gap:0; min-width:0; position:sticky; top:18px;
+  /* A coluna cabe na tela e rola por dentro. Sem o limite ela pode ficar MAIS ALTA que o editor —
+     é o que acontece quando a vista da arte aberta abre sozinha na tela larga — e aí o sticky não
+     tem para onde correr: a caneca sobe junto com a página e a pessoa volta a editar sem ver a peça.
+     Com o limite, a caneca fica sempre no topo e os ajustes ficam a uma rolagem de distância. */
+  max-height:calc(100vh - 36px); overflow-y:auto; overscroll-behavior:contain;
+}
 .studio-preview { border:1px solid var(--sand); border-radius:var(--r-lg) var(--r-lg) 0 0; border-bottom:0; background:var(--cream); min-width:0; }
 .studio-preview__bar { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:22px 24px 0; color:var(--ink-soft); font-size:.83rem; }
 .studio-preview__bar { flex-wrap:wrap; }
-.studio-cadeado { display:inline-flex; align-items:center; gap:7px; border:1.5px solid var(--sand); border-radius:999px; background:var(--paper); color:var(--ink-soft); padding:6px 12px; font:800 .74rem var(--f-body); cursor:pointer; min-height:38px; }
+.studio-cadeado { display:inline-flex; align-items:center; gap:7px; border:1.5px solid var(--sand); border-radius:999px; background:var(--paper); color:var(--ink-soft); padding:9px 12px; font:800 .74rem var(--f-body); cursor:pointer; min-height:44px; }
 .studio-cadeado:hover { border-color:var(--peach-ink); color:var(--peach-ink); }
 .studio-cadeado[aria-pressed="false"] { background:var(--sand-soft); border-color:var(--peach-ink); color:var(--peach-ink); }
 .studio-badge { background:var(--paper); color:var(--peach-ink); border:1px solid var(--sand); border-radius:999px; padding:5px 11px; font-weight:800; font-size:.7rem; letter-spacing:.08em; }
@@ -34,7 +42,7 @@
 .studio-loading { pointer-events:none; }
 .studio-view-tools { padding:0 24px; display:flex; flex-direction:column; align-items:center; gap:14px; }
 .studio-view-buttons { display:flex; flex-wrap:wrap; justify-content:center; gap:5px; padding:5px; border:1px solid var(--sand); background:var(--paper); border-radius:999px; }
-.studio-view-buttons button,.studio-color-presets button { border:0; border-radius:999px; padding:8px 15px; background:transparent; font-weight:700; font-size:.88rem; cursor:pointer; min-height:42px; }
+.studio-view-buttons button,.studio-color-presets button { border:0; border-radius:999px; padding:10px 15px; background:transparent; font-weight:700; font-size:.88rem; cursor:pointer; min-height:44px; }
 .studio-view-buttons button[aria-pressed="true"],.studio-color-presets button[aria-pressed="true"] { background:var(--ink); color:var(--paper); }
 .studio-zoom { display:flex; align-items:center; gap:12px; width:200px; font-size:.8rem; color:var(--ink-soft); }
 .studio-zoom input { min-width:0; width:100%; }
@@ -65,7 +73,8 @@ input[type="range"] { accent-color:var(--peach-ink); cursor:pointer; min-height:
 .studio-drop p { font-size:.8rem; color:var(--ink-soft); }
 .studio-drop small { font-size:.75rem; color:var(--ink-soft); }
 .studio-example-row { padding:11px 0; }
-.studio-text-button { border:0; background:none; text-decoration:underline; text-underline-offset:3px; color:var(--peach-ink); font-weight:800; font-size:.82rem; padding:5px 0; cursor:pointer; text-align:left; min-height:36px; }
+/* 44 px de alvo: o padding cresce a área do dedo sem mexer na tipografia. */
+.studio-text-button { border:0; background:none; text-decoration:underline; text-underline-offset:3px; color:var(--peach-ink); font-weight:800; font-size:.82rem; padding:9px 0; cursor:pointer; text-align:left; min-height:44px; }
 .studio-file { display:flex; align-items:center; justify-content:space-between; gap:12px; padding-top:10px; font-size:.8rem; }
 .studio-file > span { overflow-wrap:anywhere; }
 .studio-message { background:var(--sand-soft); border-left:3px solid var(--peach-ink); padding:12px; margin:12px 22px; font-size:.88rem; }
@@ -193,7 +202,7 @@ input[type="range"] { accent-color:var(--peach-ink); cursor:pointer; min-height:
 .studio-peca__resumo { font-weight:400; font-size:.8rem; color:var(--ink-soft); }
 .studio-peca .studio-help { margin-top:10px; }
 .studio-cenas { display:flex; flex-wrap:wrap; gap:5px; margin-top:11px; }
-.studio-cenas button { border:1.5px solid var(--sand); border-radius:999px; background:var(--paper); padding:8px 13px; font-weight:800; font-size:.78rem; cursor:pointer; min-height:42px; }
+.studio-cenas button { border:1.5px solid var(--sand); border-radius:999px; background:var(--paper); padding:10px 13px; font-weight:800; font-size:.78rem; cursor:pointer; min-height:44px; }
 .studio-cenas button:hover { border-color:var(--peach-ink); color:var(--peach-ink); }
 .studio-cenas button[aria-pressed="true"] { background:var(--ink); color:var(--paper); border-color:var(--ink); }
 .studio-rascunho { margin:14px 22px 0; padding:12px 14px; border:1px solid var(--kraft); border-radius:var(--r-sm); background:var(--sand-soft); display:grid; gap:8px; }
@@ -288,7 +297,7 @@ input[type="range"] { accent-color:var(--peach-ink); cursor:pointer; min-height:
   .studio-badge { font-size:.6rem; padding:5px 7px; }
   .studio-viewport { height:320px; }
   .studio-view-tools { padding-inline:12px; }
-  .studio-view-buttons button { padding:6px 12px; font-size:.8rem; }
+  .studio-view-buttons button { padding:10px 12px; font-size:.8rem; }
   .studio-caption { display:block; padding:17px 19px; }
   .studio-caption p { margin-top:5px; font-size:.8rem; }
   .studio-intro,.studio-abas,.studio-dica,.studio-acoes-arte { padding-inline:17px; }
@@ -342,3 +351,28 @@ input[type="range"] { accent-color:var(--peach-ink); cursor:pointer; min-height:
   border-radius:50%; background:var(--peach-ink);
 }
 @media (max-width:480px) { .studio-passo { flex-direction:column; align-items:stretch; } .studio-passo .btn { width:100%; } }
+
+/* Explicação curta ao lado do termo que a levanta, em vez de texto solto longe do controle. */
+.studio-duvida { margin-top:10px; }
+.studio-duvida summary {
+  cursor:pointer; font-size:.78rem; font-weight:800; color:var(--peach-ink);
+  list-style:none; display:inline-flex; align-items:center; gap:6px; min-height:44px;
+}
+.studio-duvida summary::-webkit-details-marker { display:none; }
+.studio-duvida summary::before {
+  content:"?"; display:grid; place-items:center; width:18px; height:18px; border-radius:50%;
+  border:1.5px solid currentColor; font-size:.68rem; line-height:1; flex:0 0 auto;
+}
+.studio-duvida summary:hover { color:var(--ink); }
+.studio-duvida summary:focus-visible { outline:3px solid var(--peach-deep); outline-offset:3px; border-radius:6px; }
+.studio-duvida p { margin-top:4px; color:var(--ink-soft); font-size:.8rem; line-height:1.55; max-width:62ch; }
+
+/* Só na primeira visita, e some com um clique. */
+.studio-boasvindas {
+  margin:14px 0 0; padding:16px 18px; border:1px solid var(--sand); border-radius:var(--r-sm);
+  background:var(--sand-soft);
+}
+.studio-boasvindas h2 { font-size:.95rem; font-weight:800; margin:0 0 10px; }
+.studio-boasvindas ol { margin:0 0 14px; padding-left:1.15rem; display:grid; gap:7px; }
+.studio-boasvindas li { font-size:.84rem; line-height:1.55; color:var(--ink-soft); }
+.studio-boasvindas li strong { color:var(--ink); font-weight:800; }

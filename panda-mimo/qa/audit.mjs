@@ -1240,8 +1240,8 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
       const canvas = document.querySelector('canvas.mug-3d-canvas');
       if (!canvas) return null;
       const r = canvas.getBoundingClientRect();
-      const manda = (ctrl) => {
-        const ev = new WheelEvent('wheel', { deltaY: -120, ctrlKey: ctrl, bubbles: true, cancelable: true,
+      const manda = (ctrl, delta = -120) => {
+        const ev = new WheelEvent('wheel', { deltaY: delta, ctrlKey: ctrl, bubbles: true, cancelable: true,
           clientX: r.x + r.width / 2, clientY: r.y + r.height / 2 });
         canvas.dispatchEvent(ev);
         return ev.defaultPrevented;
@@ -1249,6 +1249,11 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
       const sozinha = manda(false);
       await new Promise((res) => setTimeout(res, 120));
       const comCtrl = manda(true);
+      // Devolve o zoom: sem isto a caneca fica aproximada e as checagens seguintes, que tocam no
+      // centro da peça esperando acertar uma foto, passam a cair no lugar errado.
+      await new Promise((res) => setTimeout(res, 120));
+      manda(true, 120);
+      await new Promise((res) => setTimeout(res, 300));
       return { sozinha, comCtrl };
     });
     if (roda && roda.sozinha) failures.push(`[estúdio ${w}] a roda do mouse sobre a caneca ainda engole a rolagem da página`);
@@ -1731,6 +1736,52 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     erros.filter((e) => !/Failed to load resource|net::ERR_|PointerCapture/.test(e))
       .forEach((e) => failures.push(`[estúdio ${w}] erro: ${e}`));
     await pe.close();
+    await contexto.close();
+  }
+
+  // Quatro acréscimos da rodada de acessibilidade e primeira visita, cobrados de uma vez porque
+  // dependem da mesma página montada: alvo de toque de 44 px, dúvida explicada ao lado do termo que
+  // a levanta, boas-vindas que aparecem uma vez só, e a caneca girando pelo teclado.
+  for (const [nome, w3, h3] of [['1280', 1280, 900], ['390', 390, 844]]) {
+    const contexto = await browser.newContext({ viewport: { width: w3, height: h3 } });
+    const pz = await contexto.newPage();
+    await pz.goto(servidor.url + 'caneca-3d.html', { waitUntil: 'load' });
+    await pz.waitForTimeout(900);
+    const r = await pz.evaluate(async () => {
+      const pequenos = [...document.querySelectorAll('button, a[href]')]
+        .filter((e) => { const c = e.getBoundingClientRect(); return c.width > 0 && c.height > 0 && c.height < 44; })
+        .map((e) => `${(e.textContent || e.getAttribute('aria-label') || '').trim().slice(0, 24)} (${Math.round(e.getBoundingClientRect().height)}px)`);
+      const bv = document.getElementById('boasvindas');
+      const primeira = { existe: !!bv, visivel: bv ? !bv.hidden : false };
+      bv?.querySelector('button')?.click();
+      await new Promise((res) => setTimeout(res, 200));
+      const depoisDeFechar = bv ? bv.hidden : null;
+      const canvas = document.querySelector('canvas.mug-3d-canvas');
+      let setaTratada = null;
+      if (canvas) {
+        canvas.focus();
+        const ev = new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true });
+        canvas.dispatchEvent(ev);
+        setaTratada = ev.defaultPrevented;
+      }
+      return {
+        pequenos,
+        duvidas: document.querySelectorAll('.studio-duvida summary').length,
+        primeira, depoisDeFechar,
+        atalhos: [...document.querySelectorAll('a.skip')].map((a) => a.getAttribute('href')),
+        canvasFocavel: canvas ? canvas.tabIndex === 0 : false,
+        setaTratada,
+        aceitaHeic: (document.getElementById('art-file')?.accept || '').includes('heic'),
+      };
+    });
+    if (r.pequenos.length) failures.push(`[toque ${nome}] ${r.pequenos.length} controle(s) com menos de 44 px: ${r.pequenos.slice(0, 4).join(', ')}`);
+    if (r.duvidas < 2) failures.push(`[ajuda ${nome}] sumiram as explicações ao lado dos termos (${r.duvidas})`);
+    if (!r.primeira.existe || !r.primeira.visivel) failures.push(`[primeira visita ${nome}] as boas-vindas não apareceram na primeira abertura`);
+    if (r.depoisDeFechar === false) failures.push(`[primeira visita ${nome}] as boas-vindas não fecham no clique`);
+    if (!r.atalhos.includes('#abas')) failures.push(`[teclado ${nome}] falta o atalho que pula direto para o editor`);
+    if (!r.canvasFocavel) failures.push(`[teclado ${nome}] a caneca não recebe foco de teclado`);
+    if (r.setaTratada === false) failures.push(`[teclado ${nome}] as setas não giram a caneca`);
+    if (!r.aceitaHeic) failures.push(`[fotos ${nome}] o seletor voltou a recusar HEIC, o padrão do iPhone`);
     await contexto.close();
   }
 
