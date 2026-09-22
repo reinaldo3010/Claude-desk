@@ -3,6 +3,22 @@
 **Sessão nova começa por `ESTADO-ATUAL.md`** (na raiz): a frente aberta, o que ficou pronto, o que
 vem a seguir e o que é trabalho de outra sessão parado no diretório.
 
+## A regra que manda em todas as outras
+
+**Nenhuma alteração pode regredir o visual ou a experiência de uso.** Decisão do dono, setembro de
+2026: entre qualidade e peso, ganha a qualidade. Melhorar fluidez, velocidade e clareza é bem-vindo;
+pagar por isso com um pixel a menos de acabamento, uma animação mais pobre ou um passo a mais para o
+cliente, não.
+
+Na prática, antes de qualquer mudança que encoste na aparência ou no fluxo:
+
+1. **Meça antes e depois** e mostre o número. "Achei que ficou igual" não vale — o desktop já foi
+   quebrado uma vez neste repositório por uma mudança que parecia inofensiva na leitura do código.
+2. **Prefira a mudança que não muda pixel.** Trocar a ordem em que as coisas carregam, o token que
+   recebe a tinta ou o alvo de uma rolagem costuma resolver sem tocar no desenho.
+3. **Se a única saída for mexer na aparência, pare e pergunte.** Não é sua decisão.
+4. **Deixe uma checagem no guardião**, senão a regressão volta na próxima sessão.
+
 ## panda-mimo/ (site e marca Panda Mimo)
 
 Antes de qualquer trabalho em `panda-mimo/`, leia **`panda-mimo/MARCA.md`**, o manual da marca.
