@@ -1175,3 +1175,9 @@ h2 .hand { font-size: 1.15em; }
 .footer__nav--legal a { font-weight: 600; }
 .footer__loja { font-size: var(--fs-xs); color: var(--ink-soft); margin-top: .8rem; max-width: 60ch; line-height: 1.5; }
 .footer__loja + .footer__legal { margin-top: .2rem; }
+
+/* Ver a nota em simulador/estudio.css: 44 px é alvo de dedo; no mouse a proporção pede menos. */
+@media (pointer: fine) {
+  .footer__nav a { min-height: 32px; }
+  .brand { min-height: 0; }
+}

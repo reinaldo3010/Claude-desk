@@ -22,13 +22,12 @@
 */
 .studio-coluna-peca {
   display:flex; flex-direction:column; gap:0; min-width:0; position:sticky; top:18px;
-  /* A coluna cabe na tela e rola por dentro. Sem o limite ela pode ficar MAIS ALTA que o editor —
-     é o que acontece quando a vista da arte aberta abre sozinha na tela larga — e aí o sticky não
-     tem para onde correr: a caneca sobe junto com a página e a pessoa volta a editar sem ver a peça.
-     Com o limite, a caneca fica sempre no topo e os ajustes ficam a uma rolagem de distância. */
-  max-height:calc(100vh - 36px); overflow-y:auto; overscroll-behavior:contain;
+  /* Cabe na tela sem rolar por dentro. O que fazia a coluna estourar eram os ajustes da peça, que
+     desceram para baixo do layout: com eles ali, a coluna é só a caneca e os controles de vista.
+     Some uma das três áreas de rolagem que existiam ao mesmo tempo (página, coluna e lista). */
+  max-height:calc(100vh - 36px);
 }
-.studio-preview { border:1px solid var(--sand); border-radius:var(--r-lg) var(--r-lg) 0 0; border-bottom:0; background:var(--cream); min-width:0; }
+.studio-preview { border:1px solid var(--sand); border-radius:var(--r-lg); background:var(--cream); min-width:0; }
 .studio-preview__bar { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:22px 24px 0; color:var(--ink-soft); font-size:.83rem; }
 .studio-preview__bar { flex-wrap:wrap; }
 .studio-cadeado { display:inline-flex; align-items:center; gap:7px; border:1.5px solid var(--sand); border-radius:999px; background:var(--paper); color:var(--ink-soft); padding:9px 12px; font:800 .74rem var(--f-body); cursor:pointer; min-height:44px; }
@@ -315,13 +314,25 @@ input[type="range"] { accent-color:var(--peach-ink); cursor:pointer; min-height:
 
 
 /* Os ajustes da peça saíram de dentro do bloco que gruda; na tela larga seguem embaixo da caneca. */
-.studio-preview-extra { min-width:0; display:block; border:1px solid var(--sand); border-top:0; border-radius:0 0 var(--r-lg) var(--r-lg); background:var(--cream); }
+/* Ajustes da peça: faixa própria abaixo do layout, larga e calma. Dentro da coluna eles obrigavam
+   a caneca a rolar por dentro; aqui têm espaço e não disputam com nada. */
+.studio-preview-extra {
+  min-width:0; display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:0;
+  border:1px solid var(--sand); border-radius:var(--r-lg); background:var(--cream); overflow:hidden;
+  margin-top:28px;
+}
+.studio-preview-extra > * { border-top:0; border-left:1px solid var(--sand); }
+.studio-preview-extra > :first-child { border-left:0; }
+.studio-preview-extra .studio-caption { grid-column:1/-1; border-left:0; border-top:1px solid var(--sand); border-radius:0; }
+@media (max-width:850px) {
+  .studio-preview-extra { grid-template-columns:1fr; }
+  .studio-preview-extra > * { border-left:0; border-top:1px solid var(--sand); }
+  .studio-preview-extra > :first-child { border-top:0; }
+}
 /* No celular a caneca gruda sozinha no topo, então ela fecha o próprio cartão e os ajustes abrem o
    deles logo abaixo — dois cartões inteiros em vez de um partido ao meio. */
 @media (max-width:850px) {
-  .studio-preview { border-radius:var(--r-lg); border-bottom:1px solid var(--sand); }
-  .studio-preview-extra { border-top:1px solid var(--sand); border-radius:var(--r-lg); margin-top:14px; }
-  .studio-preview-extra > :first-child { border-top:0; }
+  .studio-preview-extra { margin-top:22px; }
 }
 
 /* Aviso curto quando a pessoa rola sobre a caneca esperando zoom. */
@@ -376,3 +387,26 @@ input[type="range"] { accent-color:var(--peach-ink); cursor:pointer; min-height:
 .studio-boasvindas ol { margin:0 0 14px; padding-left:1.15rem; display:grid; gap:7px; }
 .studio-boasvindas li { font-size:.84rem; line-height:1.55; color:var(--ink-soft); }
 .studio-boasvindas li strong { color:var(--ink); font-weight:800; }
+
+/*
+  ---------- Tamanho de controle por tipo de ponteiro ----------
+
+  Os 44 px de alvo são regra de DEDO. Aplicados também no mouse, deixaram a interface pesada: um
+  botão de 44 px com letra de 12 px é 3,7 vezes a altura da própria letra, quando interface refinada
+  fica entre 2,2 e 2,8. Era isso que se via ao pôr a tela em 80% e achar melhor — o zoom devolvia a
+  proporção certa.
+
+  Então: o dedo continua com 44 px, e quem usa mouse ganha o tamanho justo. A norma de acessibilidade
+  pede 24 px mínimos para ponteiro fino, e nada aqui chega perto disso.
+*/
+@media (pointer: fine) {
+  .studio-view-buttons button, .studio-color-presets button { min-height:36px; padding:7px 14px; }
+  .studio-cenas button { min-height:34px; padding:6px 12px; }
+  .studio-cadeado { min-height:34px; padding:6px 11px; }
+  .studio-text-button { min-height:32px; padding:4px 0; }
+  .studio-back { min-height:34px; }
+  .studio-abas button { min-height:40px; padding:9px 6px; }
+  .studio-duvida summary { min-height:32px; }
+  .studio-finish > .btn { padding-block:.85rem; }
+  .studio-passo .btn { padding-block:.7rem; }
+}
