@@ -9,11 +9,18 @@
 .studio-heading h1 { font-size:clamp(2rem,3.5vw,3.1rem); margin-top:10px; }
 .studio-heading h1 .hand { font-size:1.2em; }
 .studio-heading > p { max-width:30em; color:var(--ink-soft); font-size:1rem; }
-.studio-layout { display:grid; grid-template-columns:minmax(0,1.45fr) minmax(320px,1fr); gap:28px; align-items:stretch; }
+.studio-layout { display:grid; grid-template-columns:minmax(0,1.45fr) minmax(320px,1fr); gap:28px; align-items:start; }
 /* A coluna da peça estica até a altura do editor; sem isso a caneca para de grudar no meio. */
-.studio-coluna-peca { display:flex; flex-direction:column; gap:14px; min-width:0; }
-.studio-controls { align-self:start; }
-.studio-preview { position:sticky; top:18px; border:1px solid var(--sand); border-radius:var(--r-lg); background:var(--cream); min-width:0; }
+/*
+  Na tela larga quem gruda é a COLUNA inteira, não só a caneca. Os ajustes da peça (cores, cena, arte
+  aberta) nasceram dentro do cartão da prévia; quando só a caneca grudava, eles passavam por trás
+  dela ao rolar e ficavam inalcançáveis. Grudando a coluna, sobem junto, como sempre subiram.
+
+  O vão é zero e as bordas emendam porque cada bloco tem `border-top` de divisória e a legenda fecha
+  a base arredondada: com vão entre eles, as divisórias ficam soltas e a base não fecha nada.
+*/
+.studio-coluna-peca { display:flex; flex-direction:column; gap:0; min-width:0; position:sticky; top:18px; }
+.studio-preview { border:1px solid var(--sand); border-radius:var(--r-lg) var(--r-lg) 0 0; border-bottom:0; background:var(--cream); min-width:0; }
 .studio-preview__bar { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:22px 24px 0; color:var(--ink-soft); font-size:.83rem; }
 .studio-preview__bar { flex-wrap:wrap; }
 .studio-cadeado { display:inline-flex; align-items:center; gap:7px; border:1.5px solid var(--sand); border-radius:999px; background:var(--paper); color:var(--ink-soft); padding:6px 12px; font:800 .74rem var(--f-body); cursor:pointer; min-height:38px; }
@@ -246,9 +253,18 @@ input[type="range"] { accent-color:var(--peach-ink); cursor:pointer; min-height:
 @media(max-width:850px) {
   /* Fluxo normal em vez de grade: assim o bloco da peça consegue grudar ao longo de todo o editor.
      Em grade de uma coluna cada item fica preso à sua linha, e o sticky não teria onde correr. */
-  .studio-layout { display:block; }
-  .studio-coluna-peca { display:contents; }
+  /* Coluna flexível para o sticky valer contra a página inteira e para poder reordenar. */
+  .studio-layout { display:flex; flex-direction:column; }
+  /* A coluna sai do fluxo e quem gruda é só a caneca: a coluna toda no topo tomaria a tela e não
+     sobraria lugar para editar. */
+  .studio-coluna-peca { display:contents; position:static; }
+  /* Os ajustes da peça vão para depois do editor. Entre a caneca grudada e o editor eles passariam
+     por trás dela e não dava para abrir nem mexer; embaixo, ficam à mão. */
+  .studio-preview { order:1; }
+  .studio-controls { order:2; }
+  .studio-preview-extra { order:3; }
   .studio-layout > * + * { margin-top:22px; }
+  .studio-preview-extra { margin-top:22px; }
   /* A caneca acompanha a edição. Antes ela ficava 513 px acima da tela e a pessoa editava às cegas. */
   .studio-preview { position:sticky; top:0; z-index:5; background:var(--cream); }
   .studio-viewport { height:210px; }
@@ -290,8 +306,14 @@ input[type="range"] { accent-color:var(--peach-ink); cursor:pointer; min-height:
 
 
 /* Os ajustes da peça saíram de dentro do bloco que gruda; na tela larga seguem embaixo da caneca. */
-.studio-preview-extra { min-width:0; display:grid; gap:12px; align-content:start; }
-@media (max-width:850px) { .studio-preview-extra { display:block; } .studio-preview-extra > * + * { margin-top:12px; } }
+.studio-preview-extra { min-width:0; display:block; border:1px solid var(--sand); border-top:0; border-radius:0 0 var(--r-lg) var(--r-lg); background:var(--cream); }
+/* No celular a caneca gruda sozinha no topo, então ela fecha o próprio cartão e os ajustes abrem o
+   deles logo abaixo — dois cartões inteiros em vez de um partido ao meio. */
+@media (max-width:850px) {
+  .studio-preview { border-radius:var(--r-lg); border-bottom:1px solid var(--sand); }
+  .studio-preview-extra { border-top:1px solid var(--sand); border-radius:var(--r-lg); margin-top:14px; }
+  .studio-preview-extra > :first-child { border-top:0; }
+}
 
 /* Aviso curto quando a pessoa rola sobre a caneca esperando zoom. */
 .studio-zoom-dica {

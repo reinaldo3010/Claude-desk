@@ -1734,6 +1734,59 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     await contexto.close();
   }
 
+  // Cores da peça, cena e acabamento, e a vista da arte aberta nasceram DENTRO do cartão da prévia.
+  // Ao fazer a caneca grudar no topo, eles viraram irmãos do cartão e passaram a correr por trás dela
+  // ao rolar, ficando inalcançáveis sem nada indicar que sumiram. O dono percebeu antes da gente.
+  //
+  // A checagem rola como gente rola, sem deslocamento calculado — uma primeira versão descontava a
+  // altura da caneca grudada e, por isso, passava mesmo com o defeito de volta. Na tela larga a
+  // coluna inteira gruda, então os blocos têm de continuar à mão enquanto se usa o editor. No
+  // celular eles ficam depois do editor, e têm de estar à mão no fim da página.
+  for (const [nome, w2, h2] of [['1280', 1280, 900], ['390', 390, 844]]) {
+    const contexto = await browser.newContext({ viewport: { width: w2, height: h2 } });
+    const pa = await contexto.newPage();
+    await pa.goto(servidor.url + 'caneca-3d.html', { waitUntil: 'load' });
+    await pa.waitForTimeout(900);
+    const alcance = await pa.evaluate(async (larga) => {
+      const ids = ['peca-cores', 'peca-cena', 'flat-details'];
+      const faltando = ids.filter((id) => !document.getElementById(id));
+      const daParaUsar = (id) => {
+        const alvo = document.getElementById(id);
+        const resumo = alvo.querySelector('summary') || alvo;
+        const rr = resumo.getBoundingClientRect();
+        if (!(rr.top >= 0 && rr.bottom <= window.innerHeight)) return { ok: false, motivo: 'fora da tela' };
+        const noPonto = document.elementFromPoint(Math.round(rr.left + rr.width / 2), Math.round(rr.top + rr.height / 2));
+        if (noPonto && alvo.contains(noPonto)) return { ok: true };
+        return { ok: false, motivo: 'coberto por ' + (noPonto ? (noPonto.className || noPonto.tagName).toString().slice(0, 30) : 'nada') };
+      };
+      const presentes = ids.filter((id) => document.getElementById(id));
+      let estado;
+      if (larga) {
+        // Na tela larga a coluna inteira gruda: os blocos têm de estar à mão ENQUANTO se usa o editor.
+        const editor = document.querySelector('.studio-controls');
+        window.scrollTo({ top: window.scrollY + editor.getBoundingClientRect().top + editor.offsetHeight / 2 - window.innerHeight / 2, behavior: 'instant' });
+        await new Promise((r) => setTimeout(r, 300));
+        estado = presentes.map((id) => ({ id, ...daParaUsar(id) }));
+      } else {
+        // No celular eles ficam depois do editor: a pessoa rola até eles saírem de trás da caneca.
+        const conseguiu = new Map(presentes.map((id) => [id, { ok: false, motivo: 'nunca ficou à mão' }]));
+        const passo = Math.round(window.innerHeight / 3);
+        for (let y = 0; y <= document.documentElement.scrollHeight; y += passo) {
+          window.scrollTo({ top: y, behavior: 'instant' });
+          await new Promise((r) => setTimeout(r, 90));
+          for (const id of presentes) if (!conseguiu.get(id).ok) { const r = daParaUsar(id); if (r.ok) conseguiu.set(id, r); }
+        }
+        estado = presentes.map((id) => ({ id, ...conseguiu.get(id) }));
+      }
+      return { faltando, estado };
+    }, w2 > 850);
+    for (const id of alcance.faltando) failures.push(`[peça ${nome}] o bloco ${id} sumiu da página`);
+    for (const a of alcance.estado) {
+      if (!a.ok) failures.push(`[peça ${nome}] não dá para usar ${a.id}: ${a.motivo}`);
+    }
+    await contexto.close();
+  }
+
   // Cada miniatura do catálogo custa cerca de 5,5 ms e 300 KB de canvas. Desenhar as 138 de uma vez
   // seriam 0,8 s de tela parada e 40 MB de memória, e num celular médio bem mais. Elas nascem quando
   // o cartão chega perto da área visível da lista — o que não pode virar cartão em branco.

@@ -49,3 +49,45 @@ Duas checagens novas em `qa/audit.mjs`, cada uma conferida com defeito inserido 
   rolar a lista tem de trazer miniaturas novas.
 - **fotos**: o atalho da câmera aparece no contexto com toque e não aparece no computador, nas duas
   pontas, e "Escolher foto" continua onde estava.
+
+
+---
+
+## 3. O catálogo inteiro à mão, e a regressão que veio junto
+
+Com a miniatura barata, o "Ver mais 132 modelos" deixou de ter razão: os 139 cartões passaram a
+nascer na lista, que tem rolagem própria. A página não cresceu — 2.103 px antes e depois — porque a
+rolagem é da lista, com 11.894 px de conteúdo numa janela de 464 px. Trocar de assunto ou digitar na
+busca volta a lista ao topo, senão quem estava no meio das 138 filtrava e continuava olhando o vazio.
+
+A paginação foi removida inteira (`VISIVEIS_DE_INICIO`, o estado `mostrarTodosOsModelos`, o botão e o
+ouvinte) em vez de desligada: código morto alguém tenta reanimar depois.
+
+### A regressão: os ajustes da peça ficaram inalcançáveis
+
+**O dono percebeu antes da gente.** Ao fazer a caneca grudar no topo, "Cores da peça", "Cena e
+acabamento" e "Ver a arte aberta" saíram de dentro do cartão da prévia e viraram irmãos dele. Ao
+rolar, passavam **por trás** da caneca grudada. Nada tinha sido removido — mas o acesso, sim.
+
+Pior: na medição eles apareciam como "visível, 533 × 52 px", e isso foi aceito como prova. Estavam
+visíveis atrás da caneca. **Foi medida a coisa errada.**
+
+O conserto é diferente em cada largura, porque o objetivo é diferente:
+
+- **Tela larga:** quem gruda é a **coluna inteira** (`.studio-coluna-peca`), não só a caneca. Os três
+  sobem junto, como sempre subiram. O `align-items:start` do layout voltou, e é ele que deixa a
+  coluna ter altura de conteúdo enquanto a área da grade continua alta o bastante para o sticky
+  correr.
+- **Celular:** lá a caneca precisa grudar sozinha, senão não sobra tela para editar. Os três foram
+  para depois do editor, com `order`, onde dá para abrir e mexer sem nada por cima.
+
+O cartão voltou a ser um só: vão zero e bordas emendadas, porque cada bloco tem `border-top` de
+divisória e a legenda fecha a base arredondada.
+
+### A checagem que quase não protegeu nada
+
+A primeira versão da checagem descontava a altura da caneca grudada antes de rolar até o bloco — ou
+seja, compensava exatamente o que estava quebrado, e passava com o defeito de volta. Está reescrita
+para rolar como gente rola: na tela larga os blocos têm de estar à mão enquanto se usa o editor; no
+celular, a varredura desce a página em passos até o bloco sair de trás da caneca. Com o defeito
+reinserido, acusa `não dá para usar peca-cores: coberto por mug-3d-canvas`.
