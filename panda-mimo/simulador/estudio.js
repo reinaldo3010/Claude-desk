@@ -40,7 +40,6 @@ const PROJETO_TIPO = 'panda-mimo/caneca';
 const PROJETO_VERSAO = 4;
 const MEUS_MODELOS = 'pm_caneca_meus_modelos';
 const PASSOS_GUARDADOS = 60;
-const VISIVEIS_DE_INICIO = 6;
 const LIMITES = Object.freeze({
   fraseTamanho: [3, 22], enfeiteTamanho: [0.04, 0.5], adesivoTamanho: [0.06, 0.6],
   fotoLargura: [0.06, 0.6], giro: [-180, 180], arco: [-180, 180],
@@ -73,7 +72,7 @@ const el = {
   salvarModelo: $('salvar-modelo'), apagarModelo: $('apagar-modelo'), formMeuModelo: $('form-meu-modelo'),
   nomeMeuModelo: $('nome-meu-modelo'), confirmarMeuModelo: $('confirmar-meu-modelo'), cancelarMeuModelo: $('cancelar-meu-modelo'),
   categoria: $('categoria-modelo'), busca: $('busca-modelo'), resultado: $('resultado-modelos'),
-  models: $('model-list'), moreModels: $('model-more'),
+  models: $('model-list'),
   listaFotos: $('lista-fotos'), listaFrases: $('lista-frases'), listaEnfeites: $('lista-enfeites'),
   gradeEnfeites: $('grade-enfeites'), gradeElementos: $('grade-elementos'), fundoArte: $('fundo-arte'),
   mostrarMargem: $('mostrar-margem'),
@@ -104,7 +103,6 @@ let modeloAtual = null;
 let abaAtual = 'modelo';
 let categoria = 'todos';
 let busca = '';
-let mostrarTodosOsModelos = false;
 let artwork = null;           // arte livre: { image, width, height, name, dispose }
 let artworkBlob = null;
 const fotos = new Map();      // id da camada de foto → { asset, blob }
@@ -786,17 +784,14 @@ function cartaoDeModelo(modelo) {
 function montaModelos() {
   const filtrados = listaDeModelos(categoria).filter((modelo) => !busca
     || semAcento(`${modelo.nome} ${modelo.descricao}`).includes(busca));
-  const escondido = arte && filtrados.slice(0, VISIVEIS_DE_INICIO).every((m) => m.id !== arte.modelo)
-    && filtrados.some((m) => m.id === arte.modelo);
-  const todos = mostrarTodosOsModelos || escondido;
-  const visiveis = todos ? filtrados : filtrados.slice(0, VISIVEIS_DE_INICIO);
+  // O catálogo inteiro fica à mão: a lista tem rolagem própria e a miniatura só é desenhada quando
+  // chega perto da tela, então mostrar 138 cartões custa o mesmo que mostrar seis. Enquanto custava
+  // caro havia um "Ver mais 132 modelos", e era uma parede: a maior parte do acervo ficava atrás de
+  // um clique que ninguém dava. Para procurar, a busca e o filtro de assunto estão logo acima.
   const semModelo = categoria === 'todos' && !busca ? [cartaoDeModelo(null)] : [];
   // Sem soltar as pendências, remontar a lista guardaria cartões que já saíram do documento.
   miniaturasPendentes.clear();
-  el.models.replaceChildren(...semModelo, ...visiveis.map(cartaoDeModelo));
-  const sobram = filtrados.length - visiveis.length;
-  el.moreModels.textContent = sobram ? `Ver mais ${sobram} ${sobram === 1 ? 'modelo' : 'modelos'}` : 'Ver menos modelos';
-  el.moreModels.hidden = filtrados.length <= VISIVEIS_DE_INICIO;
+  el.models.replaceChildren(...semModelo, ...filtrados.map(cartaoDeModelo));
   el.resultado.textContent = filtrados.length
     ? `${filtrados.length} ${filtrados.length === 1 ? 'modelo' : 'modelos'}${busca ? ` com "${el.busca.value.trim()}"` : ''}.`
     : 'Nada com esse nome. Tente outra palavra ou escolha outra ocasião.';
@@ -2310,15 +2305,14 @@ function bind() {
   el.abas.addEventListener('keydown', andaNasAbas);
   el.categoria.addEventListener('change', () => {
     categoria = el.categoria.value;
-    mostrarTodosOsModelos = false;
+    el.models.scrollTop = 0;
     montaModelos();
   });
   el.busca.addEventListener('input', () => {
     busca = semAcento(el.busca.value.trim());
-    mostrarTodosOsModelos = false;
+    el.models.scrollTop = 0;
     montaModelos();
   });
-  el.moreModels.addEventListener('click', () => { mostrarTodosOsModelos = !mostrarTodosOsModelos; montaModelos(); });
   el.mostrarMargem.addEventListener('change', schedule);
 
   el.addFoto.addEventListener('click', adicionaFoto);
