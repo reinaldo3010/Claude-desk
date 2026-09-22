@@ -46,6 +46,10 @@
   <noscript><p class="studio-message">Ative o JavaScript para personalizar a caneca. Você também pode <a href="index.html#contato">contar sua ideia pra gente</a>.</p></noscript>
   <div class="studio-layout">
 
+    <!-- A peça e os ajustes dela vivem numa coluna só: assim a caneca consegue grudar ao
+         longo de todo o editor na tela larga, e no celular (onde a coluna vira display:contents)
+         ela gruda ao longo da página inteira. -->
+    <div class="studio-coluna-peca">
     <!-- ===================== A PEÇA ===================== -->
     <section class="studio-preview" aria-label="Prévia da caneca">
       <div class="studio-preview__bar">
@@ -70,6 +74,10 @@
       </div>
       <p class="studio-gesture" id="studio-gesture">Arraste para girar a caneca. Use dois dedos ou o controle para aproximar.</p>
 
+    </section>
+
+    <!-- Fica embaixo da peça: no celular, só a caneca gruda no topo. -->
+    <section class="studio-preview-extra" aria-label="Ajustes da peça">
       <!-- cores da peça ficam junto da peça, não no editor da arte -->
       <details class="studio-peca" id="peca-cores">
         <summary><span>Cores da peça</span><span class="studio-peca__resumo" id="peca-resumo">Toda branca</span></summary>
@@ -93,6 +101,7 @@
       </details>
       <div class="studio-caption"><span class="hand">Só uma prévia, tá?</span><p>Modelo de referência de 325 ml. A gente confere a peça, a combinação de cores e a arte final antes de produzir.</p></div>
     </section>
+    </div>
 
     <!-- ===================== A ARTE ===================== -->
     <aside class="studio-controls" aria-label="Montar a arte da caneca">

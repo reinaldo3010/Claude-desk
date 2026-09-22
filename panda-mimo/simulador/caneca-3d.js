@@ -497,6 +497,37 @@ export async function createMugViewer(container, { onError, onReady, onChange, o
   // OrbitControls sets touch-action:none during construction.
   canvas.style.touchAction = 'pan-y';
 
+  /*
+    A roda do mouse sobre a caneca dava zoom e engolia a rolagem da página. Como a prévia ocupa quase
+    metade da tela larga, quem punha o cursor ali sentia o site travado. Agora vale o mesmo acordo dos
+    mapas: roda sozinha rola a página, Ctrl (ou ⌘) mais roda dá zoom. A barra de zoom continua sendo
+    o caminho principal, e o toque não muda — um dedo gira, dois aproximam.
+    O ouvinte é de captura: ele decide antes de o OrbitControls ver o evento. Com enableZoom em falso
+    o controle ignora a roda e não chama preventDefault, então a página rola como em qualquer lugar.
+  */
+  const comModificador = (evento) => evento.ctrlKey || evento.metaKey;
+  canvas.addEventListener('wheel', (evento) => {
+    controls.enableZoom = comModificador(evento);
+    if (!controls.enableZoom) avisaComoDarZoom();
+  }, { capture: true, passive: true });
+  controls.enableZoom = false;
+
+  let avisoDeZoom = null, sumirAviso = 0;
+  function avisaComoDarZoom() {
+    const pai = canvas.parentElement;
+    if (!pai) return;
+    if (!avisoDeZoom) {
+      avisoDeZoom = document.createElement('p');
+      avisoDeZoom.className = 'studio-zoom-dica';
+      const tecla = /Mac|iPhone|iPad/.test(navigator.platform || '') ? '⌘' : 'Ctrl';
+      avisoDeZoom.textContent = `Use ${tecla} + roda para aproximar, ou a barra de zoom.`;
+      pai.appendChild(avisoDeZoom);
+    }
+    avisoDeZoom.classList.add('vendo');
+    clearTimeout(sumirAviso);
+    sumirAviso = setTimeout(() => avisoDeZoom?.classList.remove('vendo'), 1600);
+  }
+
   let disposed = false, visible = true, contextLost = false;
 
   /**

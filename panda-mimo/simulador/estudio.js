@@ -858,6 +858,34 @@ function escolheModelo(id) {
   garanteAdesivos();
   garanteFontes();
   schedule();
+  levaParaAPeca();
+}
+
+/**
+ * Depois de escolher um modelo, a pessoa precisa ver a caneca e o próximo passo.
+ * Sem isto ela clicava num modelo lá no fim da lista e ia parar no rodapé: a lista some, a página
+ * encolhe e o navegador gruda a rolagem no novo fim.
+ *
+ * O alvo são as abas, não a caneca: a caneca é sticky e está sempre no alto da tela, então olhar
+ * para ela dizia "já está à vista" mesmo com a pessoa parada no rodapé. No celular a caneca grudada
+ * cobre o topo, então as abas param logo abaixo dela.
+ */
+function levaParaAPeca() {
+  const abas = document.getElementById('abas');
+  if (!abas) return;
+  const caixa = abas.getBoundingClientRect();
+  if (caixa.top >= 0 && caixa.bottom <= window.innerHeight) return; // o próximo passo já está à vista
+  const peca = document.querySelector('.studio-preview');
+  const grudada = peca && getComputedStyle(peca).position === 'sticky' && window.innerWidth <= 850;
+  // `scrollMarginTop` reserva o espaço da caneca grudada; sem ele as abas parariam atrás dela.
+  // Vale `scrollIntoView` e não `window.scrollTo`: além de respeitar essa folga, ele é quem funciona
+  // quando a página está dentro de um contêiner com escala.
+  abas.style.scrollMarginTop = `${grudada ? Math.round(peca.getBoundingClientRect().height) + 8 : 8}px`;
+  // Salto seco, e precisa ser 'instant': o CSS desta página tem `scroll-behavior: smooth` no html,
+  // e 'auto' obedece a ele — a rolagem vira animada, não completa em navegador automatizado e a
+  // checagem do guardião nunca pegaria a regressão. A troca de passo já mudou o painel inteiro;
+  // meio segundo de rolagem por cima disso atrasa sem informar nada.
+  abas.scrollIntoView({ block: 'start', behavior: 'instant' });
 }
 
 function atualizaModo() {
