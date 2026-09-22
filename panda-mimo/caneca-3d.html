@@ -32,6 +32,7 @@
 </head>
 <body class="studio-page">
 <a class="skip" href="#conteudo">Ir para o conteúdo</a>
+<a class="skip" href="#abas">Ir direto para o editor da arte</a>
 <header class="studio-topbar">
   <div class="wrap studio-topbar__in">
     <a href="index.html" class="brand" aria-label="Panda Mimo — início"><img src="assets/logo-pill.svg" alt="Panda Mimo — itens personalizados" width="900" height="254"></a>
@@ -59,7 +60,7 @@
           <span id="travar-texto">Arte travada</span>
         </button>
       </div>
-      <div class="studio-viewport" id="mug-viewport" role="region" aria-label="Caneca em três dimensões. Arraste para girar ou use os botões de vista.">
+      <div class="studio-viewport" id="mug-viewport" role="region" aria-label="Prévia da caneca em três dimensões">
         <p class="studio-loading" id="viewer-loading" role="status">Preparando sua caneca…</p>
         <div id="viewer-fallback" class="studio-fallback" hidden><p>O 3D não abriu neste navegador. Sua arte continua disponível na vista plana.</p><button type="button" class="btn btn--ghost btn--sm" id="viewer-retry">Tentar o 3D novamente</button></div>
       </div>
@@ -98,6 +99,11 @@
         <div class="studio-flat__paper"><canvas id="flat-art" width="840" height="360" role="img" aria-label="Arte plana dentro da área de personalização"></canvas></div>
         <p>Esta é a área que envolve a caneca, com um espaço livre junto à alça. Puxe um canto para aumentar e o botão de cima para girar.</p>
         <label class="studio-check"><input type="checkbox" id="mostrar-margem" checked> Mostrar a margem de segurança</label>
+        <details class="studio-duvida"><summary>O que é a margem de segurança?</summary>
+          <p>É a faixa de 5 mm nas bordas da arte. A caneca é estampada com a folha envolvendo a peça, e essa
+          folha pode escorregar um fio de milímetro. O que estiver fora da margem corre o risco de sair cortado —
+          então nome, data e rosto ficam para dentro dela.</p>
+        </details>
       </details>
       <div class="studio-caption"><span class="hand">Só uma prévia, tá?</span><p>Modelo de referência de 325 ml. A gente confere a peça, a combinação de cores e a arte final antes de produzir.</p></div>
     </section>
@@ -107,6 +113,17 @@
     <aside class="studio-controls" aria-label="Montar a arte da caneca">
       <form id="mug-form" autocomplete="off">
         <p class="studio-intro">Escolha um modelo, coloque as fotos e escreva do seu jeito. Clique em cima da caneca para mexer em qualquer item.</p>
+
+        <!-- Só na primeira visita: quem chega não sabe o que acontece depois de montar. -->
+        <aside class="studio-boasvindas" id="boasvindas" hidden aria-labelledby="boasvindas-titulo">
+          <h2 id="boasvindas-titulo">Como funciona por aqui</h2>
+          <ol>
+            <li><strong>Escolha um modelo</strong> pronto para a ocasião, ou traga a sua arte.</li>
+            <li><strong>Ponha suas fotos e escreva do seu jeito.</strong> A caneca gira para você ver de todos os lados antes de decidir.</li>
+            <li><strong>Peça pelo WhatsApp.</strong> A gente confere a arte com você antes de produzir — nada sai da sua mão sem o seu "pode fazer".</li>
+          </ol>
+          <button type="button" class="btn btn--dark btn--sm" id="boasvindas-fechar">Entendi, vamos montar</button>
+        </aside>
         <div class="studio-rascunho" id="rascunho" hidden>
           <p id="rascunho-texto">Você tem um rascunho guardado neste aparelho.</p>
           <div class="studio-rascunho__acoes">
@@ -154,6 +171,11 @@
           <details class="studio-guide" id="bloco-canva">
             <summary>Quer montar a arte no Canva?</summary>
             <p>A volta inteira da caneca tem <span id="size-guide">21 × 9 cm</span>. Deixe 5 mm de folga em cada borda.</p>
+            <details class="studio-duvida"><summary>O que quer dizer 300 dpi?</summary>
+              <p>São 300 pontinhos de tinta por polegada — a densidade em que a estampa sai nítida. Na prática:
+              uma foto precisa ter mais ou menos 2.480 × 1.060 pontos para ocupar a volta inteira sem ficar
+              borrada. Foto de WhatsApp costuma ter menos, e por isso a gente avisa quando a sua está apertada.</p>
+            </details>
             <ol class="studio-passos">
               <li><strong>Levar minha arte para o Canva</strong> baixa a arte como está e abre o Canva numa aba nova.</li>
               <li>No Canva, crie um design com essa medida e arraste o arquivo para dentro dele.</li>
@@ -214,8 +236,8 @@
           </div>
         </div>
 
-        <input id="art-file" class="studio-sr-only" type="file" accept="image/png,image/jpeg,image/webp,application/json,.json" aria-label="Arquivo da foto, da arte ou do projeto salvo">
-        <input id="canva-file" class="studio-sr-only" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Arte pronta, do Canva ou de outro programa">
+        <input id="art-file" class="studio-sr-only" type="file" accept="image/png,image/jpeg,image/webp,image/heic,image/heif,.heic,.heif,application/json,.json" aria-label="Arquivo da foto, da arte ou do projeto salvo">
+        <input id="canva-file" class="studio-sr-only" type="file" accept="image/png,image/jpeg,image/webp,image/heic,image/heif,.heic,.heif" aria-label="Arte pronta, do Canva ou de outro programa">
         <p id="art-error" class="studio-message" role="alert" hidden></p>
 
         <!-- Onde a pessoa está na montagem e para onde vai depois. -->

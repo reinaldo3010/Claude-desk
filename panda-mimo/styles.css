@@ -157,6 +157,9 @@ h2 .hand { font-size: 1.15em; }
   min-height: 72px;
 }
 .brand { flex-shrink: 0; }
+/* O link do logotipo é alvo de toque como qualquer outro: a imagem tem 42 px no celular, então o
+   próprio link garante os 44 sem mudar o tamanho da marca. */
+.brand { display: inline-flex; align-items: center; min-height: 44px; }
 .brand img { width: 210px; height: auto; }
 .nav { display: flex; gap: 1.4rem; }
 .nav a {
@@ -787,8 +790,10 @@ h2 .hand { font-size: 1.15em; }
 @media (max-width: 700px) { .follow { grid-template-columns: 1fr; } .follow__art { width: 140px; } }
 
 /* ---------- rodapé: links ---------- */
-.footer__nav { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem 1.2rem; margin-top: .8rem; }
-.footer__nav a { text-decoration: none; font-size: var(--fs-s); font-weight: 700; color: var(--ink-soft); }
+.footer__nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 1.2rem; margin-top: .4rem; }
+/* O dedo precisa de alvo: estes links tinham 22 px de altura, metade do confortável. O padding
+   cresce a área clicável sem mudar a tipografia nem o espaçamento entre eles. */
+.footer__nav a { text-decoration: none; font-size: var(--fs-s); font-weight: 700; color: var(--ink-soft); display: inline-flex; align-items: center; min-height: 44px; padding-inline: .2rem; }
 .footer__nav a:hover { color: var(--peach-ink); }
 
 /* ---------- botão flutuante do WhatsApp ---------- */

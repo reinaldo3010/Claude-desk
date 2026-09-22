@@ -91,7 +91,7 @@ function fileFrom(bytes, type = 'image/png', name = 'arte.png') {
 }
 
 test('upload rejeita SVG, arquivo falso, excesso de bytes/pixels e animação antes de decodificar', async () => {
-  await assert.rejects(loadArtwork(fileFrom('<svg/>', 'image/svg+xml')), /PNG, JPG ou WebP/);
+  await assert.rejects(loadArtwork(fileFrom('<svg/>', 'image/svg+xml')), /PNG, JPG, WebP ou HEIC/);
   await assert.rejects(loadArtwork(fileFrom('<svg/>', 'image/png')), /SVG, GIF/);
   await assert.rejects(loadArtwork({ size: 20 * 1024 * 1024 + 1, arrayBuffer() { throw new Error('não deve ler'); } }), /20 MB/);
   await assert.rejects(loadArtwork(fileFrom(pngHeader(10000, 10000))), /40 megapixels/);
@@ -180,4 +180,54 @@ test('preview e export mantêm geometria em mm; export inclui apenas área útil
     if (originalDocument === undefined) delete globalThis.document;
     else globalThis.document = originalDocument;
   }
+});
+
+/*
+  HEIC é o padrão de foto do iPhone, e quem escolhe pelo app Arquivos manda esse arquivo — antes ele
+  nem aparecia como selecionável. Aqui se monta um HEIC sintético (ftyp + meta > iprp > ipco > ispe)
+  para cobrar o leitor de caixas: sem um arquivo de verdade e um Safari, é o que dá para conferir.
+  A decodificação em si é do navegador; quem não souber abrir cai na mensagem que já existe.
+*/
+function caixa(tipo, corpo) {
+  const dados = new Uint8Array(8 + corpo.length);
+  new DataView(dados.buffer).setUint32(0, dados.length);
+  dados.set([...tipo].map((c) => c.charCodeAt(0)), 4);
+  dados.set(corpo, 8);
+  return dados;
+}
+function junta(...partes) {
+  const total = partes.reduce((a, p) => a + p.length, 0);
+  const saida = new Uint8Array(total);
+  let i = 0;
+  for (const p of partes) { saida.set(p, i); i += p.length; }
+  return saida;
+}
+function ispe(largura, altura) {
+  const corpo = new Uint8Array(12);
+  const v = new DataView(corpo.buffer);
+  v.setUint32(4, largura);
+  v.setUint32(8, altura);
+  return caixa('ispe', corpo);
+}
+function heicFalso(largura, altura, { comMiniatura = true, marca = 'heic' } = {}) {
+  const ftyp = caixa('ftyp', junta(
+    new Uint8Array([...marca].map((c) => c.charCodeAt(0))),
+    new Uint8Array(4),
+    new Uint8Array([...marca].map((c) => c.charCodeAt(0))),
+  ));
+  const medidas = comMiniatura ? junta(ispe(320, 240), ispe(largura, altura)) : ispe(largura, altura);
+  const meta = caixa('meta', junta(new Uint8Array(4), caixa('iprp', caixa('ipco', medidas))));
+  return junta(ftyp, meta);
+}
+
+test('HEIC do iPhone é aceito, e a medida sai do maior ispe (não da miniatura)', async () => {
+  // O navegador do teste não decodifica HEIC. O que se cobra é que ele PASSE pelo farejador e pare
+  // só na decodificação: é a diferença entre "não dá para escolher esse arquivo" e "seu navegador
+  // não abre esse formato, salve como JPG".
+  await assert.rejects(loadArtwork(fileFrom(heicFalso(4032, 3024), 'image/heic', 'foto.heic')),
+    /Não conseguimos abrir essa imagem/);
+  // arquivo grande demais é barrado pelo ispe, antes de qualquer decodificação
+  await assert.rejects(loadArtwork(fileFrom(heicFalso(9000, 9000), 'image/heic', 'foto.heic')), /40 megapixels/);
+  // marca desconhecida continua recusada com a mensagem de formato
+  await assert.rejects(loadArtwork(fileFrom(heicFalso(100, 100, { marca: 'qt  ' }), 'image/heic', 'x.heic')), /SVG, GIF/);
 });

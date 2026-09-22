@@ -74,6 +74,7 @@ const el = {
   categoria: $('categoria-modelo'), busca: $('busca-modelo'), resultado: $('resultado-modelos'),
   models: $('model-list'),
   passo: $('passo'), passoConta: $('passo-conta'), passoFalta: $('passo-falta'), passoBotao: $('passo-botao'),
+  boasvindas: $('boasvindas'), boasvindasFechar: $('boasvindas-fechar'),
   listaFotos: $('lista-fotos'), listaFrases: $('lista-frases'), listaEnfeites: $('lista-enfeites'),
   gradeEnfeites: $('grade-enfeites'), gradeElementos: $('grade-elementos'), fundoArte: $('fundo-arte'),
   mostrarMargem: $('mostrar-margem'),
@@ -2371,6 +2372,25 @@ function bind() {
   el.handle.addEventListener('change', () => setColors(null, el.handle.value));
 
   el.travar.addEventListener('click', alternaCadeado);
+  // O atalho "Ir direto para o editor" leva a #abas; sem tabindex o foco pararia no vazio e a
+  // pessoa continuaria tabulando desde o começo.
+  /*
+    Quem chega pela primeira vez recebia a mesma tela de quem já montou dez canecas, sem nada dizendo
+    o que acontece depois de montar. Aparece uma vez só e some com um clique. O `localStorage` pode
+    estar bloqueado (janela anônima, cookies barrados): nesse caso o aviso simplesmente aparece de
+    novo, que é bem melhor do que a página quebrar.
+  */
+  const JA_VIU = 'panda-mimo:estudio-boasvindas';
+  let jaViu = false;
+  try { jaViu = localStorage.getItem(JA_VIU) === '1'; } catch { jaViu = false; }
+  el.boasvindas.hidden = jaViu;
+  el.boasvindasFechar.addEventListener('click', () => {
+    el.boasvindas.hidden = true;
+    try { localStorage.setItem(JA_VIU, '1'); } catch { /* sem memória neste navegador */ }
+    el.categoria?.focus();
+  });
+
+  el.abas.tabIndex = -1;
   el.abas.addEventListener('keydown', andaNasAbas);
   el.categoria.addEventListener('change', () => {
     categoria = el.categoria.value;

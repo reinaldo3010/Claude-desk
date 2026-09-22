@@ -16,9 +16,59 @@ import { pesoDaFonte, FONTES_DA_ARTE } from './fontes.js';
 const MAX_BYTES = 20 * 1024 * 1024;
 const MAX_PIXELS = 40_000_000;
 const DEFAULT_SPEC = Object.freeze({ diameterMm: 82, heightMm: 95, printWidthMm: 210, printHeightMm: 90 });
-const FORMATS = new Set(['image/png', 'image/jpeg', 'image/webp']);
+const FORMATS = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/heic', 'image/heif']);
 const FONTS = new Set(FONTES_DA_ARTE.map((f) => f.valor));
 const EPSILON = 1e-6;
+
+/*
+  HEIC/HEIF é o padrão de foto do iPhone, e quem escolhe pelo app Arquivos manda esse arquivo.
+  O formato é uma caixa ISO-BMFF: `ftyp` diz a marca, e a medida da imagem mora num `ispe` lá dentro,
+  em meta > iprp > ipco. Aqui se pega o MAIOR `ispe`, porque o arquivo costuma trazer também a
+  miniatura, que é menor.
+
+  Limite assumido de propósito: qual `ispe` é o da imagem principal se resolve por `pitm` e `ipma`, e
+  isso é bem mais código para pouca diferença. Por isso a medida do HEIC é tratada como palpite e a
+  conferência contra a imagem decodificada é dispensada para ele — quem segura o tamanho continua
+  sendo `assertDimensions` sobre o que o navegador realmente decodificou, que é a proteção que
+  importa. Navegador que não sabe abrir HEIC cai na mensagem que já existe, pedindo PNG ou JPG.
+*/
+function medidaDoHeic(bytes, view) {
+  let maior = null;
+  const caixas = (inicio, fim, dentro) => {
+    let i = inicio;
+    while (i + 8 <= fim) {
+      let tamanho = view.getUint32(i);
+      const tipo = ascii(bytes, i + 4, 4);
+      let corpo = i + 8;
+      if (tamanho === 1) { // tamanho de 64 bits: só o low word interessa nos tamanhos que aceitamos
+        if (i + 16 > fim) return;
+        tamanho = Number(view.getBigUint64(i + 8));
+        corpo = i + 16;
+      } else if (tamanho === 0) tamanho = fim - i;
+      if (tamanho < 8 || i + tamanho > fim) return;
+      dentro(tipo, corpo, i + tamanho);
+      i += tamanho;
+    }
+  };
+  caixas(0, bytes.length, (tipo, corpo, fim) => {
+    if (tipo !== 'meta') return;
+    caixas(corpo + 4, fim, (t2, c2, f2) => { // meta é FullBox: 4 bytes de versão e flags
+      if (t2 !== 'iprp') return;
+      caixas(c2, f2, (t3, c3, f3) => {
+        if (t3 !== 'ipco') return;
+        caixas(c3, f3, (t4, c4) => {
+          if (t4 !== 'ispe' || c4 + 12 > bytes.length) return;
+          const largura = view.getUint32(c4 + 4);
+          const altura = view.getUint32(c4 + 8);
+          if (largura > 0 && altura > 0 && (!maior || largura * altura > maior.width * maior.height)) {
+            maior = { width: largura, height: altura };
+          }
+        });
+      });
+    });
+  });
+  return maior;
+}
 
 function fileError(message) {
   const error = new Error(message);
@@ -116,6 +166,18 @@ function inspectImage(bytes) {
     if (info && hasPixels) return info;
     throw invalid();
   }
+  // ISO-BMFF: `ftyp` no começo, com a marca logo depois. É o HEIC/HEIF do iPhone.
+  if (bytes.length >= 16 && ascii(bytes, 4, 4) === 'ftyp') {
+    const marca = ascii(bytes, 8, 4);
+    const compativeis = new Set(['heic', 'heix', 'heim', 'heis', 'hevc', 'hevx', 'mif1', 'msf1']);
+    if (compativeis.has(marca)) {
+      const medida = medidaDoHeic(bytes, view);
+      // Sem `ispe` legível a gente ainda deixa passar: quem decide é o decodificador do navegador,
+      // e `assertDimensions` segura o tamanho do que ele devolver.
+      if (medida) assertDimensions(medida.width, medida.height);
+      return { type: 'image/heic', width: medida?.width || 0, height: medida?.height || 0, conferivel: false };
+    }
+  }
   throw fileError('Escolha uma imagem em PNG, JPG ou WebP. SVG, GIF e outros formatos não entram na prévia.');
 }
 
@@ -149,7 +211,7 @@ export async function loadArtwork(file) {
   if (!file.size) throw fileError('Este arquivo está vazio. Escolha outra imagem.');
   if (file.size > MAX_BYTES) throw fileError('A imagem precisa ter até 20 MB. Salve uma cópia menor e tente de novo.');
   if (file.type && !FORMATS.has(file.type.toLowerCase())) {
-    throw fileError('Escolha uma imagem em PNG, JPG ou WebP.');
+    throw fileError('Escolha uma imagem em PNG, JPG, WebP ou HEIC.');
   }
   let image;
   try {
@@ -170,7 +232,9 @@ export async function loadArtwork(file) {
     const height = image.naturalHeight || image.height;
     assertDimensions(width, height);
     // EXIF may swap axes, but never legitimately increases the number of pixels.
-    if (width * height !== header.width * header.height) {
+    // O HEIC vem marcado com `conferivel: false`: a medida dele é palpite (ver medidaDoHeic), e
+    // comparar palpite com a imagem decodificada recusaria foto boa.
+    if (header.conferivel !== false && width * height !== header.width * header.height) {
       throw fileError('As medidas dessa imagem não puderam ser conferidas. Salve uma nova cópia em PNG ou JPG.');
     }
     let disposed = false;
