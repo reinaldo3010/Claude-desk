@@ -1734,6 +1734,83 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     await contexto.close();
   }
 
+  // Cada miniatura do catálogo custa cerca de 5,5 ms e 300 KB de canvas. Desenhar as 138 de uma vez
+  // seriam 0,8 s de tela parada e 40 MB de memória, e num celular médio bem mais. Elas nascem quando
+  // o cartão chega perto da área visível da lista — o que não pode virar cartão em branco.
+  {
+    const contexto = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    const pm = await contexto.newPage();
+    await pm.goto(servidor.url + 'caneca-3d.html', { waitUntil: 'load' });
+    await pm.waitForTimeout(900);
+    const mini = await pm.evaluate(async () => {
+      const lista = document.getElementById('model-list');
+      const b = document.getElementById('model-more');
+      let n = 0;
+      while (b && !b.hidden && b.textContent.startsWith('Ver mais') && n < 20) { b.click(); n += 1; await new Promise((r) => setTimeout(r, 150)); }
+      await new Promise((r) => setTimeout(r, 400));
+      const cartoes = document.querySelectorAll('#model-list .studio-model').length;
+      const desenhadasDeInicio = document.querySelectorAll('#model-list canvas').length;
+      // as que estão à vista precisam ter tinta de verdade, não moldura vazia
+      // O cartão "Trazer a minha arte" não tem miniatura por desenho: ele mostra um ícone.
+      const aVista = [...document.querySelectorAll('#model-list .studio-model__art:not(.studio-model__art--livre)')].filter((f) => {
+        const r = f.getBoundingClientRect(), c = lista.getBoundingClientRect();
+        return r.bottom > c.top && r.top < c.bottom;
+      });
+      const pintadas = aVista.filter((f) => {
+        const cv = f.querySelector('canvas');
+        if (!cv) return false;
+        const d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data;
+        for (let i = 0; i < d.length; i += 400) if (d[i + 3] > 10 && (d[i] < 235 || d[i + 1] < 235 || d[i + 2] < 235)) return true;
+        return false;
+      }).length;
+      // rolar precisa trazer as próximas
+      lista.scrollTop = lista.scrollHeight / 2;
+      lista.dispatchEvent(new Event('scroll'));
+      await new Promise((r) => setTimeout(r, 400));
+      return { cartoes, desenhadasDeInicio, aVista: aVista.length, pintadas, depoisDeRolar: document.querySelectorAll('#model-list canvas').length };
+    });
+    if (mini.aVista && mini.pintadas < mini.aVista) {
+      failures.push(`[catálogo] ${mini.aVista - mini.pintadas} de ${mini.aVista} cartões à vista ficaram sem a arte desenhada`);
+    }
+    if (mini.desenhadasDeInicio >= mini.cartoes) {
+      failures.push(`[catálogo] desenhou ${mini.desenhadasDeInicio} miniaturas de ${mini.cartoes} cartões de uma vez: volta a travar a tela`);
+    }
+    if (mini.depoisDeRolar <= mini.desenhadasDeInicio) {
+      failures.push('[catálogo] rolar a lista não desenhou nenhuma miniatura nova');
+    }
+    await contexto.close();
+  }
+
+  // No celular dá para fotografar o bolo ou o pet na hora, em vez de garimpar a galeria. O atalho só
+  // existe onde há câmera de verdade: no computador o atributo `capture` é ignorado pelo navegador e
+  // o botão só confundiria. De quebra é o caminho que resolve o HEIC do iPhone sem precisar lê-lo,
+  // porque a câmera do navegador entrega JPEG.
+  for (const [nome, toque, deveTer] of [['celular', true, true], ['computador', false, false]]) {
+    const contexto = await browser.newContext({
+      viewport: toque ? { width: 390, height: 844 } : { width: 1280, height: 900 },
+      hasTouch: toque, isMobile: toque,
+    });
+    const pc = await contexto.newPage();
+    await pc.goto(servidor.url + 'caneca-3d.html', { waitUntil: 'load' });
+    await pc.waitForTimeout(900);
+    const achado = await pc.evaluate(async () => {
+      document.querySelector('[data-modelo="natal-flocos"]')?.click();
+      await new Promise((r) => setTimeout(r, 900));
+      document.querySelector('#lista-fotos .studio-item__cabeca')?.click();
+      await new Promise((r) => setTimeout(r, 400));
+      const corpo = document.querySelector('#lista-fotos [data-corpo]');
+      const nomes = corpo ? [...corpo.querySelectorAll('button')].map((b) => b.textContent.trim()) : [];
+      return { camera: nomes.includes('Usar a câmera'), escolher: nomes.includes('Escolher foto'), nomes: nomes.slice(0, 4) };
+    });
+    if (!achado.escolher) failures.push(`[fotos ${nome}] sumiu o botão de escolher foto (${achado.nomes.join(', ')})`);
+    if (achado.camera !== deveTer) {
+      failures.push(deveTer
+        ? `[fotos ${nome}] falta o atalho "Usar a câmera" onde existe câmera`
+        : `[fotos ${nome}] o atalho "Usar a câmera" apareceu onde não há câmera`);
+    }
+    await contexto.close();
+  }
+
   // A página de provas das coleções é a que a gente olha antes de publicar arte nova. Se ela quebrar
   // calada, a revisão humana passa a ser feita no escuro.
   {
