@@ -218,6 +218,12 @@
         <input id="canva-file" class="studio-sr-only" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Arte pronta, do Canva ou de outro programa">
         <p id="art-error" class="studio-message" role="alert" hidden></p>
 
+        <!-- Onde a pessoa está na montagem e para onde vai depois. -->
+        <div class="studio-passo" id="passo" hidden>
+          <p class="studio-passo__onde"><span id="passo-conta"></span><span id="passo-falta" class="studio-passo__falta"></span></p>
+          <button type="button" class="btn btn--dark btn--sm" id="passo-botao"></button>
+        </div>
+
         <!-- fechamento -->
         <section class="studio-finish" aria-labelledby="finish-heading">
           <h2 id="finish-heading">Leve seu mimo com você</h2>

@@ -73,6 +73,7 @@ const el = {
   nomeMeuModelo: $('nome-meu-modelo'), confirmarMeuModelo: $('confirmar-meu-modelo'), cancelarMeuModelo: $('cancelar-meu-modelo'),
   categoria: $('categoria-modelo'), busca: $('busca-modelo'), resultado: $('resultado-modelos'),
   models: $('model-list'),
+  passo: $('passo'), passoConta: $('passo-conta'), passoFalta: $('passo-falta'), passoBotao: $('passo-botao'),
   listaFotos: $('lista-fotos'), listaFrases: $('lista-frases'), listaEnfeites: $('lista-enfeites'),
   gradeEnfeites: $('grade-enfeites'), gradeElementos: $('grade-elementos'), fundoArte: $('fundo-arte'),
   mostrarMargem: $('mostrar-margem'),
@@ -349,6 +350,7 @@ function render() {
   el.savePrint.disabled = !hasContent();
   updateOrderLink();
   montaSeletorDeLote();
+  montaPasso();
   guardaRascunho();
 }
 
@@ -647,6 +649,70 @@ function contaDaAba(id) {
   return null;
 }
 
+/*
+  O que ainda falta em cada passo. Serve para o ponto de atenção na aba e para a barra de baixo.
+  "Enfeites" nunca cobra nada: é tempero, não obrigação. Já as frases nascem com texto de exemplo
+  ("chá do Theo"), e sair impresso assim é o erro mais caro que a pessoa pode cometer aqui.
+*/
+function situacaoDoPasso(id) {
+  if (!arte) return id === 'modelo' ? 'fazendo' : 'aberto';
+  if (id === 'modelo' || id === 'enfeites' || id === 'arte') return 'feito';
+  if (id === 'fotos') {
+    const espacos = camadasDo('foto');
+    const vazios = espacos.filter((c) => !fotos.get(c.id)?.asset).length;
+    return vazios ? { falta: vazios, tipo: 'fotos' } : 'feito';
+  }
+  if (id === 'frases') {
+    const base = modeloPorId(arte.modelo);
+    if (!base) return 'feito';
+    const deExemplo = camadasDo('frase').filter((c) => {
+      const original = base.camadas.find((b) => b.id === c.id);
+      return original && original.tipo === 'frase' && original.texto === c.texto;
+    }).length;
+    return deExemplo ? { falta: deExemplo, tipo: 'frases' } : 'feito';
+  }
+  return 'feito';
+}
+
+const PENDENTE = (s) => s && s !== 'feito' && s !== 'aberto' && s !== 'fazendo';
+
+/** A barra de baixo: onde a pessoa está, o que falta aqui e para onde ir depois. */
+function montaPasso() {
+  const visiveis = abasVisiveis();
+  const i = visiveis.indexOf(abaAtual);
+  if (!arte || i < 0) { el.passo.hidden = true; return; }
+  el.passo.hidden = false;
+  el.passoConta.textContent = `Passo ${i + 1} de ${visiveis.length} · ${ABAS[abaAtual].rotulo}`;
+
+  for (const botao of el.abas.children) {
+    if (PENDENTE(situacaoDoPasso(botao.dataset.aba))) botao.dataset.passo = 'falta';
+    else delete botao.dataset.passo;
+  }
+
+  const aqui = situacaoDoPasso(abaAtual);
+  el.passoFalta.textContent = PENDENTE(aqui)
+    ? (aqui.tipo === 'fotos'
+      ? (aqui.falta === 1 ? 'Falta escolher uma foto.' : `Faltam ${aqui.falta} fotos.`)
+      : (aqui.falta === 1 ? 'Uma frase ainda é a de exemplo.' : `${aqui.falta} frases ainda são as de exemplo.`))
+    : '';
+
+  const proxima = visiveis[i + 1];
+  if (proxima) {
+    el.passoBotao.textContent = `Continuar para ${ABAS[proxima].rotulo.toLowerCase()}`;
+    el.passoBotao.onclick = () => { mostraAba(proxima); levaParaAPeca(); };
+  } else {
+    el.passoBotao.textContent = 'Ver como ficou e pedir';
+    el.passoBotao.onclick = () => {
+      const fim = document.querySelector('.studio-finish');
+      if (!fim) return;
+      const peca = document.querySelector('.studio-preview');
+      const grudada = peca && getComputedStyle(peca).position === 'sticky' && window.innerWidth <= 850;
+      fim.style.scrollMarginTop = `${grudada ? Math.round(peca.getBoundingClientRect().height) + 8 : 8}px`;
+      fim.scrollIntoView({ block: 'start', behavior: 'instant' });
+    };
+  }
+}
+
 function montaAbas() {
   const visiveis = abasVisiveis();
   if (!visiveis.includes(abaAtual)) abaAtual = 'modelo';
@@ -663,6 +729,8 @@ function montaAbas() {
     const nome = document.createElement('span');
     nome.textContent = aba.rotulo;
     botao.appendChild(nome);
+    const situacao = situacaoDoPasso(id);
+    if (PENDENTE(situacao)) botao.dataset.passo = 'falta';
     const conta = contaDaAba(id);
     if (conta !== null) {
       const marca = document.createElement('small');
@@ -689,6 +757,7 @@ function atualizaPaineis() {
 function mostraAba(id, { foco = false } = {}) {
   if (!abasVisiveis().includes(id)) return;
   abaAtual = id;
+  montaPasso();
   for (const botao of el.abas.children) {
     const ativa = botao.dataset.aba === id;
     botao.setAttribute('aria-selected', String(ativa));
