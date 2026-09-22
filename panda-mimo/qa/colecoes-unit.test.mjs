@@ -16,6 +16,8 @@ import { MODELOS_PETS, CATEGORIAS_PETS } from '../simulador/pets.js';
 import { MODELOS_DATAS } from '../simulador/datas.js';
 import { MODELOS_BEBE } from '../simulador/bebe.js';
 import { MODELOS_CONVITES } from '../simulador/convites.js';
+import { MODELOS_ATELIE } from '../simulador/atelie.js';
+import { MODELOS_HOBBIES } from '../simulador/hobbies.js';
 import { ILUSTRACOES, proporcaoDaForma, ehIlustracao, TAMANHO_DA_ILUSTRACAO } from '../simulador/colecoes.js';
 import { PALETA } from '../simulador/paleta.js';
 import { TEMPLATES, CATEGORIAS, modelosDaCategoria, caixaDaCamada, novaArte, camadaEm } from '../simulador/modelos.js';
@@ -24,6 +26,8 @@ const area = { x: 0, y: 0, width: 210, height: 90 };
 
 /* As coleções escritas à mão. Coleção nova entra aqui. */
 const COLECOES = [
+  { nome: 'Pequenos Prazeres', modelos: MODELOS_HOBBIES, arquivo: 'hobbies.js' },
+  { nome: 'Ateliê', modelos: MODELOS_ATELIE, arquivo: 'atelie.js' },
   { nome: 'Pets e bichinhos', modelos: MODELOS_PETS, arquivo: 'pets.js' },
   { nome: 'Datas comemorativas', modelos: MODELOS_DATAS, arquivo: 'datas.js' },
   { nome: 'Bebê e maternidade', modelos: MODELOS_BEBE, arquivo: 'bebe.js' },
@@ -187,3 +191,4 @@ test('nenhuma ilustração de coleção carrega imagem: tudo é curva, na resolu
     }
   }
 });
+

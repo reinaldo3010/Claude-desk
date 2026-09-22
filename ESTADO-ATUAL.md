@@ -1,5 +1,9 @@
 # Estado atual do trabalho
 
+**Lote local seguinte — 22/09/2026:** Pequenos Prazeres acrescenta 24 modelos, 12 matrizes vetoriais e seis categorias no novo grupo Hobbies e paixões. Catálogo local atual: **138 modelos, 37 categorias e nove grupos**. Leia `panda-mimo/simulador/LOTE-PRAZERES.md`; galeria em `qa/provas-colecoes.html?lote=prazeres`. Também está sem publicação.
+
+**Atualização local — 22/09/2026:** a revisão de papelaria aprovada pelo dono e o lote Ateliê estão nesta cópia, ainda sem publicação. O catálogo local tem **114 modelos**, em 31 categorias e oito grupos. O lote acrescenta 12 composições, oito ilustrações vetoriais e as categorias Casa nova e Profissões e vocações. Leia `panda-mimo/simulador/REVISAO-PAPELARIA.md` e `panda-mimo/simulador/LOTE-ATELIE.md`. A galeria filtrada fica em `qa/provas-colecoes.html?lote=atelie`. Os números de 102 modelos abaixo descrevem a versão publicada em 21/09, anterior a essas alterações locais.
+
 Frente aberta, o que ficou pronto e o que vem a seguir. Atualizado em 21 de setembro de 2026.
 
 ---

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-67.9 -48.455 135.8 98.35">
+<circle cx="-40" cy="22" r="25" fill="#FFFDF8" stroke="#C9A57E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="40" cy="22" r="25" fill="#FFFDF8" stroke="#C9A57E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M -62 22 L -18 22 M -40 0 L -40 44 M -56 6 L -24 38 M -56 38 L -24 6" fill="none" stroke="#E7D8C3" stroke-width="0.65" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="-40" cy="22" r="2" fill="#C9A57E" stroke="#C9A57E" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 18 22 L 62 22 M 40 0 L 40 44 M 24 6 L 56 38 M 24 38 L 56 6" fill="none" stroke="#E7D8C3" stroke-width="0.65" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="40" cy="22" r="2" fill="#C9A57E" stroke="#C9A57E" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M -40 22 L -17 -12 L 4 22 L -40 22 M -17 -12 L 29 -12 L 4 22 M 40 22 L 26 -26" fill="none" stroke="#6E8C67" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M -40 22 L -17 -12 L 4 22 M -17 -12 L 29 -12" fill="none" stroke="#A8C5A2" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M -17 -12 L -22 -25 M 26 -26 L 25 -32 L 35 -34" fill="none" stroke="#C9A57E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M -31 -27 Q -20 -31 -12 -27 L -13 -23 L -30 -23 Z" fill="#C9A57E" stroke="#C9A57E" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="4" cy="22" r="5" fill="#FBF6EF" stroke="#C9A57E" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 4 22 L 13 28 L 19 28" fill="none" stroke="#C9A57E" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 29 -30 L 51 -30 L 47 -13 L 33 -13 Z" fill="#E7D8C3" stroke="#C9A57E" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 34 -27 L 36 -16 M 40 -27 L 40 -16 M 46 -27 L 44 -16 M 32 -23 L 48 -23" fill="none" stroke="#C9A57E" stroke-width="0.65" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 38 -30 C 29.2 -31.2 26.4 -38.8 29.2 -42 C 37.2 -41.2 40.4 -34.8 38 -30 Z" fill="#A8C5A2" stroke="#6E8C67" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 38 -30 Q 33.2 -34.8 29.6 -40.8" fill="none" stroke="#6E8C67" stroke-width="0.6" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 42 -30 C 49.92 -31.08 52.44 -37.92 49.92 -40.8 C 42.72 -40.08 39.84 -34.32 42 -30 Z" fill="#A8C5A2" stroke="#6E8C67" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 42 -30 Q 46.32 -34.32 49.56 -39.72" fill="none" stroke="#6E8C67" stroke-width="0.6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="36" cy="-42" r="4" fill="#FFB59C" stroke="#C9A57E" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="47" cy="-39" r="4" fill="#FFB59C" stroke="#C9A57E" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -3,7 +3,7 @@
 Documento de passagem do simulador de caneca da Panda Mimo. Quem chegar numa sessão nova lê este
 arquivo primeiro, depois `panda-mimo/MARCA.md` (o manual manda em cor, letra, mascote e tom de voz).
 
-Última atualização: 21 de setembro de 2026.
+Última atualização local: 22 de setembro de 2026. Os lotes e a revisão estão documentados em `LOTE-PRAZERES.md`, `LOTE-ATELIE.md` e `REVISAO-PAPELARIA.md`; ainda não foram publicados.
 
 ---
 
@@ -42,7 +42,9 @@ Três armadilhas que já custaram tempo:
 |---|---|
 | `caneca-3d.html` | A página: prévia à esquerda, painel da arte em abas à direita |
 | `simulador/estudio.js` | Liga tudo: abas, cartões, gestos, histórico, salvar, WhatsApp, Canva |
-| `simulador/modelos.js` | A arte em camadas: catálogos, os 38 modelos e o desenho em milímetros |
+| `simulador/modelos.js` | A arte em camadas: catálogo de 138 modelos e desenho em milímetros |
+| `simulador/hobbies.js` e `hobbies-desenhos.js` | Pequenos Prazeres: 24 modelos e 12 ilustrações vetoriais |
+| `simulador/atelie.js` | Lote Ateliê: 12 modelos e oito novas ilustrações vetoriais |
 | `simulador/paleta.js` | A paleta da marca num lugar só; todo desenho pede cor por token |
 | `simulador/camadas.js` | Os atalhos para escrever uma camada: `foto`, `fotoRedonda`, `frase`, `ilustra`, `panda` |
 | `simulador/colecoes.js` | O balcão das coleções: junta categorias, modelos e ilustrações |
@@ -84,7 +86,7 @@ Três armadilhas que já custaram tempo:
 interior e da alça, quatro cenas (fundo claro, mesa de madeira, mesa clara, caixa de presente kraft),
 acabamento brilhante ou fosco, vídeo de cinco segundos girando em WebM, prévia em PNG e em 4K.
 
-**Arte.** 102 modelos em 29 categorias, agrupadas em sete grupos com ordem decidida à mão
+**Arte.** 138 modelos em 37 categorias, agrupadas em nove grupos com ordem decidida à mão
 (`ORDEM_DOS_GRUPOS` em `modelos.js`) e busca. Cada assunto tem pelo menos quatro artes, com teste. Camadas de foto, frase, enfeite (9 desenhos),
 elemento do acervo (8 ilustrações da marca) e Pandinha (9 poses, um por peça). Biblioteca de 15 letras.
 Cores da paleta. Frase em arco.

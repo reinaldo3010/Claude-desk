@@ -16,17 +16,29 @@ import { ILUSTRACOES_DATAS, MODELOS_DATAS, CATEGORIAS_DATAS } from './datas.js';
 import { ILUSTRACOES_BEBE, MODELOS_BEBE, CATEGORIAS_BEBE } from './bebe.js';
 import { ILUSTRACOES_CONVITES, MODELOS_CONVITES, CATEGORIAS_CONVITES } from './convites.js';
 import { desenhaIlustracao } from './desenho.js';
+import { ILUSTRACOES_REFINADAS } from './ilustracoes-refinadas.js';
+import { acabamentoPapelaria } from './acabamento.js';
+import { ILUSTRACOES_ATELIE, MODELOS_ATELIE, CATEGORIAS_ATELIE } from './atelie.js';
+import { ILUSTRACOES_HOBBIES, MODELOS_HOBBIES, CATEGORIAS_HOBBIES } from './hobbies.js';
 
 /** As ilustrações escritas à mão, de todas as coleções. */
 export const ILUSTRACOES = Object.freeze({
   ...ILUSTRACOES_PETS, ...ILUSTRACOES_DATAS, ...ILUSTRACOES_BEBE, ...ILUSTRACOES_CONVITES,
+  ...ILUSTRACOES_REFINADAS,
+  ...ILUSTRACOES_ATELIE,
+  ...ILUSTRACOES_HOBBIES,
 });
 
 export const CATEGORIAS_DE_COLECAO = Object.freeze([
   ...CATEGORIAS_DATAS, ...CATEGORIAS_BEBE, ...CATEGORIAS_CONVITES, ...CATEGORIAS_ESPORTES, ...CATEGORIAS_PETS,
+  ...CATEGORIAS_ATELIE,
+  ...CATEGORIAS_HOBBIES,
 ]);
 export const MODELOS_DE_COLECAO = Object.freeze([
-  ...MODELOS_DATAS, ...MODELOS_BEBE, ...MODELOS_CONVITES, ...MODELOS_ESPORTES, ...MODELOS_PETS,
+  ...MODELOS_DATAS.map(acabamentoPapelaria), ...MODELOS_BEBE.map(acabamentoPapelaria),
+  ...MODELOS_CONVITES.map(acabamentoPapelaria), ...MODELOS_ESPORTES, ...MODELOS_PETS.map(acabamentoPapelaria),
+  ...MODELOS_ATELIE,
+  ...MODELOS_HOBBIES,
 ]);
 
 /** Quanto uma ilustração é mais alta que larga; `null` quando a forma não é de coleção. */
