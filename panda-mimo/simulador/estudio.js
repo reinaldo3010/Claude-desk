@@ -768,12 +768,7 @@ function cartaoDeModelo(modelo) {
   const figura = document.createElement('span');
   figura.className = 'studio-model__art';
   if (modelo) {
-    const canvas = document.createElement('canvas');
-    canvas.width = 420;
-    canvas.height = Math.round(420 * areaMm.height / areaMm.width);
-    canvas.setAttribute('aria-hidden', 'true');
-    figura.appendChild(canvas);
-    requestAnimationFrame(() => desenhaMiniatura(canvas, modelo));
+    pedeMiniatura(figura, modelo);
   } else {
     figura.classList.add('studio-model__art--livre');
     figura.innerHTML = '<svg viewBox="0 0 40 40" width="30" height="30" aria-hidden="true"><path d="M8 25v8h24v-8M20 27V7M12 15l8-8 8 8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -796,6 +791,8 @@ function montaModelos() {
   const todos = mostrarTodosOsModelos || escondido;
   const visiveis = todos ? filtrados : filtrados.slice(0, VISIVEIS_DE_INICIO);
   const semModelo = categoria === 'todos' && !busca ? [cartaoDeModelo(null)] : [];
+  // Sem soltar as pendências, remontar a lista guardaria cartões que já saíram do documento.
+  miniaturasPendentes.clear();
   el.models.replaceChildren(...semModelo, ...visiveis.map(cartaoDeModelo));
   const sobram = filtrados.length - visiveis.length;
   el.moreModels.textContent = sobram ? `Ver mais ${sobram} ${sobram === 1 ? 'modelo' : 'modelos'}` : 'Ver menos modelos';
@@ -803,6 +800,56 @@ function montaModelos() {
   el.resultado.textContent = filtrados.length
     ? `${filtrados.length} ${filtrados.length === 1 ? 'modelo' : 'modelos'}${busca ? ` com "${el.busca.value.trim()}"` : ''}.`
     : 'Nada com esse nome. Tente outra palavra ou escolha outra ocasião.';
+}
+
+/*
+  Desenhar uma miniatura custa cerca de 5,5 ms e 300 KB de canvas. Com 138 artes no catálogo, fazer
+  todas de uma vez dá 0,8 s de trabalho e 40 MB de memória nesta máquina — num celular médio, vários
+  segundos de tela parada. Então o canvas só nasce quando o cartão chega perto da área visível da
+  lista. A caixa já reserva o espaço pela proporção, então nada pula de lugar quando a arte aparece.
+
+  Aqui não vale IntersectionObserver: ele não entrega retorno em aba que não está desenhando, o que
+  inclui o navegador do guardião — a miniatura nunca sairia no teste e a checagem não protegeria nada.
+  Uma conferida de posição na rolagem, agendada por quadro, funciona em todo lugar e dá para medir.
+*/
+const miniaturasPendentes = new Map();
+let quadroDeMiniaturas = 0;
+
+function pedeMiniatura(figura, modelo) {
+  miniaturasPendentes.set(figura, modelo);
+  agendaMiniaturas();
+}
+
+function agendaMiniaturas() {
+  if (quadroDeMiniaturas || !miniaturasPendentes.size) return;
+  // setTimeout e não requestAnimationFrame: rAF só corre quando a aba está desenhando, e há
+  // navegador embutido e aba em segundo plano onde ele nunca corre — a miniatura ficaria em branco
+  // sem ninguém perceber. `getBoundingClientRect` já força o cálculo de layout que precisamos.
+  quadroDeMiniaturas = setTimeout(() => { quadroDeMiniaturas = 0; pintaAsQueChegaram(); }, 0);
+}
+
+/** Desenha o que está dentro da lista, com uma folga para a arte já estar pronta quando a pessoa chega. */
+function pintaAsQueChegaram() {
+  if (!miniaturasPendentes.size) return;
+  const caixa = el.models.getBoundingClientRect();
+  const folga = 300;
+  for (const [figura, modelo] of [...miniaturasPendentes]) {
+    if (!figura.isConnected) { miniaturasPendentes.delete(figura); continue; }
+    const f = figura.getBoundingClientRect();
+    if (f.bottom < caixa.top - folga || f.top > caixa.bottom + folga) continue;
+    miniaturasPendentes.delete(figura);
+    pintaMiniatura(figura, modelo);
+  }
+}
+
+function pintaMiniatura(figura, modelo) {
+  if (figura.querySelector('canvas')) return;
+  const canvas = document.createElement('canvas');
+  canvas.width = 420;
+  canvas.height = Math.round(420 * areaMm.height / areaMm.width);
+  canvas.setAttribute('aria-hidden', 'true');
+  figura.appendChild(canvas);
+  desenhaMiniatura(canvas, modelo);
 }
 
 function marcaModeloEscolhido() {
@@ -1101,6 +1148,9 @@ function camposDaCamada(camada) {
     const acoes = document.createElement('div');
     acoes.className = 'studio-item__acoes';
     acoes.append(botao(item?.asset ? 'Trocar foto' : 'Escolher foto', () => pedeArquivo({ tipo: 'camada', id: camada.id })));
+    // "Usar a câmera" e não "Tirar foto agora": o botão de remover ao lado já se chama "Tirar a foto",
+    // e dois botões começando com "tirar" — um que põe e outro que apaga — seria pedir erro.
+    if (temCamera()) acoes.append(botao('Usar a câmera', () => pedeArquivo({ tipo: 'camada', id: camada.id }, { camera: true })));
     if (item?.asset) acoes.append(botao('Tirar a foto', () => tiraFoto(camada.id)));
     partes.push(acoes);
     partes.push(campoSelect('Formato', FORMAS_DE_FOTO, camada.forma, (valor) => { registra(`forma:${camada.id}`); camada.forma = valor; schedule(); }));
@@ -1548,11 +1598,21 @@ function voltaOFundo(id) {
   setStatus('Fundo da foto de volta como estava.');
 }
 
-function pedeArquivo(destino) {
+/**
+ * Abre o seletor de arquivo. Com `camera`, pede a câmera de trás em vez da galeria — no celular é o
+ * caminho natural de quem vai dar a caneca de presente e quer fotografar o bolo ou o pet agora.
+ * De quebra resolve o HEIC do iPhone sem precisar lê-lo: a câmera do navegador entrega JPEG.
+ */
+function pedeArquivo(destino, { camera = false } = {}) {
   destinoDoArquivo = destino;
   el.file.value = '';
+  if (camera) el.file.setAttribute('capture', 'environment');
+  else el.file.removeAttribute('capture');
   el.file.click();
 }
+
+/** Só onde existe câmera de verdade: no computador o atributo é ignorado e o botão só confundiria. */
+const temCamera = () => window.matchMedia('(hover: none) and (pointer: coarse)').matches;
 
 function isProjectFile(file) {
   return file && (file.type === 'application/json' || /\.json$/i.test(file.name || ''));
@@ -2290,6 +2350,10 @@ function bind() {
   });
 
   el.choose.addEventListener('click', () => pedeArquivo({ tipo: 'livre' }));
+  // Rolar a lista (ou a página, que move a lista junto) traz as próximas miniaturas.
+  el.models.addEventListener('scroll', agendaMiniaturas, { passive: true });
+  window.addEventListener('scroll', agendaMiniaturas, { passive: true });
+  window.addEventListener('resize', agendaMiniaturas, { passive: true });
   el.file.addEventListener('change', () => handleFile(el.file.files?.[0]));
   el.drop.addEventListener('dragover', (event) => { event.preventDefault(); el.drop.classList.add('dragging'); });
   el.drop.addEventListener('dragleave', () => el.drop.classList.remove('dragging'));

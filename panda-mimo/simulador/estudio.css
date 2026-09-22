@@ -217,7 +217,9 @@ input[type="range"] { accent-color:var(--peach-ink); cursor:pointer; min-height:
 .studio-model { display:grid; gap:5px; text-align:left; padding:9px; border:1.5px solid var(--sand); border-radius:var(--r-sm); background:var(--paper); cursor:pointer; font:inherit; color:inherit; }
 .studio-model:hover { border-color:var(--kraft); }
 .studio-model[aria-pressed="true"] { border-color:var(--peach-ink); background:var(--sand-soft); }
-.studio-model__art { display:block; border-radius:6px; overflow:hidden; border:1px solid var(--sand); background:var(--white); }
+/* A proporção reserva a altura antes de o canvas existir, para o cartão não pular quando a
+   miniatura é desenhada ao entrar na tela. */
+.studio-model__art { display:block; border-radius:6px; overflow:hidden; border:1px solid var(--sand); background:var(--white); aspect-ratio:210/90; }
 .studio-model__art canvas { display:block; width:100%; height:auto; }
 .studio-model__art--livre { display:grid; place-items:center; aspect-ratio:210/90; color:var(--peach-ink); }
 .studio-model__nome { font-weight:800; font-size:.85rem; line-height:1.3; }
