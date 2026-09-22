@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-49.45 -27.45 98.9 54.9">
+<rect x="-25" y="-4" width="50" height="8" rx="2" fill="#E7D8C3" stroke="#C9A57E" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="-40" y="-19" width="11" height="38" rx="3" fill="#A8C5A2" stroke="#C9A57E" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="-29" y="-25" width="11" height="50" rx="3" fill="#A8C5A2" stroke="#C9A57E" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="18" y="-25" width="11" height="50" rx="3" fill="#A8C5A2" stroke="#C9A57E" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="29" y="-19" width="11" height="38" rx="3" fill="#A8C5A2" stroke="#C9A57E" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="-47" y="-7" width="7" height="14" rx="2" fill="#C9A57E" stroke="#C9A57E" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="40" y="-7" width="7" height="14" rx="2" fill="#C9A57E" stroke="#C9A57E" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M -35 -14 L -35 12 M -24 -19 L -24 18 M 24 -19 L 24 18 M 35 -14 L 35 12" fill="none" stroke="#FBF6EF" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M -12 -2 L -12 2 M -6 -2 L -6 2 M 0 -2 L 0 2 M 6 -2 L 6 2 M 12 -2 L 12 2" fill="none" stroke="#C9A57E" stroke-width="0.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

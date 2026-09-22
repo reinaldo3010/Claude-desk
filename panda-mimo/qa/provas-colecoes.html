@@ -21,6 +21,7 @@ h2{font-size:20px;margin:0 0 4px}canvas{width:100%;height:auto}small{color:var(-
   <p>Cada arte aqui é desenhada pelo mesmo motor do estúdio, na medida de uso (21 × 9 cm). Serve para
      a revisão humana antes de publicar: o guardião confere regra, não gosto.</p>
   <div class="filtros">
+    <div><label for="lote">Lote</label><select id="lote"><option value="todos">Todos os modelos</option><option value="atelie">Ateliê · 12 modelos</option><option value="prazeres">Pequenos Prazeres · 24 modelos</option></select></div>
     <div><label for="grupo">Coleção</label><select id="grupo"><option value="todos">Todas as coleções</option></select></div>
     <div><label for="categoria">Assunto</label><select id="categoria"><option value="todos">Todos os assuntos</option></select></div>
   </div>
@@ -29,26 +30,30 @@ h2{font-size:20px;margin:0 0 4px}canvas{width:100%;height:auto}small{color:var(-
   <section id="modelos" aria-label="Provas das artes"></section>
 </main>
 <script type="module">
-import { CATEGORIAS_DE_COLECAO, MODELOS_DE_COLECAO } from '../simulador/colecoes.js';
-import { CATEGORIAS, novaArte, desenhaArte } from '../simulador/modelos.js';
+import { CATEGORIAS_DE_COLECAO } from '../simulador/colecoes.js';
+import { CATEGORIAS, TEMPLATES, novaArte, desenhaArte } from '../simulador/modelos.js';
 await document.fonts.ready;
 await Promise.all(['600 14px Fredoka', '600 14px Nunito', '600 14px Caveat'].map((f) => document.fonts.load(f)));
 
 const elGrupo = document.getElementById('grupo');
+const elLote = document.getElementById('lote');
+const lotePedido = new URLSearchParams(location.search).get('lote');
+elLote.value = ['atelie','prazeres'].includes(lotePedido) ? lotePedido : 'todos';
+const modelosDoLote = () => TEMPLATES.filter(m => elLote.value === 'todos' || m.id.startsWith(`${elLote.value}-`));
 const elCategoria = document.getElementById('categoria');
 const lista = document.getElementById('modelos');
 const conta = document.getElementById('conta');
-const todasAsCategorias = [...CATEGORIAS_DE_COLECAO, ...CATEGORIAS];
+const todasAsCategorias = [...new Map([...CATEGORIAS_DE_COLECAO, ...CATEGORIAS].map(c => [c.id, c])).values()];
 const categoria = (id) => todasAsCategorias.find((c) => c.id === id) || null;
 const nomeDaCategoria = (id) => categoria(id)?.nome || id;
 
-const grupoDosModelos = new Set(MODELOS_DE_COLECAO.map((m) => categoria(m.categoria)?.grupo).filter(Boolean));
+const grupoDosModelos = new Set(TEMPLATES.map((m) => categoria(m.categoria)?.grupo).filter(Boolean));
 for (const nome of grupoDosModelos) {
   elGrupo.append(new Option(nome, nome));
 }
 
 function montaCategorias() {
-  const usadas = new Set(MODELOS_DE_COLECAO.map((m) => m.categoria));
+  const usadas = new Set(modelosDoLote().map((m) => m.categoria));
   const cabem = todasAsCategorias.filter((c) => usadas.has(c.id))
     .filter((c) => elGrupo.value === 'todos' || c.grupo === elGrupo.value);
   const escolhido = elCategoria.value;
@@ -57,7 +62,7 @@ function montaCategorias() {
 }
 
 function desenha() {
-  const modelos = MODELOS_DE_COLECAO.filter((m) => (elGrupo.value === 'todos' || categoria(m.categoria)?.grupo === elGrupo.value)
+  const modelos = modelosDoLote().filter((m) => (elGrupo.value === 'todos' || categoria(m.categoria)?.grupo === elGrupo.value)
     && (elCategoria.value === 'todos' || m.categoria === elCategoria.value));
   conta.textContent = `${modelos.length} ${modelos.length === 1 ? 'arte' : 'artes'}.`;
   lista.replaceChildren();
@@ -81,6 +86,7 @@ function desenha() {
 }
 
 elGrupo.addEventListener('change', () => { montaCategorias(); desenha(); });
+elLote.addEventListener('change', () => { elGrupo.value = 'todos'; montaCategorias(); desenha(); });
 elCategoria.addEventListener('change', desenha);
 montaCategorias();
 desenha();

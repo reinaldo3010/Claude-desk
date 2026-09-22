@@ -7,6 +7,8 @@
   nova não inventar um formato próprio.
 */
 
+import { ILUSTRACOES_REFINADAS, PROPORCOES_ANTERIORES } from './ilustracoes-refinadas.js';
+
 /** Espaço de foto. Para um círculo de verdade, `altura` = `largura` × 210 ÷ 90. */
 export const foto = (id, rotulo, forma, x, y, largura, altura) =>
   ({ id, tipo: 'foto', rotulo, forma, x, y, largura, altura, rotacao: 0, ajuste: { scale: 1, offsetX: 0, offsetY: 0 } });
@@ -24,5 +26,14 @@ export const panda = (x, y, tamanho = 0.15, arquivo = 'assets/panda-coracao.webp
   ({ id: 'pandinha', tipo: 'adesivo', rotulo: 'Pandinha', arquivo, x, y, tamanho, rotacao: 0 });
 
 /** Ilustração de coleção: entra como enfeite, então a pessoa move, gira e recolore como os outros. */
-export const ilustra = (id, rotulo, forma, x, y, tamanho, cor = '--ink', extra = {}) =>
-  ({ id, tipo: 'enfeite', rotulo, forma, x, y, tamanho, cor, rotacao: 0, ...extra });
+export const ilustra = (id, rotulo, forma, x, y, tamanho, cor = '--ink', extra = {}) => {
+  const desenho = ILUSTRACOES_REFINADAS[forma];
+  // Preserve a caixa disponível da composição ao substituir a matriz do desenho.
+  if (desenho) {
+    tamanho *= Math.min(1, PROPORCOES_ANTERIORES[forma] / (desenho.altura / desenho.largura));
+    // Os dois balões conservam o contraste escolhido para o chá revelação.
+    // Nas demais matrizes, a paleta foi redesenhada junto da ilustração.
+    cor = forma === 'bebe-balao' && cor !== '--ink' ? cor : desenho.primary;
+  }
+  return { id, tipo: 'enfeite', rotulo, forma, x, y, tamanho, cor, rotacao: 0, ...extra };
+};

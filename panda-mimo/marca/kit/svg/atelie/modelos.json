@@ -1,0 +1,1296 @@
+[
+  {
+    "id": "atelie-cuidar",
+    "categoria": "profissoes",
+    "nome": "Cuidar floresce",
+    "descricao": "Enfermagem e saúde: retrato em círculo, estetoscópio e dedicatória botânica",
+    "camadas": [
+      {
+        "id": "ramo",
+        "tipo": "enfeite",
+        "rotulo": "convite coroa",
+        "forma": "convite-coroa",
+        "x": 0.2,
+        "y": 0.43,
+        "tamanho": 0.7111111111111111,
+        "rotacao": 0,
+        "cor": "--peach"
+      },
+      {
+        "id": "foto",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "circulo",
+        "x": 0.2,
+        "y": 0.43,
+        "largura": 0.19,
+        "altura": 0.4433,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "titulo",
+        "tipo": "frase",
+        "rotulo": "Cuidar é um dom",
+        "texto": "Cuidar é um dom",
+        "x": 0.66,
+        "y": 0.28,
+        "tamanho": 12,
+        "largura": 0.42,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "nome",
+        "tipo": "frase",
+        "rotulo": "Enf. Mariana",
+        "texto": "Enf. Mariana",
+        "x": 0.66,
+        "y": 0.48,
+        "tamanho": 8,
+        "largura": 0.34,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "dedicatoria",
+        "tipo": "frase",
+        "rotulo": "carinho em cada cuidado",
+        "texto": "carinho em cada cuidado",
+        "x": 0.66,
+        "y": 0.65,
+        "tamanho": 4.8,
+        "largura": 0.38,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "esteto",
+        "tipo": "enfeite",
+        "rotulo": "estetoscopio",
+        "forma": "atelie-estetoscopio",
+        "x": 0.9,
+        "y": 0.81,
+        "tamanho": 0.18888888888888888,
+        "rotacao": 0,
+        "cor": "--sage"
+      },
+      {
+        "id": "flor",
+        "tipo": "enfeite",
+        "rotulo": "data buque",
+        "forma": "data-buque",
+        "x": 0.43,
+        "y": 0.81,
+        "tamanho": 0.16666666666666666,
+        "rotacao": 0,
+        "cor": "--peach"
+      }
+    ],
+    "semente": 901,
+    "fundo": "--white",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 7,
+      "tamanho": [
+        1.3,
+        2.1
+      ]
+    }
+  },
+  {
+    "id": "atelie-ensinar",
+    "categoria": "profissoes",
+    "nome": "Quem ensina, semeia",
+    "descricao": "Professoras e professores: título em duas linhas e retrato acompanhado de livros",
+    "camadas": [
+      {
+        "id": "linha1",
+        "tipo": "frase",
+        "rotulo": "Quem ensina,",
+        "texto": "Quem ensina,",
+        "x": 0.26,
+        "y": 0.27,
+        "tamanho": 10,
+        "largura": 0.4,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "linha2",
+        "tipo": "frase",
+        "rotulo": "semeia futuros.",
+        "texto": "semeia futuros.",
+        "x": 0.26,
+        "y": 0.45,
+        "tamanho": 11,
+        "largura": 0.43,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "nome",
+        "tipo": "frase",
+        "rotulo": "Profa. Helena",
+        "texto": "Profa. Helena",
+        "x": 0.26,
+        "y": 0.68,
+        "tamanho": 5.5,
+        "largura": 0.32,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "livros",
+        "tipo": "enfeite",
+        "rotulo": "data livros",
+        "forma": "data-livros",
+        "x": 0.49,
+        "y": 0.83,
+        "tamanho": 0.2222222222222222,
+        "rotacao": 0,
+        "cor": "--sage-deep"
+      },
+      {
+        "id": "foto",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "arredondado",
+        "x": 0.75,
+        "y": 0.4,
+        "largura": 0.29,
+        "altura": 0.6,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "legenda",
+        "tipo": "frase",
+        "rotulo": "com carinho, sua turma",
+        "texto": "com carinho, sua turma",
+        "x": 0.75,
+        "y": 0.79,
+        "tamanho": 5.3,
+        "largura": 0.31,
+        "fonte": "Caveat",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "folhas",
+        "tipo": "enfeite",
+        "rotulo": "planta",
+        "forma": "atelie-planta",
+        "x": 0.94,
+        "y": 0.75,
+        "tamanho": 0.14444444444444443,
+        "rotacao": 0,
+        "cor": "--sage"
+      }
+    ],
+    "semente": 902,
+    "fundo": "--paper",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 7,
+      "tamanho": [
+        1.3,
+        2.1
+      ]
+    }
+  },
+  {
+    "id": "atelie-projetar",
+    "categoria": "profissoes",
+    "nome": "Ideias que viram lar",
+    "descricao": "Arquitetura: dois registros do projeto e assinatura com prancheta ilustrada",
+    "camadas": [
+      {
+        "id": "foto1",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "retangulo",
+        "x": 0.19,
+        "y": 0.39,
+        "largura": 0.2,
+        "altura": 0.5,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "foto2",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "retangulo",
+        "x": 0.44,
+        "y": 0.39,
+        "largura": 0.2,
+        "altura": 0.5,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "legenda",
+        "tipo": "frase",
+        "rotulo": "do primeiro traço à vida real",
+        "texto": "do primeiro traço à vida real",
+        "x": 0.315,
+        "y": 0.76,
+        "tamanho": 5.8,
+        "largura": 0.47,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "prancheta",
+        "tipo": "enfeite",
+        "rotulo": "prancheta",
+        "forma": "atelie-prancheta",
+        "x": 0.77,
+        "y": 0.3,
+        "tamanho": 0.26666666666666666,
+        "rotacao": 0,
+        "cor": "--sage"
+      },
+      {
+        "id": "nome",
+        "tipo": "frase",
+        "rotulo": "Arq. Laura",
+        "texto": "Arq. Laura",
+        "x": 0.77,
+        "y": 0.62,
+        "tamanho": 7.5,
+        "largura": 0.32,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "linha",
+        "tipo": "frase",
+        "rotulo": "ideias que acolhem",
+        "texto": "ideias que acolhem",
+        "x": 0.77,
+        "y": 0.79,
+        "tamanho": 4.7,
+        "largura": 0.3,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "planta",
+        "tipo": "enfeite",
+        "rotulo": "planta",
+        "forma": "atelie-planta",
+        "x": 0.59,
+        "y": 0.86,
+        "tamanho": 0.12222222222222222,
+        "rotacao": 0,
+        "cor": "--sage"
+      }
+    ],
+    "semente": 903,
+    "fundo": "--white",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 7,
+      "tamanho": [
+        1.3,
+        2.1
+      ]
+    }
+  },
+  {
+    "id": "atelie-empreender",
+    "categoria": "profissoes",
+    "nome": "Feito por mim",
+    "descricao": "Empreendedorismo e artesanato: fotografia ampla do trabalho com caderno e assinatura autoral",
+    "camadas": [
+      {
+        "id": "foto",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "arredondado",
+        "x": 0.34,
+        "y": 0.37,
+        "largura": 0.51,
+        "altura": 0.55,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "legenda",
+        "tipo": "frase",
+        "rotulo": "feito à mão, com o coração",
+        "texto": "feito à mão, com o coração",
+        "x": 0.34,
+        "y": 0.8,
+        "tamanho": 7,
+        "largura": 0.5,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "caderno",
+        "tipo": "enfeite",
+        "rotulo": "caderno",
+        "forma": "atelie-caderno",
+        "x": 0.79,
+        "y": 0.26,
+        "tamanho": 0.23333333333333334,
+        "rotacao": 0,
+        "cor": "--peach"
+      },
+      {
+        "id": "laco",
+        "tipo": "enfeite",
+        "rotulo": "convite laco",
+        "forma": "convite-laco",
+        "x": 0.91,
+        "y": 0.54,
+        "tamanho": 0.16666666666666666,
+        "rotacao": 0,
+        "cor": "--peach"
+      },
+      {
+        "id": "nome",
+        "tipo": "frase",
+        "rotulo": "Ateliê da Bia",
+        "texto": "Ateliê da Bia",
+        "x": 0.78,
+        "y": 0.62,
+        "tamanho": 7.5,
+        "largura": 0.3,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "linha",
+        "tipo": "frase",
+        "rotulo": "meu sonho ganhou forma",
+        "texto": "meu sonho ganhou forma",
+        "x": 0.78,
+        "y": 0.79,
+        "tamanho": 4.4,
+        "largura": 0.31,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      }
+    ],
+    "semente": 904,
+    "fundo": "--paper",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 7,
+      "tamanho": [
+        1.3,
+        2.1
+      ]
+    }
+  },
+  {
+    "id": "atelie-primeiras-chaves",
+    "categoria": "casa-nova",
+    "nome": "Nossas primeiras chaves",
+    "descricao": "Chaveiro ilustrado, retrato e data da mudança",
+    "camadas": [
+      {
+        "id": "chaves",
+        "tipo": "enfeite",
+        "rotulo": "chaves",
+        "forma": "atelie-chaves",
+        "x": 0.18,
+        "y": 0.42,
+        "tamanho": 0.37777777777777777,
+        "rotacao": 0,
+        "cor": "--kraft"
+      },
+      {
+        "id": "ramo",
+        "tipo": "enfeite",
+        "rotulo": "convite arco",
+        "forma": "convite-arco",
+        "x": 0.49,
+        "y": 0.45,
+        "tamanho": 0.6333333333333333,
+        "rotacao": 0,
+        "cor": "--sage-deep"
+      },
+      {
+        "id": "foto",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "circulo",
+        "x": 0.49,
+        "y": 0.43,
+        "largura": 0.19,
+        "altura": 0.4433,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "titulo",
+        "tipo": "frase",
+        "rotulo": "Nosso novo lar",
+        "texto": "Nosso novo lar",
+        "x": 0.81,
+        "y": 0.3,
+        "tamanho": 10,
+        "largura": 0.3,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "nomes",
+        "tipo": "frase",
+        "rotulo": "Lia & Pedro",
+        "texto": "Lia & Pedro",
+        "x": 0.81,
+        "y": 0.5,
+        "tamanho": 6.8,
+        "largura": 0.3,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "data",
+        "tipo": "frase",
+        "rotulo": "22 de setembro · 2026",
+        "texto": "22 de setembro · 2026",
+        "x": 0.81,
+        "y": 0.69,
+        "tamanho": 4.1,
+        "largura": 0.3,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      }
+    ],
+    "semente": 905,
+    "fundo": "--white",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 7,
+      "tamanho": [
+        1.3,
+        2.1
+      ]
+    }
+  },
+  {
+    "id": "atelie-endereco",
+    "categoria": "casa-nova",
+    "nome": "Aqui mora a gente",
+    "descricao": "Uma casinha como protagonista, endereço e foto de lembrança",
+    "camadas": [
+      {
+        "id": "casa",
+        "tipo": "enfeite",
+        "rotulo": "casa",
+        "forma": "atelie-casa",
+        "x": 0.24,
+        "y": 0.36,
+        "tamanho": 0.5555555555555556,
+        "rotacao": 0,
+        "cor": "--peach"
+      },
+      {
+        "id": "frase",
+        "tipo": "frase",
+        "rotulo": "aqui mora a gente",
+        "texto": "aqui mora a gente",
+        "x": 0.24,
+        "y": 0.79,
+        "tamanho": 7.5,
+        "largura": 0.39,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "nome",
+        "tipo": "frase",
+        "rotulo": "Família Oliveira",
+        "texto": "Família Oliveira",
+        "x": 0.63,
+        "y": 0.23,
+        "tamanho": 7.7,
+        "largura": 0.34,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "endereco",
+        "tipo": "frase",
+        "rotulo": "Rua das Flores, 120",
+        "texto": "Rua das Flores, 120",
+        "x": 0.63,
+        "y": 0.41,
+        "tamanho": 4.8,
+        "largura": 0.34,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "foto",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "circulo",
+        "x": 0.78,
+        "y": 0.73,
+        "largura": 0.13,
+        "altura": 0.3033,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "planta",
+        "tipo": "enfeite",
+        "rotulo": "planta",
+        "forma": "atelie-planta",
+        "x": 0.48,
+        "y": 0.72,
+        "tamanho": 0.2222222222222222,
+        "rotacao": 0,
+        "cor": "--sage"
+      }
+    ],
+    "semente": 906,
+    "fundo": "--paper",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 7,
+      "tamanho": [
+        1.3,
+        2.1
+      ]
+    }
+  },
+  {
+    "id": "atelie-casa-viva",
+    "categoria": "casa-nova",
+    "nome": "Onde a vida floresce",
+    "descricao": "Duas fotos verticais como díptico, plantas e dedicatória",
+    "camadas": [
+      {
+        "id": "planta",
+        "tipo": "enfeite",
+        "rotulo": "planta",
+        "forma": "atelie-planta",
+        "x": 0.13,
+        "y": 0.4,
+        "tamanho": 0.3333333333333333,
+        "rotacao": 0,
+        "cor": "--sage"
+      },
+      {
+        "id": "foto1",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "arredondado",
+        "x": 0.37,
+        "y": 0.42,
+        "largura": 0.2,
+        "altura": 0.63,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "foto2",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "arredondado",
+        "x": 0.62,
+        "y": 0.42,
+        "largura": 0.2,
+        "altura": 0.63,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "frase",
+        "tipo": "frase",
+        "rotulo": "onde a vida floresce",
+        "texto": "onde a vida floresce",
+        "x": 0.495,
+        "y": 0.85,
+        "tamanho": 6.8,
+        "largura": 0.48,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "chaves",
+        "tipo": "enfeite",
+        "rotulo": "chaves",
+        "forma": "atelie-chaves",
+        "x": 0.87,
+        "y": 0.32,
+        "tamanho": 0.2111111111111111,
+        "rotacao": 0,
+        "cor": "--kraft"
+      },
+      {
+        "id": "ano",
+        "tipo": "frase",
+        "rotulo": "desde 2026",
+        "texto": "desde 2026",
+        "x": 0.87,
+        "y": 0.65,
+        "tamanho": 4.5,
+        "largura": 0.19,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      }
+    ],
+    "semente": 907,
+    "fundo": "--white",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 7,
+      "tamanho": [
+        1.3,
+        2.1
+      ]
+    }
+  },
+  {
+    "id": "atelie-cafe-em-casa",
+    "categoria": "casa-nova",
+    "nome": "Café de casa nova",
+    "descricao": "Três lembranças do lar e uma cena de café nas pontas",
+    "camadas": [
+      {
+        "id": "cafe",
+        "tipo": "enfeite",
+        "rotulo": "data xicara flor",
+        "forma": "data-xicara-flor",
+        "x": 0.1,
+        "y": 0.6,
+        "tamanho": 0.32222222222222224,
+        "rotacao": 0,
+        "cor": "--sand"
+      },
+      {
+        "id": "foto1",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "circulo",
+        "x": 0.31,
+        "y": 0.39,
+        "largura": 0.15,
+        "altura": 0.35,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "foto2",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "circulo",
+        "x": 0.52,
+        "y": 0.39,
+        "largura": 0.15,
+        "altura": 0.35,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "foto3",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "circulo",
+        "x": 0.73,
+        "y": 0.39,
+        "largura": 0.15,
+        "altura": 0.35,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "planta",
+        "tipo": "enfeite",
+        "rotulo": "planta",
+        "forma": "atelie-planta",
+        "x": 0.91,
+        "y": 0.5,
+        "tamanho": 0.2222222222222222,
+        "rotacao": 0,
+        "cor": "--sage"
+      },
+      {
+        "id": "frase",
+        "tipo": "frase",
+        "rotulo": "o café fica melhor aqui",
+        "texto": "o café fica melhor aqui",
+        "x": 0.52,
+        "y": 0.72,
+        "tamanho": 9,
+        "largura": 0.47,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "nomes",
+        "tipo": "frase",
+        "rotulo": "Bia e Caio · nosso cantinho",
+        "texto": "Bia e Caio · nosso cantinho",
+        "x": 0.52,
+        "y": 0.88,
+        "tamanho": 4.4,
+        "largura": 0.46,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      }
+    ],
+    "semente": 908,
+    "fundo": "--paper",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 7,
+      "tamanho": [
+        1.3,
+        2.1
+      ]
+    }
+  },
+  {
+    "id": "atelie-pedalar",
+    "categoria": "ciclismo",
+    "nome": "Flores pelo caminho",
+    "descricao": "Bicicleta com cestinha, retrato e frase para quem ama pedalar",
+    "camadas": [
+      {
+        "id": "bike",
+        "tipo": "enfeite",
+        "rotulo": "bicicleta",
+        "forma": "atelie-bicicleta",
+        "x": 0.23,
+        "y": 0.5,
+        "tamanho": 0.8,
+        "rotacao": 0,
+        "cor": "--sage"
+      },
+      {
+        "id": "linha",
+        "tipo": "frase",
+        "rotulo": "colecionando caminhos",
+        "texto": "colecionando caminhos",
+        "x": 0.23,
+        "y": 0.82,
+        "tamanho": 5.8,
+        "largura": 0.4,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "nome",
+        "tipo": "frase",
+        "rotulo": "Clara",
+        "texto": "Clara",
+        "x": 0.55,
+        "y": 0.27,
+        "tamanho": 9,
+        "largura": 0.18,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "frase",
+        "tipo": "frase",
+        "rotulo": "vai de bike",
+        "texto": "vai de bike",
+        "x": 0.55,
+        "y": 0.48,
+        "tamanho": 6.5,
+        "largura": 0.2,
+        "fonte": "Caveat",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "foto",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "circulo",
+        "x": 0.81,
+        "y": 0.42,
+        "largura": 0.21,
+        "altura": 0.49,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "flor",
+        "tipo": "enfeite",
+        "rotulo": "data buque",
+        "forma": "data-buque",
+        "x": 0.81,
+        "y": 0.81,
+        "tamanho": 0.18888888888888888,
+        "rotacao": 0,
+        "cor": "--peach"
+      }
+    ],
+    "semente": 909,
+    "fundo": "--white",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 7,
+      "tamanho": [
+        1.3,
+        2.1
+      ]
+    }
+  },
+  {
+    "id": "atelie-mais-forte",
+    "categoria": "musculacao",
+    "nome": "Forte do meu jeito",
+    "descricao": "Composição tipográfica com retrato e halter delicado",
+    "camadas": [
+      {
+        "id": "foto",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "arredondado",
+        "x": 0.21,
+        "y": 0.43,
+        "largura": 0.27,
+        "altura": 0.65,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "linha1",
+        "tipo": "frase",
+        "rotulo": "FORTE",
+        "texto": "FORTE",
+        "x": 0.64,
+        "y": 0.23,
+        "tamanho": 13,
+        "largura": 0.4,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "linha2",
+        "tipo": "frase",
+        "rotulo": "do meu jeito",
+        "texto": "do meu jeito",
+        "x": 0.64,
+        "y": 0.44,
+        "tamanho": 11,
+        "largura": 0.44,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "nome",
+        "tipo": "frase",
+        "rotulo": "Marina · um dia de cada vez",
+        "texto": "Marina · um dia de cada vez",
+        "x": 0.64,
+        "y": 0.64,
+        "tamanho": 4.8,
+        "largura": 0.43,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "halter",
+        "tipo": "enfeite",
+        "rotulo": "halter",
+        "forma": "atelie-halter",
+        "x": 0.61,
+        "y": 0.84,
+        "tamanho": 0.4222222222222222,
+        "rotacao": 0,
+        "cor": "--sage"
+      },
+      {
+        "id": "folhas",
+        "tipo": "enfeite",
+        "rotulo": "convite arco",
+        "forma": "convite-arco",
+        "x": 0.9,
+        "y": 0.76,
+        "tamanho": 0.2,
+        "rotacao": 0,
+        "cor": "--sage-deep"
+      }
+    ],
+    "semente": 910,
+    "fundo": "--paper",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 7,
+      "tamanho": [
+        1.3,
+        2.1
+      ]
+    }
+  },
+  {
+    "id": "atelie-padrinhos",
+    "categoria": "casamento",
+    "nome": "Ao nosso lado",
+    "descricao": "Convite em destaque, retrato do casal e ramos nas laterais",
+    "camadas": [
+      {
+        "id": "ramo",
+        "tipo": "enfeite",
+        "rotulo": "convite arco",
+        "forma": "convite-arco",
+        "x": 0.19,
+        "y": 0.37,
+        "tamanho": 0.6777777777777778,
+        "rotacao": 0,
+        "cor": "--sage-deep"
+      },
+      {
+        "id": "foto",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "coracao",
+        "x": 0.19,
+        "y": 0.38,
+        "largura": 0.16,
+        "altura": 0.45,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "titulo",
+        "tipo": "frase",
+        "rotulo": "Ao nosso lado",
+        "texto": "Ao nosso lado",
+        "x": 0.65,
+        "y": 0.24,
+        "tamanho": 12,
+        "largura": 0.49,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "convite",
+        "tipo": "frase",
+        "rotulo": "aceitam ser nossos padrinhos?",
+        "texto": "aceitam ser nossos padrinhos?",
+        "x": 0.65,
+        "y": 0.45,
+        "tamanho": 6.1,
+        "largura": 0.53,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "nomes",
+        "tipo": "frase",
+        "rotulo": "Ana & Miguel",
+        "texto": "Ana & Miguel",
+        "x": 0.65,
+        "y": 0.65,
+        "tamanho": 7,
+        "largura": 0.36,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "data",
+        "tipo": "frase",
+        "rotulo": "18 · 04 · 2027",
+        "texto": "18 · 04 · 2027",
+        "x": 0.65,
+        "y": 0.82,
+        "tamanho": 4.3,
+        "largura": 0.3,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "aliancas",
+        "tipo": "enfeite",
+        "rotulo": "convite aliancas",
+        "forma": "convite-aliancas",
+        "x": 0.91,
+        "y": 0.8,
+        "tamanho": 0.2,
+        "rotacao": 0,
+        "cor": "--kraft"
+      }
+    ],
+    "semente": 911,
+    "fundo": "--white",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 7,
+      "tamanho": [
+        1.3,
+        2.1
+      ]
+    }
+  },
+  {
+    "id": "atelie-amizade",
+    "categoria": "amizade",
+    "nome": "Nossos pequenos infinitos",
+    "descricao": "Três retratos diferentes e uma dedicatória entre flores",
+    "camadas": [
+      {
+        "id": "foto1",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "retangulo",
+        "x": 0.15,
+        "y": 0.39,
+        "largura": 0.2,
+        "altura": 0.55,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "foto2",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "circulo",
+        "x": 0.42,
+        "y": 0.39,
+        "largura": 0.2,
+        "altura": 0.4667,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "foto3",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "coracao",
+        "x": 0.69,
+        "y": 0.39,
+        "largura": 0.2,
+        "altura": 0.55,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "flores",
+        "tipo": "enfeite",
+        "rotulo": "data buque",
+        "forma": "data-buque",
+        "x": 0.91,
+        "y": 0.42,
+        "tamanho": 0.2777777777777778,
+        "rotacao": 0,
+        "cor": "--peach"
+      },
+      {
+        "id": "frase",
+        "tipo": "frase",
+        "rotulo": "nossos pequenos infinitos",
+        "texto": "nossos pequenos infinitos",
+        "x": 0.4,
+        "y": 0.77,
+        "tamanho": 8.5,
+        "largura": 0.6,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "nomes",
+        "tipo": "frase",
+        "rotulo": "Lia, Bia & Ju",
+        "texto": "Lia, Bia & Ju",
+        "x": 0.83,
+        "y": 0.83,
+        "tamanho": 5.2,
+        "largura": 0.26,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "laco",
+        "tipo": "enfeite",
+        "rotulo": "convite laco",
+        "forma": "convite-laco",
+        "x": 0.08,
+        "y": 0.84,
+        "tamanho": 0.16666666666666666,
+        "rotacao": 0,
+        "cor": "--peach"
+      }
+    ],
+    "semente": 912,
+    "fundo": "--paper",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 7,
+      "tamanho": [
+        1.3,
+        2.1
+      ]
+    }
+  }
+]

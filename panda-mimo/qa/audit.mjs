@@ -1123,15 +1123,22 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
 
     // Coleções de arte: as ilustrações precisam chegar como camadas de verdade, com nome próprio,
     // cor da paleta e tamanho maior que o de um enfeite. Se virarem desenho fixo, a promessa some.
-    for (const { nome, categoria, modelo, prefixo } of [
-      { nome: 'Ciclismo', categoria: 'ciclismo', modelo: 'esp-cic-01', prefixo: 'esp-cic' },
-      { nome: 'Cachorros', categoria: 'pet-cachorro', modelo: 'pet-cao-melhor-amigo', prefixo: 'pet-cao' },
+    const { TEMPLATES: catalogoDasColecoes } = await import('../simulador/modelos.js');
+    for (const { nome, categoria, modelo } of [
+      { nome: 'Ciclismo', categoria: 'ciclismo', modelo: 'esp-cic-01' },
+      { nome: 'Cachorros', categoria: 'pet-cachorro', modelo: 'pet-cao-melhor-amigo' },
+      { nome: 'Casa nova', categoria: 'casa-nova', modelo: 'atelie-primeiras-chaves' },
+      { nome: 'Profissões e vocações', categoria: 'profissoes', modelo: 'atelie-projetar' },
+      { nome: 'Leitura e livros', categoria: 'hobby-leitura', modelo: 'prazeres-leitura-capitulo' },
+      { nome: 'Música', categoria: 'hobby-musica', modelo: 'prazeres-musica-lado-a' },
     ]) {
       await pe.evaluate(() => document.querySelector('#abas [data-aba="modelo"]').click());
       await pe.selectOption('#categoria-modelo', categoria);
       await pe.waitForTimeout(300);
+      await pe.evaluate(() => { const b = document.getElementById('model-more'); if (b && !b.hidden && b.textContent.startsWith('Ver mais')) b.click(); });
       const daCategoria = await pe.$$eval('#model-list .studio-model', (b) => b.map((x) => x.dataset.modelo).filter(Boolean));
-      if (daCategoria.length !== 4 || !daCategoria.every((id) => id.startsWith(prefixo))) {
+      const esperados = catalogoDasColecoes.filter(m => m.categoria === categoria).map(m => m.id).sort();
+      if (JSON.stringify([...daCategoria].sort()) !== JSON.stringify(esperados)) {
         failures.push(`[estúdio ${w}] o assunto ${nome} mostrou ${daCategoria.join(', ') || 'nada'}`);
       }
       await pe.click(`[data-modelo="${modelo}"]`);
@@ -1148,25 +1155,32 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
       if (camadas.quantos < 2) failures.push(`[estúdio ${w}] ${modelo} trouxe só ${camadas.quantos} ilustração(ões) editável(is)`);
       if (camadas.semNome) failures.push(`[estúdio ${w}] ${camadas.semNome} ilustrações de ${modelo} ficaram sem nome no painel`);
       // abrir a primeira ilustração e trocar a cor: a arte tem de mudar de verdade
+      // Trocar a cor precisa pintar o CORPO do desenho, não um detalhe. A checagem antiga comparava
+      // uma assinatura amostrada e passava mesmo quando só 2% da ilustração respondia: foi assim
+      // que 37 desenhos ficaram com a recoloração morta sem ninguém ver. Agora conta pixel.
       const trocaDeCor = await pe.evaluate(async () => {
         const flat = document.getElementById('flat-art');
-        const assinatura = () => {
-          const d = flat.getContext('2d').getImageData(0, 0, flat.width, flat.height).data;
-          let soma = 0;
-          for (let i = 0; i < d.length; i += 997) soma += d[i] + d[i + 1] * 2 + d[i + 2] * 3;
-          return soma;
-        };
+        const ctx = flat.getContext('2d');
+        const quadro = () => ctx.getImageData(0, 0, flat.width, flat.height).data;
         document.querySelector('#lista-enfeites .studio-item__cabeca').click();
         await new Promise((r) => setTimeout(r, 350));
         const corpo = document.querySelector('#lista-enfeites [data-corpo]');
-        const antes = assinatura();
+        const antes = quadro();
         const botoes = [...corpo.querySelectorAll('.studio-cores button')];
         botoes.find((b) => b.getAttribute('aria-pressed') !== 'true')?.click();
         await new Promise((r) => setTimeout(r, 450));
+        const depois = quadro();
+        let mudaram = 0;
+        for (let i = 0; i < antes.length; i += 4) {
+          if (antes[i] !== depois[i] || antes[i + 1] !== depois[i + 1] || antes[i + 2] !== depois[i + 2]) mudaram++;
+        }
         const faixa = corpo.querySelector('input[type="range"]');
-        return { antes, depois: assinatura(), cores: botoes.length, maximo: faixa ? Number(faixa.max) : 0 };
+        return { mudaram, total: antes.length / 4, cores: botoes.length, maximo: faixa ? Number(faixa.max) : 0 };
       });
-      if (trocaDeCor.antes === trocaDeCor.depois) failures.push(`[estúdio ${w}] trocar a cor da ilustração de ${modelo} não mudou a arte`);
+      const fatia = trocaDeCor.mudaram / trocaDeCor.total;
+      if (fatia < 0.005) {
+        failures.push(`[estúdio ${w}] trocar a cor da ilustração de ${modelo} mexeu em ${(fatia * 100).toFixed(2)}% da arte: o corpo do desenho não obedece`);
+      }
       if (trocaDeCor.cores < 6) failures.push(`[estúdio ${w}] a ilustração de ${modelo} ficou sem a paleta para escolher (${trocaDeCor.cores} cores)`);
       if (trocaDeCor.maximo < 1) failures.push(`[estúdio ${w}] a ilustração de ${modelo} não pode crescer além de um enfeite (máximo ${trocaDeCor.maximo})`);
     }
@@ -1678,9 +1692,9 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
         conta: document.getElementById('conta').textContent,
       };
     });
-    const { MODELOS_DE_COLECAO } = await import('../simulador/colecoes.js');
-    if (provas.artes !== MODELOS_DE_COLECAO.length) {
-      failures.push(`[provas] a página mostra ${provas.artes} artes, e as coleções têm ${MODELOS_DE_COLECAO.length}`);
+    const { TEMPLATES } = await import('../simulador/modelos.js');
+    if (provas.artes !== TEMPLATES.length) {
+      failures.push(`[provas] a página mostra ${provas.artes} artes, e o catálogo tem ${TEMPLATES.length}`);
     }
     if (provas.pintados !== provas.artes) failures.push(`[provas] ${provas.artes - provas.pintados} arte(s) saíram em branco na página de provas`);
     if (provas.colecoes < 2) failures.push(`[provas] a página de provas não separou as coleções (${provas.colecoes})`);

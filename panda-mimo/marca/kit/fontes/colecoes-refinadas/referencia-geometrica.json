@@ -1,0 +1,339 @@
+{
+  "ilustracoes": {
+    "pet-cao-rosto": {
+      "altura": 78.8,
+      "largura": 102.8,
+      "primary": "--kraft"
+    },
+    "pet-cao-sentado": {
+      "altura": 103.5,
+      "largura": 77.87,
+      "primary": "--kraft"
+    },
+    "pet-ossinho": {
+      "altura": 34.97,
+      "largura": 94.6,
+      "primary": "--sand"
+    },
+    "pet-casinha": {
+      "altura": 86.8,
+      "largura": 98.8,
+      "primary": "--peach"
+    },
+    "pet-gato-rosto": {
+      "altura": 76.7,
+      "largura": 70.8,
+      "primary": "--sage-deep"
+    },
+    "pet-gato-sentado": {
+      "altura": 102.2,
+      "largura": 64.44,
+      "primary": "--sage-deep"
+    },
+    "pet-novelo": {
+      "altura": 74.3,
+      "largura": 66.6,
+      "primary": "--peach"
+    },
+    "pet-peixinho": {
+      "altura": 55.18,
+      "largura": 78.4,
+      "primary": "--sage"
+    },
+    "pet-patinha": {
+      "altura": 65.47,
+      "largura": 63.54,
+      "primary": "--peach-ink"
+    },
+    "pet-coracao-pata": {
+      "altura": 80.6,
+      "largura": 94.6,
+      "primary": "--peach"
+    },
+    "pet-coleira": {
+      "altura": 45.9,
+      "largura": 98.4,
+      "primary": "--peach-ink"
+    },
+    "pet-potinho": {
+      "altura": 44.1,
+      "largura": 82.6,
+      "primary": "--sage"
+    },
+    "pet-pegadas": {
+      "altura": 44.35,
+      "largura": 106.46,
+      "primary": "--kraft"
+    },
+    "pet-arco-folhas": {
+      "altura": 106.41,
+      "largura": 111.71,
+      "primary": "--sage-deep"
+    },
+    "pet-estrela": {
+      "altura": 64.3,
+      "largura": 96.6,
+      "primary": "--hand-ink"
+    },
+    "pet-xicara-pata": {
+      "altura": 66.8,
+      "largura": 79.03,
+      "primary": "--peach"
+    },
+    "data-arvore": {
+      "altura": 112.4,
+      "largura": 78.6,
+      "primary": "--sage-deep"
+    },
+    "data-meia": {
+      "altura": 82.7,
+      "largura": 62.74,
+      "primary": "--hand-ink"
+    },
+    "data-boneco-neve": {
+      "altura": 89.4,
+      "largura": 83.4,
+      "primary": "--white"
+    },
+    "data-presente": {
+      "altura": 80.6,
+      "largura": 70.8,
+      "primary": "--peach"
+    },
+    "data-guirlanda": {
+      "altura": 126.58,
+      "largura": 110.05,
+      "primary": "--sage-deep"
+    },
+    "data-buque": {
+      "altura": 91.53,
+      "largura": 62.49,
+      "primary": "--peach"
+    },
+    "data-moldura-coracao": {
+      "altura": 99,
+      "largura": 111,
+      "primary": "--peach"
+    },
+    "data-xicara-flor": {
+      "altura": 88.7,
+      "largura": 77.03,
+      "primary": "--sand"
+    },
+    "data-gravata": {
+      "altura": 83.7,
+      "largura": 42.8,
+      "primary": "--hand-ink"
+    },
+    "data-oculos-bigode": {
+      "altura": 59.09,
+      "largura": 99,
+      "primary": "--ink"
+    },
+    "data-martelo": {
+      "altura": 85.1,
+      "largura": 72.67,
+      "primary": "--kraft"
+    },
+    "data-churrasqueira": {
+      "altura": 99.2,
+      "largura": 83.4,
+      "primary": "--sage-deep"
+    },
+    "data-coracoes-ligados": {
+      "altura": 78.8,
+      "largura": 104.8,
+      "primary": "--peach"
+    },
+    "data-balao-coracao": {
+      "altura": 116.4,
+      "largura": 70.8,
+      "primary": "--peach"
+    },
+    "data-canecas-casal": {
+      "altura": 81.4,
+      "largura": 115.5,
+      "primary": "--peach"
+    },
+    "data-cadeado": {
+      "altura": 72.9,
+      "largura": 54.8,
+      "primary": "--kraft"
+    },
+    "data-maca": {
+      "altura": 74.07,
+      "largura": 64.53,
+      "primary": "--hand-ink"
+    },
+    "data-livros": {
+      "altura": 50.6,
+      "largura": 70.6,
+      "primary": "--sage-deep"
+    },
+    "data-lapis": {
+      "altura": 92.5,
+      "largura": 18.6,
+      "primary": "--peach"
+    },
+    "data-quadro": {
+      "altura": 70.6,
+      "largura": 102.4,
+      "primary": "--sage-deep"
+    },
+    "data-coelho": {
+      "altura": 88.49,
+      "largura": 54.8,
+      "primary": "--white"
+    },
+    "data-ovo": {
+      "altura": 80.8,
+      "largura": 62.8,
+      "primary": "--peach"
+    },
+    "data-cesta": {
+      "altura": 71.5,
+      "largura": 70.8,
+      "primary": "--kraft"
+    },
+    "data-cenoura": {
+      "altura": 87.26,
+      "largura": 32.4,
+      "primary": "--peach-deep"
+    },
+    "bebe-chupeta": {
+      "altura": 67.4,
+      "largura": 62.8,
+      "primary": "--peach"
+    },
+    "bebe-sapatinhos": {
+      "altura": 43.61,
+      "largura": 122.6,
+      "primary": "--sage"
+    },
+    "bebe-carrinho": {
+      "altura": 80.84,
+      "largura": 91.39,
+      "primary": "--peach"
+    },
+    "bebe-mamadeira": {
+      "altura": 82.7,
+      "largura": 42.6,
+      "primary": "--sand"
+    },
+    "bebe-macacao": {
+      "altura": 88.6,
+      "largura": 62.8,
+      "primary": "--peach"
+    },
+    "bebe-ursinho": {
+      "altura": 84.7,
+      "largura": 73.36,
+      "primary": "--kraft"
+    },
+    "bebe-lua": {
+      "altura": 82.8,
+      "largura": 80.4,
+      "primary": "--kraft"
+    },
+    "bebe-nuvem": {
+      "altura": 76.75,
+      "largura": 100.46,
+      "primary": "--white"
+    },
+    "bebe-coracao-pes": {
+      "altura": 90.8,
+      "largura": 106.8,
+      "primary": "--peach"
+    },
+    "bebe-balao": {
+      "altura": 116.5,
+      "largura": 66.8,
+      "primary": "--sand"
+    },
+    "bebe-barriga": {
+      "altura": 107.8,
+      "largura": 42.8,
+      "primary": "--peach"
+    },
+    "bebe-movel": {
+      "altura": 59.8,
+      "largura": 101.4,
+      "primary": "--sage"
+    },
+    "bebe-trouxinha": {
+      "altura": 73.03,
+      "largura": 70.8,
+      "primary": "--sand"
+    },
+    "convite-aliancas": {
+      "altura": 61,
+      "largura": 78,
+      "primary": "--kraft"
+    },
+    "convite-tacas": {
+      "altura": 79.9,
+      "largura": 98.6,
+      "primary": "--sand"
+    },
+    "convite-gravata-borboleta": {
+      "altura": 42.65,
+      "largura": 99.6,
+      "primary": "--hand-ink"
+    },
+    "convite-vestido": {
+      "altura": 82.85,
+      "largura": 62.8,
+      "primary": "--white"
+    },
+    "convite-igreja": {
+      "altura": 98.9,
+      "largura": 82.6,
+      "primary": "--sand"
+    },
+    "convite-vela": {
+      "altura": 74.8,
+      "largura": 43.4,
+      "primary": "--white"
+    },
+    "convite-concha": {
+      "altura": 64.15,
+      "largura": 86.8,
+      "primary": "--sand"
+    },
+    "convite-pomba": {
+      "altura": 56.67,
+      "largura": 116.79,
+      "primary": "--white"
+    },
+    "convite-cestinha": {
+      "altura": 81.76,
+      "largura": 62.8,
+      "primary": "--kraft"
+    },
+    "convite-envelope": {
+      "altura": 58.8,
+      "largura": 94.8,
+      "primary": "--sand"
+    },
+    "convite-laco": {
+      "altura": 55.92,
+      "largura": 99.5,
+      "primary": "--peach"
+    },
+    "convite-arco": {
+      "altura": 100.7,
+      "largura": 122.4,
+      "primary": "--sage-deep"
+    },
+    "convite-coroa": {
+      "altura": 81.53,
+      "largura": 100.4,
+      "primary": "--peach"
+    },
+    "convite-cruz": {
+      "altura": 86.8,
+      "largura": 75.53,
+      "primary": "--kraft"
+    }
+  }
+}

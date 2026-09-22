@@ -18,6 +18,7 @@
 import { pesoDaFonte } from './fontes.js';
 import { cor } from './paleta.js';
 import { foto, frase, panda } from './camadas.js';
+import { acabamentoPapelaria } from './acabamento.js';
 import { CATEGORIAS_DE_COLECAO, MODELOS_DE_COLECAO, proporcaoDaForma, desenhaIlustracaoDeColecao } from './colecoes.js';
 
 const VOLTA_MM = Math.PI * 82, AREA_MM = 210;
@@ -29,6 +30,7 @@ export { cor } from './paleta.js';
 /** Cores que a pessoa escolhe para uma frase ou um enfeite: só a paleta, só o que se lê na cerâmica. */
 export const CORES_DE_ARTE = Object.freeze([
   { token: '--ink', nome: 'Nanquim' },
+  { token: '--ink-soft', nome: 'Nanquim suave' },
   { token: '--peach-ink', nome: 'Pêssego escuro' },
   { token: '--hand-ink', nome: 'Pêssego' },
   { token: '--peach', nome: 'Pêssego claro' },
@@ -77,6 +79,8 @@ export const ORDEM_DOS_GRUPOS = Object.freeze([
   'Convites e agradecimentos',
   'Pets e bichinhos',
   'Esportes e movimento',
+  'Profissões e vocações',
+  'Hobbies e paixões',
   'Do dia a dia',
 ]);
 
@@ -450,7 +454,7 @@ const MODELOS = [
   },
 ];
 
-export const TEMPLATES = Object.freeze([...MODELOS, ...MODELOS_DE_COLECAO].map((m) => Object.freeze({ ...m, camadas: Object.freeze(m.camadas) })));
+export const TEMPLATES = Object.freeze([...MODELOS.map(acabamentoPapelaria), ...MODELOS_DE_COLECAO].map((m) => Object.freeze({ ...m, camadas: Object.freeze(m.camadas) })));
 export const modeloPorId = (id) => TEMPLATES.find((m) => m.id === id) || null;
 export const modelosDaCategoria = (categoria) =>
   (!categoria || categoria === 'todos' ? TEMPLATES : TEMPLATES.filter((m) => m.categoria === categoria));

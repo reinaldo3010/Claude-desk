@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-42.06 -51.455 91.76 102.07">
+<path d="M -30 -41 L -34 -23 C -43 14 14 19 8 -21 L 4 -42" fill="none" stroke="#C9A57E" stroke-width="3.3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M -29 -35 L -32 -21 C -37 3 7 7 6 -21 L 3 -35" fill="none" stroke="#A8C5A2" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="-28" cy="-44" r="4" fill="#4A443D" stroke="#C9A57E" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="3" cy="-45" r="4" fill="#4A443D" stroke="#C9A57E" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M -12 5 L -12 28 C -12 56 37 53 35 21 L 35 3" fill="none" stroke="#6E8C67" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="35" cy="-5" r="12" fill="#FBF6EF" stroke="#C9A57E" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="35" cy="-5" r="8" fill="#A8C5A2" stroke="#C9A57E" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="35" cy="-5" r="3" fill="#FBF6EF" stroke="#C9A57E" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M -27 29 C -35 12 -51 30 -27 45 C -3 30 -19 12 -27 29 Z" fill="#FFB59C" stroke="#A25030" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M -38 30 L -32 30 L -29 24 L -25 37 L -21 29 L -17 29" fill="none" stroke="#FBF6EF" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

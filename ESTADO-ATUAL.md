@@ -1,5 +1,9 @@
 # Estado atual do trabalho
 
+**Lote local seguinte — 22/09/2026:** Pequenos Prazeres acrescenta 24 modelos, 12 matrizes vetoriais e seis categorias no novo grupo Hobbies e paixões. Catálogo local atual: **138 modelos, 37 categorias e nove grupos**. Leia `panda-mimo/simulador/LOTE-PRAZERES.md`; galeria em `qa/provas-colecoes.html?lote=prazeres`. Também está sem publicação.
+
+**Atualização local — 22/09/2026:** a revisão de papelaria aprovada pelo dono e o lote Ateliê estão nesta cópia, ainda sem publicação. O catálogo local tem **114 modelos**, em 31 categorias e oito grupos. O lote acrescenta 12 composições, oito ilustrações vetoriais e as categorias Casa nova e Profissões e vocações. Leia `panda-mimo/simulador/REVISAO-PAPELARIA.md` e `panda-mimo/simulador/LOTE-ATELIE.md`. A galeria filtrada fica em `qa/provas-colecoes.html?lote=atelie`. Os números de 102 modelos abaixo descrevem a versão publicada em 21/09, anterior a essas alterações locais.
+
 Frente aberta, o que ficou pronto e o que vem a seguir. Atualizado em 21 de setembro de 2026.
 
 ---
@@ -27,24 +31,30 @@ arte** que enchem o catálogo de modelos.
 
 ## O catálogo hoje
 
-102 modelos, em sete grupos no seletor (a ordem é escrita à mão em `ORDEM_DOS_GRUPOS`):
+138 modelos, em nove grupos no seletor (a ordem é escrita à mão em `ORDEM_DOS_GRUPOS`):
 
 | Grupo | Assuntos | Artes |
 |---|---|---|
 | Datas comemorativas | Natal, Mães, Pais, Namorados, Professores, Páscoa | 24 |
-| Momentos | Aniversário, Amizade e formatura | 2 |
+| Momentos | Aniversário, Amizade e formatura, Casa nova | 7 |
 | Bebê e maternidade | Chegada, Chá de bebê, Chá revelação, Gravidez e primeiro Dia das Mães | 16 |
-| Convites e agradecimentos | Padrinhos de casamento, Padrinhos de batismo, Madrinhas e daminhas, Agradecimento | 16 |
+| Convites e agradecimentos | Padrinhos de casamento, Padrinhos de batismo, Madrinhas e daminhas, Agradecimento | 17 |
 | Pets e bichinhos | Várias fotos, Cachorros, Gatos, Homenagem, Mãe e pai de pet | 17 |
-| Esportes e movimento | funcional, musculação, ciclismo, corrida, yoga e pilates, futebol | 24 |
+| Esportes e movimento | funcional, musculação, ciclismo, corrida, yoga e pilates, futebol | 26 |
+| Profissões e vocações | Profissões e vocações (uma categoria só, por enquanto) | 4 |
+| Hobbies e paixões | Leitura, Café, Música, Jardinagem, Viagens, Culinária | 24 |
 | Do dia a dia | Só fotos | 3 |
+
+As ilustrações foram refeitas em setembro de 2026 com acabamento de papelaria (contorno suave,
+preenchimento em camadas, Nunito no lugar de Fredoka, metade do confete). O antes e depois dos 67
+desenhos está em `panda-mimo/qa/revisao-papelaria.html`.
 
 Cada assunto tem pelo menos quatro artes, e o teste cobra. As exceções ficam numa lista à vista
 (`AINDA_MAGROS` em `qa/colecoes-unit.test.mjs`): hoje só Aniversário e Amizade e formatura.
 
 ## Como está a qualidade
 
-- 39 testes unitários (`npm run test:arte`), verdes.
+- 41 testes unitários (`npm run test:arte`), verdes.
 - Guardião funcional em 390 e 1280 px, verde, cobrindo o site, o estúdio de ponta a ponta, as duas
   coleções e a página de provas.
 - Nitidez em sete combinações de tela e densidade, verde. axe-core sem violação.
@@ -68,13 +78,20 @@ Em ordem de valor, na minha leitura — o dono decide a ordem de verdade:
 |---|---|---|
 | Profissões e vocações | professor, enfermagem, medicina, direito, veterinária, engenharia, quem empreende | não existe |
 | Pessoas especiais | amiga, casal, mãe, pai, avós, irmãos, filhos, colegas | não existe |
-| Celebrações e novas fases | aniversário, noivado, formatura, aposentadoria, casa nova | Aniversário e Amizade com 1 arte cada |
-| Hobbies e paixões | livros, café, música, games, viagens, jardinagem, culinária, fotografia | 1 arte |
+| Celebrações e novas fases | noivado, formatura, aposentadoria | Aniversário com 1 arte; Casa nova já tem 4 |
 | Humor e personalidade | frases engraçadas, signo, jeito de ser, piada entre amigos | não existe |
 | Fé e espiritualidade | frases de fé, celebrações, símbolos | não existe |
 | Empresas e equipes | boas-vindas, reconhecimento, evento, brinde, conquista | não existe |
 
-Prontas: datas comemorativas, bebê e maternidade, convites e agradecimentos, pets, esportes.
+Prontas: datas comemorativas, bebê e maternidade, convites e agradecimentos, pets, esportes,
+hobbies e paixões. **Profissões e vocações** existe mas é um balde só, com quatro artes: a lista
+aprovada pedia professor, enfermagem, medicina, direito, veterinária, engenharia e quem empreende
+como assuntos separados.
+
+**Três pontas da revisão de papelaria ficaram em aberto** (detalhe em
+`panda-mimo/simulador/CONSERTOS-22-09.md`): 12 ilustrações não têm nenhum traço a 3:1 contra a
+cerâmica clara e precisam de prova física antes de mexer no traço; a coleção esportiva é a única que
+ainda usa Fredoka; e "Profissões e vocações" precisa virar assuntos de verdade.
 
 Uma ideia registrada e ainda não feita: **uma arte pode aparecer em mais de um caminho** (a caneca da
 amiga ciclista podia estar em Esportes → Ciclismo *e* em Pessoas especiais → Amigas). Hoje cada arte

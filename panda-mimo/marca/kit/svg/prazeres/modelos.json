@@ -1,0 +1,2523 @@
+[
+  {
+    "id": "prazeres-leitura-capitulo",
+    "categoria": "hobby-leitura",
+    "nome": "Só mais um capítulo",
+    "descricao": "Leitura: livro aberto em destaque, retrato redondo e assinatura",
+    "camadas": [
+      {
+        "id": "livro",
+        "tipo": "enfeite",
+        "forma": "hobby-livro",
+        "rotulo": "livro",
+        "x": 0.22,
+        "y": 0.46,
+        "tamanho": 0.7444444444444445,
+        "rotacao": 0,
+        "cor": "--sage"
+      },
+      {
+        "id": "titulo",
+        "tipo": "frase",
+        "rotulo": "só mais um capítulo",
+        "texto": "só mais um capítulo",
+        "x": 0.22,
+        "y": 0.8,
+        "tamanho": 7,
+        "largura": 0.39,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "foto",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "circulo",
+        "x": 0.77,
+        "y": 0.39,
+        "largura": 0.23,
+        "altura": 0.5367,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "nome",
+        "tipo": "frase",
+        "rotulo": "Clara",
+        "texto": "Clara",
+        "x": 0.77,
+        "y": 0.78,
+        "tamanho": 8,
+        "largura": 0.29,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "marcador",
+        "tipo": "enfeite",
+        "forma": "hobby-marcador",
+        "rotulo": "marcador",
+        "x": 0.5,
+        "y": 0.4,
+        "tamanho": 0.14444444444444443,
+        "rotacao": 0,
+        "cor": "--peach"
+      }
+    ],
+    "fundo": "--white",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 6,
+      "tamanho": [
+        1.2,
+        1.9
+      ]
+    },
+    "semente": 1001
+  },
+  {
+    "id": "prazeres-leitura-mundos",
+    "categoria": "hobby-leitura",
+    "nome": "Mundos que cabem em mim",
+    "descricao": "Leitura: frase protagonista com retrato vertical e marcador floral",
+    "camadas": [
+      {
+        "id": "t1",
+        "tipo": "frase",
+        "rotulo": "Mundos inteiros",
+        "texto": "Mundos inteiros",
+        "x": 0.3,
+        "y": 0.26,
+        "tamanho": 12,
+        "largura": 0.47,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "t2",
+        "tipo": "frase",
+        "rotulo": "cabem em mim.",
+        "texto": "cabem em mim.",
+        "x": 0.3,
+        "y": 0.47,
+        "tamanho": 9,
+        "largura": 0.43,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "nome",
+        "tipo": "frase",
+        "rotulo": "biblioteca da Helena",
+        "texto": "biblioteca da Helena",
+        "x": 0.3,
+        "y": 0.69,
+        "tamanho": 5,
+        "largura": 0.42,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "foto",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "arredondado",
+        "x": 0.77,
+        "y": 0.39,
+        "largura": 0.25,
+        "altura": 0.62,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "marcador",
+        "tipo": "enfeite",
+        "forma": "hobby-marcador",
+        "rotulo": "marcador",
+        "x": 0.57,
+        "y": 0.81,
+        "tamanho": 0.1,
+        "rotacao": 0,
+        "cor": "--peach"
+      },
+      {
+        "id": "livros",
+        "tipo": "enfeite",
+        "forma": "data-livros",
+        "rotulo": "livros",
+        "x": 0.88,
+        "y": 0.84,
+        "tamanho": 0.23333333333333334,
+        "rotacao": 0,
+        "cor": "--sage-deep"
+      }
+    ],
+    "fundo": "--paper",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 6,
+      "tamanho": [
+        1.2,
+        1.9
+      ]
+    },
+    "semente": 1002
+  },
+  {
+    "id": "prazeres-leitura-clube",
+    "categoria": "hobby-leitura",
+    "nome": "Nosso clube do livro",
+    "descricao": "Leitura: três retratos e dedicatória para amigas leitoras",
+    "camadas": [
+      {
+        "id": "a",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "circulo",
+        "x": 0.16,
+        "y": 0.39,
+        "largura": 0.19,
+        "altura": 0.4433,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "b",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "circulo",
+        "x": 0.41,
+        "y": 0.39,
+        "largura": 0.19,
+        "altura": 0.4433,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "c",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "circulo",
+        "x": 0.66,
+        "y": 0.39,
+        "largura": 0.19,
+        "altura": 0.4433,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "titulo",
+        "tipo": "frase",
+        "rotulo": "histórias que aproximam",
+        "texto": "histórias que aproximam",
+        "x": 0.41,
+        "y": 0.75,
+        "tamanho": 8,
+        "largura": 0.64,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "nomes",
+        "tipo": "frase",
+        "rotulo": "Lia, Bia & Ju",
+        "texto": "Lia, Bia & Ju",
+        "x": 0.41,
+        "y": 0.89,
+        "tamanho": 4.8,
+        "largura": 0.43,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "livro",
+        "tipo": "enfeite",
+        "forma": "hobby-livro",
+        "rotulo": "livro",
+        "x": 0.89,
+        "y": 0.32,
+        "tamanho": 0.3111111111111111,
+        "rotacao": 0,
+        "cor": "--sage"
+      },
+      {
+        "id": "marcador",
+        "tipo": "enfeite",
+        "forma": "hobby-marcador",
+        "rotulo": "marcador",
+        "x": 0.88,
+        "y": 0.73,
+        "tamanho": 0.13333333333333333,
+        "rotacao": 0,
+        "cor": "--peach"
+      }
+    ],
+    "fundo": "--white",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 6,
+      "tamanho": [
+        1.2,
+        1.9
+      ]
+    },
+    "semente": 1003
+  },
+  {
+    "id": "prazeres-leitura-cantinho",
+    "categoria": "hobby-leitura",
+    "nome": "Meu cantinho de leitura",
+    "descricao": "Leitura: foto panorâmica do cantinho, livro e xícara ilustrados",
+    "camadas": [
+      {
+        "id": "foto",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "retangulo",
+        "x": 0.35,
+        "y": 0.35,
+        "largura": 0.55,
+        "altura": 0.51,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "titulo",
+        "tipo": "frase",
+        "rotulo": "meu lugar no mundo",
+        "texto": "meu lugar no mundo",
+        "x": 0.35,
+        "y": 0.76,
+        "tamanho": 9,
+        "largura": 0.55,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "livro",
+        "tipo": "enfeite",
+        "forma": "hobby-livro",
+        "rotulo": "livro",
+        "x": 0.82,
+        "y": 0.34,
+        "tamanho": 0.4777777777777778,
+        "rotacao": 0,
+        "cor": "--sage"
+      },
+      {
+        "id": "cafe",
+        "tipo": "enfeite",
+        "forma": "data-xicara-flor",
+        "rotulo": "xicara flor",
+        "x": 0.73,
+        "y": 0.72,
+        "tamanho": 0.24444444444444444,
+        "rotacao": 0,
+        "cor": "--sand"
+      },
+      {
+        "id": "nome",
+        "tipo": "frase",
+        "rotulo": "Lívia",
+        "texto": "Lívia",
+        "x": 0.88,
+        "y": 0.82,
+        "tamanho": 6,
+        "largura": 0.17,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      }
+    ],
+    "fundo": "--paper",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 6,
+      "tamanho": [
+        1.2,
+        1.9
+      ]
+    },
+    "semente": 1004
+  },
+  {
+    "id": "prazeres-cafe-ritual",
+    "categoria": "hobby-cafe",
+    "nome": "Meu pequeno ritual",
+    "descricao": "Café: prensa francesa, retrato e dedicatória sobre a primeira pausa do dia",
+    "camadas": [
+      {
+        "id": "prensa",
+        "tipo": "enfeite",
+        "forma": "hobby-prensa",
+        "rotulo": "prensa",
+        "x": 0.18,
+        "y": 0.4,
+        "tamanho": 0.36666666666666664,
+        "rotacao": 0,
+        "cor": "--sage"
+      },
+      {
+        "id": "graos",
+        "tipo": "enfeite",
+        "forma": "hobby-graos",
+        "rotulo": "graos",
+        "x": 0.35,
+        "y": 0.75,
+        "tamanho": 0.18888888888888888,
+        "rotacao": 0,
+        "cor": "--kraft"
+      },
+      {
+        "id": "foto",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "circulo",
+        "x": 0.52,
+        "y": 0.41,
+        "largura": 0.21,
+        "altura": 0.49,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "titulo",
+        "tipo": "frase",
+        "rotulo": "meu pequeno ritual",
+        "texto": "meu pequeno ritual",
+        "x": 0.82,
+        "y": 0.28,
+        "tamanho": 8,
+        "largura": 0.3,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "linha",
+        "tipo": "frase",
+        "rotulo": "um café, um respiro",
+        "texto": "um café, um respiro",
+        "x": 0.82,
+        "y": 0.49,
+        "tamanho": 4.6,
+        "largura": 0.29,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "nome",
+        "tipo": "frase",
+        "rotulo": "Marina",
+        "texto": "Marina",
+        "x": 0.82,
+        "y": 0.7,
+        "tamanho": 6.5,
+        "largura": 0.24,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      }
+    ],
+    "fundo": "--white",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 6,
+      "tamanho": [
+        1.2,
+        1.9
+      ]
+    },
+    "semente": 1005
+  },
+  {
+    "id": "prazeres-cafe-conversa",
+    "categoria": "hobby-cafe",
+    "nome": "Café com conversa",
+    "descricao": "Café: dois retratos lado a lado e uma xícara para cada história",
+    "camadas": [
+      {
+        "id": "a",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "arredondado",
+        "x": 0.27,
+        "y": 0.37,
+        "largura": 0.24,
+        "altura": 0.54,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "b",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "arredondado",
+        "x": 0.57,
+        "y": 0.37,
+        "largura": 0.24,
+        "altura": 0.54,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "titulo",
+        "tipo": "frase",
+        "rotulo": "a conversa rende mais",
+        "texto": "a conversa rende mais",
+        "x": 0.42,
+        "y": 0.77,
+        "tamanho": 9,
+        "largura": 0.56,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "linha",
+        "tipo": "frase",
+        "rotulo": "Bia & Rafa · nosso café",
+        "texto": "Bia & Rafa · nosso café",
+        "x": 0.42,
+        "y": 0.91,
+        "tamanho": 4.4,
+        "largura": 0.47,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "cafe",
+        "tipo": "enfeite",
+        "forma": "data-canecas-casal",
+        "rotulo": "canecas casal",
+        "x": 0.87,
+        "y": 0.4,
+        "tamanho": 0.37777777777777777,
+        "rotacao": 0,
+        "cor": "--peach"
+      },
+      {
+        "id": "graos",
+        "tipo": "enfeite",
+        "forma": "hobby-graos",
+        "rotulo": "graos",
+        "x": 0.88,
+        "y": 0.8,
+        "tamanho": 0.2,
+        "rotacao": 0,
+        "cor": "--kraft"
+      }
+    ],
+    "fundo": "--paper",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 6,
+      "tamanho": [
+        1.2,
+        1.9
+      ]
+    },
+    "semente": 1006
+  },
+  {
+    "id": "prazeres-cafe-pausa",
+    "categoria": "hobby-cafe",
+    "nome": "Pausa bem merecida",
+    "descricao": "Café: lettering central, retrato em coração e prensa delicada",
+    "camadas": [
+      {
+        "id": "foto",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "coracao",
+        "x": 0.19,
+        "y": 0.43,
+        "largura": 0.24,
+        "altura": 0.6,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "titulo",
+        "tipo": "frase",
+        "rotulo": "Pausa",
+        "texto": "Pausa",
+        "x": 0.57,
+        "y": 0.27,
+        "tamanho": 16,
+        "largura": 0.3,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "linha",
+        "tipo": "frase",
+        "rotulo": "bem merecida.",
+        "texto": "bem merecida.",
+        "x": 0.57,
+        "y": 0.49,
+        "tamanho": 7.7,
+        "largura": 0.3,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "nome",
+        "tipo": "frase",
+        "rotulo": "um carinho para a Ana",
+        "texto": "um carinho para a Ana",
+        "x": 0.57,
+        "y": 0.7,
+        "tamanho": 4.9,
+        "largura": 0.35,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "prensa",
+        "tipo": "enfeite",
+        "forma": "hobby-prensa",
+        "rotulo": "prensa",
+        "x": 0.86,
+        "y": 0.48,
+        "tamanho": 0.34444444444444444,
+        "rotacao": 0,
+        "cor": "--sage"
+      },
+      {
+        "id": "graos",
+        "tipo": "enfeite",
+        "forma": "hobby-graos",
+        "rotulo": "graos",
+        "x": 0.87,
+        "y": 0.85,
+        "tamanho": 0.18888888888888888,
+        "rotacao": 0,
+        "cor": "--kraft"
+      }
+    ],
+    "fundo": "--white",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 6,
+      "tamanho": [
+        1.2,
+        1.9
+      ]
+    },
+    "semente": 1007
+  },
+  {
+    "id": "prazeres-cafe-memorias",
+    "categoria": "hobby-cafe",
+    "nome": "Memórias à mesa",
+    "descricao": "Café: foto ampla e duas lembranças pequenas em composição assimétrica",
+    "camadas": [
+      {
+        "id": "a",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "arredondado",
+        "x": 0.255,
+        "y": 0.39,
+        "largura": 0.35,
+        "altura": 0.57,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "b",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "circulo",
+        "x": 0.61,
+        "y": 0.27,
+        "largura": 0.16,
+        "altura": 0.3733,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "c",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "circulo",
+        "x": 0.82,
+        "y": 0.57,
+        "largura": 0.16,
+        "altura": 0.3733,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "titulo",
+        "tipo": "frase",
+        "rotulo": "memórias à mesa",
+        "texto": "memórias à mesa",
+        "x": 0.28,
+        "y": 0.8,
+        "tamanho": 8.5,
+        "largura": 0.43,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "nomes",
+        "tipo": "frase",
+        "rotulo": "Família Costa",
+        "texto": "Família Costa",
+        "x": 0.68,
+        "y": 0.84,
+        "tamanho": 5.5,
+        "largura": 0.32,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "cafe",
+        "tipo": "enfeite",
+        "forma": "data-xicara-flor",
+        "rotulo": "xicara flor",
+        "x": 0.59,
+        "y": 0.63,
+        "tamanho": 0.26666666666666666,
+        "rotacao": 0,
+        "cor": "--sand"
+      },
+      {
+        "id": "graos",
+        "tipo": "enfeite",
+        "forma": "hobby-graos",
+        "rotulo": "graos",
+        "x": 0.88,
+        "y": 0.2,
+        "tamanho": 0.18888888888888888,
+        "rotacao": 0,
+        "cor": "--kraft"
+      }
+    ],
+    "fundo": "--paper",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 6,
+      "tamanho": [
+        1.2,
+        1.9
+      ]
+    },
+    "semente": 1008
+  },
+  {
+    "id": "prazeres-musica-acordes",
+    "categoria": "hobby-musica",
+    "nome": "Entre acordes e flores",
+    "descricao": "Música: violão como protagonista, retrato e nome de quem toca",
+    "camadas": [
+      {
+        "id": "violao",
+        "tipo": "enfeite",
+        "forma": "hobby-violao",
+        "rotulo": "violao",
+        "x": 0.18,
+        "y": 0.43,
+        "tamanho": 0.35555555555555557,
+        "rotacao": 0,
+        "cor": "--peach"
+      },
+      {
+        "id": "flores",
+        "tipo": "enfeite",
+        "forma": "data-buque",
+        "rotulo": "buque",
+        "x": 0.34,
+        "y": 0.77,
+        "tamanho": 0.2222222222222222,
+        "rotacao": 0,
+        "cor": "--peach"
+      },
+      {
+        "id": "foto",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "circulo",
+        "x": 0.53,
+        "y": 0.4,
+        "largura": 0.23,
+        "altura": 0.5367,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "titulo",
+        "tipo": "frase",
+        "rotulo": "entre acordes",
+        "texto": "entre acordes",
+        "x": 0.83,
+        "y": 0.29,
+        "tamanho": 9,
+        "largura": 0.29,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "linha",
+        "tipo": "frase",
+        "rotulo": "e flores",
+        "texto": "e flores",
+        "x": 0.83,
+        "y": 0.47,
+        "tamanho": 8,
+        "largura": 0.26,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "nome",
+        "tipo": "frase",
+        "rotulo": "Luiza",
+        "texto": "Luiza",
+        "x": 0.83,
+        "y": 0.7,
+        "tamanho": 7,
+        "largura": 0.25,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      }
+    ],
+    "fundo": "--white",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 6,
+      "tamanho": [
+        1.2,
+        1.9
+      ]
+    },
+    "semente": 1009
+  },
+  {
+    "id": "prazeres-musica-lado-a",
+    "categoria": "hobby-musica",
+    "nome": "Meu lado A",
+    "descricao": "Música: disco de vinil e duas fotos como capa de um álbum pessoal",
+    "camadas": [
+      {
+        "id": "disco",
+        "tipo": "enfeite",
+        "forma": "hobby-vinil",
+        "rotulo": "vinil",
+        "x": 0.2,
+        "y": 0.4,
+        "tamanho": 0.5888888888888889,
+        "rotacao": 0,
+        "cor": "--sage"
+      },
+      {
+        "id": "a",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "retangulo",
+        "x": 0.53,
+        "y": 0.36,
+        "largura": 0.23,
+        "altura": 0.5,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "b",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "retangulo",
+        "x": 0.81,
+        "y": 0.36,
+        "largura": 0.23,
+        "altura": 0.5,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "titulo",
+        "tipo": "frase",
+        "rotulo": "meu lado A",
+        "texto": "meu lado A",
+        "x": 0.2,
+        "y": 0.82,
+        "tamanho": 9,
+        "largura": 0.3,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "linha",
+        "tipo": "frase",
+        "rotulo": "a trilha dos nossos dias",
+        "texto": "a trilha dos nossos dias",
+        "x": 0.67,
+        "y": 0.74,
+        "tamanho": 6,
+        "largura": 0.48,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "flor",
+        "tipo": "enfeite",
+        "forma": "convite-laco",
+        "rotulo": "laco",
+        "x": 0.91,
+        "y": 0.86,
+        "tamanho": 0.17777777777777778,
+        "rotacao": 0,
+        "cor": "--peach"
+      }
+    ],
+    "fundo": "--paper",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 6,
+      "tamanho": [
+        1.2,
+        1.9
+      ]
+    },
+    "semente": 1010
+  },
+  {
+    "id": "prazeres-musica-trilha",
+    "categoria": "hobby-musica",
+    "nome": "A nossa trilha sonora",
+    "descricao": "Música: fotografia horizontal, dedicatória e dois instrumentos visuais",
+    "camadas": [
+      {
+        "id": "foto",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "arredondado",
+        "x": 0.33,
+        "y": 0.34,
+        "largura": 0.5,
+        "altura": 0.49,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "titulo",
+        "tipo": "frase",
+        "rotulo": "a nossa trilha sonora",
+        "texto": "a nossa trilha sonora",
+        "x": 0.33,
+        "y": 0.77,
+        "tamanho": 9,
+        "largura": 0.53,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "violao",
+        "tipo": "enfeite",
+        "forma": "hobby-violao",
+        "rotulo": "violao",
+        "x": 0.82,
+        "y": 0.39,
+        "tamanho": 0.3111111111111111,
+        "rotacao": 0,
+        "cor": "--peach"
+      },
+      {
+        "id": "disco",
+        "tipo": "enfeite",
+        "forma": "hobby-vinil",
+        "rotulo": "vinil",
+        "x": 0.65,
+        "y": 0.74,
+        "tamanho": 0.25555555555555554,
+        "rotacao": 0,
+        "cor": "--sage"
+      },
+      {
+        "id": "nome",
+        "tipo": "frase",
+        "rotulo": "Lia & Léo",
+        "texto": "Lia & Léo",
+        "x": 0.85,
+        "y": 0.84,
+        "tamanho": 5.3,
+        "largura": 0.22,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      }
+    ],
+    "fundo": "--white",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 6,
+      "tamanho": [
+        1.2,
+        1.9
+      ]
+    },
+    "semente": 1011
+  },
+  {
+    "id": "prazeres-musica-volume",
+    "categoria": "hobby-musica",
+    "nome": "A vida pede música",
+    "descricao": "Música: frase em três linhas, retrato vertical e vinil floral",
+    "camadas": [
+      {
+        "id": "a",
+        "tipo": "frase",
+        "rotulo": "A VIDA",
+        "texto": "A VIDA",
+        "x": 0.28,
+        "y": 0.23,
+        "tamanho": 10,
+        "largura": 0.32,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "b",
+        "tipo": "frase",
+        "rotulo": "pede música",
+        "texto": "pede música",
+        "x": 0.28,
+        "y": 0.43,
+        "tamanho": 12,
+        "largura": 0.43,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "c",
+        "tipo": "frase",
+        "rotulo": "e um pouco de coragem.",
+        "texto": "e um pouco de coragem.",
+        "x": 0.28,
+        "y": 0.64,
+        "tamanho": 5,
+        "largura": 0.42,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "foto",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "arredondado",
+        "x": 0.7,
+        "y": 0.38,
+        "largura": 0.24,
+        "altura": 0.59,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "disco",
+        "tipo": "enfeite",
+        "forma": "hobby-vinil",
+        "rotulo": "vinil",
+        "x": 0.89,
+        "y": 0.78,
+        "tamanho": 0.2777777777777778,
+        "rotacao": 0,
+        "cor": "--sage"
+      },
+      {
+        "id": "violao",
+        "tipo": "enfeite",
+        "forma": "hobby-violao",
+        "rotulo": "violao",
+        "x": 0.51,
+        "y": 0.8,
+        "tamanho": 0.13333333333333333,
+        "rotacao": 0,
+        "cor": "--peach"
+      },
+      {
+        "id": "nome",
+        "tipo": "frase",
+        "rotulo": "da Camila",
+        "texto": "da Camila",
+        "x": 0.7,
+        "y": 0.86,
+        "tamanho": 5,
+        "largura": 0.22,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      }
+    ],
+    "fundo": "--paper",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 6,
+      "tamanho": [
+        1.2,
+        1.9
+      ]
+    },
+    "semente": 1012
+  },
+  {
+    "id": "prazeres-jardim-cultivar",
+    "categoria": "hobby-jardim",
+    "nome": "Cultivar com carinho",
+    "descricao": "Jardinagem: regador floral, retrato botânico e assinatura",
+    "camadas": [
+      {
+        "id": "regador",
+        "tipo": "enfeite",
+        "forma": "hobby-regador",
+        "rotulo": "regador",
+        "x": 0.2,
+        "y": 0.4,
+        "tamanho": 0.5,
+        "rotacao": 0,
+        "cor": "--sage"
+      },
+      {
+        "id": "frase",
+        "tipo": "frase",
+        "rotulo": "cultivar é cuidar",
+        "texto": "cultivar é cuidar",
+        "x": 0.2,
+        "y": 0.79,
+        "tamanho": 8,
+        "largura": 0.37,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "arco",
+        "tipo": "enfeite",
+        "forma": "convite-coroa",
+        "rotulo": "coroa",
+        "x": 0.7,
+        "y": 0.4,
+        "tamanho": 0.7,
+        "rotacao": 0,
+        "cor": "--peach"
+      },
+      {
+        "id": "foto",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "circulo",
+        "x": 0.7,
+        "y": 0.4,
+        "largura": 0.19,
+        "altura": 0.4433,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "nome",
+        "tipo": "frase",
+        "rotulo": "Jardim da Alice",
+        "texto": "Jardim da Alice",
+        "x": 0.7,
+        "y": 0.82,
+        "tamanho": 6,
+        "largura": 0.36,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "ferramentas",
+        "tipo": "enfeite",
+        "forma": "hobby-ferramentas",
+        "rotulo": "ferramentas",
+        "x": 0.94,
+        "y": 0.71,
+        "tamanho": 0.14444444444444443,
+        "rotacao": 0,
+        "cor": "--peach"
+      }
+    ],
+    "fundo": "--white",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 6,
+      "tamanho": [
+        1.2,
+        1.9
+      ]
+    },
+    "semente": 1013
+  },
+  {
+    "id": "prazeres-jardim-colecao",
+    "categoria": "hobby-jardim",
+    "nome": "Minha coleção de verdes",
+    "descricao": "Jardinagem: díptico das plantas favoritas e ilustrações de cultivo",
+    "camadas": [
+      {
+        "id": "a",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "arredondado",
+        "x": 0.32,
+        "y": 0.39,
+        "largura": 0.22,
+        "altura": 0.61,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "b",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "arredondado",
+        "x": 0.6,
+        "y": 0.39,
+        "largura": 0.22,
+        "altura": 0.61,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "planta",
+        "tipo": "enfeite",
+        "forma": "atelie-planta",
+        "rotulo": "planta",
+        "x": 0.1,
+        "y": 0.46,
+        "tamanho": 0.24444444444444444,
+        "rotacao": 0,
+        "cor": "--sage"
+      },
+      {
+        "id": "ferramentas",
+        "tipo": "enfeite",
+        "forma": "hobby-ferramentas",
+        "rotulo": "ferramentas",
+        "x": 0.87,
+        "y": 0.35,
+        "tamanho": 0.3,
+        "rotacao": 0,
+        "cor": "--peach"
+      },
+      {
+        "id": "frase",
+        "tipo": "frase",
+        "rotulo": "minha coleção de verdes",
+        "texto": "minha coleção de verdes",
+        "x": 0.46,
+        "y": 0.83,
+        "tamanho": 8,
+        "largura": 0.55,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "nome",
+        "tipo": "frase",
+        "rotulo": "da Bia",
+        "texto": "da Bia",
+        "x": 0.87,
+        "y": 0.76,
+        "tamanho": 5.5,
+        "largura": 0.19,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      }
+    ],
+    "fundo": "--paper",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 6,
+      "tamanho": [
+        1.2,
+        1.9
+      ]
+    },
+    "semente": 1014
+  },
+  {
+    "id": "prazeres-jardim-tempo",
+    "categoria": "hobby-jardim",
+    "nome": "Tudo tem seu tempo",
+    "descricao": "Jardinagem: mensagem de calma, retrato e uma planta em crescimento",
+    "camadas": [
+      {
+        "id": "a",
+        "tipo": "frase",
+        "rotulo": "Tudo tem",
+        "texto": "Tudo tem",
+        "x": 0.28,
+        "y": 0.24,
+        "tamanho": 11,
+        "largura": 0.37,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "b",
+        "tipo": "frase",
+        "rotulo": "seu tempo.",
+        "texto": "seu tempo.",
+        "x": 0.28,
+        "y": 0.44,
+        "tamanho": 10,
+        "largura": 0.37,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "c",
+        "tipo": "frase",
+        "rotulo": "inclusive florescer.",
+        "texto": "inclusive florescer.",
+        "x": 0.28,
+        "y": 0.63,
+        "tamanho": 5.5,
+        "largura": 0.39,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "foto",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "circulo",
+        "x": 0.73,
+        "y": 0.34,
+        "largura": 0.22,
+        "altura": 0.5133,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "planta",
+        "tipo": "enfeite",
+        "forma": "atelie-planta",
+        "rotulo": "planta",
+        "x": 0.91,
+        "y": 0.75,
+        "tamanho": 0.2111111111111111,
+        "rotacao": 0,
+        "cor": "--sage"
+      },
+      {
+        "id": "regador",
+        "tipo": "enfeite",
+        "forma": "hobby-regador",
+        "rotulo": "regador",
+        "x": 0.59,
+        "y": 0.76,
+        "tamanho": 0.28888888888888886,
+        "rotacao": 0,
+        "cor": "--sage"
+      },
+      {
+        "id": "nome",
+        "tipo": "frase",
+        "rotulo": "Laura",
+        "texto": "Laura",
+        "x": 0.76,
+        "y": 0.86,
+        "tamanho": 5.5,
+        "largura": 0.16,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      }
+    ],
+    "fundo": "--white",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 6,
+      "tamanho": [
+        1.2,
+        1.9
+      ]
+    },
+    "semente": 1015
+  },
+  {
+    "id": "prazeres-jardim-raizes",
+    "categoria": "hobby-jardim",
+    "nome": "Raízes e lembranças",
+    "descricao": "Jardinagem: três lembranças do jardim e dedicatória para quem planta",
+    "camadas": [
+      {
+        "id": "a",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "retangulo",
+        "x": 0.16,
+        "y": 0.36,
+        "largura": 0.2,
+        "altura": 0.49,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "b",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "circulo",
+        "x": 0.43,
+        "y": 0.37,
+        "largura": 0.19,
+        "altura": 0.4433,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "c",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "coracao",
+        "x": 0.7,
+        "y": 0.36,
+        "largura": 0.2,
+        "altura": 0.49,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "frase",
+        "tipo": "frase",
+        "rotulo": "raízes de boas lembranças",
+        "texto": "raízes de boas lembranças",
+        "x": 0.43,
+        "y": 0.76,
+        "tamanho": 8,
+        "largura": 0.65,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "nome",
+        "tipo": "frase",
+        "rotulo": "Vó Rosa · nosso jardim",
+        "texto": "Vó Rosa · nosso jardim",
+        "x": 0.43,
+        "y": 0.91,
+        "tamanho": 4.7,
+        "largura": 0.46,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "regador",
+        "tipo": "enfeite",
+        "forma": "hobby-regador",
+        "rotulo": "regador",
+        "x": 0.92,
+        "y": 0.3,
+        "tamanho": 0.24444444444444444,
+        "rotacao": 0,
+        "cor": "--sage"
+      },
+      {
+        "id": "ferramentas",
+        "tipo": "enfeite",
+        "forma": "hobby-ferramentas",
+        "rotulo": "ferramentas",
+        "x": 0.92,
+        "y": 0.72,
+        "tamanho": 0.16666666666666666,
+        "rotacao": 0,
+        "cor": "--peach"
+      }
+    ],
+    "fundo": "--paper",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 6,
+      "tamanho": [
+        1.2,
+        1.9
+      ]
+    },
+    "semente": 1016
+  },
+  {
+    "id": "prazeres-viagem-bagagem",
+    "categoria": "hobby-viagens",
+    "nome": "Histórias na bagagem",
+    "descricao": "Viagens: mala ilustrada, retrato e destino personalizável",
+    "camadas": [
+      {
+        "id": "mala",
+        "tipo": "enfeite",
+        "forma": "hobby-mala",
+        "rotulo": "mala",
+        "x": 0.22,
+        "y": 0.39,
+        "tamanho": 0.6222222222222222,
+        "rotacao": 0,
+        "cor": "--peach"
+      },
+      {
+        "id": "frase",
+        "tipo": "frase",
+        "rotulo": "histórias na bagagem",
+        "texto": "histórias na bagagem",
+        "x": 0.22,
+        "y": 0.8,
+        "tamanho": 7.6,
+        "largura": 0.4,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "foto",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "arredondado",
+        "x": 0.69,
+        "y": 0.36,
+        "largura": 0.28,
+        "altura": 0.5,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "destino",
+        "tipo": "frase",
+        "rotulo": "Lisboa · 2026",
+        "texto": "Lisboa · 2026",
+        "x": 0.69,
+        "y": 0.77,
+        "tamanho": 6.7,
+        "largura": 0.34,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "camera",
+        "tipo": "enfeite",
+        "forma": "hobby-camera",
+        "rotulo": "camera",
+        "x": 0.91,
+        "y": 0.69,
+        "tamanho": 0.26666666666666666,
+        "rotacao": 0,
+        "cor": "--sage"
+      }
+    ],
+    "fundo": "--white",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 6,
+      "tamanho": [
+        1.2,
+        1.9
+      ]
+    },
+    "semente": 1017
+  },
+  {
+    "id": "prazeres-viagem-postais",
+    "categoria": "hobby-viagens",
+    "nome": "Nossos cartões-postais",
+    "descricao": "Viagens: duas fotos amplas de destinos e assinatura de viagem",
+    "camadas": [
+      {
+        "id": "a",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "retangulo",
+        "x": 0.255,
+        "y": 0.38,
+        "largura": 0.35,
+        "altura": 0.5,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "b",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "retangulo",
+        "x": 0.705,
+        "y": 0.38,
+        "largura": 0.35,
+        "altura": 0.5,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "frase",
+        "tipo": "frase",
+        "rotulo": "nossos cartões-postais",
+        "texto": "nossos cartões-postais",
+        "x": 0.48,
+        "y": 0.76,
+        "tamanho": 9,
+        "largura": 0.65,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "nomes",
+        "tipo": "frase",
+        "rotulo": "Lia & Pedro",
+        "texto": "Lia & Pedro",
+        "x": 0.48,
+        "y": 0.91,
+        "tamanho": 4.7,
+        "largura": 0.3,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "mala",
+        "tipo": "enfeite",
+        "forma": "hobby-mala",
+        "rotulo": "mala",
+        "x": 0.09,
+        "y": 0.81,
+        "tamanho": 0.24444444444444444,
+        "rotacao": 0,
+        "cor": "--peach"
+      },
+      {
+        "id": "camera",
+        "tipo": "enfeite",
+        "forma": "hobby-camera",
+        "rotulo": "camera",
+        "x": 0.89,
+        "y": 0.82,
+        "tamanho": 0.24444444444444444,
+        "rotacao": 0,
+        "cor": "--sage"
+      }
+    ],
+    "fundo": "--paper",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 6,
+      "tamanho": [
+        1.2,
+        1.9
+      ]
+    },
+    "semente": 1018
+  },
+  {
+    "id": "prazeres-viagem-colecionar",
+    "categoria": "hobby-viagens",
+    "nome": "Colecionar caminhos",
+    "descricao": "Viagens: título em destaque, retrato redondo e câmera fotográfica",
+    "camadas": [
+      {
+        "id": "a",
+        "tipo": "frase",
+        "rotulo": "COLECIONAR",
+        "texto": "COLECIONAR",
+        "x": 0.29,
+        "y": 0.26,
+        "tamanho": 8.5,
+        "largura": 0.43,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "b",
+        "tipo": "frase",
+        "rotulo": "caminhos",
+        "texto": "caminhos",
+        "x": 0.29,
+        "y": 0.47,
+        "tamanho": 15,
+        "largura": 0.43,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "nome",
+        "tipo": "frase",
+        "rotulo": "a próxima parada é nossa",
+        "texto": "a próxima parada é nossa",
+        "x": 0.29,
+        "y": 0.71,
+        "tamanho": 4.8,
+        "largura": 0.42,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "foto",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "circulo",
+        "x": 0.76,
+        "y": 0.32,
+        "largura": 0.22,
+        "altura": 0.5133,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "camera",
+        "tipo": "enfeite",
+        "forma": "hobby-camera",
+        "rotulo": "camera",
+        "x": 0.79,
+        "y": 0.8,
+        "tamanho": 0.34444444444444444,
+        "rotacao": 0,
+        "cor": "--sage"
+      },
+      {
+        "id": "mala",
+        "tipo": "enfeite",
+        "forma": "hobby-mala",
+        "rotulo": "mala",
+        "x": 0.54,
+        "y": 0.83,
+        "tamanho": 0.2111111111111111,
+        "rotacao": 0,
+        "cor": "--peach"
+      }
+    ],
+    "fundo": "--white",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 6,
+      "tamanho": [
+        1.2,
+        1.9
+      ]
+    },
+    "semente": 1019
+  },
+  {
+    "id": "prazeres-viagem-album",
+    "categoria": "hobby-viagens",
+    "nome": "Meu pequeno álbum",
+    "descricao": "Viagens: uma foto horizontal e duas verticais para contar uma aventura",
+    "camadas": [
+      {
+        "id": "a",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "arredondado",
+        "x": 0.25,
+        "y": 0.36,
+        "largura": 0.34,
+        "altura": 0.49,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "b",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "arredondado",
+        "x": 0.58,
+        "y": 0.38,
+        "largura": 0.2,
+        "altura": 0.6,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "c",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "arredondado",
+        "x": 0.84,
+        "y": 0.38,
+        "largura": 0.2,
+        "altura": 0.6,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "frase",
+        "tipo": "frase",
+        "rotulo": "um mundo para lembrar",
+        "texto": "um mundo para lembrar",
+        "x": 0.28,
+        "y": 0.78,
+        "tamanho": 8,
+        "largura": 0.44,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "destino",
+        "tipo": "frase",
+        "rotulo": "Serra Gaúcha · 2026",
+        "texto": "Serra Gaúcha · 2026",
+        "x": 0.73,
+        "y": 0.87,
+        "tamanho": 4.6,
+        "largura": 0.4,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "camera",
+        "tipo": "enfeite",
+        "forma": "hobby-camera",
+        "rotulo": "camera",
+        "x": 0.53,
+        "y": 0.84,
+        "tamanho": 0.17777777777777778,
+        "rotacao": 0,
+        "cor": "--sage"
+      },
+      {
+        "id": "mala",
+        "tipo": "enfeite",
+        "forma": "hobby-mala",
+        "rotulo": "mala",
+        "x": 0.93,
+        "y": 0.83,
+        "tamanho": 0.16666666666666666,
+        "rotacao": 0,
+        "cor": "--peach"
+      }
+    ],
+    "fundo": "--paper",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 6,
+      "tamanho": [
+        1.2,
+        1.9
+      ]
+    },
+    "semente": 1020
+  },
+  {
+    "id": "prazeres-cozinha-tempero",
+    "categoria": "hobby-cozinha",
+    "nome": "Meu tempero é carinho",
+    "descricao": "Culinária: avental floral, retrato e assinatura de quem ama cozinhar",
+    "camadas": [
+      {
+        "id": "avental",
+        "tipo": "enfeite",
+        "forma": "hobby-avental",
+        "rotulo": "avental",
+        "x": 0.18,
+        "y": 0.42,
+        "tamanho": 0.4111111111111111,
+        "rotacao": 0,
+        "cor": "--peach"
+      },
+      {
+        "id": "fouet",
+        "tipo": "enfeite",
+        "forma": "hobby-fouet",
+        "rotulo": "fouet",
+        "x": 0.37,
+        "y": 0.79,
+        "tamanho": 0.1,
+        "rotacao": 0,
+        "cor": "--sage"
+      },
+      {
+        "id": "foto",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "circulo",
+        "x": 0.55,
+        "y": 0.37,
+        "largura": 0.23,
+        "altura": 0.5367,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "a",
+        "tipo": "frase",
+        "rotulo": "meu tempero",
+        "texto": "meu tempero",
+        "x": 0.84,
+        "y": 0.27,
+        "tamanho": 8.7,
+        "largura": 0.27,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "b",
+        "tipo": "frase",
+        "rotulo": "é carinho",
+        "texto": "é carinho",
+        "x": 0.84,
+        "y": 0.45,
+        "tamanho": 8.7,
+        "largura": 0.27,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "nome",
+        "tipo": "frase",
+        "rotulo": "Chef Helena",
+        "texto": "Chef Helena",
+        "x": 0.84,
+        "y": 0.69,
+        "tamanho": 5.5,
+        "largura": 0.27,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      }
+    ],
+    "fundo": "--white",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 6,
+      "tamanho": [
+        1.2,
+        1.9
+      ]
+    },
+    "semente": 1021
+  },
+  {
+    "id": "prazeres-cozinha-receita",
+    "categoria": "hobby-cozinha",
+    "nome": "Receita de bons momentos",
+    "descricao": "Culinária: fotografia do prato e receita afetiva em três linhas editáveis",
+    "camadas": [
+      {
+        "id": "foto",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "arredondado",
+        "x": 0.24,
+        "y": 0.38,
+        "largura": 0.32,
+        "altura": 0.57,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "titulo",
+        "tipo": "frase",
+        "rotulo": "Receita de afeto",
+        "texto": "Receita de afeto",
+        "x": 0.7,
+        "y": 0.23,
+        "tamanho": 10,
+        "largura": 0.46,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "linha1",
+        "tipo": "frase",
+        "rotulo": "uma pitada de cuidado",
+        "texto": "uma pitada de cuidado",
+        "x": 0.7,
+        "y": 0.44,
+        "tamanho": 5.5,
+        "largura": 0.43,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "linha2",
+        "tipo": "frase",
+        "rotulo": "uma colher de boas histórias",
+        "texto": "uma colher de boas histórias",
+        "x": 0.7,
+        "y": 0.6,
+        "tamanho": 5.2,
+        "largura": 0.48,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "nome",
+        "tipo": "frase",
+        "rotulo": "da cozinha da Ana",
+        "texto": "da cozinha da Ana",
+        "x": 0.24,
+        "y": 0.84,
+        "tamanho": 5,
+        "largura": 0.33,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "fouet",
+        "tipo": "enfeite",
+        "forma": "hobby-fouet",
+        "rotulo": "fouet",
+        "x": 0.91,
+        "y": 0.81,
+        "tamanho": 0.1,
+        "rotacao": 0,
+        "cor": "--sage"
+      },
+      {
+        "id": "avental",
+        "tipo": "enfeite",
+        "forma": "hobby-avental",
+        "rotulo": "avental",
+        "x": 0.53,
+        "y": 0.82,
+        "tamanho": 0.15555555555555556,
+        "rotacao": 0,
+        "cor": "--peach"
+      }
+    ],
+    "fundo": "--paper",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 6,
+      "tamanho": [
+        1.2,
+        1.9
+      ]
+    },
+    "semente": 1022
+  },
+  {
+    "id": "prazeres-cozinha-familia",
+    "categoria": "hobby-cozinha",
+    "nome": "Sabores de família",
+    "descricao": "Culinária: três fotos para guardar quem cozinha e quem senta à mesa",
+    "camadas": [
+      {
+        "id": "a",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "circulo",
+        "x": 0.17,
+        "y": 0.38,
+        "largura": 0.21,
+        "altura": 0.49,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "b",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "coracao",
+        "x": 0.44,
+        "y": 0.38,
+        "largura": 0.21,
+        "altura": 0.52,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "c",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "circulo",
+        "x": 0.71,
+        "y": 0.38,
+        "largura": 0.21,
+        "altura": 0.49,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "frase",
+        "tipo": "frase",
+        "rotulo": "sabores que contam histórias",
+        "texto": "sabores que contam histórias",
+        "x": 0.44,
+        "y": 0.79,
+        "tamanho": 8,
+        "largura": 0.66,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "nome",
+        "tipo": "frase",
+        "rotulo": "Família Santos",
+        "texto": "Família Santos",
+        "x": 0.82,
+        "y": 0.9,
+        "tamanho": 4.5,
+        "largura": 0.27,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "avental",
+        "tipo": "enfeite",
+        "forma": "hobby-avental",
+        "rotulo": "avental",
+        "x": 0.93,
+        "y": 0.32,
+        "tamanho": 0.18888888888888888,
+        "rotacao": 0,
+        "cor": "--peach"
+      },
+      {
+        "id": "fouet",
+        "tipo": "enfeite",
+        "forma": "hobby-fouet",
+        "rotulo": "fouet",
+        "x": 0.08,
+        "y": 0.83,
+        "tamanho": 0.08888888888888889,
+        "rotacao": 0,
+        "cor": "--sage"
+      }
+    ],
+    "fundo": "--white",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 6,
+      "tamanho": [
+        1.2,
+        1.9
+      ]
+    },
+    "semente": 1023
+  },
+  {
+    "id": "prazeres-cozinha-doce",
+    "categoria": "hobby-cozinha",
+    "nome": "Um doce de pessoa",
+    "descricao": "Confeitaria: frase protagonista, duas fotos de criações e utensílios delicados",
+    "camadas": [
+      {
+        "id": "a",
+        "tipo": "frase",
+        "rotulo": "Um doce",
+        "texto": "Um doce",
+        "x": 0.2,
+        "y": 0.28,
+        "tamanho": 13,
+        "largura": 0.3,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      },
+      {
+        "id": "b",
+        "tipo": "frase",
+        "rotulo": "de pessoa.",
+        "texto": "de pessoa.",
+        "x": 0.2,
+        "y": 0.49,
+        "tamanho": 8,
+        "largura": 0.32,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "nome",
+        "tipo": "frase",
+        "rotulo": "Confeitaria da Bia",
+        "texto": "Confeitaria da Bia",
+        "x": 0.2,
+        "y": 0.72,
+        "tamanho": 4.4,
+        "largura": 0.32,
+        "fonte": "Nunito",
+        "cor": "--ink-soft",
+        "rotacao": 0
+      },
+      {
+        "id": "foto1",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "arredondado",
+        "x": 0.54,
+        "y": 0.36,
+        "largura": 0.23,
+        "altura": 0.52,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "foto2",
+        "tipo": "foto",
+        "rotulo": "Sua foto",
+        "forma": "arredondado",
+        "x": 0.83,
+        "y": 0.36,
+        "largura": 0.23,
+        "altura": 0.52,
+        "rotacao": 0,
+        "ajuste": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0
+        }
+      },
+      {
+        "id": "fouet",
+        "tipo": "enfeite",
+        "forma": "hobby-fouet",
+        "rotulo": "fouet",
+        "x": 0.46,
+        "y": 0.82,
+        "tamanho": 0.08888888888888889,
+        "rotacao": 0,
+        "cor": "--sage"
+      },
+      {
+        "id": "avental",
+        "tipo": "enfeite",
+        "forma": "hobby-avental",
+        "rotulo": "avental",
+        "x": 0.92,
+        "y": 0.81,
+        "tamanho": 0.16666666666666666,
+        "rotacao": 0,
+        "cor": "--peach"
+      },
+      {
+        "id": "linha",
+        "tipo": "frase",
+        "rotulo": "feito com amor",
+        "texto": "feito com amor",
+        "x": 0.69,
+        "y": 0.81,
+        "tamanho": 6,
+        "largura": 0.3,
+        "fonte": "Caveat",
+        "cor": "--peach-ink",
+        "rotacao": 0
+      }
+    ],
+    "fundo": "--paper",
+    "enfeites": {
+      "formas": [
+        "bolinha"
+      ],
+      "cores": [
+        "--sand"
+      ],
+      "quantidade": 6,
+      "tamanho": [
+        1.2,
+        1.9
+      ]
+    },
+    "semente": 1024
+  }
+]
