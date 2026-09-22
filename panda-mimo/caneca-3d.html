@@ -77,36 +77,6 @@
 
     </section>
 
-    <!-- Fica embaixo da peça: no celular, só a caneca gruda no topo. -->
-    <section class="studio-preview-extra" aria-label="Ajustes da peça">
-      <!-- cores da peça ficam junto da peça, não no editor da arte -->
-      <details class="studio-peca" id="peca-cores">
-        <summary><span>Cores da peça</span><span class="studio-peca__resumo" id="peca-resumo">Toda branca</span></summary>
-        <p class="studio-help">Por fora, branca. O carinho fica por sua conta.</p>
-        <div class="studio-color-presets" role="group" aria-label="Combinações de cores"><button type="button" data-preset="branca" aria-pressed="true">Toda branca</button><button type="button" data-preset="preta" aria-pressed="false">Preto e branco</button><button type="button" data-preset="rosa" aria-pressed="false">Toque rosa</button></div>
-        <div class="studio-color-fields"><label for="inside-color">Interior<select id="inside-color" name="inside"><option value="branca">Branco</option><option value="preta">Preto</option><option value="vermelha">Vermelho</option><option value="amarela">Amarelo</option><option value="rosa">Rosa</option><option value="azul">Azul</option></select></label><label for="handle-color">Alça<select id="handle-color" name="handle"><option value="branca">Branco</option><option value="preta">Preto</option><option value="vermelha">Vermelho</option><option value="amarela">Amarelo</option><option value="rosa">Rosa</option><option value="azul">Azul</option></select></label></div>
-      </details>
-
-      <details class="studio-peca" id="peca-cena">
-        <summary><span>Cena e acabamento</span><span class="studio-peca__resumo" id="cena-resumo">Fundo claro · brilhante</span></summary>
-        <p class="studio-help">Veja a caneca como ela vai aparecer na foto do presente.</p>
-        <div class="studio-cenas" id="cenas" role="group" aria-label="Cena da prévia"></div>
-        <div class="studio-cenas" id="acabamentos" role="group" aria-label="Acabamento da cerâmica"></div>
-      </details>
-
-      <details class="studio-flat" id="flat-details">
-        <summary>Ver a arte aberta <span>área de 21 × 9 cm</span></summary>
-        <div class="studio-flat__paper"><canvas id="flat-art" width="840" height="360" role="img" aria-label="Arte plana dentro da área de personalização"></canvas></div>
-        <p>Esta é a área que envolve a caneca, com um espaço livre junto à alça. Puxe um canto para aumentar e o botão de cima para girar.</p>
-        <label class="studio-check"><input type="checkbox" id="mostrar-margem" checked> Mostrar a margem de segurança</label>
-        <details class="studio-duvida"><summary>O que é a margem de segurança?</summary>
-          <p>É a faixa de 5 mm nas bordas da arte. A caneca é estampada com a folha envolvendo a peça, e essa
-          folha pode escorregar um fio de milímetro. O que estiver fora da margem corre o risco de sair cortado —
-          então nome, data e rosto ficam para dentro dela.</p>
-        </details>
-      </details>
-      <div class="studio-caption"><span class="hand">Só uma prévia, tá?</span><p>Modelo de referência de 325 ml. A gente confere a peça, a combinação de cores e a arte final antes de produzir.</p></div>
-    </section>
     </div>
 
     <!-- ===================== A ARTE ===================== -->
@@ -279,6 +249,38 @@
       </form>
     </aside>
   </div>
+
+  <!-- Ajustes da peça: faixa própria abaixo do layout, larga e calma. Dentro da coluna eles
+       obrigavam a caneca a rolar por dentro. -->
+  <section class="studio-preview-extra" aria-label="Ajustes da peça">
+      <!-- cores da peça ficam junto da peça, não no editor da arte -->
+      <details class="studio-peca" id="peca-cores">
+        <summary><span>Cores da peça</span><span class="studio-peca__resumo" id="peca-resumo">Toda branca</span></summary>
+        <p class="studio-help">Por fora, branca. O carinho fica por sua conta.</p>
+        <div class="studio-color-presets" role="group" aria-label="Combinações de cores"><button type="button" data-preset="branca" aria-pressed="true">Toda branca</button><button type="button" data-preset="preta" aria-pressed="false">Preto e branco</button><button type="button" data-preset="rosa" aria-pressed="false">Toque rosa</button></div>
+        <div class="studio-color-fields"><label for="inside-color">Interior<select id="inside-color" name="inside"><option value="branca">Branco</option><option value="preta">Preto</option><option value="vermelha">Vermelho</option><option value="amarela">Amarelo</option><option value="rosa">Rosa</option><option value="azul">Azul</option></select></label><label for="handle-color">Alça<select id="handle-color" name="handle"><option value="branca">Branco</option><option value="preta">Preto</option><option value="vermelha">Vermelho</option><option value="amarela">Amarelo</option><option value="rosa">Rosa</option><option value="azul">Azul</option></select></label></div>
+      </details>
+
+      <details class="studio-peca" id="peca-cena">
+        <summary><span>Cena e acabamento</span><span class="studio-peca__resumo" id="cena-resumo">Fundo claro · brilhante</span></summary>
+        <p class="studio-help">Veja a caneca como ela vai aparecer na foto do presente.</p>
+        <div class="studio-cenas" id="cenas" role="group" aria-label="Cena da prévia"></div>
+        <div class="studio-cenas" id="acabamentos" role="group" aria-label="Acabamento da cerâmica"></div>
+      </details>
+
+      <details class="studio-flat" id="flat-details">
+        <summary>Ver a arte aberta <span>área de 21 × 9 cm</span></summary>
+        <div class="studio-flat__paper"><canvas id="flat-art" width="840" height="360" role="img" aria-label="Arte plana dentro da área de personalização"></canvas></div>
+        <p>Esta é a área que envolve a caneca, com um espaço livre junto à alça. Puxe um canto para aumentar e o botão de cima para girar.</p>
+        <label class="studio-check"><input type="checkbox" id="mostrar-margem" checked> Mostrar a margem de segurança</label>
+        <details class="studio-duvida"><summary>O que é a margem de segurança?</summary>
+          <p>É a faixa de 5 mm nas bordas da arte. A caneca é estampada com a folha envolvendo a peça, e essa
+          folha pode escorregar um fio de milímetro. O que estiver fora da margem corre o risco de sair cortado —
+          então nome, data e rosto ficam para dentro dela.</p>
+        </details>
+      </details>
+      <div class="studio-caption"><span class="hand">Só uma prévia, tá?</span><p>Modelo de referência de 325 ml. A gente confere a peça, a combinação de cores e a arte final antes de produzir.</p></div>
+  </section>
 </main>
 <footer class="footer">
   <div class="wrap footer__in">

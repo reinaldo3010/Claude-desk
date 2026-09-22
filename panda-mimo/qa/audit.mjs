@@ -1742,14 +1742,19 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
   // Quatro acréscimos da rodada de acessibilidade e primeira visita, cobrados de uma vez porque
   // dependem da mesma página montada: alvo de toque de 44 px, dúvida explicada ao lado do termo que
   // a levanta, boas-vindas que aparecem uma vez só, e a caneca girando pelo teclado.
-  for (const [nome, w3, h3] of [['1280', 1280, 900], ['390', 390, 844]]) {
-    const contexto = await browser.newContext({ viewport: { width: w3, height: h3 } });
+  // O piso muda com o ponteiro: 44 px onde há dedo, 24 px (o mínimo da norma) onde há mouse. Medir
+  // 44 no desktop obrigaria a interface a ficar pesada — um botão de 44 px com letra de 12 é 3,7
+  // vezes a altura da própria letra, e o dono reclamou disso antes da gente perceber.
+  for (const [nome, w3, h3, toque] of [['1280', 1280, 900, false], ['390 com dedo', 390, 844, true]]) {
+    const piso = toque ? 44 : 24;
+    const contexto = await browser.newContext({ viewport: { width: w3, height: h3 }, hasTouch: toque, isMobile: toque });
     const pz = await contexto.newPage();
     await pz.goto(servidor.url + 'caneca-3d.html', { waitUntil: 'load' });
     await pz.waitForTimeout(900);
+    await pz.evaluate((v) => { window.__piso = v; }, piso);
     const r = await pz.evaluate(async () => {
       const pequenos = [...document.querySelectorAll('button, a[href]')]
-        .filter((e) => { const c = e.getBoundingClientRect(); return c.width > 0 && c.height > 0 && c.height < 44; })
+        .filter((e) => { const c = e.getBoundingClientRect(); return c.width > 0 && c.height > 0 && c.height < window.__piso; })
         .map((e) => `${(e.textContent || e.getAttribute('aria-label') || '').trim().slice(0, 24)} (${Math.round(e.getBoundingClientRect().height)}px)`);
       const bv = document.getElementById('boasvindas');
       const primeira = { existe: !!bv, visivel: bv ? !bv.hidden : false };
@@ -1774,7 +1779,7 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
         aceitaHeic: (document.getElementById('art-file')?.accept || '').includes('heic'),
       };
     });
-    if (r.pequenos.length) failures.push(`[toque ${nome}] ${r.pequenos.length} controle(s) com menos de 44 px: ${r.pequenos.slice(0, 4).join(', ')}`);
+    if (r.pequenos.length) failures.push(`[toque ${nome}] ${r.pequenos.length} controle(s) com menos de ${piso} px: ${r.pequenos.slice(0, 4).join(', ')}`);
     if (r.duvidas < 2) failures.push(`[ajuda ${nome}] sumiram as explicações ao lado dos termos (${r.duvidas})`);
     if (!r.primeira.existe || !r.primeira.visivel) failures.push(`[primeira visita ${nome}] as boas-vindas não apareceram na primeira abertura`);
     if (r.depoisDeFechar === false) failures.push(`[primeira visita ${nome}] as boas-vindas não fecham no clique`);
@@ -1853,26 +1858,19 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
         return { ok: false, motivo: 'coberto por ' + (noPonto ? (noPonto.className || noPonto.tagName).toString().slice(0, 30) : 'nada') };
       };
       const presentes = ids.filter((id) => document.getElementById(id));
-      let estado;
-      if (larga) {
-        // Na tela larga a coluna inteira gruda: os blocos têm de estar à mão ENQUANTO se usa o editor.
-        const editor = document.querySelector('.studio-controls');
-        window.scrollTo({ top: window.scrollY + editor.getBoundingClientRect().top + editor.offsetHeight / 2 - window.innerHeight / 2, behavior: 'instant' });
-        await new Promise((r) => setTimeout(r, 300));
-        estado = presentes.map((id) => ({ id, ...daParaUsar(id) }));
-      } else {
-        // No celular eles ficam depois do editor: a pessoa rola até eles saírem de trás da caneca.
-        const conseguiu = new Map(presentes.map((id) => [id, { ok: false, motivo: 'nunca ficou à mão' }]));
-        const passo = Math.round(window.innerHeight / 3);
-        for (let y = 0; y <= document.documentElement.scrollHeight; y += passo) {
-          window.scrollTo({ top: y, behavior: 'instant' });
-          await new Promise((r) => setTimeout(r, 90));
-          for (const id of presentes) if (!conseguiu.get(id).ok) { const r = daParaUsar(id); if (r.ok) conseguiu.set(id, r); }
-        }
-        estado = presentes.map((id) => ({ id, ...conseguiu.get(id) }));
+      // Os ajustes da peça são uma faixa abaixo do layout nas duas larguras: a pessoa rola até eles.
+      // A varredura desce a página em passos e cobra que cada bloco fique, em algum momento, inteiro
+      // na tela e sem nada por cima — que é o que "dá para usar" quer dizer.
+      const conseguiu = new Map(presentes.map((id) => [id, { ok: false, motivo: 'nunca ficou à mão' }]));
+      const passo = Math.round(window.innerHeight / 3);
+      for (let y = 0; y <= document.documentElement.scrollHeight; y += passo) {
+        window.scrollTo({ top: y, behavior: 'instant' });
+        await new Promise((r) => setTimeout(r, 90));
+        for (const id of presentes) if (!conseguiu.get(id).ok) { const r = daParaUsar(id); if (r.ok) conseguiu.set(id, r); }
       }
+      const estado = presentes.map((id) => ({ id, ...conseguiu.get(id) }));
       return { faltando, estado };
-    }, w2 > 850);
+    });
     for (const id of alcance.faltando) failures.push(`[peça ${nome}] o bloco ${id} sumiu da página`);
     for (const a of alcance.estado) {
       if (!a.ok) failures.push(`[peça ${nome}] não dá para usar ${a.id}: ${a.motivo}`);
