@@ -922,6 +922,7 @@ adereço pequeno no Pandinha em datas comemorativas, com aprovação prévia (6.
 ## Histórico
 | Data | Versão | O que mudou |
 |---|---|---|
+| set/2026 | 2.16 | Acervo PNG interno: seis ilustrações delicadas de teste e 20 poses temáticas do Pandinha (profissões e paixões), geradas por IA a pedido do dono em 22/09/2026, em `marca/kit/png/`. **A regra 6.4 não mudou:** vestir o Pandinha com uniforme ou tema segue proibido no que é publicado, e este acervo é material de revisão até o dono aprovar caso a caso. O guardião (`qa/acervo-unit.test.mjs`) reprova qualquer página servida ao visitante que aponte para essas artes. |
 | set/2026 | 1.0 | Primeira edição, consolidando a identidade aplicada no site (paleta, tipografia, logo, mascote, tom de voz, aplicações, governança). |
 | set/2026 | 2.15 | Duas coleções novas no seletor: Bebê e maternidade (chegada, chá de bebê, chá revelação, gravidez e primeiro Dia das Mães) e Convites e agradecimentos (padrinhos de casamento e de batismo, madrinhas e daminhas, agradecimento), com 27 ilustrações próprias (9.1). "Bebê" e "Casamento" saem de Momentos e passam a encabeçar os grupos novos. |
 | set/2026 | 2.14 | Datas comemorativas deixam de ter uma arte cada: 18 artes novas e 24 ilustrações próprias (árvore, guirlanda, buquê, gravata, cadeado, quadro-negro, coelho, ovo e companhia), e a Páscoa entra como data nova (9.1). Cada assunto do seletor passa a ter no mínimo quatro artes, com teste cobrando. |

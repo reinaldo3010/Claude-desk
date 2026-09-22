@@ -1,3 +1,13 @@
 qa/shots/
 node_modules
-marca/kit/png/
+# Os PNG do kit eram exportações descartáveis quando esta regra nasceu. As duas pastas abaixo são
+# outra coisa: originais gerados uma vez, sem fonte reproduzível aqui — se sumirem, sumiram. Ficam
+# versionadas por decisão do dono (22/09/2026), com a versão WebP ao lado em marca/kit/webp/.
+# `marca/kit/png/*` e não `marca/kit/png/`: o git não entra numa pasta excluída, então a negação de
+# dentro não funcionaria. Excluindo o conteúdo, ele desce e as duas exceções valem.
+marca/kit/png/*
+!marca/kit/png/pandinha-temas-20/
+!marca/kit/png/piloto-aquarela/
+# Cópias byte a byte dos logos que já vivem em assets/, e ninguém as referencia. Duplicata de logo
+# é como nasce a dúvida sobre qual é o verdadeiro: ficam no disco, fora do repositório.
+marca/kit/png/pandinha-temas-20/marca-oficial/
