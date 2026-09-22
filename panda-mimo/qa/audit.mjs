@@ -1185,6 +1185,75 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
       if (trocaDeCor.maximo < 1) failures.push(`[estúdio ${w}] a ilustração de ${modelo} não pode crescer além de um enfeite (máximo ${trocaDeCor.maximo})`);
     }
 
+    /*
+      Três armadilhas de rolagem que o cliente sentiu antes da gente:
+
+      1. Com a lista inteira aberta a página passava de 13.000 px. Ao escolher um modelo a lista
+         sumia, a página encolhia de uma vez e o navegador grampeava a rolagem no novo fim: a
+         pessoa clicava num modelo e ia parar no rodapé, sem ver a caneca nem o próximo passo.
+      2. Na largura de celular a prévia não acompanhava a edição, e a caneca ficava acima da tela.
+      3. A roda do mouse sobre a prévia dava zoom e engolia a rolagem da página.
+    */
+    await pe.evaluate(() => document.querySelector('#abas [data-aba="modelo"]').click());
+    await pe.selectOption('#categoria-modelo', 'todos');
+    await pe.waitForTimeout(300);
+    const rolagem = await pe.evaluate(async () => {
+      const botaoMais = document.getElementById('model-more');
+      let n = 0;
+      while (botaoMais && !botaoMais.hidden && botaoMais.textContent.startsWith('Ver mais') && n < 20) {
+        botaoMais.click(); n += 1; await new Promise((r) => setTimeout(r, 120));
+      }
+      const alturaComTudo = document.documentElement.scrollHeight;
+      const cartoes = [...document.querySelectorAll('#model-list .studio-model')].filter((c) => c.dataset.modelo);
+      const lista = document.getElementById('model-list');
+      lista.scrollTop = lista.scrollHeight;
+      window.scrollTo({ top: document.documentElement.scrollHeight * 0.55, behavior: 'instant' });
+      await new Promise((r) => setTimeout(r, 250));
+      const antes = { y: Math.round(window.scrollY), max: document.documentElement.scrollHeight - window.innerHeight };
+      const alvo = cartoes.find((c) => { const r = c.getBoundingClientRect(); return r.top > 40 && r.bottom < window.innerHeight; }) || cartoes[cartoes.length - 1];
+      alvo.click();
+      await new Promise((r) => setTimeout(r, 1400));
+      const peca = document.querySelector('.studio-preview').getBoundingClientRect();
+      const abas = document.getElementById('abas').getBoundingClientRect();
+      return {
+        alturaComTudo,
+        antes,
+        depoisMax: document.documentElement.scrollHeight - window.innerHeight,
+        pecaVisivel: peca.bottom > 0 && peca.top < window.innerHeight,
+        // O próximo passo é o que diz se a pessoa ficou no lugar certo. O rodapé à vista não serve
+        // de sinal: numa página curta ele aparece sem que ninguém tenha sido jogado para lá.
+        proximoPassoVisivel: abas.top >= -4 && abas.top < window.innerHeight,
+      };
+    });
+    if (rolagem.alturaComTudo > 6000) {
+      failures.push(`[estúdio ${w}] a lista inteira deixa a página com ${rolagem.alturaComTudo} px: ao escolher um modelo a rolagem salta`);
+    }
+    if (!rolagem.pecaVisivel) {
+      failures.push(`[estúdio ${w}] depois de escolher um modelo a caneca ficou fora da tela`);
+    }
+    if (!rolagem.proximoPassoVisivel) {
+      failures.push(`[estúdio ${w}] depois de escolher um modelo o próximo passo (as abas) ficou fora da tela`);
+    }
+
+    // A roda sozinha tem de rolar a página; só Ctrl/⌘ dá zoom.
+    const roda = await pe.evaluate(async () => {
+      const canvas = document.querySelector('canvas.mug-3d-canvas');
+      if (!canvas) return null;
+      const r = canvas.getBoundingClientRect();
+      const manda = (ctrl) => {
+        const ev = new WheelEvent('wheel', { deltaY: -120, ctrlKey: ctrl, bubbles: true, cancelable: true,
+          clientX: r.x + r.width / 2, clientY: r.y + r.height / 2 });
+        canvas.dispatchEvent(ev);
+        return ev.defaultPrevented;
+      };
+      const sozinha = manda(false);
+      await new Promise((res) => setTimeout(res, 120));
+      const comCtrl = manda(true);
+      return { sozinha, comCtrl };
+    });
+    if (roda && roda.sozinha) failures.push(`[estúdio ${w}] a roda do mouse sobre a caneca ainda engole a rolagem da página`);
+    if (roda && !roda.comCtrl) failures.push(`[estúdio ${w}] Ctrl + roda deixou de dar zoom na caneca`);
+
     await pe.evaluate(() => document.querySelector('#abas [data-aba="modelo"]').click());
     await pe.selectOption('#categoria-modelo', 'todos');
     await pe.waitForTimeout(300);
