@@ -335,7 +335,7 @@ export const MODELOS_BEBE = [
     descricao: 'O balão da revelação, a foto do casal e a pergunta',
     fundo: '--white', semente: 721, enfeites: confetesBebe,
     camadas: [
-      ilustra('i1', 'Balão da revelação', 'bebe-balao', 0.19, 0.4, 0.34, '--sand'),
+      ilustra('i1', 'Balão da revelação', 'bebe-balao', 0.19, 0.4, 0.34, '--peach'),
       ilustra('i2', 'Sapatinhos', 'bebe-sapatinhos', 0.19, 0.84, 0.24, '--sage'),
       foto('a', 'Foto do casal', 'arredondado', 0.5, 0.4, 0.19, 0.54),
       frase('f1', 'Pergunta', 'menino ou menina?', 0.81, 0.34, 9, { fonte: 'Fredoka', cor: '--ink', largura: 0.26 }),
@@ -361,7 +361,7 @@ export const MODELOS_BEBE = [
     fundo: '--paper', semente: 723, enfeites: nuvens,
     camadas: [
       ilustra('i1', 'Nuvem de corações', 'bebe-nuvem', 0.81, 0.34, 0.46, '--white'),
-      ilustra('i2', 'Balão da revelação', 'bebe-balao', 0.63, 0.74, 0.2, '--sand'),
+      ilustra('i2', 'Balão da revelação', 'bebe-balao', 0.63, 0.74, 0.2, '--peach'),
       fotoRedonda('a', 'Foto do casal', 0.19, 0.42, 0.185),
       frase('f1', 'Anúncio', 'é menina!', 0.47, 0.36, 13, { fonte: 'Fredoka', cor: '--ink', largura: 0.22 }),
       frase('f2', 'Frase', 'e a gente não aguentou esperar', 0.47, 0.6, 5.5, { fonte: 'Nunito', cor: '--sage-deep', largura: 0.26 }),

@@ -192,3 +192,36 @@ test('nenhuma ilustração de coleção carrega imagem: tudo é curva, na resolu
   }
 });
 
+/*
+  A promessa do manual (9.1) é que a pessoa recolore a ilustração como recolore um enfeite: a parte
+  marcada com `primary` recebe a tinta escolhida. Isso deixou de valer quando as matrizes foram
+  refeitas — o corpo do desenho ficou com um token fixo e só um detalhe minúsculo respondia, então
+  trocar a cor no estúdio não mudava nada visível. Seis desenhos não mudavam nem 2% da área, e a
+  aposta do chá revelação (um balão verde contra um rosa) saía com os dois balões rosa.
+*/
+test('a cor escolhida pinta o corpo da ilustração, não só um detalhe', () => {
+  for (const [nome, desenho] of Object.entries(ILUSTRACOES)) {
+    const preenchimentos = desenho.partes.map((p) => p.fill).filter(Boolean);
+    if (!preenchimentos.length) continue; // desenho só de traço, como as pegadas
+    assert.ok(preenchimentos.includes(desenho.primary),
+      `${nome}: nenhuma parte preenchida usa "${desenho.primary}", então escolher a cor não muda nada`);
+  }
+});
+
+/*
+  O nome da camada é o que o cliente lê na lista do estúdio. Os lotes Ateliê e Pequenos Prazeres
+  montavam a camada num atalho próprio e o rótulo saía do id interno: "convite aliancas",
+  "estetoscopio", "graos". Os nomes vivem em `simulador/nomes-de-ilustracao.js`.
+*/
+test('toda camada de ilustração tem nome de gente, não id interno', () => {
+  for (const modelo of TEMPLATES) {
+    for (const camada of modelo.camadas.filter((c) => c.tipo === 'enfeite' && c.forma)) {
+      const r = camada.rotulo || '';
+      assert.notEqual(r, camada.forma, `${modelo.id}: a camada "${camada.forma}" ficou com o id como nome`);
+      assert.ok(/^[A-ZÁÂÃÀÉÊÍÓÔÕÚÇ]/.test(r), `${modelo.id}: "${r}" devia começar com maiúscula, como nome de gente`);
+      // "convite aliancas", "data xicara flor": o prefixo da coleção vazando para o cliente.
+      assert.ok(!/^(pet|data|bebe|convite|esp|atelie|hobby) /i.test(r),
+        `${modelo.id}: "${r}" começa com o prefixo interno da coleção`);
+    }
+  }
+});

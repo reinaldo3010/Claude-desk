@@ -2,6 +2,7 @@
 import { ilustracao } from './desenho.js';
 import { foto, fotoRedonda, frase } from './camadas.js';
 import { ILUSTRACOES_REFINADAS } from './ilustracoes-refinadas.js';
+import { nomeDaIlustracao } from './nomes-de-ilustracao.js';
 
 const P = (d, fill, stroke = '--kraft', w = 0.9) => ({ d, fill, stroke, w });
 const C = (x, y, r, fill, stroke = '--kraft', w = 0.9) => ({ circulo: [x,y,r], fill, stroke, w });
@@ -46,7 +47,7 @@ export const ILUSTRACOES_ATELIE = Object.freeze({
     P('M -27 29 C -35 12 -51 30 -27 45 C -3 30 -19 12 -27 29 Z','--peach','--peach-ink',.8),
     L('M -38 30 L -32 30 L -29 24 L -25 37 L -21 29 L -17 29','--paper',1),
   ]}),
-  'atelie-prancheta': ilustracao({primary:'--sage',partes:[
+  'atelie-prancheta': ilustracao({primary:'--white',partes:[
     R(-36,-48,65,97,'--sand',4),R(-31,-40,55,81,'--white',2),R(-15,-52,25,12,'--sage',3),
     L('M -24 -22 L 17 -22 M -24 -12 L 17 -12 M -24 -2 L -8 -2','--sand'),
     P('M -22 30 L -22 12 L -5 -1 L 13 12 L 13 30 Z',undefined,'--sage-deep',1),
@@ -61,7 +62,7 @@ export const ILUSTRACOES_ATELIE = Object.freeze({
     L('M -15 12 L 20 12 M -15 20 L 20 20 M -15 28 L 10 28','--sand'),
     P('M 19 -44 L 27 -44 L 27 5 L 23 0 L 19 5 Z','--sage'),
   ]}),
-  'atelie-bicicleta': ilustracao({primary:'--sage',partes:[
+  'atelie-bicicleta': ilustracao({primary:'--white',partes:[
     C(-40,22,25,'--white','--kraft',1.8),C(40,22,25,'--white','--kraft',1.8),
     ...[-40,40].flatMap(x=>[L(`M ${x-22} 22 L ${x+22} 22 M ${x} 0 L ${x} 44 M ${x-16} 6 L ${x+16} 38 M ${x-16} 38 L ${x+16} 6`,'--sand',.65),C(x,22,2,'--kraft')]),
     L('M -40 22 L -17 -12 L 4 22 L -40 22 M -17 -12 L 29 -12 L 4 22 M 40 22 L 26 -26','--sage-deep',2.5),
@@ -82,7 +83,7 @@ export const ILUSTRACOES_ATELIE = Object.freeze({
 });
 
 /** Largura física em mm; preserva a proporção nativa, sem a adaptação dos modelos antigos. */
-const I = (id,forma,x,y,mm,rotacao=0) => ({id,tipo:'enfeite',rotulo:forma.replace('atelie-','').replaceAll('-',' '),forma,x,y,tamanho:mm/90,rotacao,
+const I = (id,forma,x,y,mm,rotacao=0) => ({id,tipo:'enfeite',rotulo:nomeDaIlustracao(forma) || forma,forma,x,y,tamanho:mm/90,rotacao,
   cor:(ILUSTRACOES_ATELIE[forma] || ILUSTRACOES_REFINADAS[forma]).primary});
 const T = (id,texto,x,y,mm,largura=.3,fonte='Nunito',cor='--ink-soft') => frase(id,texto,texto,x,y,mm,{largura,fonte,cor});
 const F = (id,x,y,w,h,forma='arredondado') => foto(id,'Sua foto',forma,x,y,w,h);

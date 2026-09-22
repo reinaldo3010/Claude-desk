@@ -6,6 +6,7 @@ import fitz
 ROOT=Path(__file__).resolve().parent
 SITE=ROOT.parents[3]
 DEST=SITE/'marca/kit/svg/colecoes-refinadas';DEST.mkdir(parents=True,exist_ok=True)
+PRIMARIOS=json.loads((Path(__file__).parent/'primarios.json').read_text(encoding='utf-8')) if (Path(__file__).parent/'primarios.json').exists() else {}
 BASE=json.loads((ROOT/'referencia-geometrica.json').read_text(encoding='utf-8'))
 INK='#4A443D';CREAM='#FBF6EF';WHITE='#FFFDF8';SAND='#E7D8C3';GOLD='#C9A57E';PEACH='#FFB59C';RUST='#A25030';SAGE='#A8C5A2';GREEN='#6E8C67'
 TOK={INK:'--ink-soft',CREAM:'--paper',WHITE:'--white',SAND:'--sand',GOLD:'--kraft',PEACH:'--peach',RUST:'--peach-ink',SAGE:'--sage',GREEN:'--sage-deep','#171512':'--ink'}
@@ -275,8 +276,16 @@ for name,body in ART.items():
         if d.get('even_odd'):obj['evenOdd']=True
         parts.append(obj)
     old=BASE['ilustracoes'][name]
-    colors=Counter(v for p in parts for k,v in p.items() if k in ['fill','stroke'] and v not in ['--white','--paper','--ink-soft'])
-    primary=old['primary'] if any(old['primary'] in [p.get('fill'),p.get('stroke')] for p in parts) else colors.most_common(1)[0][0]
+    # A cor principal e a que recebe a tinta escolhida pela pessoa no estudio, entao precisa ser a
+    # que cobre o CORPO do desenho. A regra antiga mantinha a cor antiga se ela aparecesse em
+    # qualquer lugar, ate num tracinho: 37 desenhos ficaram com a recoloracao morta e a aposta do
+    # cha revelacao saiu com os dois baloes rosa. A tabela abaixo foi medida por area renderizada
+    # (qa/colecoes-unit.test.mjs cobra que ao menos um preenchimento use a cor principal).
+    primary=PRIMARIOS.get(name)
+    if primary is None:
+        fills=Counter(p['fill'] for p in parts if p.get('fill'))
+        primary=fills.most_common(1)[0][0] if fills else old['primary']
+        print(f'  aviso: {name} nao esta em primarios.json; escolhi {primary} pelo preenchimento mais comum')
     specs[name]={'primary':primary,'partes':parts}
     ratios[name]=old['altura']/old['largura']
     pdf.close();doc.close()

@@ -48,6 +48,8 @@ Três armadilhas que já custaram tempo:
 | `simulador/paleta.js` | A paleta da marca num lugar só; todo desenho pede cor por token |
 | `simulador/camadas.js` | Os atalhos para escrever uma camada: `foto`, `fotoRedonda`, `frase`, `ilustra`, `panda` |
 | `simulador/colecoes.js` | O balcão das coleções: junta categorias, modelos e ilustrações |
+| `simulador/nomes-de-ilustracao.js` | O nome que o cliente lê na camada de cada desenho |
+| `simulador/ilustracoes-refinadas.js` | As 67 matrizes de papelaria; gerado, não se edita à mão |
 | `simulador/desenho.js` | O vocabulário de desenho das ilustrações escritas à mão; mede e centra sozinho |
 | `simulador/pets.js` | Coleção de pets: 16 ilustrações e 16 artes |
 | `simulador/datas.js` | Coleção das datas comemorativas: 24 ilustrações e 18 artes |
@@ -94,6 +96,19 @@ Cinco coleções acrescentam ilustração própria, que entra na arte como camad
 token: datas comemorativas (24), bebê e maternidade (13), convites e agradecimentos (14),
 esportes (137) e pets (16). A regra está no manual, seção 9.1. Tratamento de foto (6 filtros) e recorte do fundo claro. Cor do fundo da
 arte. Centralizar na frente, no meio, no verso e na altura. Margem de segurança à vista.
+
+**Duas regras da ilustração de coleção que têm teste e já foram quebradas uma vez:**
+
+1. **A cor principal (`primary`) é a que cobre o corpo do desenho**, porque é ela que recebe a tinta
+   escolhida pela pessoa no estúdio. Se o `primary` apontar para um detalhe, trocar a cor não muda
+   nada visível — foi o que aconteceu com 37 matrizes em setembro de 2026, e a aposta do chá
+   revelação saiu com os dois balões rosa. A tabela medida vive em
+   `marca/kit/fontes/colecoes-refinadas/primarios.json`, e o gerador a lê. O teste unitário cobra
+   que ao menos um preenchimento use o `primary`; o guardião cobra que trocar a cor no estúdio mexa
+   em pelo menos 0,5% da arte.
+2. **Toda camada de ilustração tem nome de gente**, escrito em `nomes-de-ilustracao.js` ou no
+   próprio modelo. Coleção nova sem nome deixa vazar id interno ("convite aliancas") para a lista de
+   camadas que o cliente lê.
 
 **Edição.** Clique e arrasto na própria caneca (com cadeado, fechado por padrão), alças de girar e
 redimensionar na vista aberta, desfazer e refazer (60 passos, Ctrl+Z), duplicar, ordem, apagar.

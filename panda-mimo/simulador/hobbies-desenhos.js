@@ -94,7 +94,7 @@ export const ILUSTRACOES_HOBBIES=Object.freeze({
   P('M -15 16 L 15 16 L 14 31 Q 0 42 -14 31 Z','--paper'),...flor(0,25,.7),
   L('M -29 -5 C -54 -13 -54 4 -32 1 M 29 -5 C 54 -13 54 4 32 1','--kraft',1.5),
  ]}),
- 'hobby-fouet':ilustracao({primary:'--sage',partes:[
+ 'hobby-fouet':ilustracao({primary:'--paper',partes:[
   P('M -1 -2 C -38 -30 -26 -59 0 -60 C 26 -59 38 -30 1 -2 Z','--paper'),
   L('M 0 -3 C -25 -32 -16 -58 0 -60 C 16 -58 25 -32 0 -3 M 0 -59 L 0 -3','--kraft',.9),
   R(-6,-2,12,51,'--sage',4),R(-7,-3,14,7,'--sand',1),C(0,41,2,'--paper'),
