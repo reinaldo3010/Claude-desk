@@ -1734,6 +1734,48 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     await contexto.close();
   }
 
+  // Nada dizia em que passo a pessoa estava nem qual era o próximo: as abas eram a única navegação,
+  // e quem não conhece o produto não sabia que tinha terminado. A barra de passo conduz, e o ponto
+  // na aba mostra onde ainda falta fazer algo — inclusive nas frases, que nascem com texto de
+  // exemplo e sairiam impressas assim ("chá do Theo") se ninguém avisasse.
+  {
+    const contexto = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    const pp2 = await contexto.newPage();
+    await pp2.goto(servidor.url + 'caneca-3d.html', { waitUntil: 'load' });
+    await pp2.waitForTimeout(900);
+    const passo = await pp2.evaluate(async () => {
+      const leia = () => ({
+        visivel: !document.getElementById('passo')?.hidden,
+        conta: document.getElementById('passo-conta')?.textContent || '',
+        falta: document.getElementById('passo-falta')?.textContent || '',
+        botao: document.getElementById('passo-botao')?.textContent || '',
+        pontos: [...document.querySelectorAll('#abas button')].filter((b) => b.dataset.passo === 'falta').map((b) => b.dataset.aba),
+        aba: document.querySelector('#abas [aria-selected="true"]')?.dataset.aba,
+      });
+      const semModelo = leia();
+      document.querySelector('[data-modelo="natal-flocos"]').click();
+      await new Promise((r) => setTimeout(r, 1400));
+      const comModelo = leia();
+      document.getElementById('passo-botao').click();
+      await new Promise((r) => setTimeout(r, 500));
+      const adiante = leia();
+      document.getElementById('passo-botao').click();
+      await new Promise((r) => setTimeout(r, 500));
+      const fim = leia();
+      return { semModelo, comModelo, adiante, fim };
+    });
+    if (passo.semModelo.visivel) failures.push('[passo] a barra apareceu antes de escolher um modelo');
+    if (!passo.comModelo.visivel) failures.push('[passo] a barra não apareceu depois de escolher um modelo');
+    if (!/Passo \d+ de \d+/.test(passo.comModelo.conta)) failures.push(`[passo] a barra não diz em que passo a pessoa está ("${passo.comModelo.conta}")`);
+    if (!passo.comModelo.pontos.includes('fotos')) failures.push('[passo] a aba das fotos não marcou que ainda falta escolher foto');
+    if (!passo.comModelo.pontos.includes('frases')) failures.push('[passo] a aba das frases não marcou que o texto ainda é o de exemplo');
+    if (!/^Faltam? /.test(passo.comModelo.falta)) failures.push(`[passo] a barra não diz o que falta ("${passo.comModelo.falta}")`);
+    if (passo.adiante.aba === passo.comModelo.aba) failures.push('[passo] o botão de continuar não avançou de aba');
+    if (!/^Continuar para /.test(passo.comModelo.botao)) failures.push(`[passo] o botão não convida para o próximo passo ("${passo.comModelo.botao}")`);
+    if (/^Continuar para /.test(passo.fim.botao)) failures.push('[passo] no último passo o botão ainda manda continuar em vez de fechar');
+    await contexto.close();
+  }
+
   // Cores da peça, cena e acabamento, e a vista da arte aberta nasceram DENTRO do cartão da prévia.
   // Ao fazer a caneca grudar no topo, eles viraram irmãos do cartão e passaram a correr por trás dela
   // ao rolar, ficando inalcançáveis sem nada indicar que sumiram. O dono percebeu antes da gente.

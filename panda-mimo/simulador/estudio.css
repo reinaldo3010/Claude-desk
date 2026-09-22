@@ -324,3 +324,21 @@ input[type="range"] { accent-color:var(--peach-ink); cursor:pointer; min-height:
 }
 .studio-zoom-dica.vendo { opacity:1; transform:translateX(-50%) translateY(0); }
 @media (prefers-reduced-motion: reduce) { .studio-zoom-dica { transition:none; } }
+
+/* Onde a pessoa está na montagem e para onde vai depois. Fica entre o painel e a área do pedido. */
+.studio-passo {
+  display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+  margin-top:18px; padding:14px 16px; border:1px solid var(--sand); border-radius:var(--r-sm);
+  background:var(--paper);
+}
+.studio-passo__onde { display:flex; flex-direction:column; gap:3px; font-size:.82rem; font-weight:800; color:var(--ink); }
+.studio-passo__falta { font-weight:400; color:var(--peach-ink); }
+.studio-passo__falta:empty { display:none; }
+.studio-passo .btn { flex:0 0 auto; }
+/* Um ponto discreto na aba que ainda tem pendência: a atenção vai para onde falta fazer algo. */
+.studio-abas button[data-passo="falta"] { position:relative; }
+.studio-abas button[data-passo="falta"]::after {
+  content:""; position:absolute; top:7px; right:7px; width:7px; height:7px;
+  border-radius:50%; background:var(--peach-ink);
+}
+@media (max-width:480px) { .studio-passo { flex-direction:column; align-items:stretch; } .studio-passo .btn { width:100%; } }
