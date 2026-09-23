@@ -1005,6 +1005,23 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     await pe.goto(servidor.url + 'caneca-3d.html', { waitUntil: 'load' });
     const pronto = await pe.waitForFunction(() => document.getElementById('viewer-loading')?.hidden || !document.getElementById('viewer-fallback')?.hidden, null, { timeout: 15000 }).then(() => true).catch(() => false);
     if (!pronto) failures.push(`[estúdio ${w}] a prévia 3D não ficou pronta em 15 s`);
+    /*
+      A miniatura do modelo tem de mostrar o Pandinha já na primeira pintura, na abertura do estúdio.
+      Era pintada antes de a imagem chegar e nunca repintada: a lista abria com todos os modelos sem
+      o Pandinha. Só aparece aqui, antes de qualquer coisa refazer a lista — depois, a imagem já
+      chegou e a checagem passaria mesmo com o defeito (foi o que o defeito de prova mostrou).
+    */
+    const pandinhaNaMiniatura = await pe.waitForFunction(() => {
+      const c = document.querySelector('.studio-model[data-modelo="namorados-coracoes"] canvas');
+      if (!c) return false;
+      // o Pandinha desse modelo fica em x 0,5 e y 0,88, com 16% da altura da área de largura
+      const meia = Math.round(c.height * 0.16 * 0.6);
+      const d = c.getContext('2d').getImageData(Math.round(c.width * 0.5) - meia, Math.round(c.height * 0.88) - meia, meia * 2, meia * 2).data;
+      let n = 0;
+      for (let i = 0; i < d.length; i += 4) if (d[i + 3] > 200 && d[i] < 70 && d[i + 1] < 70 && d[i + 2] < 70) n++;
+      return n > 20;
+    }, null, { timeout: 8000, polling: 150 }).then(() => true).catch(() => false);
+    if (!pandinhaNaMiniatura) failures.push(`[estúdio ${w}] a miniatura do "Corações ao redor" abriu sem o Pandinha`);
     const estado = await pe.evaluate(() => ({
       canvas: !!document.querySelector('#mug-viewport canvas.mug-3d-canvas'),
       fallback: !document.getElementById('viewer-fallback').hidden,
@@ -1104,7 +1121,13 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     await pe.selectOption('#categoria-modelo', 'natal');
     await pe.waitForTimeout(300);
     const soNatal = await pe.$$eval('#model-list .studio-model', (b) => b.map((x) => x.dataset.modelo));
-    if (!soNatal.length || !soNatal.every((id) => id.startsWith('natal'))) failures.push(`[estúdio ${w}] a ocasião Natal mostrou ${soNatal.join(', ')}`);
+    // O assunto mostra exatamente os modelos dele e os que aparecem também ali (`tambemEm`), pela regra do
+    // catálogo. O prefixo do id servia de atalho até o Pandinha do Natal morar noutra coleção e aparecer aqui.
+    const { TEMPLATES: catalogoDoNatal } = await import('../simulador/modelos.js');
+    const esperadosNoNatal = catalogoDoNatal.filter((m) => m.categoria === 'natal' || (m.tambemEm || []).includes('natal')).map((m) => m.id).sort();
+    if (!soNatal.length || JSON.stringify([...soNatal].sort()) !== JSON.stringify(esperadosNoNatal)) {
+      failures.push(`[estúdio ${w}] a ocasião Natal mostrou ${soNatal.join(', ')}; o catálogo pede ${esperadosNoNatal.join(', ')}`);
+    }
     await pe.selectOption('#categoria-modelo', 'todos');
     await pe.fill('#busca-modelo', 'padrinho');
     await pe.waitForTimeout(300);
@@ -1137,7 +1160,8 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
       await pe.waitForTimeout(300);
       await pe.evaluate(() => { const b = document.getElementById('model-more'); if (b && !b.hidden && b.textContent.startsWith('Ver mais')) b.click(); });
       const daCategoria = await pe.$$eval('#model-list .studio-model', (b) => b.map((x) => x.dataset.modelo).filter(Boolean));
-      const esperados = catalogoDasColecoes.filter(m => m.categoria === categoria).map(m => m.id).sort();
+      // Um modelo mora numa categoria e pode aparecer também noutra (`tambemEm`), como no estúdio.
+      const esperados = catalogoDasColecoes.filter(m => m.categoria === categoria || (m.tambemEm || []).includes(categoria)).map(m => m.id).sort();
       if (JSON.stringify([...daCategoria].sort()) !== JSON.stringify(esperados)) {
         failures.push(`[estúdio ${w}] o assunto ${nome} mostrou ${daCategoria.join(', ') || 'nada'}`);
       }
@@ -1184,6 +1208,96 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
       if (trocaDeCor.cores < 6) failures.push(`[estúdio ${w}] a ilustração de ${modelo} ficou sem a paleta para escolher (${trocaDeCor.cores} cores)`);
       if (trocaDeCor.maximo < 1) failures.push(`[estúdio ${w}] a ilustração de ${modelo} não pode crescer além de um enfeite (máximo ${trocaDeCor.maximo})`);
     }
+
+    /*
+      As imagens do acervo na arte: poses do Pandinha, elementos da marca e aquarelas. Três defeitos
+      passaram por aqui sem ninguém ver, porque a checagem dos elementos só contava camadas:
+      1. o elemento acrescentado pela grade entrava na lista de camadas e não era desenhado;
+      2. a miniatura do modelo era pintada antes de o Pandinha chegar, e nunca repintada (essa
+         checagem mora na abertura do estúdio, porque só ali o defeito aparece);
+      3. o elemento aparecia na lista como "Pandinha", com 🐼, e sem controle de tamanho.
+      Agora conta pixel. E uma regra mudou em 23/09/2026: quantos Pandinhas vão numa caneca é
+      escolha de quem monta, então dois toques em "+ Pandinha" dão dois Pandinhas.
+    */
+    const acervo = await pe.evaluate(async () => {
+      const espera = (ms) => new Promise((r) => setTimeout(r, ms));
+      const esperaAte = async (condicao, ms = 8000) => {
+        const fim = Date.now() + ms;
+        while (Date.now() < fim) { if (await condicao()) return true; await espera(120); }
+        return false;
+      };
+      // (a miniatura com o Pandinha é conferida logo na abertura do estúdio, onde o defeito aparecia)
+      document.querySelector('#abas [data-aba="modelo"]').click();
+      const seletor = document.getElementById('categoria-modelo');
+      seletor.value = 'todos';
+      seletor.dispatchEvent(new Event('change'));
+      await espera(300);
+      const cartao = document.querySelector('.studio-model[data-modelo="namorados-coracoes"]');
+      cartao.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+
+      // 1 e 3. a aquarela da grade é desenhada, tem nome próprio e controle de tamanho
+      cartao.click();
+      await espera(900);
+      document.querySelector('#abas [data-aba="enfeites"]').click();
+      await espera(300);
+      const flat = document.getElementById('flat-art');
+      const quadro = () => flat.getContext('2d').getImageData(0, 0, flat.width, flat.height).data;
+      const diferenca = (a, b) => {
+        let n = 0;
+        for (let i = 0; i < a.length; i += 4) if (a[i] !== b[i] || a[i + 1] !== b[i + 1] || a[i + 2] !== b[i + 2]) n++;
+        return n / (a.length / 4);
+      };
+      // A seleção fica no Pandinha do modelo nas duas fotos: as alças não podem contar como desenho.
+      const selecionaOPandinha = async () => {
+        const cabeca = [...document.querySelectorAll('#lista-enfeites .studio-item')]
+          .find((li) => li.querySelector('.studio-item__texto > span')?.textContent === 'Pandinha')?.querySelector('.studio-item__cabeca');
+        if (cabeca && cabeca.getAttribute('aria-expanded') !== 'true') cabeca.click();
+        await espera(350);
+      };
+      await selecionaOPandinha();
+      const antes = quadro();
+      const buque = [...document.querySelectorAll('#grade-aquarelas .studio-elemento')].find((b) => /buquê/i.test(b.getAttribute('aria-label')));
+      buque?.click();
+      const cartaoDoBuque = () => [...document.querySelectorAll('#lista-enfeites .studio-item')]
+        .find((li) => li.querySelector('.studio-item__texto > span')?.textContent === 'Buquê de flores');
+      await esperaAte(() => cartaoDoBuque());
+      const tamanho = [...(cartaoDoBuque()?.querySelectorAll('label') || [])].find((l) => l.textContent.trim().startsWith('Tamanho'))?.querySelector('input');
+      const icone = cartaoDoBuque()?.querySelector('.studio-item__icone img')?.getAttribute('src') || '';
+      let fatia = 0;
+      await esperaAte(async () => { await selecionaOPandinha(); fatia = diferenca(antes, quadro()); return fatia >= 0.02; });
+
+      // 4. quantidade livre
+      const pandinhas = () => [...document.querySelectorAll('#lista-enfeites .studio-item__texto > span')].filter((s) => s.textContent === 'Pandinha').length;
+      const antesDosPandinhas = pandinhas();
+      document.getElementById('add-pandinha').click();
+      await espera(500);
+      document.getElementById('add-pandinha').click();
+      await espera(500);
+      const depoisDosPandinhas = pandinhas();
+      // 5. a grade de poses acrescenta o Pandinha na pose tocada
+      document.querySelector('.studio-poses').open = true;
+      const poses = document.querySelectorAll('#grade-poses .studio-elemento');
+      [...poses].find((b) => /medicina/i.test(b.getAttribute('aria-label')))?.click();
+      await espera(700);
+      const naPose = [...document.querySelectorAll('#lista-enfeites .studio-item small')].some((s) => s.textContent === 'Medicina');
+      const duplicar = [...document.querySelectorAll('#lista-enfeites [data-corpo] button')].some((b) => b.textContent === 'Duplicar');
+      document.querySelector('#abas [data-aba="modelo"]').click();
+      return {
+        fatia, temBuque: Boolean(cartaoDoBuque()), maximo: tamanho ? Number(tamanho.max) : 0, icone,
+        antesDosPandinhas, depoisDosPandinhas, poses: poses.length, naPose, duplicar,
+      };
+    });
+    if (!acervo.temBuque) failures.push(`[estúdio ${w}] a aquarela da grade não entrou na lista com o nome dela`);
+    if (acervo.fatia < 0.02) {
+      failures.push(`[estúdio ${w}] a aquarela acrescentada pela grade não apareceu na arte (mexeu em ${(acervo.fatia * 100).toFixed(2)}% da vista aberta)`);
+    }
+    if (acervo.maximo < 0.8) failures.push(`[estúdio ${w}] a aquarela ficou sem controle de tamanho, ou curto demais (máximo ${acervo.maximo})`);
+    if (!acervo.icone.includes('aquarela-buque')) failures.push(`[estúdio ${w}] a camada da aquarela ficou sem a imagem dela na lista ("${acervo.icone}")`);
+    if (acervo.depoisDosPandinhas !== acervo.antesDosPandinhas + 2) {
+      failures.push(`[estúdio ${w}] dois toques em "+ Pandinha" deram ${acervo.depoisDosPandinhas - acervo.antesDosPandinhas}: a quantidade é livre desde 23/09/2026`);
+    }
+    if (acervo.poses < 29 || !acervo.naPose) failures.push(`[estúdio ${w}] a grade de poses não acrescentou o Pandinha na pose tocada (${JSON.stringify(acervo)})`);
+    if (!acervo.duplicar) failures.push(`[estúdio ${w}] o Pandinha ficou sem "Duplicar"`);
 
     /*
       Três armadilhas de rolagem que o cliente sentiu antes da gente:
@@ -1385,7 +1499,7 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     if (cadeado.textoLivre !== 'Arte livre' || cadeado.textoTravado !== 'Arte travada') failures.push(`[estúdio ${w}] o cadeado não diz em que estado está (${cadeado.textoLivre} / ${cadeado.textoTravado})`);
     if (cadeado.aberto !== 1) failures.push(`[estúdio ${w}] devia haver um cartão aberto por vez (${cadeado.aberto})`);
 
-    // acrescentar frase, enfeite e Pandinha (um só, como manda o manual)
+    // acrescentar frase, enfeite e Pandinha (quantos quiser, desde 23/09/2026)
     const acrescimos = await pe.evaluate(async () => {
       const conta = () => document.querySelectorAll('.studio-item').length;
       const inicio = conta();
@@ -1408,8 +1522,9 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
       await new Promise((r) => setTimeout(r, 400));
       return { inicio, desenhos, comUm, depois: conta(), zap: new URL(document.getElementById('mug-order').href).searchParams.get('text') || '' };
     });
-    if (acrescimos.depois !== acrescimos.inicio + 2) failures.push(`[estúdio ${w}] acrescentar frase e enfeite não deu certo (${JSON.stringify(acrescimos)})`);
-    if (acrescimos.comUm !== acrescimos.depois) failures.push(`[estúdio ${w}] o segundo toque em "+ Pandinha" criou outro Pandinha (manual 6.4)`);
+    // frase, enfeite e dois Pandinhas: cada toque em "+ Pandinha" acrescenta um
+    if (acrescimos.depois !== acrescimos.inicio + 4) failures.push(`[estúdio ${w}] acrescentar frase, enfeite e dois Pandinhas não deu certo (${JSON.stringify(acrescimos)})`);
+    if (acrescimos.depois !== acrescimos.comUm + 1) failures.push(`[estúdio ${w}] o segundo toque em "+ Pandinha" não acrescentou outro Pandinha`);
     if (acrescimos.desenhos < 6) failures.push(`[estúdio ${w}] a grade de enfeites mostrou só ${acrescimos.desenhos} desenhos`);
     if (!acrescimos.zap.includes('feito com carinho') || !acrescimos.zap.includes('Enfeites acrescentados')) {
       failures.push(`[estúdio ${w}] o pedido não acompanhou a frase e o enfeite novos`);
@@ -2003,7 +2118,8 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     pp.on('console', (m) => m.type() === 'error' && erros.push(m.text()));
     pp.on('pageerror', (e) => erros.push(e.message));
     await pp.goto(servidor.url + 'qa/provas-colecoes.html', { waitUntil: 'load' });
-    await pp.waitForTimeout(900);
+    // Espera a página avisar que as imagens do acervo chegaram e a arte foi redesenhada com elas.
+    await pp.waitForSelector('body[data-pronto]', { timeout: 20000 }).catch(() => failures.push('[provas] a página de provas não terminou de carregar as imagens'));
     const provas = await pp.evaluate(() => {
       const pintados = [...document.querySelectorAll('#modelos canvas')].filter((c) => {
         const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;

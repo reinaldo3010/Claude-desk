@@ -20,7 +20,7 @@ import { salvaRascunho, leRascunho, apagaRascunho, quandoFoi } from './rascunho.
 import {
   gruposDeCategorias, ADESIVOS, ELEMENTOS, ENFEITES, FILTROS, CORES_DE_ARTE, FORMAS_DE_FOTO,
   modeloPorId, modelosDaCategoria, novaArte, desenhaArte, desenhaForma, camadaEm,
-  alcasDaCamada, medidorDeTexto, cor, FRENTE, VERSO,
+  alcasDaCamada, medidorDeTexto, cor, FRENTE, VERSO, miniaturaDaImagem, limiteDaImagem,
 } from './modelos.js';
 
 // Cores da cerâmica: dado físico da peça (manual 7.4), não cor de interface.
@@ -41,7 +41,7 @@ const PROJETO_VERSAO = 4;
 const MEUS_MODELOS = 'pm_caneca_meus_modelos';
 const PASSOS_GUARDADOS = 60;
 const LIMITES = Object.freeze({
-  fraseTamanho: [3, 22], enfeiteTamanho: [0.04, 0.5], adesivoTamanho: [0.06, 0.6],
+  fraseTamanho: [3, 22], enfeiteTamanho: [0.04, 0.5], adesivoTamanho: [0.06, 0.6], elementoTamanho: [0.06, 1.4],
   fotoLargura: [0.06, 0.6], giro: [-180, 180], arco: [-180, 180],
 });
 /** Onde um item se encaixa na volta: frente, meio (lado oposto à alça) e verso. */
@@ -77,6 +77,7 @@ const el = {
   boasvindas: $('boasvindas'), boasvindasFechar: $('boasvindas-fechar'),
   listaFotos: $('lista-fotos'), listaFrases: $('lista-frases'), listaEnfeites: $('lista-enfeites'),
   gradeEnfeites: $('grade-enfeites'), gradeElementos: $('grade-elementos'), fundoArte: $('fundo-arte'),
+  gradeAquarelas: $('grade-aquarelas'), gradePoses: $('grade-poses'), contagemDePoses: $('contagem-de-poses'),
   mostrarMargem: $('mostrar-margem'),
   addFoto: $('add-foto'), addFrase: $('add-frase'), addPandinha: $('add-pandinha'),
   drop: $('art-drop'), file: $('art-file'), choose: $('choose-art'), fileInfo: $('art-file-info'), fileName: $('art-file-name'),
@@ -110,6 +111,8 @@ let artworkBlob = null;
 const fotos = new Map();      // id da camada de foto → { asset, blob }
 const lixeira = new Map();    // fotos tiradas da arte, guardadas para o desfazer
 const adesivos = new Map();   // arquivo → Image já carregada
+const pedidosDeImagem = new Map();       // arquivo → promessa, para ninguém pedir a mesma imagem duas vezes
+const miniaturasCarregadas = new Map();  // arquivo → versão leve já carregada, para miniatura e grade
 const historico = { passado: [], futuro: [], ultimaChave: '', ultimoInstante: 0 };
 let selecionada = null;       // id da camada em edição
 let arrasto = null;           // gesto em andamento (mover, redimensionar ou girar)
@@ -146,6 +149,34 @@ function loadImage(url) {
     image.src = url;
   });
 }
+
+/*
+  Imagens do acervo (Pandinha e elementos). Cada uma é pedida uma vez só; quem chega depois espera
+  a mesma promessa. A arte de verdade (3D, vista aberta, 300 dpi) usa sempre o arquivo inteiro; a
+  miniatura da lista e as grades usam a versão leve, quando existe.
+*/
+const ehImagemDoAcervo = (camada) => camada.tipo === 'adesivo' || camada.tipo === 'elemento';
+const arquivosDaArte = (camadas) => [...new Set((camadas || []).filter(ehImagemDoAcervo).map((c) => c.arquivo).filter(Boolean))];
+
+function pedeImagem(arquivo, mapa = adesivos, endereco = arquivo) {
+  if (mapa.has(arquivo)) return Promise.resolve(mapa.get(arquivo));
+  const chave = `${mapa === adesivos ? 'inteira' : 'leve'}:${arquivo}`;
+  if (!pedidosDeImagem.has(chave)) {
+    pedidosDeImagem.set(chave, loadImage(endereco)
+      .then((imagem) => { mapa.set(arquivo, imagem); return imagem; })
+      .catch((erro) => { pedidosDeImagem.delete(chave); console.warn(erro.message); return null; }));
+  }
+  return pedidosDeImagem.get(chave);
+}
+
+/** A versão leve; sem versão leve, o próprio arquivo, que vale para as duas coisas. */
+function pedeImagemLeve(arquivo) {
+  const leve = miniaturaDaImagem(arquivo);
+  return leve === arquivo ? pedeImagem(arquivo) : pedeImagem(arquivo, miniaturasCarregadas, leve);
+}
+
+/** O que a miniatura desenha: o arquivo inteiro quando já chegou, senão a versão leve. */
+const imagensDaMiniatura = () => ({ ...Object.fromEntries(miniaturasCarregadas), ...Object.fromEntries(adesivos) });
 
 function download(blob, filename) {
   const url = URL.createObjectURL(blob);
@@ -823,7 +854,7 @@ function desenhaMiniatura(canvas, modelo) {
   context.setTransform(1, 0, 0, 1, 0, 0);
   context.clearRect(0, 0, canvas.width, canvas.height);
   context.setTransform(escalaX, 0, 0, escalaY, -areaMm.x * escalaX, -areaMm.y * escalaY);
-  desenhaArte(context, novaArte(modelo), areaMm, { imagens: Object.fromEntries(adesivos) });
+  desenhaArte(context, novaArte(modelo), areaMm, { imagens: imagensDaMiniatura() });
   context.setTransform(1, 0, 0, 1, 0, 0);
 }
 
@@ -914,7 +945,11 @@ function pintaMiniatura(figura, modelo) {
   canvas.height = Math.round(420 * areaMm.height / areaMm.width);
   canvas.setAttribute('aria-hidden', 'true');
   figura.appendChild(canvas);
-  desenhaMiniatura(canvas, modelo);
+  // O Pandinha e as aquarelas chegam depois do desenho. A miniatura espera por eles: pintada antes,
+  // ela mostrava o modelo sem o Pandinha e nunca era repintada.
+  const faltam = arquivosDaArte(modelo.camadas).filter((a) => !adesivos.has(a) && !miniaturasCarregadas.has(a));
+  if (!faltam.length) { desenhaMiniatura(canvas, modelo); return; }
+  Promise.all(faltam.map(pedeImagemLeve)).then(() => desenhaMiniatura(canvas, modelo));
 }
 
 function marcaModeloEscolhido() {
@@ -931,19 +966,16 @@ function garanteFontes() {
   return carregaFontes(usadas).then(() => { montaListas(); schedule(); });
 }
 
-async function garanteAdesivos() {
-  const arquivos = new Set((arte?.camadas || []).filter((c) => c.tipo === 'adesivo').map((c) => c.arquivo));
-  let mudou = false;
-  for (const arquivo of arquivos) {
-    if (adesivos.has(arquivo)) continue;
-    try {
-      adesivos.set(arquivo, await loadImage(arquivo));
-      mudou = true;
-    } catch (erro) {
-      console.warn(erro.message);
-    }
-  }
-  if (mudou) { schedule(); montaModelos(); marcaModeloEscolhido(); montaListas(); }
+/**
+ * Carrega as imagens que a arte usa — Pandinha e elementos do acervo. Antes só o Pandinha entrava
+ * aqui, e o elemento acrescentado pela grade ficava na lista de camadas sem aparecer na caneca.
+ * A lista de modelos não é refeita: cada miniatura já espera pelas próprias imagens.
+ */
+async function garanteImagens() {
+  const faltam = arquivosDaArte(arte?.camadas).filter((arquivo) => !adesivos.has(arquivo));
+  if (!faltam.length) return;
+  const chegaram = (await Promise.all(faltam.map((arquivo) => pedeImagem(arquivo)))).some(Boolean);
+  if (chegaram) { schedule(); montaListas(); }
 }
 
 function escolheModelo(id) {
@@ -967,7 +999,7 @@ function escolheModelo(id) {
   mostraAba(arte ? 'fotos' : 'arte');
   // Na tela larga, a vista aberta já abre: dá para arrastar e usar as alças ali.
   if (arte && el.flatDetails && window.innerWidth >= 850) el.flatDetails.open = true;
-  garanteAdesivos();
+  garanteImagens();
   garanteFontes();
   schedule();
   levaParaAPeca();
@@ -1012,6 +1044,8 @@ function atualizaModo() {
 /* ---------- cartões de camada ---------- */
 /** Ilustração de coleção cresce mais que enfeite: ela nasce larga e a pessoa costuma querer maior. */
 function limiteDeTamanho(camada) {
+  if (camada.tipo === 'adesivo') return limiteDaImagem(camada.arquivo, LIMITES.adesivoTamanho);
+  if (camada.tipo === 'elemento') return limiteDaImagem(camada.arquivo, LIMITES.elementoTamanho);
   return ehIlustracao(camada.forma) ? TAMANHO_DA_ILUSTRACAO : LIMITES.enfeiteTamanho;
 }
 
@@ -1019,6 +1053,7 @@ function rotuloDaCamada(camada) {
   if (camada.tipo === 'frase') return String(camada.texto || '').trim().slice(0, 34) || 'Frase sem texto';
   if (camada.tipo === 'foto') return camada.rotulo || 'Foto';
   if (camada.tipo === 'enfeite') return ENFEITES.find((e) => e.forma === camada.forma)?.nome || camada.rotulo || 'Enfeite';
+  if (camada.tipo === 'elemento') return camada.rotulo || ELEMENTOS.find((e) => e.arquivo === camada.arquivo)?.nome || 'Elemento';
   return 'Pandinha';
 }
 
@@ -1026,6 +1061,7 @@ function subtituloDaCamada(camada) {
   if (camada.tipo === 'foto') return fotos.get(camada.id)?.asset ? fotos.get(camada.id).asset.name : 'Toque para escolher a foto';
   if (camada.tipo === 'frase') return `${nomeDaLetra(camada.fonte)} · ${CORES_DE_ARTE.find((c) => c.token === camada.cor)?.nome || 'cor da marca'}`;
   if (camada.tipo === 'adesivo') return ADESIVOS.find((a) => a.arquivo === camada.arquivo)?.nome || 'Pandinha';
+  if (camada.tipo === 'elemento') return ELEMENTOS.find((e) => e.arquivo === camada.arquivo)?.grupo || 'Do acervo';
   return CORES_DE_ARTE.find((c) => c.token === camada.cor)?.nome || 'Enfeite';
 }
 
@@ -1059,9 +1095,9 @@ function icone(camada) {
     span.appendChild(canvas);
     return span;
   }
-  if (camada.tipo === 'adesivo' && adesivos.has(camada.arquivo)) {
+  if (ehImagemDoAcervo(camada) && camada.arquivo) {
     const img = document.createElement('img');
-    img.src = camada.arquivo;
+    img.src = miniaturaDaImagem(camada.arquivo);
     img.alt = '';
     span.appendChild(img);
     return span;
@@ -1090,11 +1126,20 @@ function campoTexto(rotulo, valor, maximo, aoMudar) {
 
 function campoSelect(rotulo, opcoes, valor, aoMudar) {
   const select = document.createElement('select');
+  // Opção com `grupo` entra num optgroup com esse nome, na ordem em que o grupo aparece.
+  const grupos = new Map();
   for (const opcao of opcoes) {
     const item = document.createElement('option');
     item.value = opcao.valor;
     item.textContent = opcao.nome;
-    select.appendChild(item);
+    if (!opcao.grupo) { select.appendChild(item); continue; }
+    if (!grupos.has(opcao.grupo)) {
+      const grupo = document.createElement('optgroup');
+      grupo.label = opcao.grupo;
+      grupos.set(opcao.grupo, grupo);
+      select.appendChild(grupo);
+    }
+    grupos.get(opcao.grupo).appendChild(item);
   }
   select.value = valor;
   select.addEventListener('change', () => aoMudar(select.value));
@@ -1270,18 +1315,23 @@ function camposDaCamada(camada) {
     partes.push(campoRange('Tamanho', camada.tamanho, limites, 0.005, (valor) => { registra(`tamanho:${camada.id}`); camada.tamanho = valor; schedule(); }));
   }
 
+  if (camada.tipo === 'elemento') {
+    partes.push(campoRange('Tamanho', camada.tamanho, limiteDeTamanho(camada), 0.005, (valor) => { registra(`tamanho:${camada.id}`); camada.tamanho = valor; schedule(); }));
+  }
+
   if (camada.tipo === 'adesivo') {
-    partes.push(campoSelect('Pose do Pandinha', ADESIVOS.map((a) => ({ valor: a.arquivo, nome: a.nome })), camada.arquivo, async (valor) => {
+    partes.push(campoSelect('Pose do Pandinha', ADESIVOS.map((a) => ({ valor: a.arquivo, nome: a.nome, grupo: a.grupo })), camada.arquivo, async (valor) => {
       registra(`pose:${camada.id}`);
       camada.arquivo = valor;
-      await garanteAdesivos();
+      camada.tamanho = clamp(camada.tamanho, ...limiteDeTamanho(camada));
+      await garanteImagens();
       montaListas();
       schedule();
     }));
-    partes.push(campoRange('Tamanho', camada.tamanho, LIMITES.adesivoTamanho, 0.005, (valor) => { registra(`tamanho:${camada.id}`); camada.tamanho = valor; schedule(); }));
+    partes.push(campoRange('Tamanho', camada.tamanho, limiteDeTamanho(camada), 0.005, (valor) => { registra(`tamanho:${camada.id}`); camada.tamanho = valor; schedule(); }));
     const nota = document.createElement('p');
     nota.className = 'studio-help';
-    nota.textContent = 'Um Pandinha por caneca. Ele acompanha a arte, nunca fica na frente dela.';
+    nota.textContent = 'Pode ter quantos Pandinhas quiser: duplique este ou toque numa pose da grade.';
     partes.push(nota);
   }
 
@@ -1309,7 +1359,7 @@ function camposDaCamada(camada) {
     botao('Trazer para frente', () => mudaOrdem(camada.id, 1)),
     botao('Mandar para trás', () => mudaOrdem(camada.id, -1)),
   );
-  if (camada.tipo !== 'adesivo') ordem.append(botao('Duplicar', () => duplica(camada.id)));
+  ordem.append(botao('Duplicar', () => duplica(camada.id)));
   ordem.append(botao('Apagar', () => apaga(camada.id)));
   partes.push(ordem);
   return partes;
@@ -1486,24 +1536,24 @@ function adicionaEnfeite(forma) {
 
 function adicionaElemento(arquivo) {
   if (!arte) return;
+  const item = ELEMENTOS.find((e) => e.arquivo === arquivo);
   const lugar = lugarLivre();
-  acrescenta({
-    id: novoId(), tipo: 'elemento', arquivo, rotulo: ELEMENTOS.find((e) => e.arquivo === arquivo)?.nome || 'Elemento',
-    x: lugar.x, y: 0.5, tamanho: 0.2, rotacao: 0,
-  });
-  garanteAdesivos();
+  const camada = { id: novoId(), tipo: 'elemento', arquivo, rotulo: item?.nome || 'Elemento', x: lugar.x, y: 0.5, tamanho: item?.tamanho || 0.2, rotacao: 0 };
+  camada.tamanho = clamp(camada.tamanho, ...limiteDeTamanho(camada));
+  acrescenta(camada);
+  garanteImagens();
 }
 
-async function adicionaPandinha() {
+/**
+ * Acrescenta um Pandinha. Quantos vão numa caneca é escolha de quem monta (decisão do dono,
+ * 23/09/2026): o botão acrescenta o da pose de sempre, pequeno e embaixo; a grade de poses
+ * acrescenta o da pose tocada, maior, que costuma ser o protagonista.
+ */
+async function adicionaPandinha(arquivo = ADESIVOS[0].arquivo, { y = 0.78, tamanho = 0.18 } = {}) {
   if (!arte) return;
-  const existente = arte.camadas.find((camada) => camada.tipo === 'adesivo');
-  if (existente) { seleciona(existente.id, { mostrarPainel: true }); return; }
   const lugar = lugarLivre();
-  acrescenta({
-    id: novoId(), tipo: 'adesivo', rotulo: 'Pandinha', arquivo: ADESIVOS[0].arquivo,
-    x: lugar.x, y: 0.78, tamanho: 0.18, rotacao: 0,
-  });
-  await garanteAdesivos();
+  acrescenta({ id: novoId(), tipo: 'adesivo', rotulo: 'Pandinha', arquivo, x: lugar.x, y, tamanho, rotacao: 0 });
+  await garanteImagens();
   montaListas();
   schedule();
 }
@@ -1519,21 +1569,32 @@ function montaSeletorDeLetras() {
   el.font.value = state.fontFamily;
 }
 
+/** Um botão de grade com a imagem do acervo em versão leve. */
+function botaoDeImagem(item, rotulo, aoTocar) {
+  const botaoElemento = document.createElement('button');
+  botaoElemento.type = 'button';
+  botaoElemento.className = 'studio-elemento';
+  botaoElemento.title = rotulo;
+  botaoElemento.setAttribute('aria-label', rotulo);
+  const img = document.createElement('img');
+  img.src = miniaturaDaImagem(item.arquivo);
+  img.alt = '';
+  img.loading = 'lazy';
+  botaoElemento.appendChild(img);
+  botaoElemento.addEventListener('click', aoTocar);
+  return botaoElemento;
+}
+
 function montaGradeDeElementos() {
-  el.gradeElementos.replaceChildren(...ELEMENTOS.map((item) => {
-    const botaoElemento = document.createElement('button');
-    botaoElemento.type = 'button';
-    botaoElemento.className = 'studio-elemento';
-    botaoElemento.title = `Acrescentar ${item.nome.toLowerCase()}`;
-    botaoElemento.setAttribute('aria-label', `Acrescentar ${item.nome.toLowerCase()}`);
-    const img = document.createElement('img');
-    img.src = item.arquivo;
-    img.alt = '';
-    img.loading = 'lazy';
-    botaoElemento.appendChild(img);
-    botaoElemento.addEventListener('click', () => adicionaElemento(item.arquivo));
-    return botaoElemento;
-  }));
+  const doAcervo = ELEMENTOS.filter((item) => item.grupo !== 'Em aquarela');
+  const aquarelas = ELEMENTOS.filter((item) => item.grupo === 'Em aquarela');
+  el.gradeElementos.replaceChildren(...doAcervo.map((item) =>
+    botaoDeImagem(item, `Acrescentar ${item.nome.toLowerCase()}`, () => adicionaElemento(item.arquivo))));
+  el.gradeAquarelas.replaceChildren(...aquarelas.map((item) =>
+    botaoDeImagem(item, `Acrescentar ${item.nome.toLowerCase()} em aquarela`, () => adicionaElemento(item.arquivo))));
+  el.gradePoses.replaceChildren(...ADESIVOS.map((item) =>
+    botaoDeImagem(item, `Acrescentar o Pandinha: ${item.nome.toLowerCase()}`, () => adicionaPandinha(item.arquivo, { y: 0.5, tamanho: 0.3 }))));
+  el.contagemDePoses.textContent = String(ADESIVOS.length);
 }
 
 /** A cor de fundo da arte: o mesmo modelo muda de clima trocando só isso. */
@@ -1944,7 +2005,7 @@ async function aplicaMontagem(dados, { fotos: fotosDoArquivo = null } = {}) {
     limpaHistorico();
     marcaModeloEscolhido();
     atualizaModo();
-    await garanteAdesivos();
+    await garanteImagens();
     await garanteFontes();
     const guardadas = fotosDoArquivo || dados.fotos || {};
     for (const [id, guardada] of Object.entries(guardadas)) {
@@ -2209,7 +2270,7 @@ async function openProject(file) {
       limpaHistorico();
       marcaModeloEscolhido();
       atualizaModo();
-      await garanteAdesivos();
+      await garanteImagens();
       await garanteFontes();
       for (const [id, registro] of Object.entries(project.fotos || {})) {
         if (registro?.dados) await handleFile(await arquivoDeDados(registro), { tipo: 'camada', id });
@@ -2268,7 +2329,7 @@ function redimensiona(gesto, ponto) {
     camada.largura = clamp(gesto.base.largura * fator, LIMITES.fotoLargura[0], LIMITES.fotoLargura[1]);
     camada.altura = clamp(gesto.base.altura * fator, 0.06, 1);
   } else {
-    const limite = camada.tipo === 'adesivo' ? LIMITES.adesivoTamanho : limiteDeTamanho(camada);
+    const limite = limiteDeTamanho(camada);
     camada.tamanho = clamp(gesto.base.tamanho * fator, limite[0], limite[1]);
   }
   schedule();
@@ -2406,7 +2467,7 @@ function bind() {
 
   el.addFoto.addEventListener('click', adicionaFoto);
   el.addFrase.addEventListener('click', adicionaFrase);
-  el.addPandinha.addEventListener('click', adicionaPandinha);
+  el.addPandinha.addEventListener('click', () => adicionaPandinha());
 
   el.desfazer.addEventListener('click', desfaz);
   el.refazer.addEventListener('click', refaz);
@@ -2507,11 +2568,9 @@ async function init() {
   const fontsReady = document.fonts?.load
     ? Promise.allSettled(['600 16px "Fredoka"', '600 16px "Caveat"', '600 16px "Nunito"'].map((font) => document.fonts.load(font)))
     : Promise.resolve();
-  const [panda] = await Promise.allSettled([loadImage(PANDA_ADESIVO), fontsReady]);
-  if (panda.status === 'fulfilled') {
-    pandaImage = panda.value;
-    adesivos.set(PANDA_ADESIVO, panda.value);
-  } else console.warn(panda.reason?.message);
+  // Pelo mesmo pedido das miniaturas: por caminhos separados, a imagem era baixada duas vezes.
+  const [panda] = await Promise.all([pedeImagem(PANDA_ADESIVO), fontsReady]);
+  if (panda) pandaImage = panda;
   render();
   await startViewer();
   // Link de montagem tem prioridade; sem ele, o rascunho deste aparelho é oferecido.

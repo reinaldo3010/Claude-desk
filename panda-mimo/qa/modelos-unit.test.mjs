@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   gruposDeCategorias, ORDEM_DOS_GRUPOS,
-  TEMPLATES, CATEGORIAS, CORES_DE_ARTE, ENFEITES, ADESIVOS, FORMAS_DE_FOTO,
+  TEMPLATES, CATEGORIAS, CORES_DE_ARTE, ENFEITES, ADESIVOS, ELEMENTOS, FORMAS_DE_FOTO,
   modeloPorId, modelosDaCategoria, novaArte, desenhaArte, caixaDaCamada, camadaEm, alcasDaCamada,
   medidorDeTexto, FRENTE, VERSO,
 } from '../simulador/modelos.js';
@@ -52,6 +52,7 @@ test('cada modelo tem identidade própria, categoria conhecida e camadas válida
   const formasDeFoto = new Set(FORMAS_DE_FOTO.map((f) => f.valor));
   const enfeites = new Set(ENFEITES.map((e) => e.forma));
   const poses = new Set(ADESIVOS.map((a) => a.arquivo));
+  const elementos = new Set(ELEMENTOS.map((e) => e.arquivo));
   for (const modelo of TEMPLATES) {
     assert.ok(!ids.has(modelo.id), `id repetido: ${modelo.id}`);
     ids.add(modelo.id);
@@ -61,7 +62,7 @@ test('cada modelo tem identidade própria, categoria conhecida e camadas válida
     const idsDeCamada = new Set(modelo.camadas.map((c) => c.id));
     assert.equal(idsDeCamada.size, modelo.camadas.length, `${modelo.id} tem camadas com o mesmo id`);
     for (const camada of modelo.camadas) {
-      assert.ok(['foto', 'frase', 'enfeite', 'adesivo'].includes(camada.tipo), `${modelo.id}: tipo desconhecido ${camada.tipo}`);
+      assert.ok(['foto', 'frase', 'enfeite', 'adesivo', 'elemento'].includes(camada.tipo), `${modelo.id}: tipo desconhecido ${camada.tipo}`);
       if (camada.tipo === 'frase') {
         assert.ok(fontes.has(camada.fonte), `${modelo.id} usa letra fora da biblioteca: ${camada.fonte}`);
         assert.ok(ehFonteDaMarca(camada.fonte), `${modelo.id}: modelo pronto da casa usa letra fora da marca (${camada.fonte})`);
@@ -72,9 +73,9 @@ test('cada modelo tem identidade própria, categoria conhecida e camadas válida
       if (camada.tipo === 'enfeite') assert.ok(enfeites.has(camada.forma) || ehIlustracao(camada.forma),
         `${modelo.id}: enfeite desconhecido ${camada.forma}`);
       if (camada.tipo === 'adesivo') assert.ok(poses.has(camada.arquivo), `${modelo.id}: pose do Pandinha fora do acervo (${camada.arquivo})`);
+      if (camada.tipo === 'elemento') assert.ok(elementos.has(camada.arquivo), `${modelo.id}: elemento fora do acervo (${camada.arquivo})`);
     }
-    const pandas = modelo.camadas.filter((c) => c.tipo === 'adesivo');
-    assert.ok(pandas.length <= 1, `${modelo.id} tem mais de um Pandinha (manual 6.4)`);
+    // Quantos Pandinhas vão numa caneca deixou de ter limite em 23/09/2026 (manual 6.2, decisão do dono).
   }
   assert.ok(TEMPLATES.some((m) => m.camadas.filter((c) => c.tipo === 'foto').length >= 3), 'nenhum modelo aceita três ou mais fotos');
   for (const categoria of CATEGORIAS.filter((c) => c.id !== 'livre')) {

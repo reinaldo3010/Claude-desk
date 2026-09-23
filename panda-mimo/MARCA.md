@@ -284,7 +284,10 @@ se refere a ele em qualquer canal.
 - Ele **acompanha**, nunca compete com a peça. Segura, abraça, entrega, espia, aponta.
 - Ele **fala em balões** curtos e afetuosos ("Feito com carinho, feito pra você!", "Só uma prévia,
   tá?", "Tire suas dúvidas, estamos aqui para te ajudar"). Em texto corrido, a marca fala como "a gente".
-- Um Pandinha por tela ou por peça impressa. Dois só quando a cena pede (caixa aberta + panda dormindo).
+- Na comunicação da marca (site, redes, embalagem, impressos da casa): um Pandinha por tela ou por
+  peça. Dois só quando a cena pede (caixa aberta + panda dormindo).
+- Na arte que a pessoa monta no estúdio da caneca, a quantidade é dela: quantos Pandinhas, enfeites e
+  elementos quiser. Decisão do dono em 23/09/2026: liberdade total para quem monta.
 
 ### 6.3 Poses do acervo (todas com fundo transparente)
 | Arquivo | Pose | Uso típico |
@@ -299,6 +302,7 @@ se refere a ele em qualquer canal.
 | `panda-dormindo.webp` | dormindo | "novidades em breve", fora do horário |
 | `panda-novidades.webp` | com a placa "Novidades em breve!" | lista de espera |
 | `panda-carinha.webp` | só o rosto | favicon, ícone, marca mínima |
+| `panda-<tema>.webp` (55) | ocasiões (formatura, aniversário, Natal, Páscoa, padrinho, madrinha, bebê, casa nova, amizade, agradecimento, com carinho), profissões (10), saúde (8), esporte (15) e paixões (11) | arte do cliente no estúdio da caneca (exceção de 6.4) |
 
 ### 6.4 Regras
 - Sempre inteiro. **Nunca cortado** por borda de cartão, foto ou tela (o guardião do site reprova isso).
@@ -310,7 +314,9 @@ se refere a ele em qualquer canal.
   versão em cena da seção 6.5.
 - Não vestir com roupas de marca, uniformes ou temas fora do universo da Panda Mimo. Em datas
   comemorativas ele pode ganhar um adereço pequeno (um laço, um chapéu de festa), sempre no mesmo traço
-  e com aprovação do dono antes de publicar.
+  e com aprovação do dono antes de publicar. **Exceção aprovada em 23/09/2026:** as 55 poses de
+  profissões, saúde, esporte, paixões e ocasiões (6.3), com os acessórios do tema — estetoscópio, capacete,
+  chapéu de chef, bola, beca, gorro de Natal — para a arte do cliente no estúdio. Tema novo segue o mesmo caminho: pose a pose, aprovada antes.
 
 ### 6.5 Dois planos: Pandinha adesivo e Pandinha em cena (3D)
 Aprovado em setembro de 2026. O Pandinha existe em duas versões do **mesmo personagem**, cada uma com
@@ -500,14 +506,33 @@ chuteira, uma flor de lótus — que não são elemento de interface nem adesivo
 | **A forma em si não se edita.** Não há edição de nós. | A bicicleta continua sendo uma bicicleta; o estúdio não é o Illustrator. |
 | Traço arredondado, poucas cores, silhueta cheia. Nada de linha fina de biblioteca genérica. | Mesma linguagem dos ícones e dos adesivos puffy. |
 
-Cinco coleções seguem essa regra hoje: **esportes** (137 ilustrações, 24 artes), **pets** (16
+Sete coleções seguem essa regra hoje: **esportes** (137 ilustrações, 24 artes), **pets** (16
 ilustrações, 16 artes), **datas comemorativas** (24 ilustrações, 24 artes), **bebê e maternidade**
-(13 ilustrações, 16 artes) e **convites e agradecimentos** (14 ilustrações, 16 artes). Coleção nova segue as mesmas
+(13 ilustrações, 16 artes), **convites e agradecimentos** (14 ilustrações, 16 artes), **Ateliê** (8
+ilustrações, 12 artes) e **Pequenos Prazeres** (12 ilustrações, 24 artes). Coleção nova segue as mesmas
 regras e entra com prova visual das artes no tamanho de uso.
 
 E uma regra de composição, que veio de uma crítica do dono aos primeiros modelos: **variar a frase
 não é variar a arte.** Dentro de uma coleção, cada arte muda de planta — quantas fotos tem, o
 formato delas e onde o texto fica. O teste reprova duas artes com a mesma planta.
+
+#### Imagem na arte: as poses do Pandinha e as aquarelas (23/09/2026)
+
+Duas coleções trazem **imagem** em vez de curva, aprovadas pelo dono: **Com o Pandinha** (55 poses,
+55 artes, e quatro adesivos do acervo que servem de acento) e **Aquarela** (6 ilustrações, 6 artes). Aquarela vetorizada perde a textura do papel, que
+é o que ela tem de bonito; e a pose do Pandinha é o próprio adesivo do acervo. A regra das curvas
+existe porque bitmap ampliado embaça na sublimação, então a imagem só entra com três garantias, todas
+com teste:
+
+| Garantia | Como |
+|---|---|
+| **Nunca abaixo de 300 dpi** | O controle de tamanho para onde a impressão cairia abaixo de 300 dpi (com 2% de tolerância, que a sublimação não distingue) ou onde a imagem passaria da margem de 5 mm. |
+| **A caixa abraça o desenho** | A caixa de seleção segue a proporção do arquivo, que o estúdio conhece antes de a imagem chegar (tabela gerada em `simulador/imagens-do-acervo.js`). |
+| **Mestre no kit, versão no site** | O PNG mestre fica em `marca/kit/png/`; o site usa a versão preparada em `assets/` por `marca/kit/prepara-imagens-do-estudio.py`. O kit não vai para o ar. |
+
+A imagem não troca de cor: a cor é a pintura. Move, gira, muda de tamanho, duplica e apaga como
+qualquer camada. Cada arte dessas coleções aparece no próprio assunto e também no assunto que já
+existia no estúdio — o Pandinha ciclista em "Pandinha no esporte" e em "Ciclismo".
 
 ---
 
@@ -563,8 +588,9 @@ regras:
 - Cor só por token da paleta (seção 7); fonte só Fredoka, Caveat ou Nunito (seção 8), com Caveat apenas
   em frase curta, nunca em parágrafo. A lista de cores e fontes que a pessoa vê sai do próprio código,
   então não há como escolher algo fora da marca.
-- Um Pandinha por peça, sempre o adesivo do acervo (6.3 e 6.4), escolhido entre as nove poses. Pedir
-  outro Pandinha só seleciona o que já está lá. O 3D de cena (6.5) não entra em peça de cliente.
+- O Pandinha é sempre o adesivo do acervo (6.3 e 6.4), escolhido entre as 64 poses, na quantidade
+  que a pessoa quiser: cada toque em "+ Pandinha" ou numa pose da grade acrescenta um (decisão do
+  dono, 23/09/2026). O 3D de cena (6.5) não entra em peça de cliente.
 - Enfeite de fundo não encosta em foto nem em frase, e o sorteio é sempre o mesmo: a arte que a pessoa
   aprovou é igual à que vai para a produção.
 - Espaço de foto vazio aparece tracejado na prévia e vira aviso; no arquivo de produção ele sai como
@@ -839,7 +865,12 @@ Regras de produção:
   Um redesenho vetorial do logo, com poucas formas e versão chapada, é pendência da seção 14 e, quando
   aprovado, entra no kit ao lado dos traçados, sem substituí-los.
 - Pose nova do Pandinha gerada por IA passa por aprovação do dono, é vetorizada com o mesmo processo
-  e entra no acervo (6.3) e no kit; nada é apagado.
+  e entra no acervo (6.3) e no kit; nada é apagado. As 55 poses de profissões, saúde, esporte, paixões e
+  ocasiões foram aprovadas e entraram no acervo em 23/09/2026, em dois lotes: mestres em
+  `marca/kit/png/pandinha-temas-20/` e `pandinha-temas-35/`, versão do site em `assets/panda-<tema>.webp`. **A vetorização está pendente, por decisão do dono:** o degradê de volume
+  dessas poses só passa dos 24 dB com o traçado mais fino, que pesa uns 3,5 MB por pose (perto de 190 MB as 55);
+  os traçados leves ficam em 23 dB. O script está pronto em `marca/kit/vetoriza-poses-do-pandinha.py`. Aquarela é como fotografia: vetorizar não faz sentido, e o PNG mestre em
+  `marca/kit/png/piloto-aquarela/` é o arquivo de referência.
 
 ---
 
@@ -922,6 +953,8 @@ adereço pequeno no Pandinha em datas comemorativas, com aprovação prévia (6.
 ## Histórico
 | Data | Versão | O que mudou |
 |---|---|---|
+| set/2026 | 2.18 | Segundo lote do mesmo dia: mais 35 poses do Pandinha (profissões, saúde, esporte, paixões e ocasiões — formatura, aniversário, Natal, Páscoa, padrinhos, bebê, casa nova, amizade, agradecimento e carinho) e 4 adesivos do acervo (laço, coração com folhas, margaridas, presente), com uma arte pronta para cada pose. A coleção "Com o Pandinha" passa a 55 artes em cinco assuntos (6.3, exceção de 6.4). |
+| set/2026 | 2.17 | As 26 imagens do acervo entram no estúdio, aprovadas pelo dono: 20 poses do Pandinha em profissões e paixões (6.3, exceção de 6.4) e 6 aquarelas, com uma arte pronta para cada em duas coleções novas, "Com o Pandinha" e "Aquarela". Imagem na arte ganha regra própria em 9.1: nunca abaixo de 300 dpi, caixa que abraça o desenho, mestre no kit e versão no site. E o limite de um Pandinha por caneca cai (6.2 e 10.3): na arte que a pessoa monta, a quantidade é dela. |
 | set/2026 | 2.16 | Acervo PNG interno: seis ilustrações delicadas de teste e 20 poses temáticas do Pandinha (profissões e paixões), geradas por IA a pedido do dono em 22/09/2026, em `marca/kit/png/`. **A regra 6.4 não mudou:** vestir o Pandinha com uniforme ou tema segue proibido no que é publicado, e este acervo é material de revisão até o dono aprovar caso a caso. O guardião (`qa/acervo-unit.test.mjs`) reprova qualquer página servida ao visitante que aponte para essas artes. |
 | set/2026 | 1.0 | Primeira edição, consolidando a identidade aplicada no site (paleta, tipografia, logo, mascote, tom de voz, aplicações, governança). |
 | set/2026 | 2.15 | Duas coleções novas no seletor: Bebê e maternidade (chegada, chá de bebê, chá revelação, gravidez e primeiro Dia das Mães) e Convites e agradecimentos (padrinhos de casamento e de batismo, madrinhas e daminhas, agradecimento), com 27 ilustrações próprias (9.1). "Bebê" e "Casamento" saem de Momentos e passam a encabeçar os grupos novos. |

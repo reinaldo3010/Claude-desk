@@ -18,9 +18,11 @@ import { MODELOS_BEBE } from '../simulador/bebe.js';
 import { MODELOS_CONVITES } from '../simulador/convites.js';
 import { MODELOS_ATELIE } from '../simulador/atelie.js';
 import { MODELOS_HOBBIES } from '../simulador/hobbies.js';
+import { MODELOS_PANDINHA, POSES_TEMATICAS } from '../simulador/pandinha-temas.js';
+import { MODELOS_AQUARELA } from '../simulador/aquarelas.js';
 import { ILUSTRACOES, proporcaoDaForma, ehIlustracao, TAMANHO_DA_ILUSTRACAO } from '../simulador/colecoes.js';
 import { PALETA } from '../simulador/paleta.js';
-import { TEMPLATES, CATEGORIAS, modelosDaCategoria, caixaDaCamada, novaArte, camadaEm } from '../simulador/modelos.js';
+import { TEMPLATES, CATEGORIAS, modelosDaCategoria, caixaDaCamada, novaArte, camadaEm, limiteDaImagem } from '../simulador/modelos.js';
 
 const area = { x: 0, y: 0, width: 210, height: 90 };
 
@@ -32,7 +34,17 @@ const COLECOES = [
   { nome: 'Datas comemorativas', modelos: MODELOS_DATAS, arquivo: 'datas.js' },
   { nome: 'Bebê e maternidade', modelos: MODELOS_BEBE, arquivo: 'bebe.js' },
   { nome: 'Convites e agradecimentos', modelos: MODELOS_CONVITES, arquivo: 'convites.js' },
+  { nome: 'Com o Pandinha', modelos: MODELOS_PANDINHA, arquivo: 'pandinha-temas.js' },
+  { nome: 'Aquarela', modelos: MODELOS_AQUARELA, arquivo: 'aquarelas.js' },
 ];
+
+/*
+  Nas duas coleções de imagem, a ilustração protagonista é uma imagem do acervo: a pose temática do
+  Pandinha (tipo `adesivo`) ou a aquarela (tipo `elemento`). Ela conta como ilustração. O Pandinha
+  de sempre, o adesivo pequeno dos modelos antigos, não conta — senão a regra afrouxaria para eles.
+*/
+const POSES_DE_COLECAO = new Set(POSES_TEMATICAS.map((p) => p.arquivo));
+const ehIlustracaoDaArte = (c) => c.tipo === 'enfeite' || c.tipo === 'elemento' || (c.tipo === 'adesivo' && POSES_DE_COLECAO.has(c.arquivo));
 
 /** Um contexto de mentira que anota o que foi pedido, sem desenhar nada de verdade. */
 function contexto() {
@@ -126,7 +138,8 @@ test('cada assunto do seletor tem pelo menos quatro artes, para a pessoa ter de 
   // "Sem modelo", "Só fotos" e "Várias fotos do pet" são atalhos, não assunto: ficam de fora.
   // Os que ainda não chegaram lá ficam nesta lista, à vista. A lista é uma catraca: encheu um
   // assunto, tira daqui; assunto novo magro entra reprovando, que é o que a gente quer.
-  const AINDA_MAGROS = ['aniversario', 'amizade'];
+  // Amizade e formatura saiu daqui em 23/09/2026: a formatura e a amizade do Pandinha a levaram a quatro.
+  const AINDA_MAGROS = ['aniversario'];
   const magros = CATEGORIAS
     .filter((c) => !['livre', 'fotos', 'pet'].includes(c.id))
     .filter((c) => modelosDaCategoria(c.id).length < 4)
@@ -161,7 +174,7 @@ test('toda arte de coleção tem foto, frase e pelo menos duas ilustrações', (
     for (const modelo of modelos) {
       assert.ok(modelo.camadas.some((c) => c.tipo === 'foto'), `${nome}/${modelo.id} sem espaço de foto`);
       assert.ok(modelo.camadas.some((c) => c.tipo === 'frase'), `${nome}/${modelo.id} sem frase`);
-      assert.ok(modelo.camadas.filter((c) => c.tipo === 'enfeite').length >= 2, `${nome}/${modelo.id} com menos de duas ilustrações`);
+      assert.ok(modelo.camadas.filter(ehIlustracaoDaArte).length >= 2, `${nome}/${modelo.id} com menos de duas ilustrações`);
     }
   }
 });
@@ -177,6 +190,18 @@ test('cada ilustração de coleção pode ser escolhida no clique e cresce mais 
           `${nome}/${modelo.id}: o clique no meio de "${camada.rotulo}" não acha a camada`);
         assert.ok(camada.tamanho <= TAMANHO_DA_ILUSTRACAO[1] && camada.tamanho >= TAMANHO_DA_ILUSTRACAO[0],
           `${nome}/${modelo.id}: "${camada.rotulo}" nasce fora do limite de tamanho`);
+      }
+      // A imagem protagonista também: o clique no meio dela a acha, e ela nasce dentro do limite que
+      // a pessoa tem na mão — senão o controle de tamanho pula no primeiro toque.
+      for (const camada of arte.camadas.filter((c) => c.tipo === 'elemento' || c.tipo === 'adesivo')) {
+        const caixa = caixaDaCamada(camada, area);
+        const soEla = { ...arte, camadas: [camada] };
+        assert.equal(camadaEm(soEla, { x: caixa.centroX, y: caixa.centroY }, area)?.id, camada.id,
+          `${nome}/${modelo.id}: o clique no meio de "${camada.rotulo}" não acha a camada`);
+        const teto = camada.tipo === 'adesivo' ? [0.06, 0.6] : [0.06, 1.4];
+        const [minimo, maximo] = limiteDaImagem(camada.arquivo, teto);
+        assert.ok(camada.tamanho >= minimo && camada.tamanho <= maximo,
+          `${nome}/${modelo.id}: "${camada.rotulo}" nasce com ${camada.tamanho}, fora de ${minimo}–${maximo}`);
       }
     }
   }

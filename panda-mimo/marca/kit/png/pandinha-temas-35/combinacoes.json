@@ -1,0 +1,58 @@
+[
+  {
+    "title": "Panda Mimo + Laço pêssego",
+    "layers": [
+      {
+        "file": "../../../../assets/logo-pill.svg",
+        "preserveAspectRatio": true
+      },
+      {
+        "file": "e01-laco.png",
+        "preserveAspectRatio": true
+      }
+    ],
+    "layout": "Logo à esquerda e elemento à direita; preservar espaço de proteção mínimo de um P; não sobrepor nem alterar o logo."
+  },
+  {
+    "title": "Panda Mimo + Coração botânico",
+    "layers": [
+      {
+        "file": "../../../../assets/logo-pill.svg",
+        "preserveAspectRatio": true
+      },
+      {
+        "file": "e02-coracao.png",
+        "preserveAspectRatio": true
+      }
+    ],
+    "layout": "Logo à esquerda e elemento à direita; preservar espaço de proteção mínimo de um P; não sobrepor nem alterar o logo."
+  },
+  {
+    "title": "Panda Mimo + Margaridas",
+    "layers": [
+      {
+        "file": "../../../../assets/logo-pill.svg",
+        "preserveAspectRatio": true
+      },
+      {
+        "file": "e03-margaridas.png",
+        "preserveAspectRatio": true
+      }
+    ],
+    "layout": "Logo à esquerda e elemento à direita; preservar espaço de proteção mínimo de um P; não sobrepor nem alterar o logo."
+  },
+  {
+    "title": "Panda Mimo + Presente com carinho",
+    "layers": [
+      {
+        "file": "../../../../assets/logo-pill.svg",
+        "preserveAspectRatio": true
+      },
+      {
+        "file": "e04-presente.png",
+        "preserveAspectRatio": true
+      }
+    ],
+    "layout": "Logo à esquerda e elemento à direita; preservar espaço de proteção mínimo de um P; não sobrepor nem alterar o logo."
+  }
+]
