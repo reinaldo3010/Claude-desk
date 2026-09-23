@@ -142,6 +142,8 @@ test('cada assunto do seletor tem pelo menos quatro artes, para a pessoa ter de 
   const AINDA_MAGROS = ['aniversario'];
   const magros = CATEGORIAS
     .filter((c) => !['livre', 'fotos', 'pet'].includes(c.id))
+    // As ocasiões só da garrafa têm a conta delas em pecas-unit.test.mjs.
+    .filter((c) => !c.pecas || c.pecas.includes('caneca'))
     .filter((c) => modelosDaCategoria(c.id).length < 4)
     .map((c) => c.id);
   const novosMagros = magros.filter((id) => !AINDA_MAGROS.includes(id));

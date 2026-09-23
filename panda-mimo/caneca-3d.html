@@ -41,10 +41,20 @@
 </header>
 <main class="wrap studio-main" id="conteudo">
   <header class="studio-heading">
-    <div><p class="eyebrow">MONTE SEU MIMO</p><h1 class="display">Sua arte. <span class="hand">Sua caneca.</span></h1></div>
-    <p>Uma foto, uma lembrança, um carinho.<br>Gire a caneca e veja sua ideia de todos os lados.</p>
+    <div><p class="eyebrow">MONTE SEU MIMO</p><h1 class="display">Sua arte. <span class="hand" data-texto="tituloHand">Sua caneca.</span></h1></div>
+    <p data-texto="tituloLede">Uma foto, uma lembrança, um carinho.<br>Gire a caneca e veja sua ideia de todos os lados.</p>
   </header>
   <noscript><p class="studio-message">Ative o JavaScript para personalizar a caneca. Você também pode <a href="index.html#contato">contar sua ideia pra gente</a>.</p></noscript>
+  <!-- Qual peça? Uma linha no topo do estúdio (decisão do dono, 23/09/2026), nas pílulas leves das cores.
+       A caneca abre por padrão; cada peça tem a própria montagem, os próprios modelos e as próprias cores.
+       Fica fora da grade das duas colunas de propósito: dentro dela, a coluna da peça, grudada pelo pé,
+       subia por cima desta linha. A página inicial traz as duas partes. -->
+  <div class="studio-pecas" id="pecas" role="group" aria-labelledby="rotulo-pecas">
+    <span class="studio-pecas__rotulo" id="rotulo-pecas">Qual peça?</span>
+    <button type="button" class="studio-chip" data-peca-botao="caneca" aria-pressed="true">Caneca</button>
+    <button type="button" class="studio-chip" data-peca-botao="garrafa" aria-pressed="false">Garrafa</button>
+    <button type="button" class="studio-chip" data-peca-botao="ecobag" aria-pressed="false">Ecobag</button>
+  </div>
   <div class="studio-layout">
 
     <!-- A peça, as cores dela e a arte aberta vivem numa coluna só. Na tela larga a coluna gruda
@@ -53,7 +63,7 @@
          caneca gruda. -->
     <div class="studio-coluna-peca">
     <!-- ===================== A PEÇA ===================== -->
-    <section class="studio-preview" aria-label="Prévia da caneca">
+    <section class="studio-preview" aria-label="Prévia da caneca" data-rotulo="rotuloPrevia">
       <div class="studio-preview__bar">
         <span class="studio-badge">PRÉVIA EM 360°</span>
         <button type="button" class="studio-cadeado" id="travar" aria-pressed="true">
@@ -61,18 +71,18 @@
           <span id="travar-texto">Arte travada</span>
         </button>
       </div>
-      <div class="studio-viewport" id="mug-viewport" role="region" aria-label="Prévia da caneca em três dimensões">
-        <p class="studio-loading" id="viewer-loading" role="status">Preparando sua caneca…</p>
+      <div class="studio-viewport" id="mug-viewport" role="region" aria-label="Prévia da caneca em três dimensões" data-rotulo="rotuloViewport">
+        <p class="studio-loading" id="viewer-loading" role="status" data-texto="carregando">Preparando sua caneca…</p>
         <div id="viewer-fallback" class="studio-fallback" hidden><p>O 3D não abriu neste navegador. Sua arte continua disponível na vista plana.</p><button type="button" class="btn btn--ghost btn--sm" id="viewer-retry">Tentar o 3D novamente</button></div>
       </div>
       <div class="studio-view-tools">
-        <div class="studio-view-buttons" role="group" aria-label="Escolher vista da caneca">
+        <div class="studio-view-buttons" role="group" aria-label="Escolher vista da caneca" data-rotulo="rotuloVistas">
           <button type="button" data-view="front" aria-pressed="true">Frente</button>
           <button type="button" data-view="back" aria-pressed="false">Verso</button>
           <button type="button" data-view="handle" aria-pressed="false">Alça</button>
           <button type="button" data-view="inside" aria-pressed="false">Interior</button>
         </div>
-        <label class="studio-zoom" for="mug-zoom">Zoom <input id="mug-zoom" type="range" min="75" max="140" value="100" step="5" aria-label="Aproximar a caneca"></label>
+        <label class="studio-zoom" for="mug-zoom">Zoom <input id="mug-zoom" type="range" min="75" max="140" value="100" step="5" aria-label="Aproximar a caneca" data-rotulo="rotuloZoom"></label>
       </div>
       <p class="studio-gesture" id="studio-gesture">Arraste para girar a caneca. Use dois dedos ou o controle para aproximar.</p>
 
@@ -86,12 +96,13 @@
         <div class="studio-opcao" id="peca-cores">
           <p class="studio-opcao__rotulo" id="rotulo-cores">Cores da peça</p>
           <div class="studio-opcao__valores">
-            <div class="studio-color-presets" role="group" aria-labelledby="rotulo-cores"><button type="button" class="studio-chip" data-preset="branca" aria-pressed="true">Toda branca</button><button type="button" class="studio-chip" data-preset="preta" aria-pressed="false">Preto e branco</button><button type="button" class="studio-chip" data-preset="rosa" aria-pressed="false">Toque rosa</button></div>
+            <div class="studio-color-presets" role="group" aria-labelledby="rotulo-cores" data-peca="caneca"><button type="button" class="studio-chip" data-preset="branca" aria-pressed="true">Toda branca</button><button type="button" class="studio-chip" data-preset="preta" aria-pressed="false">Preto e branco</button><button type="button" class="studio-chip" data-preset="rosa" aria-pressed="false">Toque rosa</button></div>
             <div class="studio-cores-peca">
-              <div class="studio-cores-peca__grupo" role="group" aria-labelledby="rotulo-interior"><span class="studio-cores-peca__nome" id="rotulo-interior">Interior</span><span class="studio-cores" id="cores-interior"></span></div>
-              <div class="studio-cores-peca__grupo" role="group" aria-labelledby="rotulo-alca"><span class="studio-cores-peca__nome" id="rotulo-alca">Alça</span><span class="studio-cores" id="cores-alca"></span></div>
+              <div class="studio-cores-peca__grupo" role="group" aria-labelledby="rotulo-interior" data-peca="caneca"><span class="studio-cores-peca__nome" id="rotulo-interior">Interior</span><span class="studio-cores" id="cores-interior"></span></div>
+              <div class="studio-cores-peca__grupo" role="group" aria-labelledby="rotulo-alca" data-peca="caneca"><span class="studio-cores-peca__nome" id="rotulo-alca">Alça</span><span class="studio-cores" id="cores-alca"></span></div>
+              <div class="studio-cores-peca__grupo" role="group" aria-labelledby="rotulo-corpo" data-peca="garrafa" hidden><span class="studio-cores-peca__nome" id="rotulo-corpo">Garrafa</span><span class="studio-cores" id="cores-corpo"></span></div>
             </div>
-            <p class="studio-help">Por fora, branca. O carinho fica por sua conta.</p>
+            <p class="studio-help" data-texto="ajudaDasCores">Por fora, branca. O carinho fica por sua conta.</p>
           </div>
         </div>
         <div class="studio-opcao" id="peca-acabamento">
@@ -102,40 +113,40 @@
           <p class="studio-opcao__rotulo" id="rotulo-cena">Cena</p>
           <div class="studio-opcao__valores">
             <div class="studio-cenas" id="cenas" role="group" aria-labelledby="rotulo-cena"></div>
-            <p class="studio-help">Veja a caneca como ela vai aparecer na foto do presente.</p>
+            <p class="studio-help" data-texto="ajudaDaCena">Veja a caneca como ela vai aparecer na foto do presente.</p>
           </div>
         </div>
       </section>
 
       <section class="studio-flat" id="flat-details" aria-labelledby="flat-titulo">
         <div class="studio-flat__topo">
-          <h2 class="studio-flat__titulo" id="flat-titulo">A arte aberta <span>área de 21 × 9 cm</span></h2>
+          <h2 class="studio-flat__titulo" id="flat-titulo">A arte aberta <span id="flat-medida">área de 21 × 9 cm</span></h2>
           <label class="studio-check"><input type="checkbox" id="mostrar-margem" checked> Mostrar a margem de segurança</label>
         </div>
         <div class="studio-flat__paper"><canvas id="flat-art" width="840" height="360" role="img" aria-label="Arte plana dentro da área de personalização"></canvas></div>
-        <p>Esta é a área que envolve a caneca, com um espaço livre junto à alça. Puxe um canto para aumentar e o botão de cima para girar.</p>
+        <p data-texto="sobreAArteAberta">Esta é a área que envolve a caneca, com um espaço livre junto à alça. Puxe um canto para aumentar e o botão de cima para girar.</p>
         <details class="studio-duvida"><summary>O que é a margem de segurança?</summary>
-          <p>É a faixa de 5 mm nas bordas da arte. A caneca é estampada com a folha envolvendo a peça, e essa
+          <p data-texto="margem">É a faixa de 5 mm nas bordas da arte. A caneca é estampada com a folha envolvendo a peça, e essa
           folha pode escorregar um fio de milímetro. O que estiver fora da margem corre o risco de sair cortado —
           então nome, data e rosto ficam para dentro dela.</p>
         </details>
       </section>
-      <div class="studio-caption"><span class="hand">Só uma prévia, tá?</span><p>Modelo de referência de 325 ml. A gente confere a peça, a combinação de cores e a arte final antes de produzir.</p></div>
+      <div class="studio-caption"><span class="hand">Só uma prévia, tá?</span><p data-texto="legenda">Modelo de referência de 325 ml. A gente confere a peça, a combinação de cores e a arte final antes de produzir.</p></div>
     </div>
 
     </div>
 
     <!-- ===================== A ARTE ===================== -->
-    <aside class="studio-controls" aria-label="Montar a arte da caneca">
+    <aside class="studio-controls" aria-label="Montar a arte da caneca" data-rotulo="rotuloControles">
       <form id="mug-form" autocomplete="off">
-        <p class="studio-intro">Escolha um modelo, coloque as fotos e escreva do seu jeito. Clique em cima da caneca para mexer em qualquer item.</p>
+        <p class="studio-intro" data-texto="intro">Escolha um modelo, coloque as fotos e escreva do seu jeito. Clique em cima da caneca para mexer em qualquer item.</p>
 
         <!-- Só na primeira visita: quem chega não sabe o que acontece depois de montar. -->
         <aside class="studio-boasvindas" id="boasvindas" hidden aria-labelledby="boasvindas-titulo">
           <h2 id="boasvindas-titulo">Como funciona por aqui</h2>
           <ol>
             <li><strong>Escolha um modelo</strong> pronto para a ocasião, ou traga a sua arte.</li>
-            <li><strong>Ponha suas fotos e escreva do seu jeito.</strong> A caneca gira para você ver de todos os lados antes de decidir.</li>
+            <li data-texto="boasvindasGira"><strong>Ponha suas fotos e escreva do seu jeito.</strong> A caneca gira para você ver de todos os lados antes de decidir.</li>
             <li><strong>Peça pelo WhatsApp.</strong> A gente confere a arte com você antes de produzir — nada sai da sua mão sem o seu "pode fazer".</li>
           </ol>
           <button type="button" class="btn btn--ghost btn--sm" id="boasvindas-fechar">Entendi, vamos montar</button>
@@ -196,9 +207,9 @@
 
           <details class="studio-guide" id="bloco-canva">
             <summary>Quer montar a arte no Canva?</summary>
-            <p>A volta inteira da caneca tem <span id="size-guide">21 × 9 cm</span>. Deixe 5 mm de folga em cada borda.</p>
+            <p><span data-texto="canvaVolta">A volta inteira da caneca tem </span><span id="size-guide">21 × 9 cm</span>. Deixe 5 mm de folga em cada borda.</p>
             <details class="studio-duvida"><summary>O que quer dizer 300 dpi?</summary>
-              <p>São 300 pontinhos de tinta por polegada — a densidade em que a estampa sai nítida. Na prática:
+              <p data-texto="dpi">São 300 pontinhos de tinta por polegada — a densidade em que a estampa sai nítida. Na prática:
               uma foto precisa ter mais ou menos 2.480 × 1.060 pontos para ocupar a volta inteira sem ficar
               borrada. Foto de WhatsApp costuma ter menos, e por isso a gente avisa quando a sua está apertada.</p>
             </details>
@@ -230,7 +241,7 @@
 
         <!-- aba: enfeites -->
         <div class="studio-painel" id="painel-enfeites" role="tabpanel" aria-labelledby="aba-enfeites" tabindex="0" hidden>
-          <p class="studio-help">Toque num desenho para acrescentar na caneca.</p>
+          <p class="studio-help" data-texto="ajudaDosEnfeites">Toque num desenho para acrescentar na caneca.</p>
           <div class="studio-formas" id="grade-enfeites" role="group" aria-label="Desenhos para acrescentar"></div>
           <p class="studio-help">Do acervo da Panda Mimo:</p>
           <div class="studio-elementos" id="grade-elementos" role="group" aria-label="Elementos da marca para acrescentar"></div>
@@ -253,7 +264,7 @@
           </div>
           <div class="studio-file" id="art-file-info" hidden><span id="art-file-name"></span><button type="button" class="studio-text-button" id="remove-art">Remover</button></div>
           <div class="studio-example-row"><button type="button" class="studio-text-button" id="use-example">Experimentar com uma arte da Panda Mimo</button></div>
-          <fieldset class="studio-layout-field"><legend>Onde vai a arte?</legend><div class="studio-placement"><label><input type="radio" name="layout" value="front" checked><span>Só na frente</span></label><label><input type="radio" name="layout" value="both"><span>Nos dois lados</span></label><label><input type="radio" name="layout" value="wrap"><span>Ao redor</span></label></div></fieldset>
+          <fieldset class="studio-layout-field" data-peca="caneca garrafa"><legend>Onde vai a arte?</legend><div class="studio-placement"><label><input type="radio" name="layout" value="front" checked><span>Só na frente</span></label><label><input type="radio" name="layout" value="both"><span>Nos dois lados</span></label><label><input type="radio" name="layout" value="wrap"><span>Ao redor</span></label></div></fieldset>
           <div class="studio-ranges" id="art-adjustments">
             <label for="art-scale">Tamanho <output id="scale-value" for="art-scale">100%</output><input id="art-scale" type="range" min="20" max="250" value="100" step="1"></label>
             <label for="art-x">Para os lados <output id="x-value" for="art-x">0</output><input id="art-x" type="range" min="-100" max="100" value="0" step="1"></label>
@@ -292,7 +303,7 @@
           <div class="studio-save-buttons"><button type="button" class="btn btn--ghost btn--sm" id="save-preview" disabled>Baixar prévia</button><button type="button" class="btn btn--ghost btn--sm" id="save-print">Baixar arte plana</button></div>
           <button type="button" class="btn btn--ghost btn--sm" id="compartilhar" hidden>Mandar a prévia direto</button>
           <div class="studio-extras">
-            <button type="button" class="studio-text-button" id="save-video" hidden>Baixar vídeo da caneca girando</button>
+            <button type="button" class="studio-text-button" id="save-video" hidden data-texto="video">Baixar vídeo da caneca girando</button>
             <button type="button" class="studio-text-button" id="save-4k">Baixar prévia em 4K</button>
             <button type="button" class="studio-text-button" id="copiar-link">Copiar link da montagem</button>
           </div>

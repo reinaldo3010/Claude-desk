@@ -11,7 +11,9 @@
  * a prévia, a arte plana, o gabarito ou o projeto. O pedido segue pelo WhatsApp, com as escolhas
  * escritas no texto.
  */
-import { createMugViewer, MUG_SPEC, CENARIOS, ACABAMENTOS } from './caneca-3d.js';
+import { criaVisualizador } from './peca-3d.js';
+import { FORMA_DA_CANECA } from './caneca-3d.js';
+import { PECAS, PECA_PADRAO, pecaPorId, cenasDaPeca, areaEmPalavras } from './pecas.js';
 import { loadArtwork, composeArtwork, computePlacement, exportPrintArtwork, exportGuideArtwork, tamanhoRecomendado, printAreaOf } from './arte.js';
 import { FONTES_DA_ARTE, carregaFontes, fontePorValor } from './fontes.js';
 import { ehIlustracao, TAMANHO_DA_ILUSTRACAO } from './colecoes.js';
@@ -20,24 +22,23 @@ import { salvaRascunho, leRascunho, apagaRascunho, quandoFoi } from './rascunho.
 import {
   gruposDeCategorias, ADESIVOS, ELEMENTOS, ENFEITES, FILTROS, CORES_DE_ARTE, FORMAS_DE_FOTO,
   modeloPorId, modelosDaCategoria, novaArte, desenhaArte, desenhaForma, camadaEm,
-  alcasDaCamada, medidorDeTexto, cor, FRENTE, VERSO, miniaturaDaImagem, limiteDaImagem, proporcaoDaImagem,
+  alcasDaCamada, medidorDeTexto, cor, miniaturaDaImagem, limiteDaImagem, proporcaoDaImagem,
 } from './modelos.js';
 
-// Cores da cerâmica: dado físico da peça (manual 7.4), não cor de interface.
-const CERAMICA = Object.freeze({
-  branca: '#ffffff', preta: '#1d1b19', vermelha: '#b7262b', amarela: '#f0c233', rosa: '#f3a4b7', azul: '#1f5aa3',
-});
-// O nome de cada cor, como sai no pedido e no rótulo da bolinha. Morava nas opções de duas listas do
-// navegador, que deram lugar às bolinhas.
-const NOMES_DA_CERAMICA = Object.freeze({
-  branca: 'Branco', preta: 'Preto', vermelha: 'Vermelho', amarela: 'Amarelo', rosa: 'Rosa', azul: 'Azul',
-});
-const nomeDaCeramica = (cor) => NOMES_DA_CERAMICA[cor] || cor;
-const PRESETS = Object.freeze({
-  branca: { inside: 'branca', handle: 'branca', nome: 'Toda branca' },
-  preta: { inside: 'preta', handle: 'preta', nome: 'Preto e branco' },
-  rosa: { inside: 'rosa', handle: 'rosa', nome: 'Toque rosa' },
-});
+/*
+  A peça que está no estúdio (pecas.js): caneca, garrafa… A caneca abre por padrão. Medida, cores,
+  vistas, textos e pedido vêm dela; o resto do estúdio (modelos, camadas, gestos) é o mesmo para todas.
+*/
+let peca = PECAS[PECA_PADRAO];
+/** O nome de uma cor da peça, como sai no pedido e no rótulo da bolinha. */
+const nomeDaCor = (cor) => peca.cores.nomes[cor] || cor;
+/**
+ * As cores de frase e enfeite. Na peça com tintas próprias (a garrafa), as duas que acompanham a cor
+ * dela vêm primeiro: são as dos modelos dela, e trocam sozinhas quando a garrafa muda de cor.
+ */
+const coresDaArte = () => (peca.tintas
+  ? [{ token: '--tinta-da-peca', nome: `Tinta da ${peca.palavra}` }, { token: '--acento-da-peca', nome: `Destaque da ${peca.palavra}` }, ...CORES_DE_ARTE]
+  : CORES_DE_ARTE);
 const LAYOUTS = { front: 'só na frente', both: 'nos dois lados', wrap: 'ao redor' };
 const nomeDaLetra = (familia) => fontePorValor(familia)?.nome || familia;
 const PANDA_ADESIVO = 'assets/panda-coracao.webp';
@@ -58,11 +59,11 @@ const LIMITES = Object.freeze({
   fraseTamanho: [3, 22], enfeiteTamanho: [0.04, 0.5], adesivoTamanho: [0.06, 0.6], elementoTamanho: [0.06, 1.4],
   fotoLargura: [0.06, 0.6], giro: [-180, 180], arco: [-180, 180],
 });
-/** Onde um item se encaixa na volta: frente, meio (lado oposto à alça) e verso. */
-const LUGARES = Object.freeze([
-  { nome: 'Centralizar na frente', x: FRENTE },
+/** Onde um item se encaixa na volta: frente, meio (lado oposto à alça) e verso. Na peça plana, o meio. */
+const lugaresDaPeca = () => (peca.spec.plana ? [{ nome: 'Centralizar', x: 0.5 }] : [
+  { nome: 'Centralizar na frente', x: peca.lados.frente },
   { nome: 'Centralizar no meio', x: 0.5 },
-  { nome: 'Centralizar no verso', x: VERSO },
+  { nome: 'Centralizar no verso', x: peca.lados.verso },
 ]);
 
 /** As abas do painel, na ordem em que aparecem. */
@@ -71,7 +72,7 @@ const ABAS = Object.freeze({
   fotos: { rotulo: 'Fotos', painel: 'painel-fotos', dica: 'Coloque suas fotos nos espaços. Toque numa foto para ajustar.' },
   frases: { rotulo: 'Frases', painel: 'painel-frases', dica: 'Escreva do seu jeito. Cada frase tem letra, cor e tamanho próprios.' },
   enfeites: { rotulo: 'Enfeites', painel: 'painel-enfeites', dica: 'Corações, flores, estrelas e o Pandinha para enfeitar a volta.' },
-  arte: { rotulo: 'Minha arte', painel: 'painel-arte', dica: 'Sua arte pronta na caneca: escolha o arquivo e ajuste o tamanho.' },
+  arte: { rotulo: 'Minha arte', painel: 'painel-arte', dica: 'Sua arte pronta na {peca}: escolha o arquivo e ajuste o tamanho.' },
 });
 
 const $ = (id) => document.getElementById(id);
@@ -80,7 +81,7 @@ const el = {
   zoom: $('mug-zoom'), flat: $('flat-art'), colunaPeca: document.querySelector('.studio-coluna-peca'),
   travar: $('travar'), travarTexto: $('travar-texto'), cadeadoArco: $('cadeado-arco'), gesto: $('studio-gesture'),
   cenas: $('cenas'), acabamentos: $('acabamentos'), saveVideo: $('save-video'),
-  form: $('mug-form'), coresInterior: $('cores-interior'), coresAlca: $('cores-alca'),
+  form: $('mug-form'), pecas: $('pecas'), opcaoAcabamento: $('peca-acabamento'), medidaDaArte: $('flat-medida'),
   abas: $('abas'), dicaAba: $('dica-aba'), acoesArte: $('acoes-arte'),
   desfazer: $('desfazer'), refazer: $('refazer'),
   salvarModelo: $('salvar-modelo'), apagarModelo: $('apagar-modelo'), formMeuModelo: $('form-meu-modelo'),
@@ -113,7 +114,7 @@ const viewButtons = [...document.querySelectorAll('.studio-view-buttons [data-vi
 const presetButtons = [...document.querySelectorAll('.studio-color-presets [data-preset]')];
 
 const state = {
-  inside: 'branca', handle: 'branca',
+  inside: 'branca', handle: 'branca', corpo: 'creme',
   layout: 'front', scale: 1, offsetX: 0, offsetY: 0, rotation: 0,
   name: '', fontFamily: 'Fredoka', withPanda: true,
 };
@@ -145,10 +146,13 @@ let contador = 0;
 const textureCanvas = document.createElement('canvas');
 const medidorCanvas = document.createElement('canvas').getContext('2d');
 const medidor = medidorCanvas ? medidorDeTexto(medidorCanvas) : null;
-const medida = tamanhoRecomendado(MUG_SPEC);
-const areaMm = printAreaOf(MUG_SPEC);
-const VOLTA_MM = Math.PI * MUG_SPEC.diameterMm;
-const ALTURA_MM = MUG_SPEC.heightMm;
+// A medida da peça escolhida; mudam juntas quando a pessoa troca de peça (`aplicaMedidaDaPeca`).
+let medida = tamanhoRecomendado(peca.spec);
+let areaMm = printAreaOf(peca.spec);
+// A largura que a arte cobre na peça: a volta, na que é redonda; o painel, na plana (a ecobag).
+const larguraDaVolta = (spec) => spec.widthMm ?? Math.PI * spec.diameterMm;
+let voltaMm = larguraDaVolta(peca.spec);
+let alturaMm = peca.spec.heightMm;
 
 /* ---------- utilidades ---------- */
 const clamp = (valor, min, max) => Math.min(max, Math.max(min, valor));
@@ -228,8 +232,8 @@ const pontoMm = (fracao) => ({ x: areaMm.x + fracao.x * areaMm.width, y: areaMm.
 
 /** O ponto que o dedo tocou no 3D vira fração da área de impressão. */
 function fracaoDoPonto3D(ponto) {
-  const mmX = ponto.u * VOLTA_MM;
-  const mmY = (1 - ponto.v) * ALTURA_MM;
+  const mmX = ponto.u * voltaMm;
+  const mmY = (1 - ponto.v) * alturaMm;
   return { x: (mmX - areaMm.x) / areaMm.width, y: (mmY - areaMm.y) / areaMm.height };
 }
 
@@ -330,10 +334,13 @@ function guardaMeusModelos() {
 const acheModelo = (id) => meusModelos.find((m) => m.id === id) || modeloPorId(id);
 const ehMeuModelo = (id) => meusModelos.some((m) => m.id === id);
 
+// Modelo meu de antes das outras peças não diz a peça: era de caneca.
+const meusDaPeca = () => meusModelos.filter((m) => (m.peca || PECA_PADRAO) === peca.id);
+
 function listaDeModelos(qual) {
-  if (qual === 'meus') return meusModelos;
-  const base = modelosDaCategoria(qual);
-  return qual === 'todos' ? [...meusModelos, ...base] : base;
+  if (qual === 'meus') return meusDaPeca();
+  const base = modelosDaCategoria(qual, peca.id);
+  return qual === 'todos' ? [...meusDaPeca(), ...base] : base;
 }
 
 function salvaModeloAtual() {
@@ -342,6 +349,7 @@ function salvaModeloAtual() {
   setError('');
   const meu = {
     id: `meu-${Date.now().toString(36)}`,
+    peca: peca.id,
     categoria: 'meus',
     nome,
     descricao: 'Modelo seu, guardado neste navegador',
@@ -372,7 +380,7 @@ function apagaMeuModelo() {
   const nome = modeloAtual?.nome || 'o modelo';
   meusModelos = meusModelos.filter((m) => m.id !== arte.modelo);
   guardaMeusModelos();
-  if (categoria === 'meus' && !meusModelos.length) categoria = 'todos';
+  if (categoria === 'meus' && !meusDaPeca().length) categoria = 'todos';
   montaCategorias();
   montaModelos();
   atualizaModo();
@@ -380,8 +388,15 @@ function apagaMeuModelo() {
 }
 
 /* ---------- composição ---------- */
+/*
+  O fundo da arte é a própria peça: a cerâmica branca da caneca, ou a cor da garrafa. Na textura do 3D e
+  na vista aberta ele aparece (a pessoa vê a arte sobre a garrafa sálvia); no arquivo de impressão da
+  peça colorida ele sai transparente, porque quem pinta ali é a garrafa, não a tinta.
+*/
+const substratoDaTextura = () => peca.substrato ?? peca.cores.paleta[peca.cores.fixa ?? state.corpo];
+
 function opcoesDeComposicao(extra = {}) {
-  const base = { state, spec: MUG_SPEC, ...extra };
+  const base = { state, spec: peca.spec, substrato: peca.substrato, ...extra };
   if (!arte) return { ...base, artwork, pandaImage };
   const fotosDaArte = {};
   for (const [id, item] of fotos) {
@@ -396,7 +411,7 @@ function schedule() {
 }
 
 function render() {
-  const { canvas, placement, warnings } = composeArtwork(opcoesDeComposicao({ widthPx: 2048 }), textureCanvas);
+  const { canvas, placement, warnings } = composeArtwork(opcoesDeComposicao({ widthPx: 2048, substrato: substratoDaTextura() }), textureCanvas);
   viewer?.setTexture(canvas);
   drawFlat(canvas, placement);
   el.warnings.textContent = warnings.join(' ');
@@ -420,12 +435,12 @@ function drawFlat(source, placement) {
   context.imageSmoothingQuality = 'high';
   context.clearRect(0, 0, el.flat.width, el.flat.height);
   context.drawImage(source, sx, sy, sw, sh, 0, 0, el.flat.width, el.flat.height);
-  // Marca de dobra: onde ficam a frente e o verso da caneca.
+  // Marca de dobra: onde ficam a frente e o verso da caneca. A peça plana não dobra.
   context.save();
   context.strokeStyle = cor('--sand');
   context.setLineDash([6, 8]);
   context.lineWidth = 1.5;
-  for (const u of [0.25, 0.75]) {
+  for (const u of peca.spec.plana ? [] : [0.25, 0.75]) {
     const x = ((u * placement.canvasMm.width - area.x) / area.width) * el.flat.width;
     context.beginPath();
     context.moveTo(x, 0);
@@ -511,8 +526,7 @@ function frasesDaArte() {
 }
 
 function orderMessage() {
-  const lines = ['Oi, Panda Mimo! Montei uma caneca no site 🐼', '• Caneca reta de 325 ml, branca por fora'];
-  lines.push(`• Interior: ${nomeDaCeramica(state.inside)} · Alça: ${nomeDaCeramica(state.handle)}`);
+  const lines = [`Oi, Panda Mimo! Montei uma ${peca.palavra} no site 🐼`, ...peca.pedido(state, nomeDaCor)];
   if (arte) {
     const espacos = camadasDo('foto');
     const escolhidas = espacos.filter((camada) => fotos.get(camada.id)?.asset);
@@ -549,8 +563,11 @@ function updateOrderLink() {
 }
 
 /* ---------- prévia 3D ---------- */
+/** As cores escolhidas, em tinta, com o nome de cada parte da peça (na caneca, interior e alça). */
+const coresDaPeca = () => Object.fromEntries(peca.cores.partes.map(({ chave }) => [chave, peca.cores.paleta[state[chave]]]));
+
 function applyColors() {
-  viewer?.setColors({ inside: CERAMICA[state.inside], handle: CERAMICA[state.handle] });
+  viewer?.setColors(coresDaPeca());
 }
 
 function showFallback(error) {
@@ -568,15 +585,15 @@ function atualizaCadeado() {
   el.travar.setAttribute('aria-pressed', String(travado));
   el.travarTexto.textContent = travado ? 'Arte travada' : 'Arte livre';
   el.travar.setAttribute('aria-label', travado
-    ? 'Arte travada. Abra o cadeado para mover os itens arrastando na caneca.'
-    : 'Arte livre. Feche o cadeado para só girar a caneca.');
+    ? `Arte travada. Abra o cadeado para mover os itens arrastando na ${peca.palavra}.`
+    : `Arte livre. Feche o cadeado para só girar a ${peca.palavra}.`);
   // Cadeado aberto: o arco sai do lugar e fica de lado.
   el.cadeadoArco?.setAttribute('d', travado
     ? 'M8.4 10.5V7.8a3.6 3.6 0 0 1 7.2 0v2.7'
     : 'M8.4 10.5V7.8a3.6 3.6 0 0 1 7.2 0');
   el.gesto.textContent = travado
-    ? 'Arraste para girar a caneca. Abra o cadeado para mover os itens com o dedo.'
-    : 'Arraste um item para mover. Fora dele, a caneca gira.';
+    ? `Arraste para girar a ${peca.palavra}. Abra o cadeado para mover os itens com o dedo.`
+    : `Arraste um item para mover. Fora dele, a ${peca.palavra} gira.`;
 }
 
 function alternaCadeado() {
@@ -638,12 +655,16 @@ function moveCamada(gesto, fracao) {
   schedule();
 }
 
+/** O desenho 3D da peça. O da caneca já vem com a página; o das outras carrega quando elas são escolhidas. */
+const formaDaPeca = () => (peca.id === PECA_PADRAO ? Promise.resolve(FORMA_DA_CANECA) : peca.forma3d());
+
 async function startViewer() {
   el.fallback.hidden = true;
   el.loading.hidden = false;
   if (viewer) { viewer.dispose(); viewer = null; }
   try {
-    viewer = await createMugViewer(el.viewport, {
+    viewer = await criaVisualizador(el.viewport, {
+      forma: await formaDaPeca(),
       onError: showFallback,
       onPointer: aoPonteiro,
       onChange: (event) => {
@@ -686,28 +707,30 @@ function montaCenas() {
       return botao;
     }));
   };
-  monta(el.cenas, CENARIOS, () => cenaAtual, (id) => { cenaAtual = id; viewer?.setCenario(id); });
-  monta(el.acabamentos, ACABAMENTOS, () => acabamentoAtual, (id) => { acabamentoAtual = id; viewer?.setAcabamento(id); });
+  monta(el.cenas, cenasDaPeca(peca), () => cenaAtual, (id) => { cenaAtual = id; viewer?.setCenario(id); });
+  monta(el.acabamentos, peca.acabamentos, () => acabamentoAtual, (id) => { acabamentoAtual = id; viewer?.setAcabamento(id); });
+  // A garrafa sai num acabamento só: a escolha não aparece para prometer o que a peça não tem.
+  if (el.opcaoAcabamento) el.opcaoAcabamento.hidden = !peca.acabamentos.length;
 }
 
 /* ---------- cores da peça ---------- */
 // Em bolinhas, à vista. Eram duas listas do navegador dentro de um bloco que só abria com um clique.
 function montaCoresDaPeca() {
-  const monta = (alvo, parte, aoEscolher) => {
-    alvo.replaceChildren(...Object.entries(CERAMICA).map(([cor, tinta]) => {
+  for (const { chave, rotulo, alvo } of peca.cores.partes) {
+    const destino = $(alvo);
+    if (!destino) continue;
+    destino.replaceChildren(...Object.entries(peca.cores.paleta).map(([cor, tinta]) => {
       const bolinha = document.createElement('button');
       bolinha.type = 'button';
       bolinha.className = 'studio-cor';
       bolinha.dataset.cor = cor;
       bolinha.style.setProperty('--tinta', tinta);
-      bolinha.setAttribute('aria-label', nomeDaCeramica(cor));
-      bolinha.title = `${parte}: ${nomeDaCeramica(cor).toLowerCase()}`;
-      bolinha.addEventListener('click', () => aoEscolher(cor));
+      bolinha.setAttribute('aria-label', nomeDaCor(cor));
+      bolinha.title = `${rotulo}: ${nomeDaCor(cor).toLowerCase()}`;
+      bolinha.addEventListener('click', () => defineCores({ [chave]: cor }));
       return bolinha;
     }));
-  };
-  monta(el.coresInterior, 'Interior', (cor) => setColors(cor, null));
-  monta(el.coresAlca, 'Alça', (cor) => setColors(null, cor));
+  }
   markPreset();
 }
 
@@ -729,13 +752,159 @@ function ajustaColunaDaPeca() {
   tamanho em que aparece, na densidade da tela, para a frase e as alças não saírem borradas; nunca
   abaixo dos 840 px de sempre, nunca acima dos 2.480 px da própria arte a 300 dpi.
 */
-function ajustaVistaAberta() {
+function ajustaVistaAberta({ forcar = false } = {}) {
   const largura = el.flat.getBoundingClientRect().width;
   if (!largura) return;
   const alvo = Math.round(clamp(largura * (window.devicePixelRatio || 1), 840, 2480));
-  if (Math.abs(alvo - el.flat.width) < 8) return;
+  if (!forcar && Math.abs(alvo - el.flat.width) < 8) return;
   el.flat.width = alvo;
-  el.flat.height = Math.round(alvo * 360 / 840);
+  el.flat.height = Math.round(alvo * areaMm.height / areaMm.width);
+  schedule();
+}
+
+/* ---------- a peça: caneca, garrafa… ---------- */
+/*
+  Os textos da página que falam da peça ("Preparando sua caneca…", "Por fora, branca…"). A página nasce
+  com os da caneca; ao trocar de peça, os marcados com `data-texto` (e `data-rotulo`, o que o leitor de
+  tela anuncia) recebem os da peça escolhida, e os da caneca, guardados na abertura, voltam com ela.
+*/
+const textosDaCaneca = { texto: new Map(), rotulo: new Map() };
+
+function guardaTextosDaCaneca() {
+  for (const no of document.querySelectorAll('[data-texto]')) textosDaCaneca.texto.set(no, no.innerHTML);
+  for (const no of document.querySelectorAll('[data-rotulo]')) textosDaCaneca.rotulo.set(no, no.getAttribute('aria-label'));
+}
+
+function aplicaTextosDaPeca() {
+  const textos = peca.id === PECA_PADRAO ? {} : peca.textos || {};
+  for (const [no, daCaneca] of textosDaCaneca.texto) no.innerHTML = textos[no.dataset.texto] ?? daCaneca;
+  for (const [no, daCaneca] of textosDaCaneca.rotulo) no.setAttribute('aria-label', textos[no.dataset.rotulo] ?? daCaneca);
+  for (const button of viewButtons) button.textContent = peca.vistas[button.dataset.view] || button.textContent;
+  // O que só uma peça tem (as combinações e as bolinhas de interior e alça da caneca, a cor da garrafa).
+  for (const no of document.querySelectorAll('.studio-layout [data-peca]')) no.hidden = !no.dataset.peca.split(' ').includes(peca.id);
+  atualizaCadeado();
+}
+
+/** A medida da peça: área da arte, frente e verso, o tamanho dito ao Canva e a proporção das miniaturas. */
+function aplicaMedidaDaPeca() {
+  medida = tamanhoRecomendado(peca.spec);
+  areaMm = printAreaOf(peca.spec);
+  voltaMm = larguraDaVolta(peca.spec);
+  alturaMm = peca.spec.heightMm;
+  el.sizeGuide.textContent = `${medida.larguraCm.toFixed(0)} × ${medida.alturaCm.toFixed(0)} cm (${medida.larguraPx} × ${medida.alturaPx} px a ${medida.dpi} dpi)`;
+  if (el.medidaDaArte) el.medidaDaArte.textContent = areaEmPalavras(peca.spec);
+  // A caneca fica com a proporção escrita no CSS; as outras peças dizem a delas.
+  if (peca.id === PECA_PADRAO) el.models.style.removeProperty('--proporcao-da-arte');
+  else el.models.style.setProperty('--proporcao-da-arte', `${areaMm.width} / ${areaMm.height}`);
+}
+
+function marcaPecaEscolhida() {
+  for (const botao of el.pecas?.querySelectorAll('[data-peca-botao]') || []) {
+    botao.setAttribute('aria-pressed', String(botao.dataset.pecaBotao === peca.id));
+  }
+}
+
+function montaSeletorDePeca() {
+  for (const botao of el.pecas?.querySelectorAll('[data-peca-botao]') || []) {
+    botao.addEventListener('click', () => trocaPeca(botao.dataset.pecaBotao));
+  }
+  marcaPecaEscolhida();
+}
+
+/*
+  Cada peça guarda a própria montagem enquanto a página está aberta: quem monta a caneca, olha a garrafa
+  e volta encontra a caneca como deixou. A arte não passa de uma peça para a outra porque as medidas não
+  batem (a foto redonda da caneca viraria oval na garrafa) e cada peça tem os modelos dela.
+*/
+const montagensDasPecas = new Map();
+const AJUSTES_DA_ARTE = ['layout', 'scale', 'offsetX', 'offsetY', 'rotation'];
+
+function guardaMontagemDaPeca() {
+  montagensDasPecas.set(peca.id, {
+    arte, modeloAtual, artwork, artworkBlob, selecionada, categoria, busca, contador,
+    fotos: new Map(fotos), lixeira: new Map(lixeira),
+    passado: [...historico.passado], futuro: [...historico.futuro],
+    ajustes: Object.fromEntries(AJUSTES_DA_ARTE.map((chave) => [chave, state[chave]])),
+  });
+}
+
+function recuperaMontagemDaPeca() {
+  const guardada = montagensDasPecas.get(peca.id) || {
+    arte: null, modeloAtual: null, artwork: null, artworkBlob: null, selecionada: null, categoria: 'todos', busca: '',
+    contador, fotos: new Map(), lixeira: new Map(), passado: [], futuro: [],
+    ajustes: { layout: 'front', scale: 1, offsetX: 0, offsetY: 0, rotation: 0 },
+  };
+  montagensDasPecas.delete(peca.id);
+  ({ arte, modeloAtual, artwork, artworkBlob, selecionada, categoria, busca, contador } = guardada);
+  fotos.clear();
+  for (const [id, item] of guardada.fotos) fotos.set(id, item);
+  lixeira.clear();
+  for (const [id, item] of guardada.lixeira) lixeira.set(id, item);
+  historico.passado.splice(0, Infinity, ...guardada.passado);
+  historico.futuro.splice(0, Infinity, ...guardada.futuro);
+  historico.ultimaChave = '';
+  Object.assign(state, guardada.ajustes);
+  el.form.elements.layout.value = state.layout;
+  el.scale.value = String(Math.round(state.scale * 100));
+  el.x.value = String(Math.round(state.offsetX * 100));
+  el.y.value = String(Math.round(state.offsetY * 100));
+  el.rotation.value = String(Math.round(state.rotation));
+  syncRangeOutputs();
+  el.busca.value = busca;
+  el.fileName.textContent = artwork?.name || '';
+  el.fileInfo.hidden = !artwork;
+  setError('');
+}
+
+let trocaEmAndamento = 0;
+
+/**
+ * Troca a peça do estúdio. O desenho 3D da peça nova chega antes de qualquer coisa mudar na tela:
+ * enquanto ele carrega, a caneca continua inteira, e não uma caneca com a arte da garrafa.
+ * `guardar: false` é para quem vai pôr outra montagem por cima (rascunho, link, projeto).
+ */
+async function trocaPeca(id, { guardar = true } = {}) {
+  const nova = pecaPorId(id);
+  if (nova === peca) return;
+  const vez = (trocaEmAndamento += 1);
+  const forma = await (nova.id === PECA_PADRAO ? Promise.resolve(FORMA_DA_CANECA) : nova.forma3d());
+  if (vez !== trocaEmAndamento) return;
+  abreAssuntos(false);
+  escondeArteMaior();
+  if (guardar) guardaMontagemDaPeca();
+  clearTimeout(rascunhoPendente);
+  peca = nova;
+  aplicaMedidaDaPeca();
+  aplicaTextosDaPeca();
+  recuperaMontagemDaPeca();
+  // Onde vai a arte: a peça plana só tem a frente.
+  if (peca.layouts && !peca.layouts.includes(state.layout)) {
+    state.layout = peca.layouts[0];
+    el.form.elements.layout.value = state.layout;
+  }
+  aplicaTintaDaPeca();
+  montaCoresDaPeca();
+  montaCenas();
+  montaCategorias();
+  montaModelos();
+  marcaModeloEscolhido();
+  atualizaModo();
+  atualizaHistorico();
+  marcaPecaEscolhida();
+  if (!cenasDaPeca(peca).some((cena) => cena.id === cenaAtual)) {
+    cenaAtual = 'estudio';
+    montaCenas();
+  }
+  viewer?.setForma(forma);
+  applyColors();
+  viewer?.setCenario(cenaAtual);
+  viewer?.setAcabamento(acabamentoAtual);
+  viewer?.setZoom(Number(el.zoom.value) / 100);
+  for (const button of viewButtons) button.setAttribute('aria-pressed', String(button.dataset.view === 'front'));
+  ajustaVistaAberta({ forcar: true });
+  ajustaColunaDaPeca();
+  garanteImagens();
+  garanteFontes();
   schedule();
 }
 
@@ -855,7 +1024,7 @@ function atualizaPaineis() {
     const painel = $(aba.painel);
     if (painel) painel.hidden = id !== abaAtual;
   }
-  el.dicaAba.textContent = ABAS[abaAtual]?.dica || '';
+  el.dicaAba.textContent = (ABAS[abaAtual]?.dica || '').replace('{peca}', peca.palavra);
   el.acoesArte.hidden = !arte || abaAtual === 'modelo';
   if (el.acoesArte.hidden) el.formMeuModelo.hidden = true;
 }
@@ -927,10 +1096,12 @@ function montaCategorias() {
   const primeiros = document.createElement('div');
   primeiros.className = 'studio-assunto__primeiros';
   primeiros.append(itemDeAssunto({ id: 'todos', nome: 'Todos os modelos' }));
-  if (meusModelos.length) primeiros.append(itemDeAssunto({ id: 'meus', nome: 'Meus modelos' }));
+  if (meusDaPeca().length) primeiros.append(itemDeAssunto({ id: 'meus', nome: 'Meus modelos' }));
   const grupos = document.createElement('div');
   grupos.className = 'studio-assunto__grupos';
-  gruposDeCategorias().forEach(([nome, itens], indice) => {
+  gruposDeCategorias().forEach(([nome, todos], indice) => {
+    const itens = todos.filter((item) => listaDeModelos(item.id).length);
+    if (!itens.length) return;
     const grupo = document.createElement('div');
     grupo.className = 'studio-assunto__grupo';
     grupo.setAttribute('role', 'group');
@@ -1009,6 +1180,12 @@ function desenhaMiniatura(canvas, modelo) {
   const escalaY = canvas.height / areaMm.height;
   context.setTransform(1, 0, 0, 1, 0, 0);
   context.clearRect(0, 0, canvas.width, canvas.height);
+  // Na peça colorida a miniatura mostra a arte sobre a cor dela: texto em papel na garrafa preta
+  // sumiria no branco do cartão.
+  if (peca.substrato === null) {
+    context.fillStyle = substratoDaTextura();
+    context.fillRect(0, 0, canvas.width, canvas.height);
+  }
   context.setTransform(escalaX, 0, 0, escalaY, -areaMm.x * escalaX, -areaMm.y * escalaY);
   desenhaArte(context, novaArte(modelo), areaMm, { imagens: imagensDaMiniatura() });
   context.setTransform(1, 0, 0, 1, 0, 0);
@@ -1309,7 +1486,7 @@ function escolheModelo(id) {
 */
 function entraNaMinhaArte({ nome = state.name } = {}) {
   if (ehMinhaArte()) return;
-  const base = computePlacement(artwork, { ...state, name: nome, withPanda: state.withPanda }, MUG_SPEC);
+  const base = computePlacement(artwork, { ...state, name: nome, withPanda: state.withPanda }, peca.spec);
   const area = base.printArea;
   const fx = (xMm) => (xMm - area.x) / area.width;
   const fy = (yMm) => (yMm - area.y) / area.height;
@@ -1413,8 +1590,8 @@ function atualizaModo() {
 /* ---------- cartões de camada ---------- */
 /** Ilustração de coleção cresce mais que enfeite: ela nasce larga e a pessoa costuma querer maior. */
 function limiteDeTamanho(camada) {
-  if (camada.tipo === 'adesivo') return limiteDaImagem(camada.arquivo, LIMITES.adesivoTamanho);
-  if (camada.tipo === 'elemento') return limiteDaImagem(camada.arquivo, LIMITES.elementoTamanho);
+  if (camada.tipo === 'adesivo') return limiteDaImagem(camada.arquivo, LIMITES.adesivoTamanho, areaMm.height);
+  if (camada.tipo === 'elemento') return limiteDaImagem(camada.arquivo, LIMITES.elementoTamanho, areaMm.height);
   return ehIlustracao(camada.forma) ? TAMANHO_DA_ILUSTRACAO : LIMITES.enfeiteTamanho;
 }
 
@@ -1428,10 +1605,10 @@ function rotuloDaCamada(camada) {
 
 function subtituloDaCamada(camada) {
   if (camada.tipo === 'foto') return fotos.get(camada.id)?.asset ? fotos.get(camada.id).asset.name : 'Toque para escolher a foto';
-  if (camada.tipo === 'frase') return `${nomeDaLetra(camada.fonte)} · ${CORES_DE_ARTE.find((c) => c.token === camada.cor)?.nome || 'cor da marca'}`;
+  if (camada.tipo === 'frase') return `${nomeDaLetra(camada.fonte)} · ${coresDaArte().find((c) => c.token === camada.cor)?.nome || 'cor da marca'}`;
   if (camada.tipo === 'adesivo') return ADESIVOS.find((a) => a.arquivo === camada.arquivo)?.nome || 'Pandinha';
   if (camada.tipo === 'elemento') return ELEMENTOS.find((e) => e.arquivo === camada.arquivo)?.grupo || 'Do acervo';
-  return CORES_DE_ARTE.find((c) => c.token === camada.cor)?.nome || 'Enfeite';
+  return coresDaArte().find((c) => c.token === camada.cor)?.nome || 'Enfeite';
 }
 
 function icone(camada) {
@@ -1562,7 +1739,7 @@ function campoCores(valor, aoMudar) {
   grupo.className = 'studio-cores';
   grupo.setAttribute('role', 'group');
   grupo.setAttribute('aria-label', 'Cor');
-  for (const item of CORES_DE_ARTE) {
+  for (const item of coresDaArte()) {
     const botao = document.createElement('button');
     botao.type = 'button';
     botao.className = 'studio-cor';
@@ -1608,7 +1785,7 @@ function camposDaCamada(camada) {
     if (camada.grupo) {
       const nota = document.createElement('p');
       nota.className = 'studio-help';
-      nota.textContent = 'Esta frase se repete na volta da caneca: mudou aqui, mudou nas outras.';
+      nota.textContent = `Esta frase se repete na volta da ${peca.palavra}: mudou aqui, mudou nas outras.`;
       partes.push(nota);
     }
     partes.push(campoDeLetras(camada.fonte, (valor) => {
@@ -1708,7 +1885,7 @@ function camposDaCamada(camada) {
 
   const lugares = document.createElement('div');
   lugares.className = 'studio-item__acoes';
-  for (const lugar of LUGARES) {
+  for (const lugar of lugaresDaPeca()) {
     lugares.append(botao(lugar.nome, () => {
       registra(`lugar:${camada.id}`);
       camada.x = lugar.x;
@@ -1862,7 +2039,7 @@ function apaga(id) {
 function lugarLivre() {
   const u = viewer?.frenteVisivel?.();
   if (!Number.isFinite(u)) return { x: 0.5, y: 0.5 };
-  const fracao = (u * VOLTA_MM - areaMm.x) / areaMm.width;
+  const fracao = (u * voltaMm - areaMm.x) / areaMm.width;
   return { x: clamp(fracao, 0.08, 0.92), y: 0.5 };
 }
 
@@ -1894,7 +2071,7 @@ function adicionaFoto() {
   const lugar = lugarLivre();
   const camada = acrescenta({
     id: novoId(), tipo: 'foto', rotulo: `Foto ${camadasDo('foto').length + 1}`, forma: 'arredondado',
-    x: lugar.x, y: 0.45, largura: 0.24, altura: 0.6, rotacao: 0, ajuste: { scale: 1, offsetX: 0, offsetY: 0 },
+    x: lugar.x, y: 0.45, ...peca.novos.foto, rotacao: 0, ajuste: { scale: 1, offsetX: 0, offsetY: 0 },
   });
   pedeArquivo({ tipo: 'camada', id: camada.id });
 }
@@ -1904,7 +2081,7 @@ function adicionaFrase() {
   const lugar = lugarLivre();
   acrescenta({
     id: novoId(), tipo: 'frase', rotulo: 'Frase', texto: TEXTO_DA_FRASE_NOVA,
-    x: lugar.x, y: 0.5, tamanho: 10, largura: 0.28, fonte: 'Caveat', cor: '--hand-ink', rotacao: 0,
+    x: lugar.x, y: 0.5, ...peca.novos.frase, fonte: 'Caveat', cor: '--hand-ink', rotacao: 0,
   });
   document.querySelector(`[data-corpo="${selecionada}"] input[type="text"]`)?.focus();
 }
@@ -1914,7 +2091,7 @@ function adicionaEnfeite(forma) {
   const lugar = lugarLivre();
   acrescenta({
     id: novoId(), tipo: 'enfeite', forma, cor: '--peach-deep',
-    x: lugar.x, y: 0.5, tamanho: 0.14, rotacao: 0,
+    x: lugar.x, y: 0.5, tamanho: 0.14 * peca.novos.escala, rotacao: 0,
   });
 }
 
@@ -1922,7 +2099,7 @@ function adicionaElemento(arquivo) {
   if (!arte) return;
   const item = ELEMENTOS.find((e) => e.arquivo === arquivo);
   const lugar = lugarLivre();
-  const camada = { id: novoId(), tipo: 'elemento', arquivo, rotulo: item?.nome || 'Elemento', x: lugar.x, y: 0.5, tamanho: item?.tamanho || 0.2, rotacao: 0 };
+  const camada = { id: novoId(), tipo: 'elemento', arquivo, rotulo: item?.nome || 'Elemento', x: lugar.x, y: 0.5, tamanho: (item?.tamanho || 0.2) * peca.novos.escala, rotacao: 0 };
   camada.tamanho = clamp(camada.tamanho, ...limiteDeTamanho(camada));
   acrescenta(camada);
   garanteImagens();
@@ -1936,7 +2113,9 @@ function adicionaElemento(arquivo) {
 async function adicionaPandinha(arquivo = ADESIVOS[0].arquivo, { y = 0.78, tamanho = 0.18 } = {}) {
   if (!arte) return;
   const lugar = lugarLivre();
-  acrescenta({ id: novoId(), tipo: 'adesivo', rotulo: 'Pandinha', arquivo, x: lugar.x, y, tamanho, rotacao: 0 });
+  const camada = { id: novoId(), tipo: 'adesivo', rotulo: 'Pandinha', arquivo, x: lugar.x, y, tamanho: tamanho * peca.novos.escala, rotacao: 0 };
+  camada.tamanho = clamp(camada.tamanho, ...limiteDeTamanho(camada));
+  acrescenta(camada);
   await garanteImagens();
   montaListas();
   schedule();
@@ -2176,7 +2355,7 @@ async function soltaNaCaneca(event) {
     else {
       const nova = acrescenta({
         id: novoId(), tipo: 'foto', rotulo: `Foto ${camadasDo('foto').length + 1}`, forma: 'arredondado',
-        x: clamp(fracao.x, 0.06, 0.94), y: clamp(fracao.y, 0.1, 0.9), largura: 0.24, altura: 0.6,
+        x: clamp(fracao.x, 0.06, 0.94), y: clamp(fracao.y, 0.1, 0.9), ...peca.novos.foto,
         rotacao: 0, ajuste: { scale: 1, offsetX: 0, offsetY: 0 },
       }, { desvia: false }); // soltou ali, fica ali
       destino = { tipo: 'camada', id: nova.id };
@@ -2240,20 +2419,45 @@ function resetAdjustments() {
 }
 
 function markPreset() {
+  const combinacoes = peca.cores.combinacoes || {};
   for (const button of presetButtons) {
-    const preset = PRESETS[button.dataset.preset];
-    button.setAttribute('aria-pressed', String(preset.inside === state.inside && preset.handle === state.handle));
+    const preset = combinacoes[button.dataset.preset];
+    button.setAttribute('aria-pressed', String(Boolean(preset) && preset.inside === state.inside && preset.handle === state.handle));
   }
-  for (const bolinha of el.coresInterior.children) bolinha.setAttribute('aria-pressed', String(bolinha.dataset.cor === state.inside));
-  for (const bolinha of el.coresAlca.children) bolinha.setAttribute('aria-pressed', String(bolinha.dataset.cor === state.handle));
+  for (const { chave, alvo } of peca.cores.partes) {
+    for (const bolinha of $(alvo)?.children || []) bolinha.setAttribute('aria-pressed', String(bolinha.dataset.cor === state[chave]));
+  }
 }
 
-function setColors(inside, handle) {
-  if (inside && CERAMICA[inside]) state.inside = inside;
-  if (handle && CERAMICA[handle]) state.handle = handle;
+/*
+  As duas tintas que acompanham a cor da peça (manual 7.4): na garrafa creme e na sálvia, nanquim suave e
+  pêssego tinta; na pêssego e na preta, papel. Os modelos da garrafa pintam as frases com elas, então o
+  texto troca junto com a cor da garrafa, e o nome não some na garrafa preta.
+*/
+function aplicaTintaDaPeca() {
+  const tintas = peca.tintas?.[peca.cores.fixa ?? state.corpo];
+  if (!tintas) return;
+  document.documentElement.style.setProperty('--tinta-da-peca', cor(tintas.tinta));
+  document.documentElement.style.setProperty('--acento-da-peca', cor(tintas.acento));
+}
+
+/** Troca as cores das partes da peça que vieram em `escolhas` (na caneca, `inside` e `handle`). */
+function defineCores(escolhas = {}) {
+  for (const { chave } of peca.cores.partes) {
+    const escolhida = escolhas[chave];
+    if (escolhida && peca.cores.paleta[escolhida]) state[chave] = escolhida;
+  }
   markPreset();
   applyColors();
   updateOrderLink();
+  // Na peça colorida a cor é o fundo da arte: a textura, a vista aberta e as miniaturas são refeitas.
+  if (peca.substrato === null) {
+    aplicaTintaDaPeca();
+    montaModelos();
+    marcaModeloEscolhido();
+    montaListas();
+    schedule();
+  }
 }
 
 function readLayout() {
@@ -2265,8 +2469,8 @@ function readLayout() {
 async function saveGuide() {
   el.saveGuide.disabled = true;
   try {
-    const { blob, larguraPx, alturaPx } = await exportGuideArtwork(MUG_SPEC);
-    download(blob, `gabarito-caneca-panda-mimo-${larguraPx}x${alturaPx}.png`);
+    const { blob, larguraPx, alturaPx } = await exportGuideArtwork(peca.spec);
+    download(blob, `gabarito-${peca.id}-panda-mimo-${larguraPx}x${alturaPx}.png`);
     setStatus(`Gabarito salvo em ${larguraPx} × ${alturaPx} px. No Canva, crie um design desse tamanho e use o gabarito como fundo.`);
   } catch (error) {
     setStatus(error.message || 'Não foi possível preparar o gabarito agora.');
@@ -2282,14 +2486,14 @@ async function saveGuide() {
 async function levaParaOCanva() {
   try {
     if (!hasContent()) {
-      const { blob, larguraPx, alturaPx } = await exportGuideArtwork(MUG_SPEC);
-      download(blob, `gabarito-caneca-panda-mimo-${larguraPx}x${alturaPx}.png`);
+      const { blob, larguraPx, alturaPx } = await exportGuideArtwork(peca.spec);
+      download(blob, `gabarito-${peca.id}-panda-mimo-${larguraPx}x${alturaPx}.png`);
       setStatus(`Ainda não há arte, então baixamos o gabarito (${larguraPx} × ${alturaPx} px). No Canva, crie um design desse tamanho e use o gabarito como fundo.`);
       return;
     }
     setStatus('Preparando sua arte para levar ao Canva…');
     const { blob, widthPx, heightPx } = await exportPrintArtwork(opcoesDeComposicao());
-    download(blob, `arte-da-caneca-para-o-canva-${widthPx}x${heightPx}.png`);
+    download(blob, `arte-da-${peca.palavra}-para-o-canva-${widthPx}x${heightPx}.png`);
     setStatus(`Arte baixada em ${widthPx} × ${heightPx} px. No Canva, crie um design desse tamanho e arraste o arquivo para dentro. Quando terminar, volte aqui em "Trazer a arte do Canva".`);
   } catch (error) {
     setStatus(error.message || 'Não foi possível preparar a arte para o Canva agora.');
@@ -2306,11 +2510,11 @@ async function importaDoCanva(file) {
   if (!artwork) return;
   mostraAba('arte');
   const proporcao = artwork.width / artwork.height;
-  const certa = MUG_SPEC.printWidthMm / MUG_SPEC.printHeightMm;
+  const certa = peca.spec.printWidthMm / peca.spec.printHeightMm;
   if (Math.abs(proporcao - certa) / certa > 0.03) {
-    setStatus(`A arte veio em ${artwork.width} × ${artwork.height} px, proporção diferente da volta da caneca. Ela entra inteira, com folga em volta. Para preencher tudo, use ${medida.larguraPx} × ${medida.alturaPx} px.`);
+    setStatus(`A arte veio em ${artwork.width} × ${artwork.height} px, proporção diferente da volta da ${peca.palavra}. Ela entra inteira, com folga em volta. Para preencher tudo, use ${medida.larguraPx} × ${medida.alturaPx} px.`);
   } else {
-    setStatus('Arte do Canva aplicada na volta inteira da caneca. Gire a peça para conferir.');
+    setStatus(`Arte do Canva aplicada na volta inteira da ${peca.palavra}. Gire a peça para conferir.`);
   }
 }
 
@@ -2320,6 +2524,7 @@ let rascunhoPendente = 0;
 function montagemAtual() {
   return {
     versao: PROJETO_VERSAO,
+    peca: peca.id,
     escolhas: { ...state },
     arte: arte ? { ...arte, camadas: arte.camadas.map((camada) => ({ ...camada })) } : null,
     cena: cenaAtual,
@@ -2339,14 +2544,14 @@ function guardaRascunho() {
   rascunhoPendente = setTimeout(async () => {
     const fotosSalvas = {};
     for (const [id, item] of fotos) if (item.blob) fotosSalvas[id] = item.blob;
-    await salvaRascunho({ ...montagemAtual(), fotos: fotosSalvas, arteLivre: artworkBlob || null, nomeDaArte: artwork?.name || '' });
+    await salvaRascunho({ ...montagemAtual(), fotos: fotosSalvas, arteLivre: artworkBlob || null, nomeDaArte: artwork?.name || '' }, peca.id);
   }, 1200);
 }
 
 async function ofereceRascunho() {
   const guardado = await leRascunho();
   if (!guardado || (!guardado.arte && !guardado.arteLivre)) return;
-  el.rascunhoTexto.textContent = `Você começou uma caneca ${quandoFoi(guardado.salvoEm)} e ela ficou guardada neste aparelho.`;
+  el.rascunhoTexto.textContent = `Você começou uma ${pecaPorId(guardado.peca).palavra} ${quandoFoi(guardado.salvoEm)} e ela ficou guardada neste aparelho.`;
   el.rascunho.hidden = false;
   el.rascunhoContinuar.onclick = async () => {
     el.rascunho.hidden = true;
@@ -2355,7 +2560,7 @@ async function ofereceRascunho() {
   };
   el.rascunhoApagar.onclick = async () => {
     el.rascunho.hidden = true;
-    await apagaRascunho();
+    await apagaRascunho(guardado.peca);
     setStatus('Rascunho apagado. Comece à vontade.');
   };
 }
@@ -2380,9 +2585,11 @@ function leAjustesDaArte(c) {
 
 async function aplicaMontagem(dados, { fotos: fotosDoArquivo = null } = {}) {
   const c = dados.escolhas || {};
+  // Montagem de antes das outras peças não diz a peça: era sempre caneca.
+  await trocaPeca(dados.peca || PECA_PADRAO, { guardar: false });
   // Abre sempre de uma caneca limpa: a Minha arte que está na tela não empresta camadas à que chega.
   if (ehMinhaArte()) { arte = null; selecionada = null; atualizaModo(); }
-  setColors(c.inside, c.handle);
+  defineCores(c);
   leEscolhasAntigas(c);
   if (dados.cena) { cenaAtual = dados.cena; viewer?.setCenario(cenaAtual); }
   if (dados.acabamento) { acabamentoAtual = dados.acabamento; viewer?.setAcabamento(acabamentoAtual); }
@@ -2493,7 +2700,7 @@ async function savePreview() {
   el.savePreview.disabled = true;
   try {
     const blob = await viewer.capture();
-    download(blob, `caneca-panda-mimo-previa${modeloAtual ? `-${slug(modeloAtual.nome)}` : ''}.png`);
+    download(blob, `${peca.id}-panda-mimo-previa${modeloAtual ? `-${slug(modeloAtual.nome)}` : ''}.png`);
     setStatus('Prévia salva. Anexe na conversa do WhatsApp quando pedir.');
   } catch (error) {
     setStatus(error.message || 'Não foi possível salvar a prévia agora.');
@@ -2506,14 +2713,14 @@ async function saveVideo() {
   if (!viewer) return;
   const rotulo = el.saveVideo.textContent;
   el.saveVideo.disabled = true;
-  setStatus('Gravando a caneca dando uma volta…');
+  setStatus(`Gravando a ${peca.palavra} dando uma volta…`);
   try {
     const blob = await viewer.gravaVolta({
       segundos: 5,
       aoAndar: (t) => { el.saveVideo.textContent = `Gravando… ${Math.round(t * 100)}%`; },
     });
     if (!blob) { setStatus('Este navegador não grava vídeo. Baixe a prévia em imagem.'); return; }
-    download(blob, `caneca-panda-mimo-girando${modeloAtual ? `-${slug(modeloAtual.nome)}` : ''}.webm`);
+    download(blob, `${peca.id}-panda-mimo-girando${modeloAtual ? `-${slug(modeloAtual.nome)}` : ''}.webm`);
     setStatus('Vídeo salvo em WebM, pronto para mandar no WhatsApp ou postar.');
   } catch (error) {
     setStatus(error.message || 'Não foi possível gravar o vídeo agora.');
@@ -2529,12 +2736,12 @@ async function compartilha() {
   el.compartilhar.disabled = true;
   try {
     const blob = await viewer.capture();
-    const arquivo = new File([blob], 'caneca-panda-mimo.png', { type: 'image/png' });
+    const arquivo = new File([blob], `${peca.id}-panda-mimo.png`, { type: 'image/png' });
     if (!navigator.canShare?.({ files: [arquivo] })) {
       setStatus('Este aparelho não compartilha arquivo direto. Baixe a prévia e anexe na conversa.');
       return;
     }
-    await navigator.share({ files: [arquivo], text: orderMessage(), title: 'Minha caneca Panda Mimo' });
+    await navigator.share({ files: [arquivo], text: orderMessage(), title: `Minha ${peca.palavra} Panda Mimo` });
     setStatus('Prévia mandada. É só escolher a conversa.');
   } catch (error) {
     if (error?.name !== 'AbortError') setStatus('Não deu para compartilhar agora. Baixe a prévia e anexe na conversa.');
@@ -2549,7 +2756,7 @@ async function savePreview4k() {
   setStatus('Preparando a prévia grande…');
   try {
     const blob = await viewer.capture({ largura: 3840 });
-    download(blob, `caneca-panda-mimo-previa-4k${modeloAtual ? `-${slug(modeloAtual.nome)}` : ''}.png`);
+    download(blob, `${peca.id}-panda-mimo-previa-4k${modeloAtual ? `-${slug(modeloAtual.nome)}` : ''}.png`);
     setStatus('Prévia em 4K salva, boa para post e anúncio.');
   } catch (error) {
     setStatus(error.message || 'Não foi possível salvar a prévia grande agora.');
@@ -2590,7 +2797,7 @@ async function geraLote() {
       const dados = new Uint8Array(await blob.arrayBuffer());
       arquivos.push({ nome: `${String(i + 1).padStart(2, '0')}-${slug(nomes[i]) || 'nome'}.png`, dados });
     }
-    download(fazZip(arquivos), `canecas-panda-mimo-${arquivos.length}-nomes.zip`);
+    download(fazZip(arquivos), `${peca.plural}-panda-mimo-${arquivos.length}-nomes.zip`);
     el.loteStatus.textContent = `${arquivos.length} artes num arquivo só, prontas para a produção.`;
     setStatus(`${arquivos.length} artes geradas. Mande o arquivo junto com o pedido no WhatsApp.`);
   } catch (erro) {
@@ -2608,7 +2815,7 @@ async function savePrint() {
   el.savePrint.disabled = true;
   try {
     const { blob, widthPx, heightPx } = await exportPrintArtwork(opcoesDeComposicao());
-    download(blob, `caneca-panda-mimo-arte-${MUG_SPEC.printWidthMm}x${MUG_SPEC.printHeightMm}mm-300dpi.png`);
+    download(blob, `${peca.id}-panda-mimo-arte-${peca.spec.printWidthMm}x${peca.spec.printHeightMm}mm-300dpi.png`);
     setStatus(`Arte plana salva em ${widthPx} × ${heightPx} px (300 dpi). A gente confere antes de produzir.`);
   } catch (error) {
     setStatus(error.message || 'Não foi possível preparar a arte agora.');
@@ -2639,13 +2846,13 @@ async function saveProject() {
     }
     const project = {
       tipo: PROJETO_TIPO, versao: PROJETO_VERSAO, salvoEm: new Date().toISOString(),
-      peca: { modelo: 'Caneca reta 325 ml', ...MUG_SPEC },
+      peca: { id: peca.id, modelo: peca.descricao, ...peca.spec },
       escolhas: { ...state },
       arte: arte ? { ...arte, camadas: arte.camadas.map((camada) => ({ ...camada })) } : null,
       fotos: fotosSalvas,
       arteLivre: arte && !ehMinhaArte() ? null : await arquivoDe(artworkBlob, artwork?.name),
     };
-    download(new Blob([JSON.stringify(project)], { type: 'application/json' }), `caneca-panda-mimo${modeloAtual ? `-${slug(modeloAtual.nome)}` : ''}.json`);
+    download(new Blob([JSON.stringify(project)], { type: 'application/json' }), `${peca.id}-panda-mimo${modeloAtual ? `-${slug(modeloAtual.nome)}` : ''}.json`);
     setStatus('Projeto salvo. Para continuar depois, solte esse arquivo na área da arte.');
   } catch (error) {
     setStatus(error.message || 'Não foi possível salvar o projeto agora.');
@@ -2669,7 +2876,7 @@ async function openProject(file) {
     const emCamadas = project.arte && Array.isArray(project.arte.camadas) ? project.arte : null;
     const fotosDoArquivo = {};
     for (const [id, registro] of Object.entries(project.fotos || {})) if (registro?.dados) fotosDoArquivo[id] = registro;
-    await aplicaMontagem({ escolhas: project.escolhas, arte: emCamadas, arteLivre, nomeDaArte: arteLivre?.nome }, { fotos: fotosDoArquivo });
+    await aplicaMontagem({ peca: project.peca?.id, escolhas: project.escolhas, arte: emCamadas, arteLivre, nomeDaArte: arteLivre?.nome }, { fotos: fotosDoArquivo });
     setStatus('Projeto aberto. Continue de onde parou.');
   } catch (error) {
     setError(error.message || 'Não conseguimos abrir esse projeto.');
@@ -2793,7 +3000,7 @@ function ligaVistaAberta() {
     else {
       const nova = acrescenta({
         id: novoId(), tipo: 'foto', rotulo: `Foto ${camadasDo('foto').length + 1}`, forma: 'arredondado',
-        x: clamp(fracao.x, 0.06, 0.94), y: clamp(fracao.y, 0.1, 0.9), largura: 0.24, altura: 0.6,
+        x: clamp(fracao.x, 0.06, 0.94), y: clamp(fracao.y, 0.1, 0.9), ...peca.novos.foto,
         rotacao: 0, ajuste: { scale: 1, offsetX: 0, offsetY: 0 },
       }, { desvia: false }); // soltou ali, fica ali
       await handleFile(arquivo, { tipo: 'camada', id: nova.id });
@@ -2808,8 +3015,8 @@ function bind() {
   el.retry.addEventListener('click', startViewer);
 
   for (const button of presetButtons) button.addEventListener('click', () => {
-    const preset = PRESETS[button.dataset.preset];
-    if (preset) setColors(preset.inside, preset.handle);
+    const preset = peca.cores.combinacoes?.[button.dataset.preset];
+    if (preset) defineCores(preset);
   });
 
   el.travar.addEventListener('click', alternaCadeado);
@@ -2965,6 +3172,15 @@ function bind() {
   el.form.addEventListener('submit', (event) => event.preventDefault());
   ligaVistaAberta();
 
+  // O site pede a peça de fora (o "Ver com meu nome" do detalhe da garrafa): o estúdio troca na hora e
+  // devolve em `pronto` quando terminou, para o site só rolar até aqui com a página já na medida nova.
+  document.addEventListener('estudio:peca', (evento) => {
+    const pedido = evento.detail;
+    const id = typeof pedido === 'string' ? pedido : pedido?.peca;
+    if (!PECAS[id]) return;
+    const troca = trocaPeca(id);
+    if (pedido && typeof pedido === 'object') pedido.pronto = troca;
+  });
   // Quando pagina.js trocar o número do WhatsApp, o texto do pedido acompanha.
   new MutationObserver(updateOrderLink).observe(el.order, { attributes: true, attributeFilter: ['href'] });
   document.fonts?.addEventListener?.('loadingdone', () => { montaModelos(); marcaModeloEscolhido(); schedule(); });
@@ -2978,7 +3194,9 @@ function bind() {
 async function init() {
   carregaMeusModelos();
   bind();
-  el.sizeGuide.textContent = `${medida.larguraCm.toFixed(0)} × ${medida.alturaCm.toFixed(0)} cm (${medida.larguraPx} × ${medida.alturaPx} px a ${medida.dpi} dpi)`;
+  guardaTextosDaCaneca();
+  aplicaMedidaDaPeca();
+  montaSeletorDePeca();
   montaCategorias();
   montaModelos();
   montaGradeDeEnfeites();
@@ -3001,6 +3219,9 @@ async function init() {
   // Pelo mesmo pedido das miniaturas: por caminhos separados, a imagem era baixada duas vezes.
   const [panda] = await Promise.all([pedeImagem(PANDA_ADESIVO), fontsReady]);
   if (panda) pandaImage = panda;
+  // A peça pedida pelo endereço (caneca-3d.html?peca=garrafa) ou pela página que trouxe o estúdio.
+  const pedida = new URLSearchParams(location.search).get('peca') || el.viewport.closest('[data-peca-pedida]')?.dataset.pecaPedida;
+  if (PECAS[pedida]) await trocaPeca(pedida);
   render();
   await startViewer();
   // Link de montagem tem prioridade; sem ele, o rascunho deste aparelho é oferecido.

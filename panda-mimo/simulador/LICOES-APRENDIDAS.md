@@ -181,3 +181,32 @@ repetir. Companheiro de `COMECE-AQUI.md`.
   devolvia o foco ao cartão, e o navegador arrastava a página de volta ao catálogo depois de ela ter ido
   ao estúdio. O defeito já existia com o simulador de desenho; o bloco novo do guardião pegou.
 
+## Das peças novas: garrafa e ecobag (23/09/2026)
+
+- **Refatorar com prova de pixel.** Antes de separar o que era da caneca, a caneca foi fotografada em
+  cada vista, cor, acabamento e cena, e a arte aberta junto (`qa/mede-caneca.mjs`, que roda
+  duas vezes igual antes de valer como prova). Depois de cada etapa, a mesma foto: 40 imagens idênticas.
+  Foi essa medida que mostrou que a linha nova só mexia na posição, nunca no desenho.
+- **O three.js só recalcula a projeção da sombra ao criar o mapa dela.** Mudar `left/right/top/bottom`
+  da câmera da sombra depois da primeira pintura não faz nada. Na troca de peça é preciso chamar
+  `updateProjectionMatrix()` à mão — e, para a caneca sair igual, os números dela não podiam mudar.
+- **Textura de canvas com outra medida precisa ser textura nova.** A arte da garrafa é mais alta que a
+  da caneca; reenviar o mesmo `CanvasTexture` com o canvas redimensionado deixava a textura antiga no
+  WebGL, e a garrafa aparecia com a arte da caneca. `setTexture` guarda a medida e recria quando muda.
+- **Numa grade, o elemento grudado pelo pé sobe até o topo do contêiner, não da linha dele.** A coluna
+  da caneca, grudada pelo pé, cobria a linha "Qual peça?" que estava na primeira linha da grade. O que
+  fica acima das colunas mora fora da grade.
+- **Rolagem suave que começa antes de a página mudar de altura passa do ponto.** Vindo do fim da página,
+  a troca de peça encurtava a lista de modelos no meio da rolagem até o estúdio, e a página parava
+  800 px acima. Quem rola espera a troca terminar (`estudio:peca` devolve `pronto`).
+- **Amostra de cor em checagem tem de cair em lugar liso.** A primeira checagem da garrafa sálvia
+  amostrava o meio da frente, onde a peça vazia mostra o Pandinha, e reprovava sem defeito nenhum.
+- **Texto da caneca não se reescreve, se devolve.** Os textos da página que falam da peça são guardados
+  como estão na abertura e devolvidos quando a pessoa volta para a caneca; as outras peças trazem os
+  delas, e o teste reprova peça nova que esqueça algum. Assim a caneca sai igual por construção.
+- **Modelo novo segue o acabamento que o dono aprovou, não o antigo.** `acabamento.js` diz o que a
+  revisão de papelaria fez com os modelos da casa: Nunito no lugar da Fredoka, nanquim suave, confete
+  pouco, nada girado. Os modelos da garrafa e da ecobag nasceram nesse estilo.
+- **Desenhar, olhar, corrigir, também nas peças novas.** A primeira leva da garrafa passou em todos os
+  testes e estava miúda: frases de 6 mm e o nome de 30 mm sumiam numa peça de 27 cm, e a metade de
+  baixo ficava vazia. Só a folha de contato (arte aberta, frente e verso em 3D) mostrou.
