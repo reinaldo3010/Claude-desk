@@ -10,8 +10,9 @@
  * recortada na área imprimível, sem guias, perspectiva ou espelhamento.
  */
 
-import { desenhaArte, caixaDaCamada, medidorDeTexto, cor, FRENTE as FRENTE_U, VERSO as VERSO_U } from './modelos.js';
+import { desenhaArte, caixaDaCamada, medidorDeTexto, cor } from './modelos.js';
 import { pesoDaFonte, FONTES_DA_ARTE } from './fontes.js';
+import { ladosDaPeca } from './pecas.js';
 
 const MAX_BYTES = 20 * 1024 * 1024;
 const MAX_PIXELS = 40_000_000;
@@ -267,6 +268,8 @@ function physicalSpec(spec = {}) {
   return {
     canvasMm: { width, height },
     printArea: { x: (width - printWidth) / 2, y: (height - printHeight) / 2, width: printWidth, height: printHeight },
+    // A peça plana (a ecobag) não dá a volta: a frente é o meio do painel, não um quarto da volta.
+    plana: Boolean(spec.plana),
   };
 }
 
@@ -290,11 +293,13 @@ function normalizedState(state = {}) {
 /** Pure millimetre geometry shared by preview and print; never depends on canvas resolution. */
 export function computePlacement(dimensions, state = {}, spec = {}) {
   const normalized = normalizedState(state);
-  const { canvasMm, printArea } = physicalSpec(spec);
-  const centers = (normalized.layout === 'both' ? [0.25, 0.75] : [normalized.layout === 'wrap' ? 0.5 : 0.25])
+  const { canvasMm, printArea, plana } = physicalSpec(spec);
+  // Na peça plana só existe a frente: a arte vai no meio do painel e pode ocupar a área inteira.
+  const layout = plana ? 'front' : normalized.layout;
+  const centers = (layout === 'both' ? [0.25, 0.75] : [layout === 'wrap' || plana ? 0.5 : 0.25])
     .map(u => u * canvasMm.width);
   // Every initial face fits the actual printable limits, even for a smaller template.
-  const slotWidth = normalized.layout === 'wrap' ? printArea.width : Math.max(EPSILON, Math.min(80,
+  const slotWidth = layout === 'wrap' ? printArea.width : Math.max(EPSILON, Math.min(plana ? printArea.width : 80,
     ...centers.map(x => 2 * Math.max(0, Math.min(x - printArea.x, printArea.x + printArea.width - x)))));
   const footerHeight = normalized.name || normalized.withPanda ? Math.min(18, printArea.height * 0.25) : 0;
   const contentHeight = printArea.height - footerHeight;
@@ -419,13 +424,20 @@ function desenhaArteLivre(context, items, image) {
 }
 
 function drawComposition(canvas, placement, options, cropToPrint = false) {
-  const context = canvas.getContext('2d', { alpha: false });
+  // `substrato` é a peça onde não há arte: a cerâmica branca da caneca (o padrão) ou a cor da
+  // garrafa. `null` deixa o fundo transparente: é o arquivo de impressão da peça colorida.
+  const substrato = options.substrato === undefined ? 'white' : options.substrato;
+  const context = canvas.getContext('2d', { alpha: substrato === null });
   if (!context) throw fileError('Seu navegador não conseguiu preparar a prévia. Tente atualizar a página.');
   const region = cropToPrint ? placement.printArea : { x: 0, y: 0, ...placement.canvasMm };
   context.setTransform(1, 0, 0, 1, 0, 0);
   // White is the physical ceramic / unprinted substrate, not a page design token.
-  context.fillStyle = 'white';
-  context.fillRect(0, 0, canvas.width, canvas.height);
+  if (substrato) {
+    context.fillStyle = substrato;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+  } else {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+  }
   context.setTransform(canvas.width / region.width, 0, 0, canvas.height / region.height,
     -region.x * canvas.width / region.width, -region.y * canvas.height / region.height);
   context.imageSmoothingEnabled = true;
@@ -570,7 +582,7 @@ export function tamanhoRecomendado(spec = {}, dpi = 300) {
  * de segurança, as marcas da frente e do verso e o lado da alça. Serve de fundo no Canva.
  */
 export async function exportGuideArtwork(spec = {}) {
-  const { printArea } = physicalSpec(spec);
+  const { printArea, plana } = physicalSpec(spec);
   const medida = tamanhoRecomendado(spec);
   const canvas = makeCanvas(null, medida.larguraPx, medida.alturaPx);
   const context = canvas.getContext('2d', { alpha: false });
@@ -580,9 +592,11 @@ export async function exportGuideArtwork(spec = {}) {
   context.fillStyle = cor('--white');
   context.fillRect(0, 0, printArea.width, printArea.height);
   const margem = 5;
-  const marcas = [
-    { u: FRENTE_U, texto: 'FRENTE' },
-    { u: VERSO_U, texto: 'VERSO' },
+  const lados = ladosDaPeca({ diameterMm: DEFAULT_SPEC.diameterMm, printWidthMm: printArea.width, ...spec });
+  // A peça plana (a ecobag) não tem frente e verso nem alça ao lado da arte: sem essas marcas.
+  const marcas = plana ? [] : [
+    { u: lados.frente, texto: 'FRENTE' },
+    { u: lados.verso, texto: 'VERSO' },
   ];
   context.strokeStyle = cor('--sand');
   context.lineWidth = 0.5;
@@ -595,7 +609,7 @@ export async function exportGuideArtwork(spec = {}) {
   context.textAlign = 'center';
   context.textBaseline = 'middle';
   for (const marca of marcas) {
-    // FRENTE_U e VERSO_U já são frações da área de impressão (modelos.js).
+    // A frente e o verso já são frações da área de impressão (pecas.js).
     const x = marca.u * printArea.width;
     context.setLineDash([2, 4]);
     context.strokeStyle = cor('--kraft');
@@ -609,7 +623,7 @@ export async function exportGuideArtwork(spec = {}) {
   }
   context.save();
   context.font = '600 3.4px "Fredoka", sans-serif';
-  for (const [x, giro] of [[3.2, -Math.PI / 2], [printArea.width - 3.2, Math.PI / 2]]) {
+  for (const [x, giro] of plana ? [] : [[3.2, -Math.PI / 2], [printArea.width - 3.2, Math.PI / 2]]) {
     context.save();
     context.translate(x, printArea.height / 2);
     context.rotate(giro);

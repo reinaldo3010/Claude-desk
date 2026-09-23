@@ -13,9 +13,8 @@
  * quando não há CSS (testes em Node); na página, cada token é lido de styles.css.
  */
 
-// Onde a frente (u=.25) e o verso (u=.75) caem dentro da área de impressão da caneca padrão:
-// a volta tem PI*82 mm e a área impressa, 210 mm centrados nela.
 import { pesoDaFonte } from './fontes.js';
+import { ESPECIFICACOES, ladosDaPeca } from './pecas.js';
 import { cor } from './paleta.js';
 import { foto, frase, panda } from './camadas.js';
 import { acabamentoPapelaria } from './acabamento.js';
@@ -23,10 +22,12 @@ import {
   CATEGORIAS_DE_COLECAO, MODELOS_DE_COLECAO, POSES_DE_COLECAO, ELEMENTOS_DE_COLECAO, proporcaoDaForma, desenhaIlustracaoDeColecao,
 } from './colecoes.js';
 import { IMAGENS_DO_ACERVO } from './imagens-do-acervo.js';
+import { CATEGORIAS_DA_GARRAFA, MODELOS_DA_GARRAFA } from './garrafa-modelos.js';
+import { CATEGORIAS_DA_ECOBAG, MODELOS_DA_ECOBAG } from './ecobag-modelos.js';
 
-const VOLTA_MM = Math.PI * 82, AREA_MM = 210;
-export const FRENTE = (0.25 * VOLTA_MM - (VOLTA_MM - AREA_MM) / 2) / AREA_MM;
-export const VERSO = 1 - FRENTE;
+// Onde a frente (u=.25) e o verso (u=.75) caem dentro da área de impressão da caneca padrão:
+// a volta tem PI*82 mm e a área impressa, 210 mm centrados nela. Os modelos deste arquivo são da caneca.
+export const { frente: FRENTE, verso: VERSO } = ladosDaPeca(ESPECIFICACOES.caneca);
 
 export { cor } from './paleta.js';
 
@@ -67,6 +68,10 @@ export const CATEGORIAS = Object.freeze([
   { id: 'amizade', grupo: 'Momentos', nome: 'Amizade e formatura', descricao: 'Amiga, turma, time do trabalho' },
   { id: 'pet', grupo: 'Pets e bichinhos', nome: 'Várias fotos do pet', descricao: 'Três fotos do bichinho e o nome' },
   ...CATEGORIAS_DE_COLECAO,
+  // As ocasiões que só a garrafa e a ecobag têm (`pecas`). A caneca não as mostra: o cardápio de cada
+  // peça lista só as ocasiões com modelo dela.
+  ...CATEGORIAS_DA_GARRAFA,
+  ...CATEGORIAS_DA_ECOBAG,
   { id: 'fotos', grupo: 'Do dia a dia', nome: 'Só fotos', descricao: 'Várias fotos ao redor, sem data' },
 ]);
 
@@ -504,16 +509,29 @@ const MODELOS = [
   },
 ];
 
-export const TEMPLATES = Object.freeze([...MODELOS.map(acabamentoPapelaria), ...MODELOS_DE_COLECAO].map((m) => Object.freeze({ ...m, camadas: Object.freeze(m.camadas) })));
-export const modeloPorId = (id) => TEMPLATES.find((m) => m.id === id) || null;
+const congela = (m) => Object.freeze({ ...m, camadas: Object.freeze(m.camadas) });
+/** Os modelos da caneca: os deste arquivo e os das coleções, todos desenhados para a área de 210 × 90 mm. */
+export const TEMPLATES = Object.freeze([...MODELOS.map(acabamentoPapelaria), ...MODELOS_DE_COLECAO].map(congela));
+/*
+  Cada peça tem os próprios modelos, desenhados para o formato dela (decisão do dono, 23/09/2026): os da
+  caneca não se esticam para a garrafa, onde a foto redonda viraria oval. A caneca é a de sempre.
+*/
+const MODELOS_POR_PECA = Object.freeze({
+  caneca: TEMPLATES,
+  garrafa: Object.freeze(MODELOS_DA_GARRAFA.map(congela)),
+  ecobag: Object.freeze(MODELOS_DA_ECOBAG.map(congela)),
+});
+export const modeloPorId = (id) => Object.values(MODELOS_POR_PECA).flat().find((m) => m.id === id) || null;
 /**
- * Os modelos de um assunto. Um modelo mora numa categoria e pode aparecer também em outras
- * (`tambemEm`): o Pandinha ciclista é da coleção do Pandinha e aparece em Ciclismo, onde quem
+ * Os modelos de um assunto, na peça pedida. Um modelo mora numa categoria e pode aparecer também em
+ * outras (`tambemEm`): o Pandinha ciclista é da coleção do Pandinha e aparece em Ciclismo, onde quem
  * procura por ciclismo vai olhar. Em "todos", cada modelo aparece uma vez só.
  */
-export const modelosDaCategoria = (categoria) =>
-  (!categoria || categoria === 'todos' ? TEMPLATES
-    : TEMPLATES.filter((m) => m.categoria === categoria || (m.tambemEm || []).includes(categoria)));
+export const modelosDaCategoria = (categoria, peca = 'caneca') => {
+  const daPeca = MODELOS_POR_PECA[peca] || [];
+  return !categoria || categoria === 'todos' ? daPeca
+    : daPeca.filter((m) => m.categoria === categoria || (m.tambemEm || []).includes(categoria));
+};
 
 const clone = (valor) => (typeof structuredClone === 'function' ? structuredClone(valor) : JSON.parse(JSON.stringify(valor)));
 

@@ -2599,8 +2599,204 @@ if (roda('paginas')) {
     - o botão flutuante do WhatsApp sai do caminho sobre o estúdio;
     - escolher o modelo fica em Modelo, e o pedido vai para o WhatsApp com a montagem;
     - o link de montagem copiado ali abre a home já com o estúdio e a montagem;
-    - "Ver com meu nome" aparece no detalhe da caneca e leva ao estúdio; no da garrafa, não aparece.
+    - "Ver com meu nome" aparece no detalhe da caneca, da garrafa e da ecobag e leva ao estúdio já na
+      peça; no das peças que o estúdio ainda não monta (o copo, por enquanto), não aparece.
   */
+  /*
+    As peças do estúdio (decisão do dono, 23/09/2026: o estúdio cresce para a garrafa e a ecobag).
+    - A linha "Qual peça?" fica acima das duas colunas e nada a cobre: dentro da grade, a coluna da peça,
+      grudada pelo pé, subia por cima dela.
+    - Trocar para a garrafa troca o 3D e a ARTE dele: quando o canvas da arte mudava de medida (a da
+      garrafa é mais alta), o corpo da garrafa continuava mostrando a arte da caneca.
+    - Textos, cores, vistas e pedido são da garrafa; ela não tem acabamento para escolher; a arte aberta
+      tem a proporção dela; o catálogo não mostra modelo da caneca; e o arquivo de impressão sai na medida
+      da garrafa e sem fundo (quem pinta ali é a cor da garrafa).
+    - A caneca volta como estava, com o modelo escolhido e os textos dela.
+  */
+  if (roda('pecas')) for (const [w9, h9, toque] of [[1280, 800, false], [390, 844, true]]) {
+    const contexto = await browser.newContext({ viewport: { width: w9, height: h9 }, hasTouch: toque, isMobile: toque, acceptDownloads: true });
+    const pp = await contexto.newPage();
+    const onde = `[peças ${w9}]`;
+    const erros = [];
+    pp.on('pageerror', (e) => erros.push(e.message));
+    pp.on('console', (m) => m.type() === 'error' && erros.push(m.text()));
+    await pp.route('**/rest/v1/**', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: '[{"whatsapp":"5511999999999"}]' }));
+    await pp.goto(servidor.url + 'caneca-3d.html', { waitUntil: 'load' });
+    const abriu = await pp.waitForFunction(() => document.getElementById('viewer-loading')?.hidden && document.querySelector('#mug-viewport canvas.mug-3d-canvas'), null, { timeout: 20000 }).then(() => true).catch(() => false);
+    if (!abriu) { failures.push(`${onde} o estúdio não abriu`); await contexto.close(); continue; }
+    await pp.click('#boasvindas-fechar').catch(() => {});
+    const linha = await pp.evaluate(async () => {
+      const espera = (ms) => new Promise((r) => setTimeout(r, ms));
+      const cobertos = [];
+      for (const y of [0, 40]) {
+        window.scrollTo({ top: y, behavior: 'instant' });
+        await espera(90);
+        for (const b of document.querySelectorAll('[data-peca-botao]')) {
+          const r = b.getBoundingClientRect();
+          if (r.bottom <= 0 || r.top >= innerHeight) continue;
+          const no = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+          if (!b.contains(no)) cobertos.push(`${b.dataset.pecaBotao} com a página em ${y} px, por ${no?.className || no?.tagName}`);
+        }
+      }
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      return { cobertos, pressionada: document.querySelector('[data-peca-botao][aria-pressed="true"]')?.dataset.pecaBotao };
+    });
+    if (linha.pressionada !== 'caneca') failures.push(`${onde} o estúdio não abriu na caneca (${linha.pressionada})`);
+    if (linha.cobertos.length) failures.push(`${onde} a linha "Qual peça?" ficou coberta: ${linha.cobertos.join('; ')}`);
+    // Algo montado na caneca, para conferir na volta.
+    await pp.evaluate(() => document.querySelector('.studio-model[data-modelo="namorados-coracoes"]').click());
+    await pp.waitForTimeout(400);
+    await pp.locator('[data-peca-botao="garrafa"]').click();
+    const trocou = await pp.waitForFunction(() => document.querySelector('[data-peca-botao="garrafa"]')?.getAttribute('aria-pressed') === 'true', null, { timeout: 15000 }).then(() => true).catch(() => false);
+    if (!trocou) { failures.push(`${onde} o botão "Garrafa" não trocou a peça`); await contexto.close(); continue; }
+    const salvia = pp.locator('#cores-corpo [data-cor="salvia"]');
+    if (!(await salvia.isVisible().catch(() => false))) failures.push(`${onde} as cores da garrafa não estão à vista`);
+    else await salvia.click();
+    await pp.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+    await pp.waitForTimeout(900);
+    // O corpo da garrafa, no meio da prévia, tem de sair na cor escolhida (sálvia puxa para o verde).
+    const foto3d = (await pp.locator('#mug-viewport canvas.mug-3d-canvas').screenshot()).toString('base64');
+    const corDoCorpo = await pp.evaluate(async (b64) => {
+      const img = new Image();
+      await new Promise((ok) => { img.onload = ok; img.src = `data:image/png;base64,${b64}`; });
+      const c = document.createElement('canvas'); c.width = img.width; c.height = img.height;
+      const g = c.getContext('2d'); g.drawImage(img, 0, 0);
+      // Um pedaço liso do corpo, abaixo do meio da frente (onde a peça vazia mostra o Pandinha).
+      const d = g.getImageData(Math.round(img.width * 0.49), Math.round(img.height * 0.8), Math.max(2, Math.round(img.width * 0.03)), Math.max(2, Math.round(img.height * 0.04))).data;
+      let r = 0, gr = 0, bl = 0, n = 0;
+      for (let i = 0; i < d.length; i += 4) { r += d[i]; gr += d[i + 1]; bl += d[i + 2]; n += 1; }
+      return { r: Math.round(r / n), g: Math.round(gr / n), b: Math.round(bl / n) };
+    }, foto3d);
+    if (!(corDoCorpo.g > corDoCorpo.r + 8 && corDoCorpo.g > corDoCorpo.b + 8)) failures.push(`${onde} a garrafa sálvia não saiu sálvia na prévia (média ${JSON.stringify(corDoCorpo)}): a textura da peça de antes ficou`);
+    const naGarrafa = await pp.evaluate(() => {
+      const zap = new URL(document.getElementById('mug-order').href, location.href).searchParams.get('text') || document.getElementById('mug-order').dataset.msg || '';
+      const plana = document.getElementById('flat-art');
+      return {
+        zap,
+        titulo: document.querySelector('[data-texto="tituloHand"]')?.textContent,
+        ajuda: document.querySelector('[data-texto="ajudaDasCores"]')?.textContent,
+        vistas: [...document.querySelectorAll('.studio-view-buttons [data-view]')].map((b) => b.textContent).join(','),
+        acabamento: !document.getElementById('peca-acabamento').hidden,
+        interior: !document.getElementById('cores-interior').closest('[data-peca]').hidden,
+        proporcao: plana.width / plana.height,
+        medida: document.getElementById('flat-medida')?.textContent,
+        daCaneca: [...document.querySelectorAll('#model-list .studio-model[data-modelo]:not([data-modelo=""])')].filter((b) => !b.dataset.modelo.startsWith('garrafa-')).map((b) => b.dataset.modelo).slice(0, 3),
+      };
+    });
+    if (!/Montei uma garrafa/.test(naGarrafa.zap) || !/Cor da garrafa: Sálvia/.test(naGarrafa.zap)) failures.push(`${onde} o pedido não diz que é a garrafa sálvia (${naGarrafa.zap.slice(0, 90)})`);
+    if (naGarrafa.titulo !== 'Sua garrafa.' || !/tampa e a alça/.test(naGarrafa.ajuda || '')) failures.push(`${onde} os textos continuaram os da caneca (${naGarrafa.titulo} · ${naGarrafa.ajuda})`);
+    if (naGarrafa.vistas !== 'Frente,Verso,Alça,Tampa') failures.push(`${onde} as vistas da garrafa estão erradas (${naGarrafa.vistas})`);
+    if (naGarrafa.acabamento) failures.push(`${onde} a garrafa oferece acabamento, que ela não tem`);
+    if (naGarrafa.interior) failures.push(`${onde} as bolinhas de interior e alça da caneca continuam na garrafa`);
+    if (Math.abs(naGarrafa.proporcao - 230 / 180) > 0.02 || naGarrafa.medida !== 'área de 23 × 18 cm') failures.push(`${onde} a arte aberta não tem a medida da garrafa (${naGarrafa.proporcao.toFixed(3)} · ${naGarrafa.medida})`);
+    if (naGarrafa.daCaneca.length) failures.push(`${onde} o catálogo da garrafa mostra modelo da caneca (${naGarrafa.daCaneca.join(', ')})`);
+    // Os modelos da garrafa (primeira leva, 23/09/2026): o catálogo e o cardápio são dela, a miniatura
+    // mostra a arte sobre a cor da garrafa, e a tinta das frases vira papel na garrafa preta (manual 7.4).
+    const catalogo = await pp.evaluate(() => {
+      const itens = [...document.querySelectorAll('#lista-assuntos [data-assunto]')].map((b) => [b.dataset.assunto, Number(b.querySelector('.studio-assunto__conta')?.textContent)]);
+      const miniatura = document.querySelector('#model-list .studio-model[data-modelo^="garrafa-"] canvas');
+      const canto = miniatura ? [...miniatura.getContext('2d').getImageData(2, 2, 1, 1).data].slice(0, 3) : null;
+      return {
+        modelos: document.querySelectorAll('#model-list .studio-model[data-modelo^="garrafa-"]').length,
+        ocasioes: itens.filter(([id]) => id !== 'todos' && id !== 'meus'),
+        canto,
+      };
+    });
+    if (catalogo.modelos < 8) failures.push(`${onde} o catálogo da garrafa tem ${catalogo.modelos} modelos dela, e não os 8 da primeira leva`);
+    if (!catalogo.ocasioes.length || catalogo.ocasioes.some(([id, conta]) => !id.startsWith('garrafa-') || conta < 4)) failures.push(`${onde} o cardápio da garrafa mostra ocasião que não é dela ou magra (${JSON.stringify(catalogo.ocasioes)})`);
+    if (!catalogo.canto || Math.abs(catalogo.canto[0] - 168) > 6 || Math.abs(catalogo.canto[1] - 197) > 6 || Math.abs(catalogo.canto[2] - 162) > 6) failures.push(`${onde} a miniatura do modelo não mostra a arte sobre a garrafa sálvia (canto ${JSON.stringify(catalogo.canto)})`);
+    await pp.evaluate(() => document.querySelector('#model-list .studio-model[data-modelo="garrafa-nome-grande"]')?.click());
+    await pp.waitForTimeout(400);
+    await pp.locator('#cores-corpo [data-cor="preta"]').click();
+    await pp.waitForTimeout(400);
+    const naPreta = await pp.evaluate(() => ({
+      tinta: getComputedStyle(document.documentElement).getPropertyValue('--tinta-da-peca').trim().toUpperCase(),
+      papel: getComputedStyle(document.documentElement).getPropertyValue('--paper').trim().toUpperCase(),
+      zap: new URL(document.getElementById('mug-order').href, location.href).searchParams.get('text') || document.getElementById('mug-order').dataset.msg || '',
+    }));
+    if (!naPreta.tinta || naPreta.tinta !== naPreta.papel) failures.push(`${onde} na garrafa preta a tinta das frases não virou papel (${naPreta.tinta})`);
+    if (!/Modelo: Nome em destaque/.test(naPreta.zap) || !/Cor da garrafa: Preta/.test(naPreta.zap)) failures.push(`${onde} o pedido não leva o modelo e a cor da garrafa (${naPreta.zap.slice(0, 120)})`);
+    await pp.locator('#cores-corpo [data-cor="salvia"]').click();
+    await pp.waitForTimeout(300);
+    // O arquivo de impressão: na medida da garrafa (230 × 180 mm a 300 dpi) e sem fundo.
+    const [baixado] = await Promise.all([
+      pp.waitForEvent('download', { timeout: 20000 }).catch(() => null),
+      pp.evaluate(() => document.getElementById('save-print').click()),
+    ]);
+    if (!baixado) failures.push(`${onde} "Baixar arte plana" não baixou nada na garrafa`);
+    else {
+      const nome = baixado.suggestedFilename();
+      const bytes = fs.readFileSync(await baixado.path());
+      const largura = bytes.readUInt32BE(16), altura = bytes.readUInt32BE(20), tipoDeCor = bytes[25];
+      if (nome !== 'garrafa-panda-mimo-arte-230x180mm-300dpi.png') failures.push(`${onde} a arte da garrafa saiu com o nome ${nome}`);
+      if (largura !== 2717 || altura !== 2126) failures.push(`${onde} a arte da garrafa saiu em ${largura} × ${altura} px, e não 2717 × 2126 (230 × 180 mm a 300 dpi)`);
+      const canto = await pp.evaluate(async (b64) => {
+        const img = new Image();
+        await new Promise((ok) => { img.onload = ok; img.src = `data:image/png;base64,${b64}`; });
+        const c = document.createElement('canvas'); c.width = 8; c.height = 8;
+        const g = c.getContext('2d'); g.drawImage(img, 0, 0);
+        return g.getImageData(1, 1, 1, 1).data[3];
+      }, bytes.toString('base64'));
+      if (tipoDeCor !== 6 || canto !== 0) failures.push(`${onde} a arte da garrafa saiu com fundo pintado (canto com alfa ${canto}): ela vai sobre a cor da peça`);
+    }
+    // A ecobag, a peça plana: arte só na frente (sem "Onde vai a arte?"), painel em pé de 25 × 30 cm,
+    // três cenas (ela não sobe na caixa de presente), os modelos dela e o arquivo sem fundo na medida.
+    await pp.locator('[data-peca-botao="ecobag"]').click();
+    const foiEcobag = await pp.waitForFunction(() => document.querySelector('[data-peca-botao="ecobag"]')?.getAttribute('aria-pressed') === 'true', null, { timeout: 15000 }).then(() => true).catch(() => false);
+    if (!foiEcobag) failures.push(`${onde} o botão "Ecobag" não trocou a peça`);
+    else {
+      await pp.waitForTimeout(700);
+      const naEcobag = await pp.evaluate(() => {
+        const plana = document.getElementById('flat-art');
+        return {
+          zap: new URL(document.getElementById('mug-order').href, location.href).searchParams.get('text') || '',
+          vistas: [...document.querySelectorAll('.studio-view-buttons [data-view]')].map((b) => b.textContent).join(','),
+          ondeVai: !document.querySelector('.studio-layout-field').hidden,
+          cenas: document.querySelectorAll('#cenas button').length,
+          proporcao: plana.width / plana.height,
+          medida: document.getElementById('flat-medida')?.textContent,
+          modelos: [...document.querySelectorAll('#model-list .studio-model[data-modelo]:not([data-modelo=""])')].map((b) => b.dataset.modelo),
+          ajuda: document.querySelector('[data-texto="ajudaDasCores"]')?.textContent,
+        };
+      });
+      if (!/Montei uma ecobag/.test(naEcobag.zap)) failures.push(`${onde} o pedido não diz que é a ecobag (${naEcobag.zap.slice(0, 80)})`);
+      if (naEcobag.vistas !== 'Frente,Verso,Lado,Por dentro') failures.push(`${onde} as vistas da ecobag estão erradas (${naEcobag.vistas})`);
+      if (naEcobag.ondeVai) failures.push(`${onde} a ecobag oferece "Onde vai a arte?", mas a arte dela vai só na frente`);
+      if (naEcobag.cenas !== 3) failures.push(`${onde} a ecobag tem ${naEcobag.cenas} cenas, e não as três dela`);
+      if (Math.abs(naEcobag.proporcao - 250 / 300) > 0.02 || naEcobag.medida !== 'área de 25 × 30 cm') failures.push(`${onde} a arte aberta não tem a medida da ecobag (${naEcobag.proporcao.toFixed(3)} · ${naEcobag.medida})`);
+      if (naEcobag.modelos.length < 8 || naEcobag.modelos.some((id) => !id.startsWith('ecobag-'))) failures.push(`${onde} o catálogo da ecobag não é o dela (${naEcobag.modelos.slice(0, 4).join(', ')})`);
+      if (!/Algodão cru/.test(naEcobag.ajuda || '')) failures.push(`${onde} a ecobag não diz a cor do tecido (${naEcobag.ajuda})`);
+      const [arquivo] = await Promise.all([
+        pp.waitForEvent('download', { timeout: 20000 }).catch(() => null),
+        pp.evaluate(() => document.getElementById('save-print').click()),
+      ]);
+      if (!arquivo) failures.push(`${onde} "Baixar arte plana" não baixou nada na ecobag`);
+      else {
+        const bytes = fs.readFileSync(await arquivo.path());
+        const largura = bytes.readUInt32BE(16), altura = bytes.readUInt32BE(20);
+        if (arquivo.suggestedFilename() !== 'ecobag-panda-mimo-arte-250x300mm-300dpi.png' || largura !== 2953 || altura !== 3543 || bytes[25] !== 6) {
+          failures.push(`${onde} a arte da ecobag saiu como ${arquivo.suggestedFilename()}, ${largura} × ${altura} px, tipo de cor ${bytes[25]} (esperado 2953 × 3543, com transparência)`);
+        }
+      }
+    }
+    // De volta à caneca: o modelo escolhido e os textos dela.
+    await pp.locator('[data-peca-botao="caneca"]').click();
+    const voltou = await pp.waitForFunction(() => document.querySelector('[data-peca-botao="caneca"]')?.getAttribute('aria-pressed') === 'true', null, { timeout: 15000 }).then(() => true).catch(() => false);
+    await pp.waitForTimeout(500);
+    const naCaneca = await pp.evaluate(() => ({
+      modelo: document.querySelector('#model-list .studio-model[aria-pressed="true"]')?.dataset.modelo,
+      ajuda: document.querySelector('[data-texto="ajudaDasCores"]')?.textContent,
+      vistas: [...document.querySelectorAll('.studio-view-buttons [data-view]')].map((b) => b.textContent).join(','),
+      acabamento: !document.getElementById('peca-acabamento').hidden,
+      proporcao: document.getElementById('flat-art').width / document.getElementById('flat-art').height,
+    }));
+    if (!voltou || naCaneca.modelo !== 'namorados-coracoes') failures.push(`${onde} a caneca não voltou com a montagem dela (${JSON.stringify(naCaneca)})`);
+    if (naCaneca.ajuda !== 'Por fora, branca. O carinho fica por sua conta.' || naCaneca.vistas !== 'Frente,Verso,Alça,Interior' || !naCaneca.acabamento) failures.push(`${onde} a caneca voltou sem os textos, as vistas ou o acabamento dela (${JSON.stringify(naCaneca)})`);
+    if (Math.abs(naCaneca.proporcao - 210 / 90) > 0.02) failures.push(`${onde} a arte aberta da caneca ficou com a proporção da garrafa (${naCaneca.proporcao.toFixed(3)})`);
+    erros.forEach((e) => failures.push(`${onde} erro: ${e}`));
+    await contexto.close();
+  }
+
   if (roda('estudio-no-site')) for (const [w8, h8, toque] of [[1280, 800, false], [390, 844, true]]) {
     const contexto = await browser.newContext({ viewport: { width: w8, height: h8 }, hasTouch: toque, isMobile: toque, permissions: ['clipboard-read', 'clipboard-write'] });
     const ph = await contexto.newPage();
@@ -2677,7 +2873,8 @@ if (roda('paginas')) {
         }
       }
     }
-    // "Ver com meu nome": no detalhe da caneca leva ao estúdio; no da garrafa não aparece
+    // "Ver com meu nome": no detalhe da caneca, da garrafa e da ecobag leva ao estúdio, já na peça; no do
+    // copo (que o estúdio ainda não monta) não aparece. Até 23/09/2026 só a caneca mostrava.
     const detalhe = await ph.evaluate(async () => {
       const espera = (ms) => new Promise((r) => setTimeout(r, ms));
       const abre = async (slug) => {
@@ -2686,20 +2883,35 @@ if (roda('paginas')) {
         const botao = document.getElementById('detalhe-personalizar');
         return { aberto: document.getElementById('detalhe').open, visivel: !!botao && !botao.hidden };
       };
-      const garrafa = await abre('garrafas-termicas');
+      const naSecao = () => { const r = document.getElementById('monte').getBoundingClientRect(); return r.top < window.innerHeight * 0.5 && r.bottom > 0; };
+      const pecaDoEstudio = () => document.querySelector('[data-peca-botao][aria-pressed="true"]')?.dataset.pecaBotao;
+      const vaiAte = async (peca) => {
+        // espera a chegada (a rolagem é suave) e a troca de peça, e não um tempo fixo
+        for (let i = 0; i < 60 && !(naSecao() && pecaDoEstudio() === peca); i += 1) await espera(100);
+        await espera(300);
+        return { naSecao: naSecao(), peca: pecaDoEstudio(), fechou: !document.getElementById('detalhe').open };
+      };
+      const copo = await abre('copos-termicos');
       document.getElementById('detalhe').close();
       await espera(150);
+      const garrafa = await abre('garrafas-termicas');
+      document.getElementById('detalhe-personalizar').click();
+      const foiNaGarrafa = await vaiAte('garrafa');
+      const ecobag = await abre('ecobags');
+      document.getElementById('detalhe-personalizar').click();
+      const foiNaEcobag = await vaiAte('ecobag');
       const caneca = await abre('canecas');
       document.getElementById('detalhe-personalizar').click();
-      // espera a chegada (a rolagem é suave), e não um tempo fixo
-      const naSecao = () => { const r = document.getElementById('monte').getBoundingClientRect(); return r.top < window.innerHeight * 0.5 && r.bottom > 0; };
-      for (let i = 0; i < 40 && !naSecao(); i += 1) await espera(100);
-      await espera(400);
-      return { garrafa, caneca, naSecao: naSecao(), fechou: !document.getElementById('detalhe').open };
+      const foiNaCaneca = await vaiAte('caneca');
+      return { copo, garrafa, ecobag, caneca, foiNaGarrafa, foiNaEcobag, foiNaCaneca };
     });
     if (!detalhe.caneca.aberto || !detalhe.caneca.visivel) failures.push(`${onde} o detalhe da caneca não mostra "Ver com meu nome" (${JSON.stringify(detalhe.caneca)})`);
-    if (detalhe.garrafa.visivel) failures.push(`${onde} o detalhe da garrafa mostra "Ver com meu nome", que leva ao estúdio da caneca`);
-    if (!detalhe.naSecao || !detalhe.fechou) failures.push(`${onde} "Ver com meu nome" não levou ao estúdio (${JSON.stringify(detalhe)})`);
+    if (!detalhe.garrafa.aberto || !detalhe.garrafa.visivel) failures.push(`${onde} o detalhe da garrafa não mostra "Ver com meu nome" (${JSON.stringify(detalhe.garrafa)})`);
+    if (!detalhe.ecobag.aberto || !detalhe.ecobag.visivel) failures.push(`${onde} o detalhe da ecobag não mostra "Ver com meu nome" (${JSON.stringify(detalhe.ecobag)})`);
+    if (detalhe.copo.visivel) failures.push(`${onde} o detalhe do copo mostra "Ver com meu nome", mas o estúdio ainda não monta copo`);
+    if (!detalhe.foiNaEcobag.naSecao || !detalhe.foiNaEcobag.fechou || detalhe.foiNaEcobag.peca !== 'ecobag') failures.push(`${onde} "Ver com meu nome" da ecobag não abriu o estúdio na ecobag (${JSON.stringify(detalhe.foiNaEcobag)})`);
+    if (!detalhe.foiNaGarrafa.naSecao || !detalhe.foiNaGarrafa.fechou || detalhe.foiNaGarrafa.peca !== 'garrafa') failures.push(`${onde} "Ver com meu nome" da garrafa não abriu o estúdio na garrafa (${JSON.stringify(detalhe.foiNaGarrafa)})`);
+    if (!detalhe.foiNaCaneca.naSecao || !detalhe.foiNaCaneca.fechou || detalhe.foiNaCaneca.peca !== 'caneca') failures.push(`${onde} "Ver com meu nome" da caneca não levou ao estúdio na caneca (${JSON.stringify(detalhe.foiNaCaneca)})`);
     errosDaHome.forEach((e) => failures.push(`${onde} erro: ${e}`));
     await contexto.close();
   }

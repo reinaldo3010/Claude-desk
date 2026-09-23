@@ -78,7 +78,8 @@ test('cada modelo tem identidade própria, categoria conhecida e camadas válida
     // Quantos Pandinhas vão numa caneca deixou de ter limite em 23/09/2026 (manual 6.2, decisão do dono).
   }
   assert.ok(TEMPLATES.some((m) => m.camadas.filter((c) => c.tipo === 'foto').length >= 3), 'nenhum modelo aceita três ou mais fotos');
-  for (const categoria of CATEGORIAS.filter((c) => c.id !== 'livre')) {
+  // As ocasiões só da garrafa (`pecas`) têm a conta delas em pecas-unit.test.mjs.
+  for (const categoria of CATEGORIAS.filter((c) => c.id !== 'livre' && (!c.pecas || c.pecas.includes('caneca')))) {
     assert.ok(modelosDaCategoria(categoria.id).length > 0, `a categoria ${categoria.id} ficou sem modelo`);
   }
 });
@@ -249,6 +250,10 @@ test('o seletor mostra os grupos na ordem decidida, e nenhum grupo entra sem lug
   assert.ok(!gruposDeCategorias().some(([, itens]) => itens.some((c) => c.id === 'livre')));
   for (const [nome, itens] of gruposDeCategorias()) {
     assert.ok(itens.length, `grupo "${nome}" ficou vazio`);
-    for (const categoria of itens) assert.ok(modelosDaCategoria(categoria.id).length, `categoria "${categoria.id}" sem nenhum modelo`);
+    // Cada ocasião conta os modelos das peças dela (a caneca, quando não diz; as da garrafa, `pecas`).
+    for (const categoria of itens) {
+      assert.ok((categoria.pecas || ['caneca']).every((peca) => modelosDaCategoria(categoria.id, peca).length),
+        `categoria "${categoria.id}" sem nenhum modelo`);
+    }
   }
 });

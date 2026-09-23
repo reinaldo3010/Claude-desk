@@ -8,7 +8,10 @@
  */
 const BANCO = 'panda-mimo-caneca';
 const CAIXA = 'rascunho';
+// Um rascunho por peça. O da caneca continua na chave de sempre, para quem já tinha um não perder.
 const CHAVE = 'atual';
+const CHAVES = Object.freeze({ caneca: CHAVE, garrafa: 'garrafa', ecobag: 'ecobag' });
+const chaveDa = (peca) => CHAVES[peca] || CHAVE;
 const DIAS_DE_VALIDADE = 30;
 
 function abre() {
@@ -35,10 +38,10 @@ function transacao(banco, modo, acao) {
   });
 }
 
-export async function salvaRascunho(dados) {
+export async function salvaRascunho(dados, peca = 'caneca') {
   try {
     const banco = await abre();
-    await transacao(banco, 'readwrite', (caixa) => caixa.put({ ...dados, salvoEm: Date.now() }, CHAVE));
+    await transacao(banco, 'readwrite', (caixa) => caixa.put({ ...dados, salvoEm: Date.now() }, chaveDa(peca)));
     banco.close();
     return true;
   } catch {
@@ -46,24 +49,32 @@ export async function salvaRascunho(dados) {
   }
 }
 
-/** Devolve o rascunho guardado, ou null se não houver, se for velho demais ou se der errado. */
+const valeAinda = (guardado) => guardado?.salvoEm && (Date.now() - guardado.salvoEm) / 86400000 <= DIAS_DE_VALIDADE;
+
+/**
+ * Devolve o rascunho mais recente entre as peças, ou null se não houver, se for velho demais ou se
+ * der errado. O da caneca de antes das outras peças não diz a peça: `peca` sai como caneca.
+ */
 export async function leRascunho() {
   try {
     const banco = await abre();
-    const guardado = await transacao(banco, 'readonly', (caixa) => caixa.get(CHAVE));
+    const guardados = [];
+    for (const [peca, chave] of Object.entries(CHAVES)) {
+      // eslint-disable-next-line no-await-in-loop
+      const guardado = await transacao(banco, 'readonly', (caixa) => caixa.get(chave));
+      if (valeAinda(guardado)) guardados.push({ peca, ...guardado });
+    }
     banco.close();
-    if (!guardado?.salvoEm) return null;
-    const dias = (Date.now() - guardado.salvoEm) / 86400000;
-    return dias > DIAS_DE_VALIDADE ? null : guardado;
+    return guardados.sort((a, b) => b.salvoEm - a.salvoEm)[0] || null;
   } catch {
     return null;
   }
 }
 
-export async function apagaRascunho() {
+export async function apagaRascunho(peca = 'caneca') {
   try {
     const banco = await abre();
-    await transacao(banco, 'readwrite', (caixa) => caixa.delete(CHAVE));
+    await transacao(banco, 'readwrite', (caixa) => caixa.delete(chaveDa(peca)));
     banco.close();
     return true;
   } catch {

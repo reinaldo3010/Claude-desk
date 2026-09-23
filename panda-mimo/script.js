@@ -237,12 +237,16 @@ function iniciaCarrosseis(escopo = document) {
    ========================================================= */
 const detalhe = document.getElementById("detalhe");
 let voltarFocoPara = null;
+// As peças que o estúdio monta: o "Ver com meu nome" do detalhe delas leva ao estúdio, já na peça.
+const PECAS_DO_ESTUDIO = ["caneca", "garrafa", "ecobag"];
+let pecaDoDetalhe = null;
 
 const baseDoProduto = (p) => {
   const t = `${p.slug} ${p.nome}`.toLowerCase();
   if (t.includes("garrafa")) return "garrafa";
   if (t.includes("caneca")) return "caneca";
   if (t.includes("copo")) return "copo";
+  if (t.includes("ecobag")) return "ecobag";
   return null;
 };
 
@@ -278,9 +282,10 @@ function abreDetalhe(slug, gatilho) {
   zap.dataset.rotulo = `${p.rotulo_botao || "Quero essa"} · ${p.nome} · detalhe`;
   aplicaContatos(detalhe);
 
-  // "Ver com meu nome" leva ao estúdio da caneca: só faz sentido na caneca.
+  // "Ver com meu nome" leva ao estúdio, na peça do detalhe: só aparece nas peças que ele monta.
   const pers = document.getElementById("detalhe-personalizar");
-  pers.hidden = baseDoProduto(p) !== "caneca";
+  pecaDoDetalhe = baseDoProduto(p);
+  pers.hidden = !PECAS_DO_ESTUDIO.includes(pecaDoDetalhe);
 
   if (!detalhe.open) detalhe.showModal();
   history.replaceState(null, "", `#produto/${slug}`);
@@ -301,9 +306,17 @@ document.querySelector(".detalhe__fechar").addEventListener("click", fechaDetalh
 document.getElementById("detalhe-personalizar").addEventListener("click", (e) => {
   e.preventDefault();
   fechaDetalhe();
-  carregaEstudio();
-  document.getElementById("monte").scrollIntoView({ behavior: reduzMovimento ? "auto" : "smooth", block: "start" });
-  history.replaceState(null, "", "#monte");
+  // A peça vai junto. Estúdio ainda fechado: ele abre nela (lê `data-peca-pedida`); já aberto, troca.
+  if (estudioNoSite && pecaDoDetalhe) estudioNoSite.dataset.pecaPedida = pecaDoDetalhe;
+  const pedido = { peca: pecaDoDetalhe, pronto: null };
+  if (estudioNoSite?.querySelector(".studio-layout")) document.dispatchEvent(new CustomEvent("estudio:peca", { detail: pedido }));
+  // Rola só depois da troca: a lista de modelos de outra peça muda a altura da página, e a rolagem suave
+  // que começou antes passava do ponto (vindo do fim da página, parava 800 px acima do estúdio).
+  Promise.resolve(pedido.pronto).catch(() => {}).then(() => {
+    carregaEstudio();
+    document.getElementById("monte").scrollIntoView({ behavior: reduzMovimento ? "auto" : "smooth", block: "start" });
+    history.replaceState(null, "", "#monte");
+  });
 });
 
 lista.addEventListener("click", (e) => {
@@ -540,11 +553,11 @@ if (formDepo) {
 }
 
 /* =========================================================
-   Monte seu mimo: o estúdio da caneca em 360°, aqui mesmo na página
+   Monte seu mimo: o estúdio em 360° (caneca, garrafa e ecobag), aqui mesmo na página
    - no lugar do simulador de desenho (pedido do dono, 23/09/2026);
    - a marcação vem de caneca-3d.html, uma fonte só para as duas páginas;
-   - o estúdio (3D, 199 modelos) só carrega quando a seção chega perto da tela, ou na hora em que a
-     pessoa pede: o link do topo, o "Ver com meu nome" de uma caneca, um link de montagem.
+   - o estúdio (3D e os modelos de cada peça) só carrega quando a seção chega perto da tela, ou na hora
+     em que a pessoa pede: o link do topo, o "Ver com meu nome" de uma peça, um link de montagem.
    ========================================================= */
 const estudioNoSite = document.getElementById("estudio-no-site");
 let estudioCarregando = null;
@@ -562,7 +575,7 @@ function carregaEstudio() {
   // desenhar o 3D: fica o aviso com o caminho, sem erro no console.
   if (location.protocol === "file:") {
     const aviso = document.getElementById("estudio-no-site-aviso");
-    if (aviso) aviso.innerHTML = 'A caneca em 360° abre com o site publicado (ou com <code>npm run servir</code>). Enquanto isso, <a href="#contato">conte sua ideia pra gente</a>.';
+    if (aviso) aviso.innerHTML = 'O estúdio em 360° abre com o site publicado (ou com <code>npm run servir</code>). Enquanto isso, <a href="#contato">conte sua ideia pra gente</a>.';
     estudioCarregando = Promise.resolve(false);
     return estudioCarregando;
   }
@@ -579,8 +592,10 @@ function carregaEstudio() {
     const pagina = new DOMParser().parseFromString(await resposta.text(), "text/html");
     const layout = pagina.querySelector(".studio-layout");
     if (!layout) throw new Error("estúdio sem conteúdo");
+    // A linha "Qual peça?" mora logo acima do estúdio, fora da grade dele: vem junto.
+    const pecas = pagina.getElementById("pecas");
     await folha;
-    estudioNoSite.replaceChildren(document.importNode(layout, true));
+    estudioNoSite.replaceChildren(...[pecas, layout].filter(Boolean).map((no) => document.importNode(no, true)));
     aplicaContatos(estudioNoSite);
     await import("./simulador/estudio.js");
     estudioNoSite.removeAttribute("aria-busy");
@@ -589,7 +604,7 @@ function carregaEstudio() {
   })().catch(() => {
     estudioCarregando = null;
     const aviso = document.getElementById("estudio-no-site-aviso");
-    if (aviso) aviso.innerHTML = 'A caneca em 360° não abriu agora. <a href="caneca-3d.html">Tente por aqui</a> ou <a href="#contato">conte sua ideia pra gente</a>.';
+    if (aviso) aviso.innerHTML = 'O estúdio em 360° não abriu agora. <a href="caneca-3d.html">Tente por aqui</a> ou <a href="#contato">conte sua ideia pra gente</a>.';
     return false;
   });
   return estudioCarregando;

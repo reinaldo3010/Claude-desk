@@ -1,5 +1,7 @@
 # Estado atual do trabalho
 
+**O estúdio com garrafa e ecobag — 23/09/2026 (ramo `pecas-no-estudio`, sem commit):** a pedido do dono ("vamos começar a evoluir o estúdio para garrafas e ecobags"), com as três recomendações que ele escolheu: modelos próprios de cada peça, medidas de referência e "Qual peça? Caneca · Garrafa · Ecobag" numa linha no topo do estúdio. A garrafa térmica de 1 L (arte de 23 × 18 cm envolvendo, nas quatro cores das peças) e a ecobag de algodão cru (arte de 25 × 30 cm só na frente) têm 3D próprio, 8 modelos cada (duas ocasiões de quatro), a arte sobre a cor da peça, arquivo de 300 dpi sem fundo, frases que acompanham a cor (7.4) e "Ver com meu nome" no detalhe delas. **A caneca não mudou um pixel** (40 imagens idênticas; a linha nova desce o estúdio 52 px). Três defeitos meus no caminho viraram checagem (bloco novo `pecas`) e doze provas de defeito reprovaram; o guardião inteiro passou nas 14 resoluções. Manual 4.7, 7.4, 10.3, 13.3 e histórico 2.21. Leia `panda-mimo/simulador/PECAS-NO-ESTUDIO.md`. Fica com o dono: a tinta na garrafa pêssego (7.4 × 7.3), medidas e cores do fornecedor, estampa no verso da ecobag, o copo e o campo de quantidade.
+
 **O estúdio dentro do site — 23/09/2026 (publicado em 23/09/2026, merge 341c9e4):** a pedido do dono ("ficou perfeito; não quero que ele fique fora do meu site"), a seção **Monte seu mimo** da página inicial passou a ser o estúdio da caneca em 360°, no lugar do simulador de desenho de garrafa, caneca e copo. Decisão dele: só o novo, porque o próximo passo é o estúdio crescer para garrafas, ecobags e outras peças. Uma marcação só (`caneca-3d.html`, que continua no ar para links de montagem); a home busca o `.studio-layout` e carrega o estúdio quando a seção se aproxima (`carregaEstudio()` em `script.js`). A caneca gruda abaixo da barra do topo, o botão flutuante sai do caminho, "Ver com meu nome" fica só no detalhe da caneca e leva ao estúdio. Conserto no caminho: ao fechar o detalhe de um produto, o foco devolvido ao cartão puxava a página de volta e desfazia a ida ao estúdio. Guardião: bloco `estudio-no-site`. Manual 4.7, 7.4, 10.3 e histórico 2.20, texto e visual.
 
 **Minha arte em camadas — 23/09/2026 (publicado em 23/09/2026, merge 341c9e4):** a pedido do dono. A arte trazida pronta vira o fundo de uma arte em camadas, na altura inteira; nome, Pandinhas (quantos quiser), enfeites e elementos entram por cima, livres, pelas abas Frases e Enfeites, que a Minha arte ganhou. Rascunho antigo abre com o nome virado frase no mesmo lugar. Três consertos no caminho: a letra do nome não carregava ao reabrir; **o rascunho se apagava ao abrir a página** (a caneca vazia era gravada por cima 1,2 s depois); e o item novo nascia embaixo do anterior. O guardião passou a rodar por bloco (`QA_SO`): prova de defeito em ~30 s em vez de 5 min. Leia `panda-mimo/simulador/MINHA-ARTE-EM-CAMADAS.md`.
@@ -20,16 +22,17 @@ Frente aberta, o que ficou pronto e o que vem a seguir. Atualizado em 21 de sete
 
 ## Onde estamos (fim de 23/09/2026)
 
-**Frente:** o estúdio da caneca em 360° da Panda Mimo. O dono o considerou "perfeito" em 23/09/2026 —
-é a base a preservar. Ele mora em dois lugares com uma marcação só:
+**Frente:** o estúdio em 360° da Panda Mimo, que desde 23/09/2026 monta caneca, garrafa e ecobag
+(`PECAS-NO-ESTUDIO.md`). O dono considerou o da caneca "perfeito" em 23/09/2026 — é a base a preservar, e
+a caneca não mudou um pixel com as peças novas. Ele mora em dois lugares com uma marcação só:
 
 - na seção **Monte seu mimo** da página inicial (<https://reinaldo3010.github.io/Claude-desk/#monte>),
   no lugar do simulador de desenho, que saiu; a home busca o `.studio-layout` de `caneca-3d.html` e
   carrega o estúdio quando a seção se aproxima (`carregaEstudio()` em `script.js`);
 - em `caneca-3d.html`, que continua no ar para os links de montagem e as páginas de fora.
 
-**Próximo passo que o dono anunciou:** fazer o estúdio crescer para **garrafas, ecobags e outras
-peças**. Ver "O que vem a seguir", item 1.
+**Próximo passo:** a garrafa e a ecobag estão no ramo `pecas-no-estudio`, esperando o olhar do dono e o
+pedido de publicação. Depois: mais modelos para as duas, o copo e as outras peças (item 1 abaixo).
 
 **Publicado em 23/09/2026** (merge `341c9e4`, mais o `5cdbea0` só de documentação), conferido no ar
 com navegador de verdade em 1280 e 390 px. O registro do fim da sessão (este arquivo, `COMECE-AQUI.md` e
@@ -53,7 +56,9 @@ dono esperar; o guardião avisa sem bloquear. Enquanto isso, o pedido do estúdi
 
 ## O catálogo hoje
 
-199 modelos, 42 ocasiões em onze grupos (a ordem é escrita à mão em `ORDEM_DOS_GRUPOS`):
+Na caneca, 199 modelos e 42 ocasiões em onze grupos (a ordem é escrita à mão em `ORDEM_DOS_GRUPOS`).
+Desde 23/09/2026 (no ramo `pecas-no-estudio`), a garrafa tem 8 modelos em Com o seu nome e Treino, e a
+ecobag 8 em Com o seu nome e Pequenos prazeres; cada peça só mostra as ocasiões dela. A caneca:
 
 | Grupo | Ocasiões | Artes |
 |---|---|---|
@@ -76,13 +81,13 @@ pixel a pixel (`qa/artes-aprovadas-unit.test.mjs`).
 
 ## Como está a qualidade
 
-- 49 testes unitários (`npm run test:arte`), verdes.
+- 58 testes unitários (`npm run test:arte`), verdes, com `qa/pecas-unit.test.mjs` para as peças.
 - Guardião completo em 14 resoluções, verde (uns 11 minutos, `npm test`), com nitidez em sete
   combinações de tela e densidade e axe-core sem violação.
 - **O guardião roda por bloco:** `QA_SO=<bloco> QA_VIEWPORTS=1280 node qa/audit.mjs` leva de 20 s a
   2 min. Blocos: `site`, `cabecalho`, `conversao`, `conteudo`, `nitidez`, `medicao`, `banco`,
   `painel`, `paginas`, `estudio`, `sobreposicao`, `layout`, `arte-maior`, `toque`, `passo`, `peca`,
-  `peca-a-vista`, `cardapio`, `minha-arte`, `miniaturas`, `camera`, `provas`, `estudio-no-site`.
+  `peca-a-vista`, `cardapio`, `minha-arte`, `miniaturas`, `camera`, `provas`, `estudio-no-site`, `pecas`.
   No trabalho, só os blocos que a mudança toca; o guardião inteiro uma vez, antes de publicar.
 - **Prova de defeito** numa pasta sobreposta, nunca no arquivo do site:
   `QA_SOBREPOR=<pasta> QA_SO=<bloco> QA_VIEWPORTS=1280 node qa/audit.mjs`.
@@ -99,16 +104,13 @@ centra sozinho), modelos embaixo (com os atalhos de `camadas.js`), e três linha
 
 ## O que vem a seguir
 
-### 1. O estúdio para outras peças (o próximo passo do dono)
+### 1. O estúdio para outras peças (garrafa e ecobag prontas no ramo)
 
-Garrafas, ecobags e outras peças no mesmo estúdio. O que existe hoje é de caneca, e é por onde começar:
-`MUG_SPEC` e o modelo 3D em `simulador/caneca-3d.js` (caneca reta de 325 ml, área de 210 × 90 mm), a
-área de impressão que `arte.js` e `modelos.js` usam em milímetros, as cores da cerâmica (`CERAMICA` em
-`estudio.js`) e a mensagem do pedido ("Caneca reta de 325 ml"). Com a peça nova, voltar a mostrar o
-"Ver com meu nome" no detalhe dela (`baseDoProduto` em `script.js`, hoje só `caneca`) e rever o texto da
-seção Monte seu mimo, que hoje fala só de caneca. Garrafa e copo ficaram sem montagem no site desde que
-o simulador de desenho saiu (decisão do dono, 23/09/2026); a quantidade (1 a 500), que ele levava na
-mensagem, também não existe no estúdio (sugerido um campo; sem resposta).
+A garrafa e a ecobag já estão no estúdio (`PECAS-NO-ESTUDIO.md`), no ramo `pecas-no-estudio`, sem
+commit. O que vem: o dono olhar e pedir a publicação; mais ocasiões para as duas (a leva é curta de
+propósito: Com o seu nome e Treino na garrafa, Com o seu nome e Pequenos prazeres na ecobag); o copo
+térmico e as outras peças, pelo passo a passo do fim de `PECAS-NO-ESTUDIO.md`. A quantidade (1 a 500),
+que o simulador de desenho levava na mensagem, continua sem campo no estúdio (sugerido; sem resposta).
 
 ### 2. Mais coleções (a lista que o dono aprovou)
 
@@ -131,11 +133,14 @@ ainda usa Fredoka; e "Profissões e vocações" precisa virar assuntos de verdad
 ### 3. Pendências que dependem do dono
 
 1. **Trocar o número do WhatsApp** pelo real, no painel ou em `script.js`, e republicar.
-2. **Tipos de caneca e cores da peça.** Depende da lista real do fornecedor: quais peças existem
+2. **A tinta na garrafa pêssego.** O manual manda a arte em papel na peça pêssego (7.4), com contraste de
+   1,6:1; a 7.3 proíbe branco sobre pêssego. Nanquim daria 11:1. Uma linha em `simulador/pecas.js`.
+3. **Medidas e cores do fornecedor da garrafa e da ecobag**, e se a ecobag tem estampa no verso.
+4. **Tipos de caneca e cores da peça.** Depende da lista real do fornecedor: quais peças existem
    (mágica, cônica, alça de coração, 15 oz) e a área de impressão de cada uma.
-3. **A cena "caixa de presente".** Foi refeita; o dono quer olhar antes de manter.
-4. **Vetorizar as 55 poses do Pandinha para o kit** (uns 190 MB no preset que passa na qualidade).
-5. **O lugar dos grupos novos no seletor** (Com o Pandinha e Aquarela estão perto do fim) e **o teto de
+5. **A cena "caixa de presente".** Foi refeita; o dono quer olhar antes de manter.
+6. **Vetorizar as 55 poses do Pandinha para o kit** (uns 190 MB no preset que passa na qualidade).
+7. **O lugar dos grupos novos no seletor** (Com o Pandinha e Aquarela estão perto do fim) e **o teto de
    tamanho do Pandinha** (54 mm, pelo piso de 300 dpi).
 
 ### 4. Ideias recusadas de propósito

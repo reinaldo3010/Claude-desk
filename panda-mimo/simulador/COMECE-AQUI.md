@@ -4,7 +4,16 @@ Documento de passagem do simulador de caneca da Panda Mimo. Quem chegar numa ses
 arquivo primeiro, depois `panda-mimo/MARCA.md` (o manual manda em cor, letra, mascote e tom de voz).
 
 Última atualização: 23 de setembro de 2026. O redesenho leve e o layout estão em `REDESENHO-LEVE.md`; a
-Minha arte em camadas, em `MINHA-ARTE-EM-CAMADAS.md`.
+Minha arte em camadas, em `MINHA-ARTE-EM-CAMADAS.md`; **a garrafa e a ecobag no mesmo estúdio, e o
+caminho para uma peça nova, em `PECAS-NO-ESTUDIO.md`**.
+
+**Desde 23/09/2026 o estúdio monta três peças: caneca, garrafa e ecobag.** "Qual peça?" fica numa linha
+acima do estúdio (fora da grade das duas colunas, de propósito) e a caneca vem por padrão. O que muda de
+uma peça para outra — medida, cores, tintas, vistas, textos, pedido — mora em `simulador/pecas.js`; o
+visualizador 3D de qualquer peça é `peca-3d.js`, e cada peça tem o seu arquivo de forma (`caneca-3d.js`,
+`garrafa-3d.js`, `ecobag-3d.js`) e de modelos (`modelos.js` e as coleções para a caneca;
+`garrafa-modelos.js`, `ecobag-modelos.js`). A caneca não mudou um pixel, e o guardião cobra as três no
+bloco `pecas`.
 
 **O estúdio mora em dois lugares com uma marcação só.** A fonte é `caneca-3d.html`. A seção Monte seu mimo
 da página inicial (`#estudio-no-site`) busca o `.studio-layout` dessa página, põe a folha `estudio.css` e
@@ -33,6 +42,7 @@ npm test                    # testes unitários + guardião + nitidez (uns 11 mi
 QA_VIEWPORTS=390,1280 npm test   # a passada rápida, a mesma do GitHub Actions
 QA_SO=cardapio,minha-arte QA_VIEWPORTS=1280 node qa/audit.mjs   # só esses blocos (segundos a 2 min)
 npm run test:arte           # só os testes unitários (segundos)
+node qa/mede-caneca.mjs fotografa <pasta>   # a caneca pixel a pixel, para provar que uma mudança não a moveu
 npm run provas              # gera as artes dos modelos em qa/shots, para revisão humana
 ```
 
@@ -68,8 +78,12 @@ Três armadilhas que já custaram tempo:
 | `simulador/convites.js` | Coleção de convites e agradecimentos: 14 ilustrações e 15 artes |
 | `simulador/esportes.js` | Desenha as ilustrações esportivas, convertidas de SVG |
 | `simulador/esportes-dados.js` | Os caminhos das 137 ilustrações e os 24 modelos esportivos |
-| `simulador/arte.js` | Compõe a textura, calcula dpi e exporta (300 dpi, gabarito) |
-| `simulador/caneca-3d.js` | A caneca em three.js: geometria, luz, cenas, acabamento, vídeo, clique |
+| `simulador/arte.js` | Compõe a textura, calcula dpi e exporta (300 dpi, gabarito), na medida de qualquer peça |
+| `simulador/pecas.js` | As peças do estúdio: medida, cores, tintas, vistas, cenas, textos, pedido (sem three.js) |
+| `simulador/peca-3d.js` | O visualizador 3D de qualquer peça: luz, cenas, câmera, gestos, vídeo, troca de peça |
+| `simulador/caneca-3d.js` | A caneca: geometria, cerâmica, vistas e enquadramento |
+| `simulador/garrafa-3d.js` e `ecobag-3d.js` | A garrafa de 1 L e a ecobag de algodão cru, no mesmo formato de forma |
+| `simulador/garrafa-modelos.js` e `ecobag-modelos.js` | Os 8 modelos de cada peça nova, com `atalhos-da-peca.js` |
 | `simulador/fontes.js` | Biblioteca de 15 letras (3 da marca + 12 OFL em `assets/fontes/arte/`) |
 | `simulador/rascunho.js` | Rascunho no IndexedDB do aparelho |
 | `simulador/zip.js` | Empacotador ZIP sem compressão, para o lote de nomes |
@@ -77,14 +91,17 @@ Três armadilhas que já custaram tempo:
 | `qa/audit.mjs` | Guardião: site inteiro + estúdio de ponta a ponta |
 | `qa/*-unit.test.mjs` | Testes unitários da arte e dos modelos |
 | `qa/artes-aprovadas-unit.test.mjs` | A impressão digital das 138 artes aprovadas até 22/09: mexer no motor não pode mover um traço delas |
+| `qa/pecas-unit.test.mjs` | As peças: a caneca com as medidas de sempre, textos de cada peça, e os modelos da garrafa e da ecobag com as regras dos da caneca |
 | `qa/imagens-unit.test.mjs` | As imagens do acervo: tabela certa, 300 dpi no tamanho máximo, caixa que abraça o desenho |
 | `qa/provas.mjs` | Gera as artes dos modelos para revisão visual, em `qa/shots` |
 | `qa/provas-colecoes.html` | Catálogo das artes das coleções, com filtro por coleção e assunto |
 
 ## 4. Como a arte funciona (o que não dá para esquecer)
 
-- **Tudo em milímetros, em fração da área de impressão.** A área é 210 × 90 mm (21 × 9 cm), que a
-  300 dpi dá 2480 × 1063 px. `x=0` é a borda junto da alça, `x=1` a outra borda; `y=0` é o topo.
+- **Tudo em milímetros, em fração da área de impressão.** Na caneca a área é 210 × 90 mm (21 × 9 cm),
+  que a 300 dpi dá 2480 × 1063 px; na garrafa, 230 × 180 mm; na ecobag, 250 × 300 mm, só na frente.
+  `x=0` é a borda junto da alça, `x=1` a outra borda; `y=0` é o topo. Por isso um modelo é de uma peça
+  só: na área de outra, a foto redonda vira oval.
 - **A frente da caneca fica em `FRENTE` (≈0,193) e o verso em `VERSO` (≈0,807)**, derivados da volta
   (π × 82 mm) e da área impressa. Esses valores existem em `modelos.js` e são conferidos por teste.
 - **O mesmo desenho serve para os três lugares**: textura do 3D, vista aberta e arquivo de 300 dpi.
@@ -134,13 +151,17 @@ rascunho automático no aparelho, compartilhamento direto no celular, ida e volt
 
 ## 6. O que está pendente (decisão do dono)
 
-1. **Outros tipos de caneca** (mágica, cônica, alça de coração, 15 oz) e **cor externa e do anel**:
+1. **A tinta na garrafa pêssego**: o manual (7.4) manda a arte em papel, que tem contraste de 1,6:1
+   sobre pêssego; a 7.3 proíbe branco sobre pêssego. Trocar para nanquim é uma linha em `pecas.js`.
+2. **Medidas e cores do fornecedor** da garrafa e da ecobag, estampa no verso da ecobag e o copo térmico
+   (o caminho de peça nova está em `PECAS-NO-ESTUDIO.md`).
+3. **Outros tipos de caneca** (mágica, cônica, alça de coração, 15 oz) e **cor externa e do anel**:
    cada um tem medida própria de área de impressão. Precisa da lista real do fornecedor para modelar.
-2. **Cena "caixa de presente"**: foi refeita depois de uma primeira versão ruim. Vale um olhar do dono
+4. **Cena "caixa de presente"**: foi refeita depois de uma primeira versão ruim. Vale um olhar do dono
    para manter ou tirar.
-3. **O WhatsApp do site ainda é o número de reserva** (`5500000000000`). O guardião avisa a cada
+5. **O WhatsApp do site ainda é o número de reserva** (`5500000000000`). O guardião avisa a cada
    execução. Troca-se pelo painel ou em `script.js`.
-4. **Remover fundo por inteligência artificial** ficou de fora de propósito: exigiria embarcar um
+6. **Remover fundo por inteligência artificial** ficou de fora de propósito: exigiria embarcar um
    modelo de vários megabytes com licença comercial. O recorte atual funciona em fundo liso e avisa
    quando não dá.
 
@@ -181,7 +202,8 @@ coleção nova não precisa do Python.
    `roda('...')` de cada bloco do `qa/audit.mjs`). Quem estiver com o estúdio aberto não vê o defeito, e
    cada prova leva menos de um minuto.
 5. Modelo novo: copie um item de `MODELOS` em `modelos.js` e rode `npm run test:arte`. Coleção
-   nova: seção 7 aqui em cima.
+   nova: seção 7 aqui em cima. Modelo de garrafa ou ecobag: nos arquivos `-modelos.js` delas, com os
+   atalhos de `atalhos-da-peca.js`, quatro por ocasião. Peça nova: `PECAS-NO-ESTUDIO.md`, último item.
 6. Antes de publicar, olhe as provas (`npm run provas`) no tamanho de uso. O guardião confere regras,
    não gosto.
 
