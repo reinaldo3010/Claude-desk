@@ -20,13 +20,27 @@ const TIPOS = {
   '.woff2': 'font/woff2', '.woff': 'font/woff', '.ttf': 'font/ttf', '.txt': 'text/plain; charset=utf-8', '.xml': 'application/xml',
 };
 
-export function servir(raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'), porta = 0) {
+/*
+  `QA_SOBREPOR` aponta uma pasta cujos arquivos passam na frente dos do site, no mesmo caminho. É por ela
+  que a prova de defeito reinsere um defeito: a cópia estragada fica numa pasta temporária e o arquivo
+  de verdade nunca é tocado. Antes a prova reescrevia o próprio arquivo, e o dono, com o estúdio aberto
+  no navegador, abriu justamente a versão estragada (23/09/2026).
+*/
+export function servir(raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'), porta = 0, { sobre = process.env.QA_SOBREPOR } = {}) {
+  raiz = path.resolve(raiz); // com barra normal ("C:/...") a comparação de prefixo abaixo recusava tudo
+  const pastaDeCima = sobre ? path.resolve(sobre) : null;
+  const naPastaDeCima = (caminho) => {
+    if (!pastaDeCima) return null;
+    const arquivo = path.resolve(pastaDeCima, '.' + caminho);
+    return arquivo.startsWith(pastaDeCima) && fs.existsSync(arquivo) && fs.statSync(arquivo).isFile() ? arquivo : null;
+  };
   const servidor = http.createServer((req, res) => {
     let caminho;
     try { caminho = decodeURIComponent(new URL(req.url, 'http://localhost').pathname); } catch { res.writeHead(400).end(); return; }
     if (caminho.endsWith('/')) caminho += 'index.html';
-    const arquivo = path.resolve(raiz, '.' + caminho);
-    if (!arquivo.startsWith(raiz) || !fs.existsSync(arquivo) || fs.statSync(arquivo).isDirectory()) {
+    const deCima = naPastaDeCima(caminho);
+    const arquivo = deCima || path.resolve(raiz, '.' + caminho);
+    if (!deCima && (!arquivo.startsWith(raiz) || !fs.existsSync(arquivo) || fs.statSync(arquivo).isDirectory())) {
       const p404 = path.resolve(raiz, '404.html');
       res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
       res.end(fs.existsSync(p404) ? fs.readFileSync(p404) : 'não encontrado');

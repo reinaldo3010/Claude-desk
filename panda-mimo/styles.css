@@ -348,22 +348,15 @@ h2 .hand { font-size: 1.15em; }
 }
 .product__cta:hover { background: var(--peach); color: var(--ink); }
 
-/* ---------- monte seu mimo ---------- */
-.builder {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: clamp(1.5rem, 4vw, 3rem);
-  align-items: start;
+/* ---------- monte seu mimo: o estúdio da caneca em 360°, aqui mesmo ---------- */
+/* Enquanto o estúdio carrega: a caneca de verdade e um aviso, no tamanho de um cartão. */
+.estudio-no-site { min-width: 0; }
+.estudio-no-site__espera {
+  display: grid; justify-items: center; gap: .8rem; padding: clamp(1.5rem, 4vw, 3rem) 1rem;
+  background: var(--cream); border: 1px solid var(--sand); border-radius: var(--r-lg);
 }
-@media (max-width: 860px) { .builder { grid-template-columns: 1fr; } .builder__stage { order: -1; position: static; } }
-
-.builder__form {
-  display: grid; gap: 1.3rem;
-  background: var(--white);
-  border-radius: var(--r-lg);
-  padding: clamp(1.2rem, 3vw, 2rem);
-  box-shadow: var(--shadow);
-}
+.estudio-no-site__espera img { width: min(100%, 320px); height: auto; }
+.estudio-no-site__aviso { color: var(--ink-soft); font-size: var(--fs-s); text-align: center; }
 .field { display: grid; gap: .5rem; border: 0; padding: 0; margin: 0; min-width: 0; }
 .field label, .field legend {
   font-family: var(--f-display); font-weight: 600; font-size: 1rem; padding: 0;
@@ -383,7 +376,7 @@ h2 .hand { font-size: 1.15em; }
 .field--check input { width: 20px; height: 20px; accent-color: var(--peach-deep); margin: 0; }
 
 .seg { display: flex; gap: .4rem; flex-wrap: wrap; }
-.seg input, .swatches input { position: absolute; opacity: 0; pointer-events: none; }
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
 .seg label {
   padding: .55rem 1rem;
   border: 2px solid var(--sand);
@@ -397,46 +390,6 @@ h2 .hand { font-size: 1.15em; }
 .seg input:focus-visible + label { outline: 3px solid var(--peach-deep); outline-offset: 2px; }
 .f-redonda { font-family: var(--f-display) !important; }
 .f-manuscrita { font-family: var(--f-hand) !important; font-size: 1.15rem !important; }
-
-.swatches { display: flex; gap: .7rem; flex-wrap: wrap; }
-.swatches label {
-  display: grid; justify-items: center; gap: .35rem;
-  font-size: var(--fs-xs) !important; font-weight: 700 !important;
-  color: var(--ink-soft); cursor: pointer;
-}
-.swatches label::before {
-  content: ""; width: 38px; height: 38px; border-radius: 50%;
-  background: var(--sw);
-  border: 3px solid var(--white);
-  box-shadow: 0 0 0 2px var(--sand);
-  transition: box-shadow .15s, transform .15s;
-}
-.swatches input:checked + label::before { box-shadow: 0 0 0 3px var(--ink); transform: scale(1.06); }
-.swatches input:focus-visible + label::before { box-shadow: 0 0 0 3px var(--peach-deep); }
-
-.builder__stage { display: grid; justify-items: center; gap: .8rem; }
-@media (min-width: 861px) { .builder__stage { position: sticky; top: 92px; } }
-.preview {
-  width: min(100%, 380px);
-  aspect-ratio: 260 / 320;
-  overflow: visible;
-}
-.preview .pv-body { fill: var(--pv, #F3EEE4); stroke: var(--ink); stroke-width: 2.5; transition: fill .3s ease; }
-.preview .pv-text {
-  font-family: var(--pv-font, var(--f-display));
-  font-weight: 600;
-  font-size: var(--pv-size, 30px);
-  fill: var(--pv-ink, var(--ink));
-  transition: fill .3s ease;
-}
-.preview .pv-heart { fill: var(--peach); }
-.preview[data-cor="preta"] .pv-heart, .preview[data-cor="pessego"] .pv-heart { fill: var(--pv-ink, var(--ink)); }
-.preview .pv-panda { transition: opacity .2s; }
-.preview[data-panda="off"] .pv-panda { opacity: 0; }
-.builder__foot { display: flex; align-items: center; gap: .6rem; max-width: 380px; }
-.builder__foot img { width: 120px; flex: none; }
-.builder__note { font-size: var(--fs-s); color: var(--ink-soft); }
-.builder__note .hand { font-size: 1.25rem; color: var(--peach-ink); }
 
 /* ---------- como funciona ---------- */
 .steps {
@@ -540,7 +493,6 @@ h2 .hand { font-size: 1.15em; }
 .footer__legal { font-size: var(--fs-xs); color: var(--ink-soft); margin-top: .8rem; }
 
 /* SVG: o atributo hidden precisa ser honrado também dentro do <svg> */
-.preview g[hidden] { display: none; }
 
 
 /* =========================================================
@@ -809,7 +761,7 @@ h2 .hand { font-size: 1.15em; }
 
 /* ---------- celular: nada fica fixo enquanto a página rola ---------- */
 @media (max-width: 860px) {
-  .builder__stage, .faq__side { position: static; top: auto; }
+  .faq__side { position: static; top: auto; }
 }
 
 
@@ -1065,27 +1017,6 @@ h2 .hand { font-size: 1.15em; }
 }
 
 /* =========================================================
-   Simulador: modo foto real
-   ========================================================= */
-.seg--modo { justify-content: center; margin-bottom: .2rem; }
-.foto-real {
-  position: relative; width: min(100%, 380px); aspect-ratio: 1;
-  border-radius: var(--r-md);
-  background: var(--sand-soft) radial-gradient(circle, rgba(255,181,156,.45) 1.6px, transparent 1.7px) 0 0 / 22px 22px;
-}
-.foto-real img { width: 100%; height: 100%; object-fit: contain; }
-.foto-real__placa {
-  position: absolute;
-  left: var(--px); top: var(--py); width: var(--pw); height: var(--ph);
-  background: var(--placa, #F6D8D0);
-  border-radius: 14% / 45%;
-  box-shadow: inset 0 0 0 1.5px rgba(23,21,18,.08), 0 1px 2px rgba(23,21,18,.08);
-  display: grid; place-items: center; overflow: hidden;
-  font-family: var(--f-hand); font-weight: 600; color: var(--ink); line-height: 1; white-space: nowrap;
-}
-.swatches input:disabled + label, .field--check input:disabled + label { opacity: .45; }
-
-/* =========================================================
    Movimento, com moderação
    ========================================================= */
 .reveal--pronto { opacity: 0; transform: translateY(12px); }
@@ -1102,13 +1033,6 @@ h2 .hand { font-size: 1.15em; }
    ========================================================= */
 .hero__assinatura { font-size: clamp(1.5rem, 1.2rem + 1vw, 2.1rem); color: var(--hand-ink); line-height: 1.1; margin: -.2rem 0 .2rem; }
 .hero__facts li:nth-child(4) { display: list-item; }
-.builder__garantia { font-size: var(--fs-s); color: var(--ink-soft); margin: .4rem 0 0; }
-/* convite ao estúdio da caneca em 360° (caneca-3d.html) */
-.builder__estudio { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .9rem 1.5rem; margin-top: 1.6rem; padding: 1.1rem 1.4rem; background: var(--cream); border: 1px solid var(--sand); border-radius: var(--r-md); }
-.builder__estudio p { flex: 1 1 28ch; font-size: var(--fs-s); color: var(--ink-soft); line-height: 1.55; }
-.builder__estudio .hand { display: block; font-size: 1.35rem; color: var(--peach-ink); }
-.builder__estudio .btn { flex: none; }
-@media (max-width: 480px) { .builder__estudio .btn { width: 100%; } }
 
 .depoimentos { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.2rem; }
 .depo {

@@ -394,7 +394,7 @@
           <tr><td>Assinatura principal</td><td><strong>Feito com carinho, feito pra você.</strong></td><td>Hero (manuscrita, abaixo do título), rodapé, bilhete, balão do mascote, verso da tag</td></tr>
           <tr><td>Assinatura de produto</td><td>Mais que um presente, um mimo.</td><td>Diferenciais, embalagem, post de apresentação</td></tr>
           <tr><td>Faixa</td><td>Personalizados com amor</td><td>Seção de produtos, sticker em stories</td></tr>
-          <tr><td>Selo</td><td>Personalizado do seu jeito</td><td>Coração pontilhado no simulador, tag</td></tr>
+          <tr><td>Selo</td><td>Personalizado do seu jeito</td><td>Coração pontilhado na seção Monte seu mimo, tag</td></tr>
           <tr><td>Etiqueta</td><td>Feito especialmente para você!</td><td>Hero, tag da embalagem</td></tr>
           <tr><td>Faixa</td><td>Para momentos especiais</td><td>Ocasiões</td></tr>
           <tr><td>Convite</td><td>Vamos fazer o seu?</td><td>Contato, fim de post</td></tr>
@@ -602,7 +602,7 @@
           <div class="peca"><i style="background:#FFB59C"></i>Pêssego</div>
           <div class="peca"><i style="background:#1F1D1A"></i>Preta</div>
         </div>
-        <p class="legenda">As quatro cores em que as peças saem, exatamente as do simulador do site. Na preta e na pêssego, a arte vai em papel; nas demais, em nanquim.</p>
+        <p class="legenda">As quatro cores em que as peças saem. Na preta e na pêssego, a arte vai em papel; nas demais, em nanquim.</p>
       </div>
       <div>
         <h3>Pares aprovados</h3>
@@ -670,7 +670,7 @@
     </div>
 
     <p>A margarida de Ocasiões ganhou uma edição com pétalas e miolo definidos, aprovada no piloto. Usa WebP com transparência real em duas densidades; o mestre PNG e a origem ficam no kit. O arquivo original está preservado. Esta imagem é raster, não SVG.</p><p>Os mestres SVG fornecidos pelo dono estão em <code>marca/kit/padrao-referencia/</code>. Para telas pequenas, selos e faixas combinam os símbolos vetoriais com texto HTML em Fredoka a partir de 18 px. Balões usam texto real a partir de 16 px; descrições em Nunito a partir de 14 px. A etiqueta da hero é a exceção: adesivo decorativo em imagem, com a frase no <code>alt</code>. Os derivados ficam em <code>marca/kit/tela/</code>. Ícones de interface não recebem filtros nem renderização pixelada. Estas adaptações de leitura foram aprovadas pelo dono; os mestres e as demais fontes da marca continuam preservados (manual, seções 13.6 e 13.7).</p>
-    <p>Coração do simulador e celular das redes usam frases HTML a 18 px; os links sociais usam os símbolos SVG do site. No azulejo em teste, a frase substitui apenas a ilustração antiga: fotos novas cadastradas no painel são preservadas. Contato e rodapé usam os logos WebP mais fiéis, sem inclinação ou filtro, com “Itens personalizados” em HTML a 14 px. Os traçados antigos dos dois logos foram rejeitados na comparação visual; converter para SVG não recupera detalhes ausentes nem garante fidelidade.</p>
+    <p>Coração da seção Monte seu mimo e celular das redes usam frases HTML a 18 px; os links sociais usam os símbolos SVG do site. No azulejo em teste, a frase substitui apenas a ilustração antiga: fotos novas cadastradas no painel são preservadas. Contato e rodapé usam os logos WebP mais fiéis, sem inclinação ou filtro, com “Itens personalizados” em HTML a 14 px. Os traçados antigos dos dois logos foram rejeitados na comparação visual; converter para SVG não recupera detalhes ausentes nem garante fidelidade.</p>
     <div class="stickers">
       <div class="fig fig--dots"><img src="../assets/faixa-carinho.webp" alt="Faixa: feito com carinho" width="900" height="300"></div>
       <div class="fig fig--dots"><img src="../assets/faixa-amor.webp" alt="Faixa: personalizados com amor" width="900" height="300"></div>
@@ -746,7 +746,7 @@
 
     <div class="grid grid--3" style="margin-top:1.4rem">
       <div class="card"><h4>Nomes de arquivo</h4><p class="small"><code>prod-&lt;produto&gt;[-&lt;vista&gt;].webp</code> para catálogo (a primeira é a foto do cartão); <code>uso-*.webp</code> e <code>foto-*.webp</code> para contexto; <code>panda-*.webp</code> para o mascote.</p></div>
-      <div class="card"><h4>Prévia real</h4><p class="small">O simulador desenha o nome na foto real da garrafa, da caneca e do copo. Trocou a foto-base? Recalibre posição e cor da placa em <code>FOTO_REAL</code> (script.js). Prévias no WhatsApp seguem o mesmo princípio: arte aplicada na peça, nunca solta.</p></div>
+      <div class="card"><h4>Prévia real</h4><p class="small">A prévia do site é o estúdio da caneca em 360°, na seção Monte seu mimo da página inicial (desde 23/09/2026, no lugar do simulador de desenho). Prévias no WhatsApp seguem o mesmo princípio: arte aplicada na peça, nunca solta.</p></div>
       <div class="card card--areia"><h4>Não fazer</h4><p class="small">Fundo branco recortado às pressas, sombra dura, filtro colorido, peça pela metade, colagem com mais de três peças, texto sobre a foto de catálogo.</p></div>
     </div>
   </div>
@@ -825,7 +825,7 @@
                 <tr><td>Paleta</td><td><code>styles.css</code> · <code>--ink</code>, <code>--paper</code>, <code>--peach</code>…</td></tr>
                 <tr><td>Tipografia e escala</td><td><code>--f-display</code>, <code>--f-hand</code>, <code>--f-body</code>, <code>--fs-*</code></td></tr>
                 <tr><td>Raios, sombra, largura</td><td><code>--r-lg/md/sm</code>, <code>--shadow</code>, <code>--wrap</code></td></tr>
-                <tr><td>Cores das peças</td><td><code>--sw</code> no simulador, <code>FOTO_REAL</code> em script.js</td></tr>
+                <tr><td>Cores das peças</td><td>o manual e as fotos do catálogo; cores da cerâmica do estúdio em <code>CERAMICA</code> (simulador/estudio.js)</td></tr>
                 <tr><td>Regras de foto</td><td><code>preparaFoto</code> em admin.js, travas de pixel em qa/audit.mjs</td></tr>
                 <tr><td>Frases e rótulos</td><td>index.html, produtos.js, mensagens <code>data-msg</code></td></tr>
               </tbody>

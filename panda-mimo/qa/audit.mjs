@@ -55,13 +55,47 @@ import fs from 'node:fs';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const page_url = 'file://' + path.resolve(here, '..', 'index.html');
 const onlyShots = process.argv.includes('--shots');
+/**
+ * Escolhe uma ocasião no seletor do estúdio como uma pessoa faria: abre o painel e toca na pílula.
+ * O seletor deixou de ser um <select> nativo em 23/09/2026 (a lista do navegador era grande e sem ordem).
+ */
+async function escolheAssunto(pagina, id) {
+  await pagina.evaluate((id) => {
+    const botao = document.getElementById('categoria-modelo');
+    if (botao.getAttribute('aria-expanded') !== 'true') botao.click();
+    document.querySelector(`#painel-assuntos [data-assunto="${id}"]`).click();
+  }, id);
+  await pagina.waitForTimeout(300);
+}
+
 const TODAS = [[320, 568], [360, 800], [375, 667], [375, 812], [390, 844], [393, 852], [414, 896], [768, 1024], [820, 1180], [1024, 768], [1280, 720], [1366, 768], [1440, 900], [1920, 1080]];
 // QA_VIEWPORTS=390,1280 roda só essas larguras (útil para uma checagem rápida)
 const filtro = (process.env.QA_VIEWPORTS || '').split(',').filter(Boolean).map(Number);
 const viewports = filtro.length ? TODAS.filter(([w]) => filtro.includes(w)) : TODAS;
+/*
+  QA_SO=cardapio,minha-arte roda só esses blocos; o nome de cada um está no `roda('...')` que o abre.
+  Um bloco leva de segundos a um ou dois minutos, e o guardião inteiro, uns 25: é por aqui que a prova
+  de defeito e a conferência do dia a dia andam depressa (23/09/2026, pedido do dono, depois de uma
+  tarde de esperas de 5 minutos para ver uma checagem só reprovar). Antes de publicar, roda tudo.
+*/
+const SO = new Set((process.env.QA_SO || '').split(',').map((b) => b.trim()).filter(Boolean));
+const roda = (bloco) => !SO.size || SO.has(bloco);
 const shotWidths = new Set([320, 390, 768, 1280, 1920]);
 const failures = []; const warnings = []; const links = new Map(); let quadrosConferidos = false;
 const fail = (w, msg) => failures.push(`[${w}px] ${msg}`);
+/*
+  Quando uma checagem quebra no meio — um clique esperando 30 s por um botão que um defeito escondeu —, o
+  processo morria sem relatório, e com ele sumiam as reprovações já encontradas. A prova de defeito de
+  23/09/2026 caiu nisso duas vezes: saída 1 e nenhuma linha dizendo o quê. Agora sai o que já reprovou e
+  onde parou.
+*/
+const relataQuebra = (erro) => {
+  console.error(`\n✗ o guardião parou no meio: ${String(erro?.message || erro).split('\n')[0]}`);
+  if (failures.length) console.error(`\n✗ ${failures.length} problema(s) antes da parada:\n` + failures.map((f) => '  - ' + f).join('\n'));
+  process.exit(1);
+};
+process.on('uncaughtException', relataQuebra);
+process.on('unhandledRejection', relataQuebra);
 
 const exe = process.env.CHROMIUM_PATH;
 const browser = await chromium.launch({ ...(exe ? { executablePath: exe } : {}), args: ['--allow-file-access-from-files'] });
@@ -76,7 +110,7 @@ async function loadImages(page) {
   await page.waitForTimeout(250);
 }
 
-for (const [w, h] of viewports) {
+if (roda('site')) for (const [w, h] of viewports) {
   const page = await browser.newPage({ viewport: { width: w, height: h }, deviceScaleFactor: 1 });
   const consoleErrors = [], netFailures = [];
   page.on('pageerror', (e) => consoleErrors.push(e.message));
@@ -129,7 +163,7 @@ for (const [w, h] of viewports) {
       const cs = getComputedStyle(el);
       if ((cs.overflowX === 'hidden' || cs.overflow === 'hidden' || cs.textOverflow === 'ellipsis') && el.scrollWidth > el.clientWidth + 1) out.push(`texto cortado: ${el.tagName.toLowerCase()} "${el.textContent.trim().slice(0, 40)}"`);
     }
-    const groups = ['.products', '.steps', '.occasions', '.promises', '.care', '.faq__list', '.gallery', '.trust__in', '.builder', '.hero__actions', '.contact__actions', '.follow__links', '.footer__nav', '.topbar__in'];
+    const groups = ['.products', '.steps', '.occasions', '.promises', '.care', '.faq__list', '.gallery', '.trust__in', '.hero__actions', '.contact__actions', '.follow__links', '.footer__nav', '.topbar__in'];
     for (const sel of groups) {
       const parent = document.querySelector(sel); if (!parent) continue;
       const kids = [...parent.children].filter((k) => visible(k) && getComputedStyle(k).position !== 'absolute');
@@ -346,53 +380,13 @@ for (const [w, h] of viewports) {
   await page.evaluate(() => window.scrollTo(0, 0));
 
   // botão flutuante
-  await page.focus('#b-nome'); await page.waitForTimeout(100);
+  await page.focus('#busca-pecas'); await page.waitForTimeout(100);
   if (!(await page.$eval('.fab', (f) => f.classList.contains('is-hidden')))) fail(w, 'botão flutuante visível com o teclado aberto');
-  await page.$eval('#b-nome', (i) => i.blur());
+  await page.$eval('#busca-pecas', (i) => i.blur());
   await page.evaluate(() => document.getElementById('contato').scrollIntoView({ behavior: 'instant', block: 'center' })); await page.waitForTimeout(350);
   if (!(await page.$eval('.fab', (f) => f.classList.contains('is-hidden')))) fail(w, 'botão flutuante sobre a seção de contato');
   await page.evaluate(() => window.scrollTo(0, 0)); await page.waitForTimeout(350);
   if (await page.$eval('.fab', (f) => f.classList.contains('is-hidden'))) fail(w, 'botão flutuante não volta a aparecer');
-
-  // simulador
-  const pick = (id) => page.$eval(`label[for="${id}"]`, (l) => l.click());
-  const setNome = (v) => page.fill('#b-nome', v);
-  const largura = { garrafa: 84, caneca: 120, copo: 92 };
-  for (const base of ['garrafa', 'caneca', 'copo']) {
-    await pick(`i-${base}`);
-    for (const letra of ['redonda', 'manuscrita']) {
-      await pick(`l-${letra}`);
-      for (const nome of ['', 'Jo', 'Malu', 'João Ção', 'Ana & Bia #1', 'Beatriz Gonçalves', 'Maria Eduarda 2', 'Malu 🐼💕']) {
-        await setNome(nome);
-        const r = await page.evaluate((b) => {
-          const g = document.getElementById(`pv-${b}`); const t = g.querySelector('.pv-text');
-          const outras = ['garrafa', 'caneca', 'copo'].filter((x) => x !== b).filter((x) => getComputedStyle(document.getElementById(`pv-${x}`)).display !== 'none');
-          return { hidden: getComputedStyle(g).display === 'none', outras, text: t.textContent, width: t.getComputedTextLength() };
-        }, base);
-        if (r.hidden) fail(w, `base ${base} não aparece no desenho`);
-        if (r.outras.length) fail(w, `base ${base} escolhida, mas o desenho ainda mostra ${r.outras.join(' e ')}`);
-        if (r.text !== (nome.trim() || 'Seu nome')) fail(w, `prévia não mostra "${nome}" em ${base}/${letra} (veio "${r.text}")`);
-        if (r.width > largura[base] + 2) fail(w, `texto "${nome}" não cabe na ${base} com letra ${letra} (${Math.round(r.width)} > ${largura[base]})`);
-      }
-    }
-    for (const cor of ['creme', 'salvia', 'pessego', 'preta']) {
-      await pick(`c-${cor}`);
-      const fill = await page.$eval(`#pv-${base} .pv-body`, (b) => getComputedStyle(b).fill);
-      if (!fill || fill === 'none') fail(w, `cor ${cor} não pintou a ${base}`);
-    }
-  }
-  const ink = await page.$eval('.preview', (p) => getComputedStyle(p).getPropertyValue('--pv-ink').trim());
-  if (!/FBF6EF/i.test(ink)) fail(w, `cor preta não trocou a cor do texto (--pv-ink=${ink})`);
-  for (const [val, esperado] of [['0', 1], ['-3', 1], ['abc', 1], ['9999', 500], ['12', 12], ['2.7', 2], ['', 1]]) {
-    await page.$eval('#b-qtd', (i, v) => { i.value = v; i.dispatchEvent(new Event('input', { bubbles: true })); i.dispatchEvent(new Event('change', { bubbles: true })); i.blur(); }, val);
-    const got = await page.$eval('#b-qtd', (i) => i.value);
-    if (+got !== esperado) fail(w, `quantidade "${val}" virou "${got}" (esperado ${esperado})`);
-  }
-  await page.fill('#b-qtd', '3');
-  await pick('i-copo'); await pick('c-salvia'); await pick('l-manuscrita'); await setNome('Beatriz'); await page.$eval('#b-panda', (c) => { if (c.checked) c.click(); });
-  const msg = await page.evaluate(() => new Promise((res) => { const o = window.open; window.open = (u) => { window.open = o; res(decodeURIComponent(u.split('text=')[1])); }; document.getElementById('b-send').click(); }));
-  for (const parte of ['copo térmico', 'sálvia', '"Beatriz"', 'letra manuscrita', 'sem o pandinha', 'Quantidade: 3']) if (!msg.includes(parte)) fail(w, `mensagem do WhatsApp sem "${parte}"`);
-  await page.$eval('#b-panda', (c) => { if (!c.checked) c.click(); }); await pick('i-garrafa'); await pick('c-creme'); await pick('l-redonda'); await setNome('Malu'); await page.fill('#b-qtd', '1');
 
   // FAQ
   const items = await page.$$('.faq__item');
@@ -439,38 +433,6 @@ for (const [w, h] of viewports) {
     if (/^#produto\//.test(depois.hash)) fail(w, 'detalhe fechou mas o endereço continuou apontando para o produto');
   }
 
-  // simulador em modo foto real
-  {
-    await page.fill('#b-nome', 'Beatriz');
-    await page.$eval('label[for="m-foto"]', (l) => l.click()); await page.waitForTimeout(250);
-    const f = await page.evaluate(() => {
-      const foto = document.getElementById('foto-real'), placa = document.getElementById('foto-real-placa'), nome = document.getElementById('foto-real-nome');
-      const rp = placa.getBoundingClientRect(), rn = nome.getBoundingClientRect();
-      return {
-        fotoVisivel: !foto.hidden && getComputedStyle(foto).display !== 'none',
-        desenhoEscondido: getComputedStyle(document.querySelector('.preview')).display === 'none',
-        texto: nome.textContent, cabe: rn.left >= rp.left - 1 && rn.right <= rp.right + 1 && rn.top >= rp.top - 1 && rn.bottom <= rp.bottom + 1,
-        placaNaFoto: (() => { const ri = document.getElementById('foto-real-img').getBoundingClientRect(); return rp.left > ri.left && rp.right < ri.right && rp.top > ri.top && rp.bottom < ri.bottom; })(),
-        coresDesligadas: document.getElementById('c-creme').disabled,
-      };
-    });
-    if (!f.fotoVisivel) fail(w, 'modo foto real não mostrou a foto');
-    if (!f.desenhoEscondido) fail(w, 'modo foto real deixou o desenho aparecendo junto');
-    if (f.texto !== 'Beatriz') fail(w, `nome na foto real veio "${f.texto}"`);
-    if (!f.cabe) fail(w, 'nome na foto real saiu da plaquinha');
-    if (!f.placaNaFoto) fail(w, 'plaquinha da foto real fora da área da foto');
-    if (!f.coresDesligadas) fail(w, 'modo foto real deixou as cores ativas, mas elas não valem na foto');
-    for (const base of ['garrafa', 'copo', 'caneca']) {
-      await page.$eval(`label[for="i-${base}"]`, (l) => l.click()); await page.waitForTimeout(120);
-      const ok = await page.evaluate(() => { const rp = document.getElementById('foto-real-placa').getBoundingClientRect(), rn = document.getElementById('foto-real-nome').getBoundingClientRect(); return rn.right <= rp.right + 1 && rn.left >= rp.left - 1; });
-      if (!ok) fail(w, `nome na foto real saiu da plaquinha na base ${base}`);
-    }
-    await page.$eval('label[for="m-desenho"]', (l) => l.click()); await page.waitForTimeout(120);
-    await page.fill('#b-nome', 'Malu');
-    if (!(await page.$eval('#foto-real', (f) => f.hidden))) fail(w, 'voltar para o desenho não escondeu a foto real');
-    if (await page.$eval('#c-creme', (c) => c.disabled)) fail(w, 'voltar para o desenho não religou as cores');
-  }
-
   // movimento: depois de rolar até uma seção ela precisa estar visível
   {
     await page.evaluate(() => document.getElementById('contato').scrollIntoView({ behavior: 'instant', block: 'center' }));
@@ -502,7 +464,7 @@ for (const [w, h] of viewports) {
   await page.close();
 }
 // ---- cabeçalho, ícones e arquivos de lançamento ----
-{
+if (roda('cabecalho')) {
   const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
   await page.goto(page_url, { waitUntil: 'load' });
   const cab = await page.evaluate(async () => {
@@ -561,7 +523,7 @@ for (const [w, h] of viewports) {
 }
 
 // ---- conversão (V2): o que vende precisa estar na tela, do jeito que o manual manda ----
-{
+if (roda('conversao')) {
   const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
   const depos = [];
   await page.route('**/rest/v1/pm_depoimentos*', (r) => {
@@ -587,7 +549,7 @@ for (const [w, h] of viewports) {
   if (hero.botoes[0] !== 'Quero criar meu mimo' || hero.botoes[1] !== 'Ver as peças') failures.push(`[conversão] chamadas do hero fora da tabela 4.7: ${hero.botoes.join(' | ')}`);
   if (hero.facts < 4) failures.push('[conversão] a faixa de segurança do hero perdeu itens');
   // chamadas para ação: só as da tabela 4.7 (botões .btn com texto)
-  const permitidas = ['Quero criar meu mimo', 'Ver as peças', 'Quero essa', 'Pedir esse mimo no WhatsApp', 'Orçamento para 10+ unidades', 'Me avise', 'Pedir pelo WhatsApp', 'Perguntar no WhatsApp', 'Ver no Instagram', 'Ver com meu nome', 'Ver minha foto na caneca', 'Enviar depoimento', 'Voltar pro início', 'Limpar busca', 'Ver mais'];
+  const permitidas = ['Quero criar meu mimo', 'Ver as peças', 'Quero essa', 'Pedir esse mimo no WhatsApp', 'Orçamento para 10+ unidades', 'Me avise', 'Pedir pelo WhatsApp', 'Perguntar no WhatsApp', 'Ver no Instagram', 'Ver com meu nome', 'Enviar depoimento', 'Voltar pro início', 'Limpar busca', 'Ver mais'];
   const fora = await page.$$eval('main .btn, footer .btn', (els) => els.map((b) => b.textContent.replace(/\s+/g, ' ').trim()).filter(Boolean));
   const estranhas = [...new Set(fora.filter((t) => !permitidas.some((p) => t === p || t.startsWith(p))))];
   if (estranhas.length) failures.push(`[conversão] chamada(s) fora da tabela 4.7 do manual: ${estranhas.join(' | ')}`);
@@ -653,7 +615,7 @@ for (const [w, h] of viewports) {
 // ---- conteúdo sempre visível: a animação de entrada nunca pode deixar a página em branco ----
 // Cenário real: webview do Instagram/WhatsApp carrega a página antes de ter altura (innerHeight ~0);
 // tudo o que depender de "está abaixo da primeira tela" esconde a página inteira, hero incluído.
-{
+if (roda('conteudo')) {
   const visivel = (page, sel) => page.$eval(sel, (el) => { const cs = getComputedStyle(el); const b = el.getBoundingClientRect(); return Number(cs.opacity) > 0.99 && cs.visibility !== 'hidden' && b.height > 0; });
   const invisiveis = (page) => page.$$eval('main > section, main > .trust, footer', (els) => els.filter((el) => Number(getComputedStyle(el).opacity) < 0.99).map((el) => el.id || el.className.split(' ')[0]));
   // a) carrega com 1 px de altura e só depois ganha a tela
@@ -692,17 +654,15 @@ for (const [w, h] of viewports) {
 }
 
 // ---- nitidez: em telas 2x e 3x nenhuma imagem pode aparecer ampliada acima de 10% ----
-for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
+if (roda('nitidez')) for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
   const page = await browser.newPage({ viewport: { width: w, height: h }, deviceScaleFactor: dpr });
   await page.goto(page_url, { waitUntil: 'load' });
   await page.addStyleTag({ content: 'html{scroll-behavior:auto!important}' });
   await page.evaluate(() => { window.PANDA_REVELA_TUDO && window.PANDA_REVELA_TUDO(); document.querySelectorAll('img[loading="lazy"]').forEach((i) => { i.loading = 'eager'; }); });
   await page.evaluate(async () => { const passo = innerHeight * .8; for (let y = 0; y < document.documentElement.scrollHeight; y += passo) { scrollTo(0, y); await new Promise((r) => setTimeout(r, 30)); } scrollTo(0, 0); });
-  // detalhe e foto real também entram na medição
+  // o detalhe do produto também entra na medição
   await page.$eval('.product[data-slug="canecas"] .product__ver', (b) => b.click()).catch(() => {});
   await page.waitForTimeout(150);
-  await page.$eval('label[for="i-caneca"]', (l) => l.click()).catch(() => {});
-  await page.$eval('label[for="m-foto"]', (l) => l.click()).catch(() => {});
   await page.waitForTimeout(200);
   await page.evaluate(() => Promise.all([...document.images].map((i) => (i.complete && i.naturalWidth > 0) ? null : new Promise((r) => { i.onload = i.onerror = r; setTimeout(r, 5000); }))));
   const macias = await page.evaluate((dpr) => {
@@ -731,7 +691,7 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
 }
 
 // ---- medição: visita e clique chegam ao banco (simulado) ----
-{
+if (roda('medicao')) {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   const eventos = [];
   await page.route('**/rest/v1/pm_eventos*', (r) => { try { eventos.push(JSON.parse(r.request().postData() || '{}')); } catch {} r.fulfill({ status: 201, body: '' }); });
@@ -762,7 +722,7 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
 }
 
 // ---- o catálogo vindo do banco substitui a cópia local ----
-{
+if (roda('banco')) {
   const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
   const iguaisAoLocal = JSON.parse(fs.readFileSync(path.resolve(here, '..', 'produtos.js'), 'utf8')
     .replace(/^[\s\S]*?window\.PANDA_PRODUTOS\s*=\s*/, '').replace(/;\s*$/, ''))
@@ -812,7 +772,7 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
 }
 
 // ---- painel: carrega limpo e o preparo de foto segue as mesmas regras ----
-{
+if (roda('painel')) {
   const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
   const errosPainel = [];
   page.on('pageerror', (e) => errosPainel.push(e.message));
@@ -896,9 +856,13 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
 }
 
 // ---- páginas de apoio, SEO técnico, fontes próprias e acessibilidade (axe-core) ----
-{
+if (roda('paginas')) {
   const raiz = path.resolve(here, '..');
-  const ler = (f) => fs.readFileSync(path.resolve(raiz, f), 'utf8');
+  // Lido do disco, e não pelo servidor: a pasta da prova de defeito (QA_SOBREPOR) passa na frente aqui também.
+  const ler = (f) => {
+    const deCima = process.env.QA_SOBREPOR ? path.resolve(process.env.QA_SOBREPOR, f) : null;
+    return fs.readFileSync(deCima && fs.existsSync(deCima) ? deCima : path.resolve(raiz, f), 'utf8');
+  };
   const index = ler('index.html');
   const PAGINAS = ['sobre.html', 'trocas.html', 'termos.html', 'privacidade.html'];
   const sitemap = ler('sitemap.xml');
@@ -922,7 +886,8 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     if (!fs.existsSync(path.resolve(raiz, pg))) failures.push(`[estúdio] falta ${pg}`);
     else {
       const t = ler(pg);
-      if (!new RegExp(`href="${pg}"`).test(index)) failures.push(`[estúdio] o index não leva para ${pg}`);
+      // Desde 23/09/2026 o estúdio mora na própria seção Monte seu mimo, que busca a marcação desta página.
+      if (!new RegExp(`href="${pg}"`).test(index) && !new RegExp(`id="estudio-no-site"[^>]*data-origem="${pg}"`).test(index)) failures.push(`[estúdio] o index não leva ao estúdio (${pg}) nem o traz na seção Monte seu mimo`);
       if (!t.includes(`<link rel="canonical" href="`) || !t.includes(pg + '"')) failures.push(`[estúdio] ${pg} sem canonical próprio`);
       if (!/<title>[^<]{10,70}Panda Mimo<\/title>/.test(t)) failures.push(`[estúdio] ${pg} sem <title> "… · Panda Mimo"`);
       if (!/<meta name="description" content="[^"]{60,170}">/.test(t)) failures.push(`[estúdio] ${pg} sem meta description de 60 a 170 caracteres`);
@@ -990,7 +955,7 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
   const { servir } = await import('./servidor.mjs');
   const servidor = await servir();
   const larguras = viewports.some(([w]) => w >= 1024) && viewports.some(([w]) => w < 600) ? [390, 1280] : [viewports[0]?.[0] || 390];
-  for (const w of larguras) {
+  if (roda('estudio')) for (const w of larguras) {
     const contexto = await browser.newContext({
       viewport: { width: w, height: w < 600 ? 844 : 800 },
       permissions: ['clipboard-read', 'clipboard-write'],
@@ -1028,14 +993,18 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
       rolagem: document.documentElement.scrollWidth > document.documentElement.clientWidth,
       previa: !document.getElementById('save-preview').disabled,
       zap: document.getElementById('mug-order').href,
+      abas: [...document.querySelectorAll('#abas button')].map((b) => b.dataset.aba).join(','),
     }));
+    // Na abertura, sem modelo e sem arte, as abas são Modelo e Minha arte.
+    if (estado.abas !== 'modelo,arte') failures.push(`[estúdio ${w}] na abertura as abas deviam ser Modelo e Minha arte (${estado.abas})`);
     if (estado.fallback || !estado.canvas) failures.push(`[estúdio ${w}] o 3D caiu no aviso de indisponível`);
     if (estado.rolagem) failures.push(`[estúdio ${w}] rolagem lateral na página`);
     if (!estado.previa) failures.push(`[estúdio ${w}] "Baixar prévia" continua desligado com o 3D pronto`);
     if (!/^https:\/\/wa\.me\/5511999999999\?text=/.test(estado.zap) || !new URL(estado.zap).searchParams.get('text').includes('Interior: Branco')) failures.push(`[estúdio ${w}] o pedido não leva as escolhas para o WhatsApp (${estado.zap.slice(0, 60)})`);
-    // abre os blocos recolhidos: só assim dá para medir todos os campos da página
+    // abre os blocos recolhidos: só assim dá para medir todos os campos da página (cores, cena e arte
+    // aberta ficam à vista desde 23/09/2026; resta o bloco do Canva)
     await pe.evaluate(() => {
-      for (const id of ['peca-cores', 'peca-cena', 'flat-details', 'bloco-canva']) {
+      for (const id of ['bloco-canva']) {
         const bloco = document.getElementById(id);
         if (bloco) bloco.open = true;
       }
@@ -1059,10 +1028,28 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     if (plana.pintados < 200) failures.push(`[estúdio ${w}] a arte plana ficou em branco depois de colocar a arte`);
     if (!plana.zap.includes('Arte:')) failures.push(`[estúdio ${w}] a mensagem do pedido não cita a arte`);
     if (!plana.erro) failures.push(`[estúdio ${w}] apareceu erro de arquivo com a arte de exemplo`);
-    // nome, cores e vistas (as cores da peça ficam junto da peça, num bloco que abre)
-    await pe.evaluate(() => { document.getElementById('peca-cores').open = true; });
-    await pe.fill('#art-name', 'Malu');
-    await pe.selectOption('#inside-color', 'rosa');
+    // nome, cores e vistas. O nome da arte trazida pronta é uma frase de verdade (23/09/2026): nasce pelo
+    // "+ Nome ou frase" da própria aba, abre para escrever e vai para a mensagem do pedido. As cores da
+    // peça ficam junto da peça, à vista, em bolinhas.
+    await pe.click('#arte-add-frase');
+    await pe.waitForTimeout(300);
+    const campoDoNome = pe.locator('#lista-frases [data-corpo]:not([hidden]) input[type="text"]').first();
+    if (!(await campoDoNome.isVisible().catch(() => false))) failures.push(`[estúdio ${w}] "+ Nome ou frase" não abriu a frase para escrever`);
+    else await campoDoNome.fill('Malu');
+    // Confere antes de clicar: com as cores escondidas, o clique esperaria 30 s e derrubaria o guardião.
+    const coresAVista = await pe.locator('#cores-interior [data-cor="rosa"]').isVisible() && await pe.locator('[data-preset="preta"]').isVisible();
+    if (!coresAVista) failures.push(`[estúdio ${w}] as cores da peça não estão à vista para escolher`);
+    if (coresAVista) {
+    await pe.click('#cores-interior [data-cor="rosa"]');
+    await pe.waitForTimeout(200);
+    const soInterior = await pe.evaluate(() => ({
+      zap: new URL(document.getElementById('mug-order').href).searchParams.get('text') || '',
+      combinacao: document.querySelector('[data-preset][aria-pressed="true"]')?.dataset.preset || null,
+      marcada: document.querySelector('#cores-interior [aria-pressed="true"]')?.dataset.cor,
+    }));
+    if (!soInterior.zap.includes('Interior: Rosa · Alça: Branco') || soInterior.combinacao || soInterior.marcada !== 'rosa') {
+      failures.push(`[estúdio ${w}] a bolinha do interior não trocou só o interior (${JSON.stringify({ ...soInterior, zap: soInterior.zap.slice(0, 120) })})`);
+    }
     await pe.click('[data-preset="preta"]');
     await pe.click('[data-view="back"]');
     await pe.waitForTimeout(700);
@@ -1070,11 +1057,13 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
       zap: new URL(document.getElementById('mug-order').href).searchParams.get('text') || '',
       pressed: document.querySelector('[data-view][aria-pressed="true"]')?.dataset.view,
       preset: document.querySelector('[data-preset][aria-pressed="true"]')?.dataset.preset,
-      interior: document.getElementById('inside-color').value,
+      interior: document.querySelector('#cores-interior [aria-pressed="true"]')?.dataset.cor,
+      alca: document.querySelector('#cores-alca [aria-pressed="true"]')?.dataset.cor,
     }));
     if (!depois.zap.includes('"Malu"') || !depois.zap.includes('Interior: Preto')) failures.push(`[estúdio ${w}] o pedido não acompanha nome e cores escolhidos`);
     if (depois.pressed !== 'back') failures.push(`[estúdio ${w}] o botão de vista "Verso" não ficou marcado`);
-    if (depois.preset !== 'preta' || depois.interior !== 'preta') failures.push(`[estúdio ${w}] a combinação "Preto e branco" não aplicou as duas cores`);
+    if (depois.preset !== 'preta' || depois.interior !== 'preta' || depois.alca !== 'preta') failures.push(`[estúdio ${w}] a combinação "Preto e branco" não aplicou as duas cores`);
+    }
     // arquivo inválido é recusado com mensagem, sem erro de console
     await pe.setInputFiles('#art-file', { name: 'falso.png', mimeType: 'image/png', buffer: Buffer.from('<svg/>') });
     await pe.waitForTimeout(300);
@@ -1110,16 +1099,34 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     await pe.waitForTimeout(250);
     const filtros = await pe.evaluate(() => ({
       abas: [...document.querySelectorAll('#abas button')].map((b) => b.dataset.aba),
-      grupos: [...document.querySelectorAll('#categoria-modelo optgroup')].map((g) => g.label),
-      ocasioes: document.querySelectorAll('#categoria-modelo option').length,
+      grupos: [...document.querySelectorAll('#painel-assuntos .studio-assunto__titulo')].map((g) => g.textContent),
+      ocasioes: document.querySelectorAll('#painel-assuntos [data-assunto]').length,
       resultado: document.getElementById('resultado-modelos').textContent,
     }));
-    if (filtros.abas.join(',') !== 'modelo,arte') failures.push(`[estúdio ${w}] sem modelo, as abas deviam ser Modelo e Minha arte (${filtros.abas.join(',')})`);
+    // Com a arte de exemplo dentro, a Minha arte ganha Frases e Enfeites para pôr por cima (23/09/2026).
+    if (filtros.abas.join(',') !== 'modelo,arte,frases,enfeites') failures.push(`[estúdio ${w}] com a arte trazida pronta, as abas deviam ser Modelo, Minha arte, Frases e Enfeites (${filtros.abas.join(',')})`);
     if (filtros.grupos.length < 3 || filtros.ocasioes < 10) failures.push(`[estúdio ${w}] o seletor de ocasião não veio agrupado (${JSON.stringify(filtros)})`);
     if (!/\d+ modelos/.test(filtros.resultado)) failures.push(`[estúdio ${w}] a lista de modelos não diz quantos são ("${filtros.resultado}")`);
 
-    await pe.selectOption('#categoria-modelo', 'natal');
-    await pe.waitForTimeout(300);
+    // O seletor abre, fecha com Esc e fecha ao escolher; o botão passa a dizer a ocasião.
+    const seletor = await pe.evaluate(async () => {
+      const espera = (ms) => new Promise((r) => setTimeout(r, ms));
+      const botao = document.getElementById('categoria-modelo');
+      const painel = document.getElementById('painel-assuntos');
+      const fechadoNoComeco = !painel.open;
+      botao.click(); await espera(150);
+      const abriu = painel.open && botao.getAttribute('aria-expanded') === 'true';
+      painel.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      await espera(120);
+      const escFecha = !painel.open && botao.getAttribute('aria-expanded') === 'false';
+      botao.click(); await espera(120);
+      painel.querySelector('[data-assunto="natal"]').click();
+      await espera(350);
+      return { fechadoNoComeco, abriu, escFecha, fechouAoEscolher: !painel.open, rotulo: botao.textContent.trim() };
+    });
+    if (!seletor.fechadoNoComeco || !seletor.abriu || !seletor.escFecha || !seletor.fechouAoEscolher || seletor.rotulo !== 'Natal') {
+      failures.push(`[estúdio ${w}] o seletor de ocasião não abre, fecha ou escolhe como devia (${JSON.stringify(seletor)})`);
+    }
     const soNatal = await pe.$$eval('#model-list .studio-model', (b) => b.map((x) => x.dataset.modelo));
     // O assunto mostra exatamente os modelos dele e os que aparecem também ali (`tambemEm`), pela regra do
     // catálogo. O prefixo do id servia de atalho até o Pandinha do Natal morar noutra coleção e aparecer aqui.
@@ -1128,7 +1135,7 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     if (!soNatal.length || JSON.stringify([...soNatal].sort()) !== JSON.stringify(esperadosNoNatal)) {
       failures.push(`[estúdio ${w}] a ocasião Natal mostrou ${soNatal.join(', ')}; o catálogo pede ${esperadosNoNatal.join(', ')}`);
     }
-    await pe.selectOption('#categoria-modelo', 'todos');
+    await escolheAssunto(pe, 'todos');
     await pe.fill('#busca-modelo', 'padrinho');
     await pe.waitForTimeout(300);
     // A busca precisa filtrar de verdade: trazer só o que fala de padrinho, e não o catálogo inteiro.
@@ -1156,7 +1163,7 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
       { nome: 'Música', categoria: 'hobby-musica', modelo: 'prazeres-musica-lado-a' },
     ]) {
       await pe.evaluate(() => document.querySelector('#abas [data-aba="modelo"]').click());
-      await pe.selectOption('#categoria-modelo', categoria);
+      await escolheAssunto(pe, categoria);
       await pe.waitForTimeout(300);
       await pe.evaluate(() => { const b = document.getElementById('model-more'); if (b && !b.hidden && b.textContent.startsWith('Ver mais')) b.click(); });
       const daCategoria = await pe.$$eval('#model-list .studio-model', (b) => b.map((x) => x.dataset.modelo).filter(Boolean));
@@ -1228,9 +1235,9 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
       };
       // (a miniatura com o Pandinha é conferida logo na abertura do estúdio, onde o defeito aparecia)
       document.querySelector('#abas [data-aba="modelo"]').click();
-      const seletor = document.getElementById('categoria-modelo');
-      seletor.value = 'todos';
-      seletor.dispatchEvent(new Event('change'));
+      const botaoDoAssunto = document.getElementById('categoria-modelo');
+      if (botaoDoAssunto.getAttribute('aria-expanded') !== 'true') botaoDoAssunto.click();
+      document.querySelector('#painel-assuntos [data-assunto="todos"]').click();
       await espera(300);
       const cartao = document.querySelector('.studio-model[data-modelo="namorados-coracoes"]');
       cartao.scrollIntoView({ block: 'nearest', behavior: 'instant' });
@@ -1309,8 +1316,7 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
       3. A roda do mouse sobre a prévia dava zoom e engolia a rolagem da página.
     */
     await pe.evaluate(() => document.querySelector('#abas [data-aba="modelo"]').click());
-    await pe.selectOption('#categoria-modelo', 'todos');
-    await pe.waitForTimeout(300);
+    await escolheAssunto(pe, 'todos');
     const rolagem = await pe.evaluate(async () => {
       const botaoMais = document.getElementById('model-more');
       let n = 0;
@@ -1321,22 +1327,30 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
       const cartoes = [...document.querySelectorAll('#model-list .studio-model')].filter((c) => c.dataset.modelo);
       const lista = document.getElementById('model-list');
       lista.scrollTop = lista.scrollHeight;
-      window.scrollTo({ top: document.documentElement.scrollHeight * 0.55, behavior: 'instant' });
+      // Do ponto mais fundo em que alguém ainda escolhe um modelo: o pé da lista encostado no pé da tela.
+      // Rolava-se a 55% da página quando a caneca grudava pelo topo e estava em qualquer altura; com a
+      // arte aberta embaixo dela (23/09/2026), a 55% a lista já saiu da tela e o clique seria num cartão
+      // que ninguém vê.
+      const peDaLista = lista.getBoundingClientRect().bottom + window.scrollY;
+      window.scrollTo({ top: Math.max(0, peDaLista - window.innerHeight + 8), behavior: 'instant' });
       await new Promise((r) => setTimeout(r, 250));
       const antes = { y: Math.round(window.scrollY), max: document.documentElement.scrollHeight - window.innerHeight };
       const alvo = cartoes.find((c) => { const r = c.getBoundingClientRect(); return r.top > 40 && r.bottom < window.innerHeight; }) || cartoes[cartoes.length - 1];
+      const topoAntes = alvo.getBoundingClientRect().top;
       alvo.click();
       await new Promise((r) => setTimeout(r, 1400));
       const peca = document.querySelector('.studio-preview').getBoundingClientRect();
-      const abas = document.getElementById('abas').getBoundingClientRect();
       return {
         alturaComTudo,
         antes,
         depoisMax: document.documentElement.scrollHeight - window.innerHeight,
         pecaVisivel: peca.bottom > 0 && peca.top < window.innerHeight,
-        // O próximo passo é o que diz se a pessoa ficou no lugar certo. O rodapé à vista não serve
-        // de sinal: numa página curta ele aparece sem que ninguém tenha sido jogado para lá.
-        proximoPassoVisivel: abas.top >= -4 && abas.top < window.innerHeight,
+        // Escolher o modelo não pula de etapa (decisão do dono, 23/09/2026): a aba continua Modelo, o
+        // cartão clicado não sai de baixo do dedo, e quem leva adiante é o botão de continuar.
+        cartaoAndou: Math.round(alvo.getBoundingClientRect().top - topoAntes),
+        aba: document.querySelector('#abas [aria-selected="true"]')?.dataset.aba,
+        continuar: document.getElementById('passo-botao')?.textContent.trim() || '',
+        fundoNoTopo: !document.getElementById('fundo-arte').hidden,
       };
     });
     if (rolagem.alturaComTudo > 6000) {
@@ -1345,37 +1359,46 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     if (!rolagem.pecaVisivel) {
       failures.push(`[estúdio ${w}] depois de escolher um modelo a caneca ficou fora da tela`);
     }
-    if (!rolagem.proximoPassoVisivel) {
-      failures.push(`[estúdio ${w}] depois de escolher um modelo o próximo passo (as abas) ficou fora da tela`);
-    }
+    if (rolagem.aba !== 'modelo') failures.push(`[estúdio ${w}] escolher um modelo pulou para a aba ${rolagem.aba}; tem de ficar em Modelo`);
+    if (Math.abs(rolagem.cartaoAndou) > 4) failures.push(`[estúdio ${w}] o cartão clicado andou ${rolagem.cartaoAndou} px na tela ao escolher o modelo`);
+    if (!/^Continuar para /.test(rolagem.continuar)) failures.push(`[estúdio ${w}] depois de escolher o modelo falta o botão de seguir ("${rolagem.continuar}")`);
+    if (!rolagem.fundoNoTopo) failures.push(`[estúdio ${w}] a cor do fundo não apareceu na aba Modelo depois de escolher o modelo`);
 
-    // A roda sozinha tem de rolar a página; só Ctrl/⌘ dá zoom.
+    /*
+      A roda sobre a caneca dá zoom (o dono pediu de volta em 23/09/2026) e, no limite do zoom, devolve
+      a volta seguinte para a página — assim ninguém fica preso com o cursor sobre a prévia.
+    */
     const roda = await pe.evaluate(async () => {
       const canvas = document.querySelector('canvas.mug-3d-canvas');
       if (!canvas) return null;
+      const espera = (ms) => new Promise((res) => setTimeout(res, ms));
       const r = canvas.getBoundingClientRect();
-      const manda = (ctrl, delta = -120) => {
-        const ev = new WheelEvent('wheel', { deltaY: delta, ctrlKey: ctrl, bubbles: true, cancelable: true,
+      const barra = document.getElementById('mug-zoom');
+      const manda = (delta) => {
+        const ev = new WheelEvent('wheel', { deltaY: delta, bubbles: true, cancelable: true,
           clientX: r.x + r.width / 2, clientY: r.y + r.height / 2 });
         canvas.dispatchEvent(ev);
         return ev.defaultPrevented;
       };
-      const sozinha = manda(false);
-      await new Promise((res) => setTimeout(res, 120));
-      const comCtrl = manda(true);
-      // Devolve o zoom: sem isto a caneca fica aproximada e as checagens seguintes, que tocam no
-      // centro da peça esperando acertar uma foto, passam a cair no lugar errado.
-      await new Promise((res) => setTimeout(res, 120));
-      manda(true, 120);
-      await new Promise((res) => setTimeout(res, 300));
-      return { sozinha, comCtrl };
+      const inicio = Number(barra.value);
+      const aproximou = manda(-120);
+      await espera(80);
+      const barraSubiu = Number(barra.value) > inicio;
+      let voltas = 0;
+      while (voltas < 30 && manda(120)) voltas += 1;
+      const noLimite = Number(barra.value);
+      const devolveParaAPagina = !manda(120);
+      // Devolve o zoom de antes: as checagens seguintes tocam no centro da peça esperando uma foto ali.
+      barra.value = String(inicio);
+      barra.dispatchEvent(new Event('input'));
+      await espera(300);
+      return { aproximou, barraSubiu, noLimite, devolveParaAPagina, voltas };
     });
-    if (roda && roda.sozinha) failures.push(`[estúdio ${w}] a roda do mouse sobre a caneca ainda engole a rolagem da página`);
-    if (roda && !roda.comCtrl) failures.push(`[estúdio ${w}] Ctrl + roda deixou de dar zoom na caneca`);
+    if (roda && (!roda.aproximou || !roda.barraSubiu)) failures.push(`[estúdio ${w}] a roda sobre a caneca deixou de dar zoom, ou a barra não acompanha (${JSON.stringify(roda)})`);
+    if (roda && (roda.noLimite !== 75 || !roda.devolveParaAPagina)) failures.push(`[estúdio ${w}] no limite do zoom a roda não volta para a página (${JSON.stringify(roda)})`);
 
     await pe.evaluate(() => document.querySelector('#abas [data-aba="modelo"]').click());
-    await pe.selectOption('#categoria-modelo', 'todos');
-    await pe.waitForTimeout(300);
+    await escolheAssunto(pe, 'todos');
     await pe.evaluate(() => { const b = document.getElementById('model-more'); if (b && !b.hidden && b.textContent.startsWith('Ver mais')) b.click(); });
     await pe.waitForSelector('[data-modelo="namorados-coracoes"]', { state: 'visible' });
     await pe.click('[data-modelo="namorados-coracoes"]');
@@ -1387,16 +1410,23 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
       fotos: document.querySelectorAll('#lista-fotos .studio-item').length,
       frases: document.querySelectorAll('#lista-frases .studio-item').length,
       enfeites: document.querySelectorAll('#lista-enfeites .studio-item').length,
+      painelModelo: !document.getElementById('painel-modelo').hidden,
       painelFotos: !document.getElementById('painel-fotos').hidden,
       painelFrases: !document.getElementById('painel-frases').hidden,
       aviso: document.getElementById('art-warnings').textContent,
     }));
     if (comModelo.abas.join(',') !== 'modelo,fotos,frases,enfeites') failures.push(`[estúdio ${w}] com modelo, faltam abas (${comModelo.abas.join(',')})`);
-    if (comModelo.ativa !== 'fotos') failures.push(`[estúdio ${w}] escolher o modelo não levou para a aba das fotos (${comModelo.ativa})`);
+    // Escolher o modelo fica em Modelo (decisão do dono, 23/09/2026); quem leva às fotos é o botão de continuar.
+    if (comModelo.ativa !== 'modelo') failures.push(`[estúdio ${w}] escolher o modelo pulou para a aba ${comModelo.ativa}; tem de ficar em Modelo`);
     if (comModelo.fotos !== 2 || comModelo.frases !== 2 || comModelo.enfeites !== 1) failures.push(`[estúdio ${w}] os itens não foram separados por tipo (${JSON.stringify(comModelo)})`);
     if (comModelo.contas.join(',') !== '2,2,1') failures.push(`[estúdio ${w}] as abas não mostram quantos itens têm (${comModelo.contas.join(',')})`);
-    if (!comModelo.painelFotos || comModelo.painelFrases) failures.push(`[estúdio ${w}] mais de um container aberto ao mesmo tempo`);
+    if (!comModelo.painelModelo || comModelo.painelFotos || comModelo.painelFrases) failures.push(`[estúdio ${w}] mais de um container aberto ao mesmo tempo`);
     if (!/falta escolher/.test(comModelo.aviso)) failures.push(`[estúdio ${w}] o modelo com espaços vazios não avisou ("${comModelo.aviso}")`);
+    // As checagens seguintes partem da aba das fotos, como partiam: chega-se lá pelo botão de continuar.
+    await pe.evaluate(() => document.getElementById('passo-botao').click());
+    await pe.waitForTimeout(400);
+    const naAbaDasFotos = await pe.evaluate(() => document.querySelector('#abas [aria-selected="true"]')?.dataset.aba);
+    if (naAbaDasFotos !== 'fotos') failures.push(`[estúdio ${w}] "Continuar para fotos" não levou para a aba das fotos (${naAbaDasFotos})`);
 
     // uma foto em cada espaço, pelo cartão (a mesma janela de arquivo que a pessoa usa)
     const fotoDeTeste = path.resolve(here, '..', 'assets', 'uso-caneca-cafe.webp');
@@ -1642,22 +1672,21 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
 
     // cena e acabamento da prévia
     const cena = await pe.evaluate(async () => {
-      document.getElementById('peca-cena').open = true;
       const cenas = document.querySelectorAll('#cenas button').length;
       const acabamentos = document.querySelectorAll('#acabamentos button').length;
       document.querySelector('#cenas [data-valor="madeira"]').click();
       await new Promise((r) => setTimeout(r, 700));
-      const comCena = document.getElementById('cena-resumo').textContent;
+      const comCena = document.querySelector('#cenas [aria-pressed="true"]')?.textContent || '';
       document.querySelector('#acabamentos [data-valor="fosco"]').click();
       await new Promise((r) => setTimeout(r, 500));
-      const comFosco = document.getElementById('cena-resumo').textContent;
+      const comFosco = (document.querySelector('#acabamentos [aria-pressed="true"]')?.textContent || '').toLowerCase();
       document.querySelector('#cenas [data-valor="estudio"]').click();
       document.querySelector('#acabamentos [data-valor="brilhante"]').click();
       await new Promise((r) => setTimeout(r, 600));
       return { cenas, acabamentos, comCena, comFosco, video: !document.getElementById('save-video').hidden };
     });
     if (cena.cenas < 3 || cena.acabamentos !== 2) failures.push(`[estúdio ${w}] faltam cenas ou acabamentos (${JSON.stringify(cena)})`);
-    if (!/Mesa de madeira/.test(cena.comCena) || !/fosco/.test(cena.comFosco)) failures.push(`[estúdio ${w}] a cena escolhida não aparece no resumo (${cena.comCena} / ${cena.comFosco})`);
+    if (!/Mesa de madeira/.test(cena.comCena) || !/fosco/.test(cena.comFosco)) failures.push(`[estúdio ${w}] a cena ou o acabamento escolhido não ficou marcado (${cena.comCena} / ${cena.comFosco})`);
     if (!cena.video) failures.push(`[estúdio ${w}] o botão do vídeo girando não apareceu`);
 
     // desfazer e refazer: o passo volta inteiro
@@ -1715,11 +1744,11 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
       document.getElementById('nome-meu-modelo').value = 'Modelo de teste';
       document.getElementById('confirmar-meu-modelo').click();
       await new Promise((r) => setTimeout(r, 500));
-      const ocasioes = [...document.querySelectorAll('#categoria-modelo option')].map((o) => o.value);
+      const ocasioes = [...document.querySelectorAll('#painel-assuntos [data-assunto]')].map((o) => o.dataset.assunto);
       document.querySelector('#abas [data-aba="modelo"]').click();
-      const seletor = document.getElementById('categoria-modelo');
-      seletor.value = 'meus';
-      seletor.dispatchEvent(new Event('change'));
+      const botaoDoAssunto = document.getElementById('categoria-modelo');
+      if (botaoDoAssunto.getAttribute('aria-expanded') !== 'true') botaoDoAssunto.click();
+      document.querySelector('#painel-assuntos [data-assunto="meus"]').click();
       await new Promise((r) => setTimeout(r, 400));
       const nomes = [...document.querySelectorAll('#model-list .studio-model__nome')].map((s) => s.textContent);
       const guardados = JSON.parse(localStorage.getItem('pm_caneca_meus_modelos') || '[]');
@@ -1802,7 +1831,8 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
       status: document.getElementById('save-status').textContent,
       arquivo: document.getElementById('art-file-name').textContent,
     }));
-    if (doCanva.abas.join(',') !== 'modelo,arte' || doCanva.ativa !== 'arte') failures.push(`[estúdio ${w}] a arte do Canva não abriu a aba Minha arte (${JSON.stringify(doCanva)})`);
+    // A arte do Canva é arte trazida pronta: abre a Minha arte, com Frases e Enfeites para pôr por cima.
+    if (doCanva.abas.join(',') !== 'modelo,arte,frases,enfeites' || doCanva.ativa !== 'arte') failures.push(`[estúdio ${w}] a arte do Canva não abriu a aba Minha arte com frases e enfeites (${JSON.stringify(doCanva)})`);
     if (doCanva.layout !== 'wrap') failures.push(`[estúdio ${w}] a arte do Canva não foi aplicada ao redor da caneca`);
     if (!/Canva|proporção/i.test(doCanva.status)) failures.push(`[estúdio ${w}] a arte do Canva entrou sem dizer o que aconteceu ("${doCanva.status}")`);
     if (!doCanva.arquivo) failures.push(`[estúdio ${w}] a arte do Canva não aparece como arquivo escolhido`);
@@ -1832,9 +1862,9 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     if (!apareceu) failures.push(`[estúdio ${w}] o rascunho guardado não foi oferecido depois de recarregar`);
     else {
       await pe.click('#rascunho-continuar');
-      await pe.waitForFunction((alvo) => (alvo.camadas
-        ? document.querySelectorAll('.studio-item').length === alvo.camadas
-        : document.getElementById('art-file-name').textContent === alvo.arquivo), antesDeRecarregar, { timeout: 15000 }).catch(() => {});
+      // Espera tudo o que compara: as camadas e, na Minha arte, a arte por baixo delas, que carrega depois.
+      await pe.waitForFunction((alvo) => document.querySelectorAll('.studio-item').length === alvo.camadas
+        && document.getElementById('art-file-name').textContent === alvo.arquivo, antesDeRecarregar, { timeout: 15000 }).catch(() => {});
       const voltou = await pe.evaluate(() => ({
         camadas: document.querySelectorAll('.studio-item').length,
         arquivo: document.getElementById('art-file-name').textContent,
@@ -1862,14 +1892,14 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
   // no documento. Bastou um `max-height` sobrando na coluna para o conteúdo vazar da caixa e a caneca
   // cobrir a faixa de ajustes logo abaixo — o dono viu antes da gente, num print. A janela baixa é o
   // caso que revela: é onde a coluna encosta no limite da tela.
-  for (const [nome, w4, h4] of [['1366x768', 1366, 768], ['1337x660', 1337, 660], ['1280x580', 1280, 580]]) {
+  if (roda('sobreposicao')) for (const [nome, w4, h4] of [['1366x768', 1366, 768], ['1337x660', 1337, 660], ['1280x580', 1280, 580]]) {
     const contexto = await browser.newContext({ viewport: { width: w4, height: h4 } });
     const ps = await contexto.newPage();
     await ps.goto(servidor.url + 'caneca-3d.html', { waitUntil: 'load' });
     await ps.waitForTimeout(800);
     const choque = await ps.evaluate(async () => {
       const peca = document.querySelector('.studio-preview');
-      const abaixo = ['.studio-preview-extra', '.studio-finish', 'footer'].map((s2) => document.querySelector(s2)).filter(Boolean);
+      const abaixo = ['.studio-peca-detalhes', '.studio-finish', 'footer'].map((s2) => document.querySelector(s2)).filter(Boolean);
       let pior = { invade: 0, sobre: null };
       for (let y = 0; y <= document.documentElement.scrollHeight; y += 60) {
         window.scrollTo({ top: y, behavior: 'instant' });
@@ -1893,13 +1923,133 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     await contexto.close();
   }
 
+  /*
+    O layout em todas as larguras. O bug do print do dono (23/09/2026) morava entre 700 e 850 px: a
+    caneca não esticava, ficava com 422 px no meio de um painel de 640 e, grudada no topo, cobria 27 a
+    40% dele. E no celular a caneca grudada tomava 54 a 94% da altura da tela. As regras:
+    - em duas colunas (760 px ou mais), a caneca nunca cobre o painel, em nenhum ponto da rolagem;
+    - em uma coluna, a caneca tem a largura do painel e no máximo 45% da altura da tela;
+    - nunca rolagem lateral.
+  */
+  if (roda('layout')) for (const [w5, h5, toque] of [[320, 568, true], [375, 667, true], [390, 844, true], [414, 896, true], [700, 640, false],
+    [759, 700, false], [760, 700, false], [800, 640, false], [850, 700, false], [1024, 768, false]]) {
+    const contexto = await browser.newContext({ viewport: { width: w5, height: h5 }, hasTouch: toque, isMobile: toque });
+    const pl = await contexto.newPage();
+    await pl.goto(servidor.url + 'caneca-3d.html', { waitUntil: 'load' });
+    await pl.waitForTimeout(700);
+    const medida = await pl.evaluate(async () => {
+      const espera = (ms) => new Promise((r) => setTimeout(r, ms));
+      const peca = document.querySelector('.studio-preview');
+      const painel = document.querySelector('.studio-controls');
+      const umaColuna = window.matchMedia('(max-width: 759px)').matches;
+      let pior = 0;
+      for (const fracao of [0.2, 0.45, 0.7]) {
+        window.scrollTo({ top: document.documentElement.scrollHeight * fracao, behavior: 'instant' });
+        await espera(120);
+        if (umaColuna) continue;
+        const c = painel.getBoundingClientRect();
+        let cobertos = 0, total = 0;
+        for (let x = c.left + 8; x < c.right - 8; x += 20) {
+          for (let y = Math.max(c.top, 0) + 8; y < Math.min(c.bottom, innerHeight) - 8; y += 20) {
+            total += 1;
+            const e = document.elementFromPoint(x, y);
+            if (e && peca.contains(e)) cobertos += 1;
+          }
+        }
+        if (total) pior = Math.max(pior, cobertos / total);
+      }
+      const p = peca.getBoundingClientRect(), c = painel.getBoundingClientRect();
+      return {
+        umaColuna, pior,
+        larguraPeca: Math.round(p.width), larguraPainel: Math.round(c.width),
+        alturaPeca: Math.round(p.height), alturaTela: innerHeight,
+        lateral: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+      };
+    });
+    const onde = `[layout ${w5}x${h5}]`;
+    if (medida.lateral) failures.push(`${onde} rolagem lateral na página`);
+    if (!medida.umaColuna && medida.pior > 0) failures.push(`${onde} a caneca cobre ${Math.round(medida.pior * 100)}% do painel ao rolar`);
+    if (medida.umaColuna && Math.abs(medida.larguraPeca - medida.larguraPainel) > 2) {
+      failures.push(`${onde} a caneca grudada tem ${medida.larguraPeca} px e o painel ${medida.larguraPainel}: ela tem de cobrir a largura inteira, não um pedaço`);
+    }
+    if (medida.umaColuna && medida.alturaPeca > medida.alturaTela * 0.45) {
+      failures.push(`${onde} a caneca grudada toma ${Math.round(100 * medida.alturaPeca / medida.alturaTela)}% da altura da tela (máximo 45%)`);
+    }
+    await contexto.close();
+  }
+
+  // A arte do modelo, maior: com o mouse descansando no cartão, e com o dedo segurando.
+  if (roda('arte-maior')) {
+    const contexto = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+    const pm = await contexto.newPage();
+    await pm.goto(servidor.url + 'caneca-3d.html', { waitUntil: 'load' });
+    await pm.waitForSelector('[data-modelo="namorados-coracoes"] canvas', { state: 'attached' });
+    await pm.waitForTimeout(500);
+    const cartao = pm.locator('[data-modelo="namorados-coracoes"]');
+    await cartao.scrollIntoViewIfNeeded();
+    await cartao.hover();
+    await pm.waitForTimeout(700);
+    const aberta = await pm.evaluate(() => {
+      const caixa = document.querySelector('.studio-previa-modelo');
+      if (!caixa || !caixa.classList.contains('vendo')) return { vendo: false };
+      const c = caixa.querySelector('canvas');
+      const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+      let tinta = 0;
+      for (let i = 3; i < d.length; i += 400) if (d[i] > 0) tinta += 1;
+      const rc = document.querySelector('[data-modelo="namorados-coracoes"]').getBoundingClientRect();
+      const rp = caixa.getBoundingClientRect();
+      return { vendo: true, nome: caixa.querySelector('strong').textContent, tinta, cobreOCartao: rp.left < rc.right && rp.right > rc.left && rp.top < rc.bottom && rp.bottom > rc.top };
+    });
+    await pm.mouse.move(5, 5);
+    await pm.waitForTimeout(300);
+    const fechou = await pm.evaluate(() => !document.querySelector('.studio-previa-modelo')?.classList.contains('vendo'));
+    if (!aberta.vendo) failures.push('[arte maior] descansar o mouse no cartão não mostrou a arte maior');
+    else {
+      if (aberta.nome !== 'Corações ao redor') failures.push(`[arte maior] mostrou "${aberta.nome}" para o cartão Corações ao redor`);
+      if (aberta.tinta < 20) failures.push('[arte maior] a arte maior saiu em branco');
+      if (aberta.cobreOCartao) failures.push('[arte maior] a arte maior cobre o próprio cartão do modelo');
+    }
+    if (!fechou) failures.push('[arte maior] a arte maior não some quando o mouse sai do cartão');
+    await contexto.close();
+
+    const toque = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+    const pt = await toque.newPage();
+    await pt.goto(servidor.url + 'caneca-3d.html', { waitUntil: 'load' });
+    await pt.waitForSelector('[data-modelo="namorados-coracoes"]', { state: 'attached' });
+    await pt.waitForTimeout(500);
+    const segurou = await pt.evaluate(async () => {
+      const espera = (ms) => new Promise((r) => setTimeout(r, ms));
+      const cartao = document.querySelector('[data-modelo="namorados-coracoes"]');
+      cartao.scrollIntoView({ block: 'center', behavior: 'instant' });
+      await espera(200);
+      const r = cartao.getBoundingClientRect();
+      const ponto = { clientX: r.x + r.width / 2, clientY: r.y + r.height / 2, pointerType: 'touch', bubbles: true, isPrimary: true, pointerId: 7 };
+      cartao.dispatchEvent(new PointerEvent('pointerdown', ponto));
+      await espera(650);
+      const folha = document.querySelector('dialog.studio-folha-modelo');
+      const abriu = Boolean(folha?.open);
+      cartao.dispatchEvent(new PointerEvent('pointerup', ponto));
+      cartao.click();   // o toque que solta não pode escolher o modelo por baixo da folha
+      await espera(200);
+      const escolheuPorBaixo = cartao.getAttribute('aria-pressed') === 'true';
+      [...(folha?.querySelectorAll('button') || [])].find((b) => b.textContent === 'Usar este modelo')?.click();
+      await espera(700);
+      return { abriu, escolheuPorBaixo, fechouAoUsar: !folha?.open, escolhido: cartao.isConnected ? cartao.getAttribute('aria-pressed') : document.querySelector('[data-modelo="namorados-coracoes"]')?.getAttribute('aria-pressed') };
+    });
+    if (!segurou.abriu) failures.push('[arte maior 390 com dedo] segurar o dedo no cartão não abriu a arte maior');
+    if (segurou.escolheuPorBaixo) failures.push('[arte maior 390 com dedo] soltar o dedo escolheu o modelo por baixo da folha');
+    if (!segurou.fechouAoUsar || segurou.escolhido !== 'true') failures.push(`[arte maior 390 com dedo] "Usar este modelo" não escolheu o modelo (${JSON.stringify(segurou)})`);
+    await toque.close();
+  }
+
+
   // Quatro acréscimos da rodada de acessibilidade e primeira visita, cobrados de uma vez porque
   // dependem da mesma página montada: alvo de toque de 44 px, dúvida explicada ao lado do termo que
   // a levanta, boas-vindas que aparecem uma vez só, e a caneca girando pelo teclado.
   // O piso muda com o ponteiro: 44 px onde há dedo, 24 px (o mínimo da norma) onde há mouse. Medir
   // 44 no desktop obrigaria a interface a ficar pesada — um botão de 44 px com letra de 12 é 3,7
   // vezes a altura da própria letra, e o dono reclamou disso antes da gente perceber.
-  for (const [nome, w3, h3, toque] of [['1280', 1280, 900, false], ['390 com dedo', 390, 844, true]]) {
+  if (roda('toque')) for (const [nome, w3, h3, toque] of [['1280', 1280, 900, false], ['390 com dedo', 390, 844, true]]) {
     const piso = toque ? 44 : 24;
     const contexto = await browser.newContext({ viewport: { width: w3, height: h3 }, hasTouch: toque, isMobile: toque });
     const pz = await contexto.newPage();
@@ -1948,7 +2098,7 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
   // e quem não conhece o produto não sabia que tinha terminado. A barra de passo conduz, e o ponto
   // na aba mostra onde ainda falta fazer algo — inclusive nas frases, que nascem com texto de
   // exemplo e sairiam impressas assim ("chá do Theo") se ninguém avisasse.
-  {
+  if (roda('passo')) {
     const contexto = await browser.newContext({ viewport: { width: 1280, height: 900 } });
     const pp2 = await contexto.newPage();
     await pp2.goto(servidor.url + 'caneca-3d.html', { waitUntil: 'load' });
@@ -1966,20 +2116,22 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
       document.querySelector('[data-modelo="natal-flocos"]').click();
       await new Promise((r) => setTimeout(r, 1400));
       const comModelo = leia();
-      document.getElementById('passo-botao').click();
-      await new Promise((r) => setTimeout(r, 500));
-      const adiante = leia();
-      document.getElementById('passo-botao').click();
-      await new Promise((r) => setTimeout(r, 500));
-      const fim = leia();
-      return { semModelo, comModelo, adiante, fim };
+      const passos = [];
+      for (let i = 0; i < 3; i += 1) {
+        document.getElementById('passo-botao').click();
+        await new Promise((r) => setTimeout(r, 500));
+        passos.push(leia());
+      }
+      return { semModelo, comModelo, adiante: passos[0], fim: passos[2] };
     });
     if (passo.semModelo.visivel) failures.push('[passo] a barra apareceu antes de escolher um modelo');
     if (!passo.comModelo.visivel) failures.push('[passo] a barra não apareceu depois de escolher um modelo');
     if (!/Passo \d+ de \d+/.test(passo.comModelo.conta)) failures.push(`[passo] a barra não diz em que passo a pessoa está ("${passo.comModelo.conta}")`);
     if (!passo.comModelo.pontos.includes('fotos')) failures.push('[passo] a aba das fotos não marcou que ainda falta escolher foto');
     if (!passo.comModelo.pontos.includes('frases')) failures.push('[passo] a aba das frases não marcou que o texto ainda é o de exemplo');
-    if (!/^Faltam? /.test(passo.comModelo.falta)) failures.push(`[passo] a barra não diz o que falta ("${passo.comModelo.falta}")`);
+    // O modelo fica na aba Modelo; o que falta (as fotos) aparece no passo seguinte, que é onde se resolve.
+    if (passo.comModelo.aba !== 'modelo') failures.push(`[passo] escolher o modelo pulou para ${passo.comModelo.aba}`);
+    if (!/^Faltam? /.test(passo.adiante.falta)) failures.push(`[passo] a barra não diz o que falta ("${passo.adiante.falta}")`);
     if (passo.adiante.aba === passo.comModelo.aba) failures.push('[passo] o botão de continuar não avançou de aba');
     if (!/^Continuar para /.test(passo.comModelo.botao)) failures.push(`[passo] o botão não convida para o próximo passo ("${passo.comModelo.botao}")`);
     if (/^Continuar para /.test(passo.fim.botao)) failures.push('[passo] no último passo o botão ainda manda continuar em vez de fechar');
@@ -1994,25 +2146,24 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
   // altura da caneca grudada e, por isso, passava mesmo com o defeito de volta. Na tela larga a
   // coluna inteira gruda, então os blocos têm de continuar à mão enquanto se usa o editor. No
   // celular eles ficam depois do editor, e têm de estar à mão no fim da página.
-  for (const [nome, w2, h2] of [['1280', 1280, 900], ['390', 390, 844]]) {
+  if (roda('peca')) for (const [nome, w2, h2] of [['1280', 1280, 900], ['390', 390, 844]]) {
     const contexto = await browser.newContext({ viewport: { width: w2, height: h2 } });
     const pa = await contexto.newPage();
     await pa.goto(servidor.url + 'caneca-3d.html', { waitUntil: 'load' });
     await pa.waitForTimeout(900);
     const alcance = await pa.evaluate(async (larga) => {
-      const ids = ['peca-cores', 'peca-cena', 'flat-details'];
+      const ids = ['peca-cores', 'peca-acabamento', 'peca-cena', 'flat-details'];
       const faltando = ids.filter((id) => !document.getElementById(id));
       const daParaUsar = (id) => {
         const alvo = document.getElementById(id);
-        const resumo = alvo.querySelector('summary') || alvo;
-        const rr = resumo.getBoundingClientRect();
+        const rr = alvo.getBoundingClientRect();
         if (!(rr.top >= 0 && rr.bottom <= window.innerHeight)) return { ok: false, motivo: 'fora da tela' };
         const noPonto = document.elementFromPoint(Math.round(rr.left + rr.width / 2), Math.round(rr.top + rr.height / 2));
         if (noPonto && alvo.contains(noPonto)) return { ok: true };
         return { ok: false, motivo: 'coberto por ' + (noPonto ? (noPonto.className || noPonto.tagName).toString().slice(0, 30) : 'nada') };
       };
       const presentes = ids.filter((id) => document.getElementById(id));
-      // Os ajustes da peça são uma faixa abaixo do layout nas duas larguras: a pessoa rola até eles.
+      // Na tela larga os blocos da peça vêm logo abaixo da caneca; no celular, depois do editor.
       // A varredura desce a página em passos e cobra que cada bloco fique, em algum momento, inteiro
       // na tela e sem nada por cima — que é o que "dá para usar" quer dizer.
       const conseguiu = new Map(presentes.map((id) => [id, { ok: false, motivo: 'nunca ficou à mão' }]));
@@ -2032,10 +2183,301 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     await contexto.close();
   }
 
+  /*
+    A peça à vista (pedido do dono, 23/09/2026): "essas cores da peça, cena e acabamento têm que aparecer
+    logo de cara", e a arte aberta "tem que aparecer logo abaixo da caneca 3D, e num tamanho maior,
+    porque dá para editar por ali". Na tela larga:
+    - cores, acabamento e cena ficam à vista, sem bloco que abre, e logo abaixo da caneca;
+    - a arte aberta vem logo depois, na largura da coluna, em densidade de tela;
+    - o escolhido das opções é leve, não pílula preta;
+    - quando o editor passa da coluna, a coluna gruda pelo pé: do meio ao fim do editor a arte aberta
+      continua inteira à vista.
+  */
+  if (roda('peca-a-vista')) for (const [w6, h6, escala] of [[1280, 800, 1], [1024, 768, 1], [1280, 720, 2]]) {
+    const contexto = await browser.newContext({ viewport: { width: w6, height: h6 }, deviceScaleFactor: escala });
+    const pv = await contexto.newPage();
+    await pv.goto(servidor.url + 'caneca-3d.html', { waitUntil: 'load' });
+    await pv.waitForTimeout(900);
+    const vista = await pv.evaluate(async () => {
+      const espera = (ms) => new Promise((r) => setTimeout(r, ms));
+      const caixa = (seletor) => document.querySelector(seletor)?.getBoundingClientRect();
+      const previa = caixa('.studio-preview');
+      const opcoes = caixa('.studio-opcoes');
+      const flat = document.getElementById('flat-art');
+      const secaoFlat = caixa('#flat-details');
+      const coluna = caixa('.studio-coluna-peca');
+      const fechados = ['peca-cores', 'peca-acabamento', 'peca-cena', 'flat-details']
+        .filter((id) => { const e = document.getElementById(id); return !e || e.closest('details:not([open])') || !e.offsetParent; });
+      const visiveis = (seletor) => [...document.querySelectorAll(seletor)].filter((b) => b.getBoundingClientRect().width > 0).length;
+      const botoes = {
+        combinacoes: visiveis('#peca-cores [data-preset]'), interior: visiveis('#cores-interior .studio-cor'), alca: visiveis('#cores-alca .studio-cor'),
+        acabamentos: visiveis('#acabamentos button'), cenas: visiveis('#cenas button'),
+      };
+      const tinta = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim();
+      const pretas = [...document.querySelectorAll('.studio-opcoes [aria-pressed="true"]')].filter((b) => {
+        const fundo = getComputedStyle(b).backgroundColor;
+        const cor = document.createElement('span'); cor.style.color = tinta; document.body.append(cor);
+        const tintaRgb = getComputedStyle(cor).color; cor.remove();
+        return fundo === tintaRgb;
+      }).map((b) => b.textContent.trim() || b.dataset.cor);
+      /*
+        A cola pelo pé, com o editor mais alto que a coluna (o bloco do Canva e o de vários nomes abertos):
+        a coluna tem uma folga para correr, e dois pontos da rolagem separam os jeitos de grudar. No meio
+        da folga, só grudando pelo pé a arte aberta está à vista (grudada pelo topo ela fica abaixo da tela
+        até o fim do layout). Perto do fim, a coluna parada já subiu e levou a arte aberta junto. Ir ao
+        botão do pedido não separava nada: ali o fim do layout empurra qualquer coluna para cima.
+      */
+      document.getElementById('bloco-canva').open = true;
+      document.getElementById('lote').open = true;
+      await espera(300);
+      const layout = document.querySelector('.studio-layout');
+      const alturas = { coluna: Math.round(document.querySelector('.studio-coluna-peca').getBoundingClientRect().height), editor: Math.round(document.querySelector('.studio-controls').getBoundingClientRect().height) };
+      const folga = Math.round(layout.getBoundingClientRect().height - alturas.coluna);
+      const fimDoLayout = layout.getBoundingClientRect().bottom + window.scrollY;
+      const flatComFimAbaixo = async (d) => {
+        window.scrollTo({ top: Math.max(0, fimDoLayout - window.innerHeight - d), behavior: 'instant' });
+        await espera(200);
+        const r = flat.getBoundingClientRect();
+        return { ok: r.top >= 0 && r.bottom <= window.innerHeight, caixa: [Math.round(r.top), Math.round(r.bottom)] };
+      };
+      const noMeio = folga >= 300 ? await flatComFimAbaixo(Math.round(folga / 2 + 80)) : null;
+      const pertoDoFim = folga >= 300 ? await flatComFimAbaixo(30) : null;
+      return {
+        folga, noMeio, pertoDoFim,
+        fechados, botoes, pretas, alturas,
+        colado: Math.round(opcoes.top - previa.bottom),
+        mesmaColuna: Math.abs(opcoes.left - previa.left) <= 2 && Math.abs(secaoFlat.left - previa.left) <= 2,
+        flatLogoDepois: Math.round(secaoFlat.top - opcoes.bottom),
+        larguraFlat: Math.round(flat.getBoundingClientRect().width),
+        larguraColuna: Math.round(coluna.width),
+        densidade: +(flat.width / flat.getBoundingClientRect().width).toFixed(2),
+        dpr: window.devicePixelRatio,
+      };
+    });
+    const onde = `[peça à vista ${w6}x${h6}${escala > 1 ? ' @2x' : ''}]`;
+    if (vista.fechados.length) failures.push(`${onde} ${vista.fechados.join(', ')} ainda escondido(s) atrás de um clique`);
+    const b6 = vista.botoes;
+    if (b6.combinacoes !== 3 || b6.interior !== 6 || b6.alca !== 6 || b6.acabamentos !== 2 || b6.cenas !== 4) failures.push(`${onde} faltam opções à vista (${JSON.stringify(b6)})`);
+    if (vista.pretas.length) failures.push(`${onde} o escolhido das opções da peça voltou a ser pílula preta (${vista.pretas.join(', ')})`);
+    if (Math.abs(vista.colado) > 2 || !vista.mesmaColuna) failures.push(`${onde} as opções da peça não estão logo abaixo da caneca (vão de ${vista.colado} px)`);
+    if (Math.abs(vista.flatLogoDepois) > 2) failures.push(`${onde} a arte aberta não vem logo depois das opções (vão de ${vista.flatLogoDepois} px)`);
+    if (vista.larguraFlat < vista.larguraColuna - 80) failures.push(`${onde} a arte aberta tem ${vista.larguraFlat} px numa coluna de ${vista.larguraColuna}: tem de ocupar a coluna`);
+    // Pelo menos um pixel do canvas por pixel da tela, até os 2.480 px da arte a 300 dpi.
+    if (vista.densidade < Math.min(vista.dpr, 2480 / vista.larguraFlat) - 0.02) failures.push(`${onde} a arte aberta está em ${vista.densidade} pixel por ponto de tela numa tela de ${vista.dpr}x: sai borrada`);
+    if (vista.noMeio && !vista.noMeio.ok) failures.push(`${onde} no meio do editor a arte aberta ficou fora da tela (${vista.noMeio.caixa.join(' a ')} px, folga ${vista.folga} px): a coluna tinha de grudar pelo pé`);
+    if (vista.pertoDoFim && !vista.pertoDoFim.ok) failures.push(`${onde} perto do fim do editor a arte aberta ficou fora da tela (${vista.pertoDoFim.caixa.join(' a ')} px, folga ${vista.folga} px): a coluna tinha de grudar pelo pé`);
+    if (!vista.noMeio) warnings.push(`${onde} o editor passou da coluna só ${vista.folga} px (${JSON.stringify(vista.alturas)}): a cola pelo pé não foi posta à prova`);
+    await contexto.close();
+  }
+
+  /*
+    O seletor de ocasião como cardápio (pedido do dono, 23/09/2026: a lista do navegador e depois o
+    painel de pílulas "desse jeito não fica bom"). Na tela larga ele flutua: abrir não empurra a lista de
+    modelos, as ocasiões saem em colunas, cabe inteiro sem rolagem própria em 1280x800, cada ocasião diz
+    quantos modelos tem, e fecha com um clique fora. No celular é uma folha modal que fecha no X e no
+    fundo escurecido. Pelo teclado, a seta anda entre as ocasiões.
+  */
+  if (roda('cardapio')) {
+    const { TEMPLATES: catalogoDoCardapio } = await import('../simulador/modelos.js');
+    const doNatal = catalogoDoCardapio.filter((m) => m.categoria === 'natal' || (m.tambemEm || []).includes('natal')).length;
+    for (const [w7, h7, toque] of [[1280, 800, false], [390, 844, true]]) {
+      const contexto = await browser.newContext({ viewport: { width: w7, height: h7 }, hasTouch: toque, isMobile: toque });
+      const pc = await contexto.newPage();
+      await pc.goto(servidor.url + 'caneca-3d.html', { waitUntil: 'load' });
+      await pc.waitForTimeout(900);
+      await pc.evaluate(() => document.getElementById('boasvindas-fechar')?.click());
+      await pc.evaluate(() => { const b = document.getElementById('categoria-modelo'); window.scrollTo({ top: b.getBoundingClientRect().top + window.scrollY - 120, behavior: 'instant' }); });
+      await pc.waitForTimeout(200);
+      const antes = await pc.evaluate(() => Math.round(document.getElementById('model-list').getBoundingClientRect().top));
+      if (toque) await pc.tap('#categoria-modelo'); else await pc.click('#categoria-modelo');
+      await pc.waitForTimeout(400);
+      const cardapio = await pc.evaluate(() => {
+        const painel = document.getElementById('painel-assuntos');
+        const titulos = [...painel.querySelectorAll('.studio-assunto__titulo')];
+        const natal = painel.querySelector('[data-assunto="natal"] .studio-assunto__conta');
+        return {
+          aberto: painel.open, modal: painel.matches(':modal'),
+          colunas: new Set(titulos.map((t) => Math.round(t.getBoundingClientRect().left))).size,
+          rolaPorDentro: painel.scrollHeight > painel.clientHeight + 2,
+          natal: natal ? Number(natal.textContent) : null,
+          semConta: [...painel.querySelectorAll('[data-assunto]')].filter((b) => !/^\d+$/.test(b.querySelector('.studio-assunto__conta')?.textContent || '')).length,
+          lista: Math.round(document.getElementById('model-list').getBoundingClientRect().top),
+          fechar: (() => { const x = document.getElementById('fechar-assuntos').getBoundingClientRect(); return x.width > 0 && x.height > 0; })(),
+          dentro: (() => { const r = painel.getBoundingClientRect(); return r.left >= 0 && r.right <= window.innerWidth + 1; })(),
+        };
+      });
+      const onde = `[cardápio ${w7}]`;
+      if (!cardapio.aberto) failures.push(`${onde} o seletor de ocasião não abriu`);
+      if (cardapio.natal !== doNatal) failures.push(`${onde} o Natal diz ${cardapio.natal} modelos; o catálogo tem ${doNatal}`);
+      if (cardapio.semConta) failures.push(`${onde} ${cardapio.semConta} ocasião(ões) sem a contagem de modelos`);
+      if (!cardapio.dentro) failures.push(`${onde} o cardápio sai para fora da tela`);
+      if (toque) {
+        if (!cardapio.modal || !cardapio.fechar) failures.push(`${onde} no celular o seletor tinha de abrir como folha, com o X (${JSON.stringify(cardapio)})`);
+        if (cardapio.colunas < 2) failures.push(`${onde} a folha tem ${cardapio.colunas} coluna(s); cabem duas`);
+        // o X fecha; e o toque no fundo escurecido também
+        // Se o X ou o fundo falharem, a folha é fechada à força: aberta, ela deixaria o resto da página
+        // inerte, e o próximo toque esperaria para sempre.
+        const fechaAForca = () => pc.evaluate(() => { const d = document.getElementById('painel-assuntos'); const ficou = d.open; d.close(); return !ficou; });
+        if (cardapio.fechar) await pc.tap('#fechar-assuntos');
+        await pc.waitForTimeout(300);
+        const fechouNoX = await fechaAForca();
+        await pc.tap('#categoria-modelo');
+        await pc.waitForTimeout(400);
+        await pc.touchscreen.tap(Math.round(w7 / 2), 30);
+        await pc.waitForTimeout(300);
+        const fechouNoFundo = await fechaAForca();
+        if (!fechouNoX || !fechouNoFundo) failures.push(`${onde} a folha não fecha no X (${fechouNoX}) ou no fundo escurecido (${fechouNoFundo})`);
+      } else {
+        if (cardapio.modal) failures.push(`${onde} na tela larga o seletor abriu como janela modal; tem de flutuar sobre a página`);
+        if (Math.abs(cardapio.lista - antes) > 1) failures.push(`${onde} abrir o seletor empurrou a lista de modelos ${cardapio.lista - antes} px`);
+        if (cardapio.colunas < 4) failures.push(`${onde} o cardápio tem ${cardapio.colunas} coluna(s); na tela larga são pelo menos quatro`);
+        if (cardapio.rolaPorDentro) failures.push(`${onde} o cardápio não coube inteiro: rola por dentro em ${w7}x${h7}`);
+        // pelo teclado: a seta desce do botão para a lista e anda entre as ocasiões
+        await pc.keyboard.press('ArrowDown');
+        await pc.keyboard.press('ArrowDown');
+        const noTeclado = await pc.evaluate(() => document.activeElement?.dataset.assunto || document.activeElement?.id);
+        if (!noTeclado || noTeclado === 'todos' || noTeclado === 'categoria-modelo') failures.push(`${onde} a seta não anda entre as ocasiões (foco em ${noTeclado})`);
+        // um clique fora fecha, sem escolher nada
+        await pc.mouse.click(Math.round(w7 * 0.25), h7 - 40);
+        await pc.waitForTimeout(250);
+        const fora = await pc.evaluate(() => ({ aberto: document.getElementById('painel-assuntos').open, rotulo: document.getElementById('categoria-modelo').textContent.trim() }));
+        if (fora.aberto || fora.rotulo !== 'Todos os modelos') failures.push(`${onde} o clique fora não fechou o cardápio, ou escolheu algo (${JSON.stringify(fora)})`);
+      }
+      await contexto.close();
+    }
+  }
+
+  /*
+    A Minha arte em camadas (pedido do dono, 23/09/2026: "o nome eu não consigo mexer, ele sempre vai
+    ficar embaixo"; "se eu coloco o Pandinha, a foto eu não consigo expandir"; "quero ter a liberdade de
+    mover o nome, aumentar, diminuir, colocar mais de um Pandinha"). O caso é o do dono: um rascunho de
+    antes das camadas, com a arte ao redor e o nome "Prof. Amanda" em Indie Flower, sem Pandinha.
+    - o rascunho guardado não some ao abrir a página duas vezes sem tocar em "Continuar de onde parei";
+    - ele abre na Minha arte com as abas de Frases e Enfeites, e o nome já é frase, na letra carregada;
+    - a arte ocupa a altura inteira (o rodapé que guardava lugar para nome e Pandinha não existe mais);
+    - arrastar o nome com o mouse na arte aberta o leva junto;
+    - "+ Pandinha" duas vezes dá dois Pandinhas lado a lado, não um escondido embaixo do outro.
+    O nome e os Pandinhas são achados pela tinta escura na arte aberta, como a gente acharia olhando.
+  */
+  if (roda('minha-arte')) {
+    const contexto = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    const pa = await contexto.newPage();
+    const errosDaArte = [];
+    pa.on('pageerror', (e) => errosDaArte.push(e.message));
+    await pa.goto(servidor.url + 'caneca-3d.html', { waitUntil: 'load' });
+    await pa.waitForTimeout(900);
+    await pa.evaluate(async () => {
+      const tela = document.createElement('canvas');
+      tela.width = 1400; tela.height = 600;
+      const c = tela.getContext('2d');
+      c.fillStyle = 'rgb(110, 140, 103)'; // a arte de teste: uma cor só, de ponta a ponta
+      c.fillRect(0, 0, tela.width, tela.height);
+      const arteLivre = await new Promise((r) => tela.toBlob(r, 'image/png'));
+      const banco = await new Promise((ok, erro) => {
+        const pedido = indexedDB.open('panda-mimo-caneca', 1);
+        pedido.onupgradeneeded = () => { if (!pedido.result.objectStoreNames.contains('rascunho')) pedido.result.createObjectStore('rascunho'); };
+        pedido.onsuccess = () => ok(pedido.result);
+        pedido.onerror = () => erro(pedido.error);
+      });
+      await new Promise((ok, erro) => {
+        const tx = banco.transaction('rascunho', 'readwrite');
+        tx.objectStore('rascunho').put({
+          versao: 4, arte: null, arteLivre, nomeDaArte: 'arte-ao-redor.png', fotos: {}, salvoEm: Date.now(),
+          escolhas: { inside: 'branca', handle: 'branca', layout: 'wrap', scale: 1, offsetX: 0, offsetY: 0, rotation: 0, name: 'Prof. Amanda', fontFamily: 'Indie Flower', withPanda: false },
+        }, 'atual');
+        tx.oncomplete = ok;
+        tx.onerror = () => erro(tx.error);
+      });
+      banco.close();
+    });
+    // duas aberturas seguidas, sem tocar em nada, cada uma esperando mais que o 1,2 s do salvamento
+    await pa.reload({ waitUntil: 'load' });
+    await pa.waitForTimeout(2800);
+    await pa.reload({ waitUntil: 'load' });
+    const oferecido = await pa.waitForFunction(() => !document.getElementById('rascunho').hidden, null, { timeout: 12000 }).then(() => true).catch(() => false);
+    if (!oferecido) failures.push('[minha arte] o rascunho sumiu ao abrir a página duas vezes sem tocar em "Continuar de onde parei"');
+    else {
+      await pa.click('#rascunho-continuar');
+      await pa.waitForFunction(() => document.querySelectorAll('#lista-frases .studio-item').length > 0, null, { timeout: 12000 }).catch(() => {});
+      await pa.evaluate(() => document.getElementById('flat-art').scrollIntoView({ block: 'center', behavior: 'instant' }));
+      await pa.waitForTimeout(700);
+      // Onde está a tinta escura (o nome e os Pandinhas) na arte aberta, e de que cor é um ponto dela.
+      const olha = () => pa.evaluate(() => {
+        const flat = document.getElementById('flat-art');
+        const d = flat.getContext('2d').getImageData(0, 0, flat.width, flat.height).data;
+        const escuro = (i) => d[i] < 70 && d[i + 1] < 70 && d[i + 2] < 70;
+        let x0 = Infinity, x1 = -1, y0 = Infinity, y1 = -1, n = 0;
+        const faixa = { x0: Infinity, x1: -1 };
+        for (let y = 0; y < flat.height; y += 2) {
+          for (let x = 0; x < flat.width; x += 2) {
+            const i = (y * flat.width + x) * 4;
+            if (!escuro(i)) continue;
+            n += 1; x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y);
+            if (y > flat.height * 0.62 && y < flat.height * 0.94) { faixa.x0 = Math.min(faixa.x0, x); faixa.x1 = Math.max(faixa.x1, x); }
+          }
+        }
+        const ponto = (fx, fy) => { const i = (Math.round(fy * flat.height) * flat.width + Math.round(fx * flat.width)) * 4; return [d[i], d[i + 1], d[i + 2]]; };
+        const caixa = flat.getBoundingClientRect();
+        return {
+          tinta: n ? { cx: (x0 + x1) / 2 / flat.width, cy: (y0 + y1) / 2 / flat.height } : null,
+          larguraDaFaixa: faixa.x1 >= 0 ? (faixa.x1 - faixa.x0) / flat.width : 0,
+          cantoDeBaixo: ponto(0.08, 0.975), cantoDeCima: ponto(0.92, 0.03),
+          tela: { left: caixa.left, top: caixa.top, width: caixa.width, height: caixa.height },
+        };
+      });
+      // A letra chega pela rede: espera por ela (com limite), em vez de olhar uma vez só.
+      await pa.waitForFunction(() => [...document.fonts].some((f) => f.family.replace(/"/g, '') === 'Indie Flower' && f.status === 'loaded'), null, { timeout: 10000 }).catch(() => {});
+      const migrada = await pa.evaluate(() => ({
+        abas: [...document.querySelectorAll('#abas button')].map((b) => b.dataset.aba).join(','),
+        frases: [...document.querySelectorAll('#lista-frases .studio-item__texto > span')].map((t) => t.textContent),
+        letra: [...document.fonts].filter((f) => f.family.replace(/"/g, '') === 'Indie Flower').map((f) => f.status),
+        pandinhas: document.querySelectorAll('#lista-enfeites .studio-item').length,
+      }));
+      const antes = await olha();
+      const ehArte = ([r, g, b]) => Math.abs(r - 110) < 14 && Math.abs(g - 140) < 14 && Math.abs(b - 103) < 14;
+      if (migrada.abas !== 'modelo,arte,frases,enfeites') failures.push(`[minha arte] o rascunho não abriu na Minha arte com frases e enfeites (${migrada.abas})`);
+      if (migrada.frases.join('|') !== 'Prof. Amanda') failures.push(`[minha arte] o nome do rascunho antigo não virou frase (${JSON.stringify(migrada.frases)})`);
+      if (!migrada.letra.includes('loaded')) failures.push(`[minha arte] a letra do nome (Indie Flower) não carregou: o nome sai na letra padrão do navegador (${JSON.stringify(migrada.letra)})`);
+      if (migrada.pandinhas !== 0) failures.push(`[minha arte] apareceu Pandinha num rascunho que não tinha (${migrada.pandinhas})`);
+      if (!ehArte(antes.cantoDeBaixo) || !ehArte(antes.cantoDeCima)) failures.push(`[minha arte] a arte ao redor não ocupa a altura inteira: embaixo ${antes.cantoDeBaixo}, em cima ${antes.cantoDeCima}`);
+      if (!antes.tinta) failures.push('[minha arte] o nome não aparece na arte aberta');
+      else {
+        // arrasta o nome com o mouse, de onde a tinta está para mais acima e à direita
+        const de = { x: antes.tela.left + antes.tinta.cx * antes.tela.width, y: antes.tela.top + antes.tinta.cy * antes.tela.height };
+        const para = { x: de.x + antes.tela.width * 0.2, y: antes.tela.top + antes.tela.height * 0.35 };
+        await pa.mouse.move(de.x, de.y);
+        await pa.mouse.down();
+        await pa.mouse.move((de.x + para.x) / 2, (de.y + para.y) / 2, { steps: 6 });
+        await pa.mouse.move(para.x, para.y, { steps: 6 });
+        await pa.mouse.up();
+        await pa.waitForTimeout(500);
+        const depois = await olha();
+        const andou = depois.tinta ? { dx: depois.tinta.cx - antes.tinta.cx, dy: depois.tinta.cy - antes.tinta.cy } : null;
+        if (!andou || andou.dx < 0.12 || andou.dy > -0.2) failures.push(`[minha arte] arrastar o nome na arte aberta não o levou junto (${JSON.stringify(andou)})`);
+        // dois Pandinhas: o segundo nasce ao lado do primeiro
+        await pa.click('#abas [data-aba="arte"]');
+        await pa.click('#arte-add-pandinha');
+        await pa.waitForTimeout(900);
+        const umPandinha = await olha();
+        await pa.click('#abas [data-aba="arte"]');
+        await pa.click('#arte-add-pandinha');
+        await pa.waitForTimeout(900);
+        const doisPandinhas = await olha();
+        const pandinhas = await pa.evaluate(() => document.querySelectorAll('#lista-enfeites .studio-item').length);
+        if (pandinhas !== 2) failures.push(`[minha arte] dois toques em "+ Pandinha" deram ${pandinhas} Pandinha(s)`);
+        if (!(umPandinha.larguraDaFaixa > 0) || doisPandinhas.larguraDaFaixa < umPandinha.larguraDaFaixa * 1.5) {
+          failures.push(`[minha arte] os dois Pandinhas nasceram um em cima do outro (faixa de ${umPandinha.larguraDaFaixa.toFixed(3)} para ${doisPandinhas.larguraDaFaixa.toFixed(3)} da largura)`);
+        }
+      }
+    }
+    for (const e of errosDaArte) failures.push(`[minha arte] erro: ${e}`);
+    await contexto.close();
+  }
+
   // Cada miniatura do catálogo custa cerca de 5,5 ms e 300 KB de canvas. Desenhar as 138 de uma vez
   // seriam 0,8 s de tela parada e 40 MB de memória, e num celular médio bem mais. Elas nascem quando
   // o cartão chega perto da área visível da lista — o que não pode virar cartão em branco.
-  {
+  if (roda('miniaturas')) {
     const contexto = await browser.newContext({ viewport: { width: 1280, height: 900 } });
     const pm = await contexto.newPage();
     await pm.goto(servidor.url + 'caneca-3d.html', { waitUntil: 'load' });
@@ -2083,7 +2525,7 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
   // existe onde há câmera de verdade: no computador o atributo `capture` é ignorado pelo navegador e
   // o botão só confundiria. De quebra é o caminho que resolve o HEIC do iPhone sem precisar lê-lo,
   // porque a câmera do navegador entrega JPEG.
-  for (const [nome, toque, deveTer] of [['celular', true, true], ['computador', false, false]]) {
+  if (roda('camera')) for (const [nome, toque, deveTer] of [['celular', true, true], ['computador', false, false]]) {
     const contexto = await browser.newContext({
       viewport: toque ? { width: 390, height: 844 } : { width: 1280, height: 900 },
       hasTouch: toque, isMobile: toque,
@@ -2111,7 +2553,7 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
 
   // A página de provas das coleções é a que a gente olha antes de publicar arte nova. Se ela quebrar
   // calada, a revisão humana passa a ser feita no escuro.
-  {
+  if (roda('provas')) {
     const contexto = await browser.newContext({ viewport: { width: 1280, height: 900 } });
     const pp = await contexto.newPage();
     const erros = [];
@@ -2148,6 +2590,120 @@ for (const [w, h, dpr] of [[1280, 800, 2], [390, 844, 3]]) {
     await pp.close();
     await contexto.close();
   }
+  /*
+    O estúdio dentro do site (pedido do dono, 23/09/2026): a seção "Monte seu mimo" é o estúdio da caneca
+    em 360°, no lugar do simulador de desenho.
+    - a abertura do site não baixa o estúdio: ele só chega quando a seção se aproxima;
+    - rolando até a seção, ele abre sem erro, sem id repetido e sem o simulador antigo;
+    - a caneca gruda logo abaixo da barra do topo do site, nunca por baixo dela;
+    - o botão flutuante do WhatsApp sai do caminho sobre o estúdio;
+    - escolher o modelo fica em Modelo, e o pedido vai para o WhatsApp com a montagem;
+    - o link de montagem copiado ali abre a home já com o estúdio e a montagem;
+    - "Ver com meu nome" aparece no detalhe da caneca e leva ao estúdio; no da garrafa, não aparece.
+  */
+  if (roda('estudio-no-site')) for (const [w8, h8, toque] of [[1280, 800, false], [390, 844, true]]) {
+    const contexto = await browser.newContext({ viewport: { width: w8, height: h8 }, hasTouch: toque, isMobile: toque, permissions: ['clipboard-read', 'clipboard-write'] });
+    const ph = await contexto.newPage();
+    const errosDaHome = [];
+    const pedidos = [];
+    ph.on('pageerror', (e) => errosDaHome.push(e.message));
+    ph.on('request', (r) => pedidos.push(r.url()));
+    await ph.goto(servidor.url + 'index.html', { waitUntil: 'load' });
+    await ph.waitForTimeout(1200);
+    const onde = `[estúdio no site ${w8}]`;
+    const cedo = pedidos.filter((u) => /\/simulador\/|three/.test(u));
+    if (cedo.length) failures.push(`${onde} a abertura do site já baixou o estúdio (${cedo.slice(0, 3).map((u) => u.split('/').pop()).join(', ')})`);
+    await ph.evaluate(() => document.getElementById('monte').scrollIntoView({ block: 'start', behavior: 'instant' }));
+    const abriu = await ph.waitForFunction(() => !!document.querySelector('#estudio-no-site canvas.mug-3d-canvas'), null, { timeout: 20000 }).then(() => true).catch(() => false);
+    if (!abriu) {
+      failures.push(`${onde} o estúdio não abriu na seção Monte seu mimo`);
+    } else {
+      await ph.waitForTimeout(800);
+      const pagina = await ph.evaluate(() => {
+        const ids = [...document.querySelectorAll('[id]')].map((e) => e.id);
+        return {
+          repetidos: [...new Set(ids.filter((id, i) => ids.indexOf(id) !== i))],
+          lateral: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+          velho: !!document.getElementById('builder') || !!document.querySelector('.preview'),
+        };
+      });
+      if (pagina.repetidos.length) failures.push(`${onde} id repetido na página: ${pagina.repetidos.join(', ')}`);
+      if (pagina.lateral) failures.push(`${onde} rolagem lateral com o estúdio na página`);
+      if (pagina.velho) failures.push(`${onde} o simulador de desenho continua na página`);
+      // Rola pelo estúdio como gente: a peça que gruda pelo topo (a caneca no celular, a coluna no
+      // computador quando cabe) tem de parar logo abaixo da barra do site, e o botão flutuante some.
+      const grude = await ph.evaluate(async () => {
+        const espera = (ms) => new Promise((r) => setTimeout(r, ms));
+        const barra = document.querySelector('.topbar');
+        const alvo = document.querySelector(window.innerWidth < 760 ? '.studio-preview' : '.studio-coluna-peca');
+        const caixa = document.querySelector('.studio-layout').getBoundingClientRect();
+        const comeco = caixa.top + window.scrollY, fim = caixa.bottom + window.scrollY - window.innerHeight;
+        let pior = 0, fabAparecendo = 0, vezes = 0;
+        for (let y = comeco; y < fim; y += 120) {
+          window.scrollTo({ top: y, behavior: 'instant' });
+          await espera(60);
+          vezes += 1;
+          if (!document.querySelector('.fab')?.classList.contains('is-hidden')) fabAparecendo += 1;
+          const pelaCabeca = getComputedStyle(alvo).position === 'sticky' && getComputedStyle(alvo).top !== 'auto';
+          if (!pelaCabeca) continue;
+          const b = barra.getBoundingClientRect().bottom;
+          const r = alvo.getBoundingClientRect();
+          if (r.top < b - 1 && r.bottom > b) pior = Math.max(pior, Math.round(b - r.top));
+        }
+        return { pior, fabAparecendo, vezes };
+      });
+      if (grude.pior) failures.push(`${onde} a caneca grudada ficou ${grude.pior} px por baixo da barra do topo do site`);
+      if (grude.fabAparecendo > 1) failures.push(`${onde} o botão flutuante do WhatsApp apareceu por cima do estúdio (${grude.fabAparecendo} de ${grude.vezes} pontos da rolagem)`);
+      // escolhe um modelo e confere o pedido
+      await ph.evaluate(() => document.querySelector('#model-list .studio-model:not([data-modelo=""])').click());
+      await ph.waitForTimeout(1200);
+      const pedido = await ph.evaluate(() => ({ aba: document.querySelector('#abas [aria-selected="true"]')?.dataset.aba, zap: document.getElementById('mug-order').href }));
+      if (pedido.aba !== 'modelo') failures.push(`${onde} escolher o modelo no site pulou para ${pedido.aba}`);
+      if (!/^https:\/\/wa\.me\/\d+\?text=/.test(pedido.zap) || !/Modelo:/.test(decodeURIComponent(pedido.zap.replace(/\+/g, ' ')))) {
+        failures.push(`${onde} o pedido do estúdio não vai para o WhatsApp com a montagem (${pedido.zap.slice(0, 70)})`);
+      }
+      if (!toque) {
+        await ph.evaluate(() => document.getElementById('copiar-link').click());
+        await ph.waitForTimeout(900);
+        const link = await ph.evaluate(() => navigator.clipboard.readText().catch(() => ''));
+        if (!/(index\.html|\/)#[jm]=/.test(link)) failures.push(`${onde} o link da montagem não aponta para a home (${link.slice(0, 60)})`);
+        else {
+          const nova = await contexto.newPage();
+          nova.on('pageerror', (e) => errosDaHome.push(e.message));
+          await nova.goto(link, { waitUntil: 'load' });
+          const voltou = await nova.waitForFunction(() => !!document.querySelector('#model-list [aria-pressed="true"]:not([data-modelo=""])'), null, { timeout: 20000 }).then(() => true).catch(() => false);
+          if (!voltou) failures.push(`${onde} o link da montagem não abriu o estúdio com a montagem na home`);
+          await nova.close();
+        }
+      }
+    }
+    // "Ver com meu nome": no detalhe da caneca leva ao estúdio; no da garrafa não aparece
+    const detalhe = await ph.evaluate(async () => {
+      const espera = (ms) => new Promise((r) => setTimeout(r, ms));
+      const abre = async (slug) => {
+        document.querySelector(`.product[data-slug="${slug}"] .product__ver`)?.click();
+        await espera(350);
+        const botao = document.getElementById('detalhe-personalizar');
+        return { aberto: document.getElementById('detalhe').open, visivel: !!botao && !botao.hidden };
+      };
+      const garrafa = await abre('garrafas-termicas');
+      document.getElementById('detalhe').close();
+      await espera(150);
+      const caneca = await abre('canecas');
+      document.getElementById('detalhe-personalizar').click();
+      // espera a chegada (a rolagem é suave), e não um tempo fixo
+      const naSecao = () => { const r = document.getElementById('monte').getBoundingClientRect(); return r.top < window.innerHeight * 0.5 && r.bottom > 0; };
+      for (let i = 0; i < 40 && !naSecao(); i += 1) await espera(100);
+      await espera(400);
+      return { garrafa, caneca, naSecao: naSecao(), fechou: !document.getElementById('detalhe').open };
+    });
+    if (!detalhe.caneca.aberto || !detalhe.caneca.visivel) failures.push(`${onde} o detalhe da caneca não mostra "Ver com meu nome" (${JSON.stringify(detalhe.caneca)})`);
+    if (detalhe.garrafa.visivel) failures.push(`${onde} o detalhe da garrafa mostra "Ver com meu nome", que leva ao estúdio da caneca`);
+    if (!detalhe.naSecao || !detalhe.fechou) failures.push(`${onde} "Ver com meu nome" não levou ao estúdio (${JSON.stringify(detalhe)})`);
+    errosDaHome.forEach((e) => failures.push(`${onde} erro: ${e}`));
+    await contexto.close();
+  }
+
   await servidor.close();
 }
 

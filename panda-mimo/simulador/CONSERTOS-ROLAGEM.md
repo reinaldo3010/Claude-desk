@@ -44,7 +44,8 @@ trocava frase sem ver o resultado.
 **O conserto.** A prévia gruda no topo também no celular. Para isso:
 
 - os ajustes da peça (cores, cena, arte aberta) saíram de dentro do bloco que gruda e viraram
-  `.studio-preview-extra` — senão o bloco tomaria a tela inteira;
+  `.studio-preview-extra` — senão o bloco tomaria a tela inteira (em 23/09/2026 eles voltaram para
+  a coluna da peça, à vista, e a coluna passou a grudar pelo pé; ver `REDESENHO-LEVE.md`);
 - os dois passaram a viver em `.studio-coluna-peca`. Na tela larga essa coluna é um item da grade que
   **estica** até a altura do editor, que é o que dá espaço para o `sticky` correr. No celular ela vira
   `display:contents` e some do fluxo, e aí o `sticky` corre contra a página toda;

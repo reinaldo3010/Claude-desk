@@ -772,7 +772,9 @@ function desenhaAdesivo(ctx, camada, caixa, imagem) {
  * @param {CanvasRenderingContext2D} ctx já transformado para milímetros
  * @param {{fundo:string, semente:number, enfeites:object, camadas:Array}} arte
  * @param {{x:number,y:number,width:number,height:number}} printArea área útil em mm
- * @param {{fotos?:Object, imagens?:Object, semPandinha?:boolean}} dados
+ * @param {{fotos?:Object, imagens?:Object, semPandinha?:boolean, antesDasCamadas?:Function}} dados
+ *   `antesDasCamadas` desenha por baixo de todas as camadas: é por ali que entra a arte que a pessoa
+ *   trouxe pronta. Arte sem `fundo` deixa à mostra o branco da cerâmica, que quem chama já pintou.
  * @returns {Array<{camada:object, caixa:object}>} onde cada camada ficou, para o clique e o contorno
  */
 export function desenhaArte(ctx, arte, printArea, dados = {}) {
@@ -780,8 +782,11 @@ export function desenhaArte(ctx, arte, printArea, dados = {}) {
   const visiveis = arte.camadas.filter((camada) => !(dados.semPandinha && camada.tipo === 'adesivo'));
   const caixas = visiveis.map((camada) => ({ camada, caixa: caixaDaCamada(camada, printArea, medidor) }));
   ctx.save();
-  ctx.fillStyle = cor(arte.fundo);
-  ctx.fillRect(printArea.x, printArea.y, printArea.width, printArea.height);
+  if (arte.fundo) {
+    ctx.fillStyle = cor(arte.fundo);
+    ctx.fillRect(printArea.x, printArea.y, printArea.width, printArea.height);
+  }
+  dados.antesDasCamadas?.(ctx);
 
   // Enfeites do fundo: sempre no mesmo lugar, longe das fotos e das frases.
   const conf = arte.enfeites;

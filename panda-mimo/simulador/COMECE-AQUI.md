@@ -3,7 +3,14 @@
 Documento de passagem do simulador de caneca da Panda Mimo. Quem chegar numa sessão nova lê este
 arquivo primeiro, depois `panda-mimo/MARCA.md` (o manual manda em cor, letra, mascote e tom de voz).
 
-Última atualização: 23 de setembro de 2026. Os lotes e a revisão estão documentados em `LOTE-PANDINHA-E-AQUARELA.md`, `LOTE-PRAZERES.md`, `LOTE-ATELIE.md` e `REVISAO-PAPELARIA.md`.
+Última atualização: 23 de setembro de 2026. O redesenho leve e o layout estão em `REDESENHO-LEVE.md`; a
+Minha arte em camadas, em `MINHA-ARTE-EM-CAMADAS.md`.
+
+**O estúdio mora em dois lugares com uma marcação só.** A fonte é `caneca-3d.html`. A seção Monte seu mimo
+da página inicial (`#estudio-no-site`) busca o `.studio-layout` dessa página, põe a folha `estudio.css` e
+importa `estudio.js` quando a seção se aproxima da tela (`carregaEstudio()` em `script.js`). Mudou o
+estúdio? Muda em `caneca-3d.html` e vale nos dois. Dentro da home, `--estudio-topo` é a altura da barra do
+topo do site, para a caneca grudar abaixo dela; o guardião cobra isso no bloco `estudio-no-site`. Os lotes e a revisão estão documentados em `LOTE-PANDINHA-E-AQUARELA.md`, `LOTE-PRAZERES.md`, `LOTE-ATELIE.md` e `REVISAO-PAPELARIA.md`.
 
 ---
 
@@ -21,9 +28,10 @@ anexada, que é o fluxo de venda da casa.
 ```bash
 cd panda-mimo
 npm install                 # só na primeira vez
-npm run servir              # abre em http://127.0.0.1:8765 (o estúdio é /caneca-3d.html)
-npm test                    # testes unitários + guardião + nitidez (demora)
+npm run servir              # abre em http://127.0.0.1:8765 (o estúdio está na página inicial, em #monte, e em /caneca-3d.html)
+npm test                    # testes unitários + guardião + nitidez (uns 25 min; antes de publicar)
 QA_VIEWPORTS=390,1280 npm test   # a passada rápida, a mesma do GitHub Actions
+QA_SO=cardapio,minha-arte QA_VIEWPORTS=1280 node qa/audit.mjs   # só esses blocos (segundos a 2 min)
 npm run test:arte           # só os testes unitários (segundos)
 npm run provas              # gera as artes dos modelos em qa/shots, para revisão humana
 ```
@@ -167,7 +175,11 @@ coleção nova não precisa do Python.
 2. Faça a mudança e rode `QA_VIEWPORTS=390,1280 npm test`.
 3. Toda regra nova de marca entra no manual **e** no histórico do fim dele.
 4. Toda regressão que passar despercebida vira checagem no guardião, com defeito de prova para
-   confirmar que a checagem reprova de verdade.
+   confirmar que a checagem reprova de verdade. O defeito vai numa pasta à parte, nunca no arquivo do
+   site: `QA_SOBREPOR=<pasta> QA_SO=<bloco> QA_VIEWPORTS=1280 node qa/audit.mjs`, com a pasta imitando
+   os caminhos (`<pasta>/simulador/estudio.js`) e só o bloco que tem de pegar o defeito (o nome está no
+   `roda('...')` de cada bloco do `qa/audit.mjs`). Quem estiver com o estúdio aberto não vê o defeito, e
+   cada prova leva menos de um minuto.
 5. Modelo novo: copie um item de `MODELOS` em `modelos.js` e rode `npm run test:arte`. Coleção
    nova: seção 7 aqui em cima.
 6. Antes de publicar, olhe as provas (`npm run provas`) no tamanho de uso. O guardião confere regras,

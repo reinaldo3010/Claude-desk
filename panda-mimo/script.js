@@ -278,10 +278,9 @@ function abreDetalhe(slug, gatilho) {
   zap.dataset.rotulo = `${p.rotulo_botao || "Quero essa"} · ${p.nome} · detalhe`;
   aplicaContatos(detalhe);
 
+  // "Ver com meu nome" leva ao estúdio da caneca: só faz sentido na caneca.
   const pers = document.getElementById("detalhe-personalizar");
-  const base = baseDoProduto(p);
-  pers.hidden = !base;
-  pers.dataset.base = base || "";
+  pers.hidden = baseDoProduto(p) !== "caneca";
 
   if (!detalhe.open) detalhe.showModal();
   history.replaceState(null, "", `#produto/${slug}`);
@@ -292,23 +291,19 @@ function fechaDetalhe() { if (detalhe.open) detalhe.close(); }
 
 detalhe.addEventListener("close", () => {
   if (/^#produto\//.test(location.hash)) history.replaceState(null, "", "#produtos");
-  if (voltarFocoPara) voltarFocoPara.focus();
+  // Sem rolar: o foco volta ao cartão sem arrastar a página, senão "Ver com meu nome" era desfeito — a
+  // página descia até o estúdio e o foco devolvido ao cartão a puxava de volta para o catálogo.
+  if (voltarFocoPara) voltarFocoPara.focus({ preventScroll: true });
 });
 detalhe.addEventListener("click", (e) => { if (e.target === detalhe) fechaDetalhe(); });
 document.querySelector(".detalhe__fechar").addEventListener("click", fechaDetalhe);
 
 document.getElementById("detalhe-personalizar").addEventListener("click", (e) => {
   e.preventDefault();
-  const base = e.currentTarget.dataset.base;
   fechaDetalhe();
-  if (base) {
-    const r = document.getElementById(`i-${base}`); if (r) r.checked = true;
-    const foto = document.getElementById("m-foto"); if (foto) { foto.checked = true; }
-  }
-  render();
+  carregaEstudio();
   document.getElementById("monte").scrollIntoView({ behavior: reduzMovimento ? "auto" : "smooth", block: "start" });
   history.replaceState(null, "", "#monte");
-  document.getElementById("b-nome").focus({ preventScroll: true });
 });
 
 lista.addEventListener("click", (e) => {
@@ -545,161 +540,78 @@ if (formDepo) {
 }
 
 /* =========================================================
-   Monte seu mimo
+   Monte seu mimo: o estúdio da caneca em 360°, aqui mesmo na página
+   - no lugar do simulador de desenho (pedido do dono, 23/09/2026);
+   - a marcação vem de caneca-3d.html, uma fonte só para as duas páginas;
+   - o estúdio (3D, 199 modelos) só carrega quando a seção chega perto da tela, ou na hora em que a
+     pessoa pede: o link do topo, o "Ver com meu nome" de uma caneca, um link de montagem.
    ========================================================= */
-const form = document.getElementById("builder");
-const preview = document.querySelector(".preview");
-const count = document.getElementById("b-count");
-const bases = {
-  garrafa: document.getElementById("pv-garrafa"),
-  caneca: document.getElementById("pv-caneca"),
-  copo: document.getElementById("pv-copo"),
-};
+const estudioNoSite = document.getElementById("estudio-no-site");
+let estudioCarregando = null;
 
-const CORES = {
-  creme:   { fill: "#F3EEE4", ink: "#171512" },
-  salvia:  { fill: "#A8C5A2", ink: "#171512" },
-  pessego: { fill: "#FFB59C", ink: "#171512" },
-  preta:   { fill: "#1F1D1A", ink: "#FBF6EF" },
-};
-const LETRAS = {
-  redonda:    { font: '"Fredoka", "Nunito", sans-serif', base: 30 },
-  manuscrita: { font: '"Caveat", cursive', base: 40 },
-};
-const ROTULOS = {
-  garrafa: "garrafa térmica", caneca: "caneca", copo: "copo térmico",
-  creme: "creme", salvia: "sálvia", pessego: "pêssego", preta: "preta",
-  redonda: "letra redondinha", manuscrita: "letra manuscrita",
-};
-
-/* foto real de cada base e onde fica a plaquinha do nome
-   (porcentagens da largura/altura da foto: esquerda, topo, largura, altura) */
-const FOTO_REAL = {
-  garrafa: { src: "assets/prod-garrafa.webp", placa: [37.5, 61.6, 19.7, 5.8], cor: "#F4DFD1" },
-  caneca:  { src: "assets/prod-caneca.webp",  placa: [46.7, 71.7, 35.5, 12.5], cor: "#DAC9BE" },
-  copo:    { src: "assets/prod-copo.webp",    placa: [60.5, 50.5, 21.0, 5.3], cor: "#F2D6C1" },
-};
-const fotoReal = document.getElementById("foto-real");
-const fotoRealImg = document.getElementById("foto-real-img");
-const fotoRealPlaca = document.getElementById("foto-real-placa");
-const fotoRealNome = document.getElementById("foto-real-nome");
-const dicaFoto = document.getElementById("dica-foto");
-const modoFoto = () => !!document.getElementById("m-foto")?.checked;
-
-const medidor = document.createElement("canvas").getContext("2d");
-function ajustaNomeNaPlaca(texto, fonte) {
-  const r = fotoRealPlaca.getBoundingClientRect();
-  if (!r.width) return;
-  const maxW = r.width * 0.84, maxH = r.height * 0.74;
-  let fs = maxH;
-  medidor.font = `600 ${fs}px ${fonte}`;
-  const largura = medidor.measureText(texto).width || 1;
-  if (largura > maxW) fs = Math.max(7, fs * (maxW / largura));
-  fotoRealNome.style.fontFamily = fonte;
-  fotoRealNome.style.fontSize = `${fs}px`;
+/* A barra do topo gruda: a caneca, que também gruda, tem de parar logo abaixo dela. */
+function medeTopoDoEstudio() {
+  const altura = Math.round(document.querySelector(".topbar")?.getBoundingClientRect().height || 0);
+  estudioNoSite?.style.setProperty("--estudio-topo", `${altura}px`);
 }
 
-function estado() {
-  const d = new FormData(form);
-  const qtd = Math.min(500, Math.max(1, parseInt(d.get("qtd"), 10) || 1));
-  return {
-    nome: (d.get("nome") || "").trim(),
-    item: d.get("item"),
-    cor: d.get("cor") || "creme",
-    letra: d.get("letra"),
-    panda: d.get("panda") === "on",
-    qtd,
-    foto: modoFoto(),
-  };
-}
-
-function render() {
-  const s = estado();
-  const texto = s.nome || "Seu nome";
-  const cor = CORES[s.cor];
-  const letra = LETRAS[s.letra];
-
-  // na foto real a cor da peça e o pandinha não se aplicam
-  form.querySelectorAll('input[name="cor"]').forEach((r) => (r.disabled = s.foto));
-  document.getElementById("b-panda").disabled = s.foto;
-  dicaFoto.hidden = !s.foto;
-  fotoReal.hidden = !s.foto;
-  preview.toggleAttribute("hidden", s.foto); // svg não tem a propriedade .hidden
-
-  if (s.foto) {
-    const f = FOTO_REAL[s.item] || FOTO_REAL.caneca;
-    const srcset2 = `${f.src} 1x, ${f.src.replace(/\.webp$/, "@2x.webp")} 2x`;
-    if (fotoRealImg.getAttribute("srcset") !== srcset2) fotoRealImg.srcset = srcset2;
-    if (fotoRealImg.getAttribute("src") !== f.src) fotoRealImg.src = f.src;
-    const [x, y, w, h] = f.placa;
-    fotoRealPlaca.style.setProperty("--px", `${x}%`);
-    fotoRealPlaca.style.setProperty("--py", `${y}%`);
-    fotoRealPlaca.style.setProperty("--pw", `${w}%`);
-    fotoRealPlaca.style.setProperty("--ph", `${h}%`);
-    fotoRealPlaca.style.setProperty("--placa", f.cor);
-    fotoRealNome.textContent = texto;
-    ajustaNomeNaPlaca(texto, letra.font);
+function carregaEstudio() {
+  if (!estudioNoSite) return Promise.resolve(false);
+  if (estudioCarregando) return estudioCarregando;
+  // Aberto como arquivo (dois cliques no index.html), o navegador não deixa buscar a outra página nem
+  // desenhar o 3D: fica o aviso com o caminho, sem erro no console.
+  if (location.protocol === "file:") {
+    const aviso = document.getElementById("estudio-no-site-aviso");
+    if (aviso) aviso.innerHTML = 'A caneca em 360° abre com o site publicado (ou com <code>npm run servir</code>). Enquanto isso, <a href="#contato">conte sua ideia pra gente</a>.';
+    estudioCarregando = Promise.resolve(false);
+    return estudioCarregando;
   }
-
-  // a fonte encolhe conforme o texto cresce, para caber na peça
-  const len = texto.length;
-  const size = len <= 6 ? letra.base : Math.max(15, letra.base - (len - 6) * 1.7);
-
-  preview.style.setProperty("--pv", cor.fill);
-  preview.style.setProperty("--pv-ink", cor.ink);
-  preview.style.setProperty("--pv-font", letra.font);
-  preview.style.setProperty("--pv-size", `${size}px`);
-  preview.dataset.cor = s.cor;
-  preview.dataset.panda = s.panda ? "on" : "off";
-
-  Object.entries(bases).forEach(([k, g]) => g.toggleAttribute("hidden", k !== s.item)); // <g> do svg não tem .hidden
-  preview.querySelectorAll(".pv-text").forEach((t) => {
-    t.textContent = texto;
-    t.style.fontSize = "";
+  estudioCarregando = (async () => {
+    medeTopoDoEstudio();
+    const folha = new Promise((pronto) => {
+      if (document.querySelector('link[href="simulador/estudio.css"]')) { pronto(); return; }
+      const link = Object.assign(document.createElement("link"), { rel: "stylesheet", href: "simulador/estudio.css" });
+      link.onload = link.onerror = () => pronto();
+      document.head.appendChild(link);
+    });
+    const resposta = await fetch(estudioNoSite.dataset.origem || "caneca-3d.html");
+    if (!resposta.ok) throw new Error("estúdio indisponível");
+    const pagina = new DOMParser().parseFromString(await resposta.text(), "text/html");
+    const layout = pagina.querySelector(".studio-layout");
+    if (!layout) throw new Error("estúdio sem conteúdo");
+    await folha;
+    estudioNoSite.replaceChildren(document.importNode(layout, true));
+    aplicaContatos(estudioNoSite);
+    await import("./simulador/estudio.js");
+    estudioNoSite.removeAttribute("aria-busy");
+    if ("ResizeObserver" in window) new ResizeObserver(medeTopoDoEstudio).observe(document.querySelector(".topbar"));
+    return true;
+  })().catch(() => {
+    estudioCarregando = null;
+    const aviso = document.getElementById("estudio-no-site-aviso");
+    if (aviso) aviso.innerHTML = 'A caneca em 360° não abriu agora. <a href="caneca-3d.html">Tente por aqui</a> ou <a href="#contato">conte sua ideia pra gente</a>.';
+    return false;
   });
-  // se o texto ainda não cabe na largura da peça, encolhe a fonte até caber
-  const larguraPeca = { garrafa: 84, caneca: 120, copo: 92 }[s.item];
-  const el = bases[s.item].querySelector(".pv-text");
-  if (el && el.getComputedTextLength && !s.foto) {
-    el.removeAttribute("textLength"); el.removeAttribute("lengthAdjust");
-    const medida = el.getComputedTextLength();
-    if (medida > larguraPeca) {
-      const fs = Math.max(10, size * (larguraPeca / medida) * 0.98);
-      el.style.fontSize = `${fs}px`;
-      if (el.getComputedTextLength() > larguraPeca) {
-        el.setAttribute("textLength", larguraPeca);
-        el.setAttribute("lengthAdjust", "spacingAndGlyphs");
-      }
-    }
-  }
-  count.textContent = s.nome.length;
+  return estudioCarregando;
 }
 
-const qtdInput = document.getElementById("b-qtd");
-qtdInput.addEventListener("change", () => { qtdInput.value = estado().qtd; render(); });
-qtdInput.addEventListener("blur", () => { qtdInput.value = estado().qtd; });
-
-form.addEventListener("input", render);
-document.querySelectorAll('input[name="modo"]').forEach((r) => r.addEventListener("change", render));
-fotoRealImg.addEventListener("load", () => { if (modoFoto()) render(); });
-let esperaRedimensionar;
-window.addEventListener("resize", () => { clearTimeout(esperaRedimensionar); esperaRedimensionar = setTimeout(() => modoFoto() && render(), 120); });
-render();
-if (document.fonts && document.fonts.ready) document.fonts.ready.then(render);
-
-document.getElementById("b-send").addEventListener("click", () => {
-  const s = estado();
-  const msg =
-    `Oi, Panda Mimo! Montei uma ideia no site 🐼\n` +
-    `• Base: ${ROTULOS[s.item]}\n` +
-    `• Cor: ${s.foto ? "a combinar" : ROTULOS[s.cor]}\n` +
-    `• Escrito: "${s.nome || "(ainda vou decidir)"}"\n` +
-    `• ${ROTULOS[s.letra]}${s.foto ? "" : s.panda ? ", com o pandinha" : ", sem o pandinha"}\n` +
-    `• Quantidade: ${s.qtd}\n` +
-    `Pode me passar valor e prazo?`;
-  medir("simulador", ROTULOS[s.item]);
-  window.open(waLink(msg), "_blank", "noopener");
-});
+if (estudioNoSite) {
+  // Link de montagem (#m=… ou #j=…) abre o estúdio na hora, já com a montagem.
+  if (/^#[jm]=/.test(location.hash)) {
+    carregaEstudio().then(() => document.getElementById("monte").scrollIntoView({ block: "start" }));
+  } else if ("IntersectionObserver" in window) {
+    const perto = new IntersectionObserver((entradas) => {
+      if (!entradas.some((e) => e.isIntersecting)) return;
+      perto.disconnect();
+      carregaEstudio();
+    }, { rootMargin: "1200px 0px" });
+    perto.observe(estudioNoSite);
+  } else {
+    carregaEstudio();
+  }
+  // Quem clica para ir à seção não espera a rolagem chegar perto para o estúdio começar a carregar.
+  document.addEventListener("click", (e) => { if (e.target.closest('a[href="#monte"]')) carregaEstudio(); });
+}
 
 /* ---------- dúvidas: uma aberta por vez, com aria-expanded ---------- */
 const faqs = document.querySelectorAll(".faq__item");
@@ -728,7 +640,9 @@ document.addEventListener("click", (e) => topbar.classList.contains("is-open") &
 
 /* ---------- botão flutuante: sai do caminho quando cobriria um CTA ou o teclado está aberto ---------- */
 const fab = document.querySelector(".fab");
-const blockers = [document.getElementById("contato"), document.querySelector(".builder__form"), document.querySelector(".follow__links")].filter(Boolean);
+// O estúdio tem o próprio "Pedir esse mimo no WhatsApp", que leva a montagem escrita; o botão
+// flutuante mandaria uma mensagem vazia de montagem, e ainda cobriria os controles da caneca.
+const blockers = [document.getElementById("contato"), estudioNoSite, document.querySelector(".follow__links")].filter(Boolean);
 const visiveis = new Set();
 let teclado = false;
 const updateFab = () => fab.classList.toggle("is-hidden", teclado || visiveis.size > 0);
