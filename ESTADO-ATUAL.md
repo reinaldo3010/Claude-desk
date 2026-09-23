@@ -36,10 +36,10 @@ navegador de verdade em 1280 e 390 (a primeira visita logo depois da publicaçã
 Pages, que ainda espalhava os arquivos; a segunda passou sem erro). Próximo passo: o olhar do dono sobre
 as duas peças; depois, mais modelos para elas, o copo e as outras peças (item 1 abaixo).
 
-**Publicado em 23/09/2026** (merge `341c9e4`, mais o `5cdbea0` só de documentação), conferido no ar
-com navegador de verdade em 1280 e 390 px. O registro do fim da sessão (este arquivo, `COMECE-AQUI.md` e
-`LICOES-APRENDIDAS.md`) ficou num commit só de documentação na `main` daqui, sem push: sobe junto com a
-próxima publicação.
+Antes disso, no mesmo dia, o estúdio da caneca foi para dentro do site (merge `341c9e4`). O registro do
+fim da sessão das peças (este arquivo, `COMECE-AQUI.md`, `LICOES-APRENDIDAS.md` e as ferramentas
+`qa/folha-de-modelos.mjs` e `qa/confere-no-ar.mjs`) ficou num commit só de registro na `main` daqui, sem
+push: sobe junto com a próxima publicação, e não muda nada no site.
 
 **O caminho até o ar tem três pernas**, e a do meio costuma ser esquecida:
 
