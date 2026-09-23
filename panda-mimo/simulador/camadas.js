@@ -21,9 +21,13 @@ export const fotoRedonda = (id, rotulo, x, y, largura) =>
 export const frase = (id, rotulo, texto, x, y, tamanho, extra = {}) =>
   ({ id, tipo: 'frase', rotulo, texto, x, y, tamanho, largura: 0.3, fonte: 'Caveat', cor: '--hand-ink', rotacao: 0, ...extra });
 
-/** O Pandinha adesivo, um por peça. */
+/** O Pandinha adesivo. O tamanho é a largura, em fração da altura da área; a altura sai do arquivo. */
 export const panda = (x, y, tamanho = 0.15, arquivo = 'assets/panda-coracao.webp') =>
   ({ id: 'pandinha', tipo: 'adesivo', rotulo: 'Pandinha', arquivo, x, y, tamanho, rotacao: 0 });
+
+/** Imagem do acervo (aquarela, adesivo da marca): move, gira e muda de tamanho, mas não troca de cor. */
+export const elemento = (id, rotulo, arquivo, x, y, tamanho) =>
+  ({ id, tipo: 'elemento', rotulo, arquivo, x, y, tamanho, rotacao: 0 });
 
 /** Ilustração de coleção: entra como enfeite, então a pessoa move, gira e recolore como os outros. */
 export const ilustra = (id, rotulo, forma, x, y, tamanho, cor = '--ink', extra = {}) => {

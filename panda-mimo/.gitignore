@@ -8,6 +8,11 @@ node_modules
 marca/kit/png/*
 !marca/kit/png/pandinha-temas-20/
 !marca/kit/png/piloto-aquarela/
+!marca/kit/png/pandinha-temas-35/
 # Cópias byte a byte dos logos que já vivem em assets/, e ninguém as referencia. Duplicata de logo
 # é como nasce a dúvida sobre qual é o verdadeiro: ficam no disco, fora do repositório.
 marca/kit/png/pandinha-temas-20/marca-oficial/
+marca/kit/png/pandinha-temas-35/marca-oficial/
+
+# Cache do Python: sai de qualquer checagem dos scripts do kit e não é do projeto.
+__pycache__/

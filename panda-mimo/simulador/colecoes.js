@@ -8,6 +8,9 @@
   - as da coleção esportiva, convertidas de SVG, guardadas como listas de comandos (`esportes.js`);
   - as escritas à mão no vocabulário de `desenho.js`, que se medem sozinhas.
   As duas pintam só por token da paleta e obedecem à seção 9.1 do manual.
+
+  E duas coleções trazem imagem em vez de curva: as poses do Pandinha (`pandinha-temas.js`), que
+  entram na lista de poses, e as aquarelas (`aquarelas.js`), que entram nos elementos do acervo.
 */
 import { MODELOS_ESPORTES, CATEGORIAS_ESPORTES } from './esportes-dados.js';
 import { vetorEsportivo, desenhaVetorEsportivo } from './esportes.js';
@@ -20,6 +23,12 @@ import { ILUSTRACOES_REFINADAS } from './ilustracoes-refinadas.js';
 import { acabamentoPapelaria } from './acabamento.js';
 import { ILUSTRACOES_ATELIE, MODELOS_ATELIE, CATEGORIAS_ATELIE } from './atelie.js';
 import { ILUSTRACOES_HOBBIES, MODELOS_HOBBIES, CATEGORIAS_HOBBIES } from './hobbies.js';
+import { POSES_TEMATICAS, ADESIVOS_DO_ACERVO, MODELOS_PANDINHA, CATEGORIAS_PANDINHA } from './pandinha-temas.js';
+import { AQUARELAS, MODELOS_AQUARELA, CATEGORIAS_AQUARELA } from './aquarelas.js';
+
+/** As poses do Pandinha que as coleções trazem, e as imagens que entram nos elementos do acervo. */
+export const POSES_DE_COLECAO = POSES_TEMATICAS;
+export const ELEMENTOS_DE_COLECAO = Object.freeze([...ADESIVOS_DO_ACERVO, ...AQUARELAS]);
 
 /** As ilustrações escritas à mão, de todas as coleções. */
 export const ILUSTRACOES = Object.freeze({
@@ -33,12 +42,16 @@ export const CATEGORIAS_DE_COLECAO = Object.freeze([
   ...CATEGORIAS_DATAS, ...CATEGORIAS_BEBE, ...CATEGORIAS_CONVITES, ...CATEGORIAS_ESPORTES, ...CATEGORIAS_PETS,
   ...CATEGORIAS_ATELIE,
   ...CATEGORIAS_HOBBIES,
+  ...CATEGORIAS_PANDINHA,
+  ...CATEGORIAS_AQUARELA,
 ]);
 export const MODELOS_DE_COLECAO = Object.freeze([
   ...MODELOS_DATAS.map(acabamentoPapelaria), ...MODELOS_BEBE.map(acabamentoPapelaria),
   ...MODELOS_CONVITES.map(acabamentoPapelaria), ...MODELOS_ESPORTES, ...MODELOS_PETS.map(acabamentoPapelaria),
   ...MODELOS_ATELIE,
   ...MODELOS_HOBBIES,
+  ...MODELOS_PANDINHA,
+  ...MODELOS_AQUARELA,
 ]);
 
 /** Quanto uma ilustração é mais alta que larga; `null` quando a forma não é de coleção. */

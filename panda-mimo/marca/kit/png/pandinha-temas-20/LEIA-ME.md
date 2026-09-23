@@ -23,3 +23,9 @@ Ciclismo, academia, engenharia, medicina, professores, corrida, yoga, treino fun
 20 arquivos com canal alpha e pixels transparentes; galeria local carregada com as 20 imagens. Revisão visual em conjunto sobre fundo claro e amostra sobre fundo escuro. Não foi feita prova física de impressão. O acabamento dos acessórios é ilustrativo, não desenho técnico.
 
 Galeria: `index.html`, servida pelo servidor local do site. A integração de um novo bloco no editor permanece para a etapa seguinte.
+
+## Integrado ao estúdio (23/09/2026)
+
+As poses já estão no estúdio da caneca, cada uma com uma arte pronta, e os adesivos na grade do acervo.
+As versões do site saem daqui por `marca/kit/prepara-imagens-do-estudio.py`; as regras e os números estão
+em `simulador/LOTE-PANDINHA-E-AQUARELA.md`. O que está escrito acima sobre a integração ficou para trás.

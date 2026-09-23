@@ -84,3 +84,24 @@ repetir. Companheiro de `COMECE-AQUI.md`.
 - **Coleção nova não pode pular para a frente do seletor.** Ao entrar, a coleção esportiva ficou
   antes das datas comemorativas porque foi espalhada no topo do array. A ordem dos grupos passou a
   ser uma lista escrita à mão (`ORDEM_DOS_GRUPOS`), com teste.
+
+## Das imagens do acervo (23/09/2026)
+
+- **Checagem que conta camada deixa passar camada invisível.** O elemento do acervo entrava na lista e
+  nunca era desenhado, e o guardião só conferia que a lista cresceu. Imagem na arte se confere por
+  pixel: tira a foto da vista aberta com a seleção na mesma camada antes e depois (senão as alças contam
+  como desenho) e mede quanto mudou.
+- **Defeito que só aparece na primeira pintura não aparece depois.** A miniatura sem o Pandinha só existe
+  na abertura do estúdio; quando a checagem rodava mais tarde, a lista já tinha sido refeita com a imagem
+  carregada e ela passava com o defeito de volta. Foi o defeito de prova que mostrou — mais uma vez, a
+  checagem estava errada, não o código.
+- **Mexer na caixa de uma camada mexe no confete.** O sorteio das bolinhas de fundo desvia da caixa de
+  todas as camadas; a caixa do Pandinha ficou mais alta e o confete de "amizade-formatura" mudou de
+  lugar. Só a medida da arte dos 138 modelos, antes e depois, pegou. Hoje isso é teste
+  (`qa/artes-aprovadas-unit.test.mjs`), com a impressão digital calculada pelo motor antigo, tirado do git.
+- **Duas portas para a mesma imagem baixam duas vezes.** A abertura pedia o Pandinha por um caminho e a
+  miniatura por outro; com cache desligado, 70 KB em dobro. Toda imagem do acervo passa por `pedeImagem`.
+- **Arquivo servido chega com CRLF.** Instrumentar um módulo trocando texto na rota do Playwright falha
+  calado se a âncora tiver `\n`: normalize o fim de linha antes de procurar.
+- **Barra invertida em heredoc se corrompe neste ambiente.** Um `\n` dentro de `<<'PY'` chegou ao
+  arquivo como quebra de linha de verdade. Remendo com barra invertida vai num arquivo `.py` escrito à parte.

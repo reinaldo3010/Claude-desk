@@ -1,0 +1,665 @@
+[
+  {
+    "id": "21-arquiteto",
+    "title": "Pandinha arquiteto",
+    "category": "Profissões",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: seated beside a small beautifully built cream architectural house model, holding a sage drafting compass and peach pencil; no safety helmet.",
+    "file": "21-arquiteto.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 39.99,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "fb7baf651317bb42d43e4cd545d8b159c6cd5d07062bbdeec53d4208b1a8995c"
+  },
+  {
+    "id": "22-programador",
+    "title": "Pandinha programador",
+    "category": "Profissões",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: sitting using a sage laptop on lap, cream screen without text, tiny peach mug beside feet, playful focused smile.",
+    "file": "22-programador.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 39.89,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "7f2db9f5d4effc5889a29a7173b72ce6adf6e33ed02d1698fcb2834cb0c9b5ad"
+  },
+  {
+    "id": "23-cientista",
+    "title": "Pandinha cientista",
+    "category": "Profissões",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: holding a round laboratory flask containing translucent peach liquid and standing beside a compact cream and sage microscope, no symbols.",
+    "file": "23-cientista.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 40.62,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "24dafcac8cd079a5be2f9cba56a89030c96ae5d1af9eada0d0ef6152d7cbcf5c"
+  },
+  {
+    "id": "24-advogado",
+    "title": "Pandinha advogado",
+    "category": "Profissões",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: holding a small balanced brass-colored justice scale, a thick sage law book beside feet, dignified friendly seated pose.",
+    "file": "24-advogado.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 37.61,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "cd660b2050619446d5f854486e0443cee4bbce17ae0b5f3c684a8006c3f7b5b1"
+  },
+  {
+    "id": "25-psicologo",
+    "title": "Pandinha psicólogo",
+    "category": "Profissões",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: comfortingly embracing a peach heart cushion while seated beside a cream notebook and sage pencil, caring welcoming gesture.",
+    "file": "25-psicologo.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 37.52,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "73b54ed14b0cf94a13fdef9852e8977ae06c8315407c634673f59a4d4f6c8d1b"
+  },
+  {
+    "id": "26-nutricionista",
+    "title": "Pandinha nutricionista",
+    "category": "Profissões",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: presenting a cream bowl of recognizable peach-colored apple slices, green leaves and sage pear, small cloth napkin; balanced cheerful pose.",
+    "file": "26-nutricionista.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 43.8,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "910a37e182851485f792bfa9553fbef0908e882369b86398ddf28b91cd5cf564"
+  },
+  {
+    "id": "27-fisioterapeuta",
+    "title": "Pandinha fisioterapeuta",
+    "category": "Profissões",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: standing stretching a sage resistance band between both paws, peach small exercise ball next to feet, convincing simple band shape.",
+    "file": "27-fisioterapeuta.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 41.04,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "8ae6e93bc0851bd3a4539035b6f6d6db69c6ddec1ed37bcdb450a7bcd09f56e7"
+  },
+  {
+    "id": "28-farmaceutico",
+    "title": "Pandinha farmacêutico",
+    "category": "Profissões",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: seated with a cream mortar and sage pestle in paws, two small blank amber medicine bottles with peach caps beside feet, no labels.",
+    "file": "28-farmaceutico.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 36.91,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "47a2b5114a5390dd31415982d783656857bbb49ecb49c9d8305e5baf78564f72"
+  },
+  {
+    "id": "29-cabeleireiro",
+    "title": "Pandinha cabeleireiro",
+    "category": "Profissões",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: holding a peach hair dryer in one paw and a sage round hairbrush in other, face visible, tiny sand pouch at feet.",
+    "file": "29-cabeleireiro.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 36.72,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "c1346808b769819198d33155f4ded3194c8babdd610f3c30c97c3f50dcc244a3"
+  },
+  {
+    "id": "30-costureiro",
+    "title": "Pandinha costureiro",
+    "category": "Profissões",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: sitting beside a compact cream vintage sewing machine with peach details, sage fabric draping over base, holding a spool of peach thread.",
+    "file": "30-costureiro.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 32.94,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "6d8c4746e2a86018e93791e142dc36aea9074a2e1d809750e32d81378be871e8"
+  },
+  {
+    "id": "31-florista",
+    "title": "Pandinha florista",
+    "category": "Profissões",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: standing presenting a hand-tied bouquet of cream daisies and peach roses with sage leaves in kraft wrap; cheerful generous gesture.",
+    "file": "31-florista.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 42.63,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "5c391460120b976a798395ffcc55f45fb6336c413ec2cea4f4e7b03045f4053b"
+  },
+  {
+    "id": "32-barista",
+    "title": "Pandinha barista",
+    "category": "Profissões",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: seated carefully presenting an ivory cappuccino cup on a sage saucer, peach heart latte art, small coffee bean pouch at feet.",
+    "file": "32-barista.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 37.5,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "84bc60b96cbb987e5401ff279ba0fcd0e2cedd77a600eebce975f93dd677e741"
+  },
+  {
+    "id": "33-tenista",
+    "title": "Pandinha tenista",
+    "category": "Esportes",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: standing in playful ready pose holding a sage tennis racket with regular string grid and cream tennis ball, peach wristband.",
+    "file": "33-tenista.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 47.02,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "31c251424a146f2c5af3c03bd6e74436096138bdca89bf8b767e8090682cf961"
+  },
+  {
+    "id": "34-basquete",
+    "title": "Pandinha basquete",
+    "category": "Esportes",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: joyful dynamic pose hugging a peach basketball with credible curved seams, one foot raised, tiny sage sneakers.",
+    "file": "34-basquete.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 50.79,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "1aab38006a4302dbe312f87fdb38a96d60cf29403934be62a978ea857e88a831"
+  },
+  {
+    "id": "35-volei",
+    "title": "Pandinha vôlei",
+    "category": "Esportes",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: standing with both paws lifting a cream and sage volleyball above one shoulder, clear anatomy, peach wristbands.",
+    "file": "35-volei.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 48.61,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "7c7795d5c45be10ce5e759797a98f7fcddf28d1caaaf667b7ab90f17cb9759c3"
+  },
+  {
+    "id": "36-skate",
+    "title": "Pandinha skate",
+    "category": "Esportes",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: balanced on a peach skateboard with sage wheels, small sage helmet leaving ears and tuft visible, one arm extended joyfully.",
+    "file": "36-skate.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 46.07,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "8aa0d9dcca1fee364af2692e4052d6bd6fcefb57a0bb45c939ea1661522c2036"
+  },
+  {
+    "id": "37-patinacao",
+    "title": "Pandinha patinação",
+    "category": "Esportes",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: gliding on two peach quad roller skates with cream wheels, sage knee pads, both paws out balancing, full figure.",
+    "file": "37-patinacao.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 50.41,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "25800078dffd6ac2095626134cba6dc6b832d9f00fcd69aaab9dcfa02d90e2c4"
+  },
+  {
+    "id": "38-trilha",
+    "title": "Pandinha trilheiro",
+    "category": "Esportes",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: standing with a small sage hiking backpack, holding a wooden walking stick and folded blank cream map, peach boots.",
+    "file": "38-trilha.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 42.42,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "1ebbdd0a38cb12e01eae86885582f2f1bf2d5170b4d63979f00c12cca9c63171"
+  },
+  {
+    "id": "39-pilates",
+    "title": "Pandinha pilates",
+    "category": "Esportes",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: seated with knees bent holding a sage pilates ring upright between paws, small peach exercise mat, different from yoga pose.",
+    "file": "39-pilates.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 38.58,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "64846e9d4f9f8fc8f982683a777ac4af404a7fa88098010af40a70f1fdf76b94"
+  },
+  {
+    "id": "40-surf",
+    "title": "Pandinha surfista",
+    "category": "Esportes",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: standing hugging a tall peach surfboard with a simple cream and sage stripe, board fully visible beside panda, no water or scenery.",
+    "file": "40-surf.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 37.56,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "e9a64d205ee771acb7edc7429517a2d33a98ae0580e65beb5a811d96b85d3aa8"
+  },
+  {
+    "id": "41-formatura",
+    "title": "Pandinha formando",
+    "category": "Ocasiões",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: seated proudly holding a rolled cream diploma tied with peach ribbon, small warm-black graduation cap with peach tassel, ears visible.",
+    "file": "41-formatura.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 43.7,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "c09bbbe5e51b44dc0363a87ec0f695f6444a3ca2855a00eb221842f7fcb796b9"
+  },
+  {
+    "id": "42-aniversario",
+    "title": "Pandinha aniversário",
+    "category": "Ocasiões",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: holding a tiny cream birthday cake with peach icing and one unlit candle, small sage party hat, no confetti cloud.",
+    "file": "42-aniversario.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 47.6,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "201c66101ec9e6f351cf94b2dee7188ffc0de498deeea2dce43e91ebf5242290"
+  },
+  {
+    "id": "43-natal",
+    "title": "Pandinha Natal",
+    "category": "Ocasiões",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: seated hugging a kraft gift with peach satin bow, tiny peach and cream winter hat between ears, small sage holly sprig.",
+    "file": "43-natal.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 45.5,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "5f33de349f1a7b59edc014f8836e33ec27a3354c93db59fe4ef020a91ba83505"
+  },
+  {
+    "id": "44-pascoa",
+    "title": "Pandinha Páscoa",
+    "category": "Ocasiões",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: seated beside wicker basket containing three peach cream sage decorated eggs, holding one small egg with heart motif.",
+    "file": "44-pascoa.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 42.4,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "42f33feb00854462cb40a5a2fed65acda8d1095cd39e3cfe4129d481e01da81a"
+  },
+  {
+    "id": "45-padrinho",
+    "title": "Pandinha padrinho",
+    "category": "Ocasiões",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: wearing only a small sage bow tie, presenting an open cream keepsake box containing a peach heart, affectionate welcoming pose.",
+    "file": "45-padrinho.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 40.37,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "fcfc908d207a3c1f3b87b0e72bb12a7dc78da044081faa68691bca4e768b8b3b"
+  },
+  {
+    "id": "46-madrinha",
+    "title": "Pandinha madrinha",
+    "category": "Ocasiões",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: small peach satin bow beside one ear, seated holding a delicate cream gift pouch with sage ribbon and a peach heart charm.",
+    "file": "46-madrinha.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 42.35,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "65885e5a7479e836e10ba196881efa499f29207672ebc9b9523e97b1566070bd"
+  },
+  {
+    "id": "47-bebe",
+    "title": "Pandinha chegada do bebê",
+    "category": "Ocasiões",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: tenderly cradling a folded cream baby blanket with a tiny peach baby shoe pair resting on it; no other character, gentle wink.",
+    "file": "47-bebe.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 38.84,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "843e9cd57d7767b4d75008509c31e5102658da8dc3004ef1ddc44e411d1795c3"
+  },
+  {
+    "id": "48-casa-nova",
+    "title": "Pandinha casa nova",
+    "category": "Ocasiões",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: seated hugging a small cream cottage-shaped cushion with peach roof, holding one sage house key, warm celebratory expression.",
+    "file": "48-casa-nova.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 38.87,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "b1b807613133d4044010dee4d5e2ac4291ceefcf11ef55540acac53df3bf943a"
+  },
+  {
+    "id": "49-amizade",
+    "title": "Pandinha amizade",
+    "category": "Ocasiões",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: standing offering two linked peach and sage heart charms in its paws, no second panda, friendly slightly forward leaning gesture.",
+    "file": "49-amizade.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 50.07,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "89c4621b117ff440558b3e38fa023d4ef77d364e5be5a99de92eda3950e5e579"
+  },
+  {
+    "id": "50-obrigado",
+    "title": "Pandinha agradecimento",
+    "category": "Ocasiões",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: standing bowing head slightly with one paw over chest and other offering a small cream daisy, face remains visible.",
+    "file": "50-obrigado.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 47.87,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "02eb7da4d47f0fc4e475f5f906afc554c354822c45c3ec3dccefbc413f7b1a5b"
+  },
+  {
+    "id": "51-viajante",
+    "title": "Pandinha viajante",
+    "category": "Paixões",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: standing beside a sand suitcase with peach trim and sage handle, holding a blank cream passport, small peach travel pillow.",
+    "file": "51-viajante.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 35.73,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "1b0f0f08f3efd74622af2c80c2ada23b1c540fd76c77f71f20a5ad4d1d439d51"
+  },
+  {
+    "id": "52-acampamento",
+    "title": "Pandinha acampamento",
+    "category": "Paixões",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: seated in front of a small sage triangular camping tent, holding a peach lantern, tent compact and entire composition isolated.",
+    "file": "52-acampamento.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 46.28,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "b238f5178a412f1f1e90bcf4df2879291777b94959b30247068461a4f359a525"
+  },
+  {
+    "id": "53-cinema",
+    "title": "Pandinha cinema",
+    "category": "Paixões",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: seated hugging a cream popcorn bucket with peach vertical stripes, small sage film clapper beside feet without text.",
+    "file": "53-cinema.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 43.23,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "c8d19717f3dbbcb444d8e03e6dc28d79cceeb3b159b3b55235455e0fccd5050f"
+  },
+  {
+    "id": "54-gamer",
+    "title": "Pandinha gamer",
+    "category": "Paixões",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: seated holding a sage game controller with peach buttons, cream headphones resting around neck, joyful face unobscured.",
+    "file": "54-gamer.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 42.49,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "44947b520c734f316a5297d96e6d328d106dc3abc32cb3dee5a4d2857d73f040"
+  },
+  {
+    "id": "55-cartinha",
+    "title": "Pandinha com carinho",
+    "category": "Afeto",
+    "prompt": "Use case: illustration-story. Create a single new pose of the SAME Panda Mimo mascot shown in the identity reference. Match its giant cream head, tiny rounded warm-black body, asymmetrical black eye patches, left eye open glossy and right eye winking from viewer perspective, two little cream hair tufts, peach-pink ear centers, blushing cheeks and pink paw pads, small black nose and joyful mouth. Exact same polished softly shaded inflated sticker illustration finish; smooth, not furry, not photoreal, not flat clipart. Character stays recognizable across collection. ONE panda, complete body and props visible. Transparent PNG with actual alpha, no background or ground shadow, no checkerboard pixels. Clean natural antialiased edges. Leave 8% transparent margin on EVERY side; no object touches edge. Palette: warm black #171512, cream #F6F4EF, peach #FFB59C, sage #A8C5A2, sand #E7D8C3. Fine premium illustration for sublimation. No text, no logo, no watermark. Highest native resolution available. Different pose and composition suited to this specific theme: seated presenting an open cream envelope with a peach heart-shaped seal, a blank cream note peeking out, small sage ribbon curl.",
+    "file": "55-cartinha.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 38.76,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "4bde1a124cba13bdf501771ce04f7f7fd7fb9ad2fe30780399275e9af2124a38"
+  },
+  {
+    "id": "e01-laco",
+    "title": "Laço pêssego",
+    "category": "Elementos",
+    "prompt": "Create one standalone decorative illustration for Panda Mimo premium stationery and sublimation. Match the soft inflated rounded polished illustration finish and palette of the reference, but DO NOT include any panda or text or logo. Cream #F6F4EF peach #FFB59C sage #A8C5A2 sand #E7D8C3. Smooth exquisite shading and convincing details, soft satin highlights, no glitter, no scenery. Transparent PNG with actual alpha, no ground shadow or background, clean antialiased edges, ample transparent margins, complete subject. Highest native resolution. Subject: a single elegant peach satin bow, two balanced loops and two flowing ribbon tails",
+    "file": "e01-laco.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 43.7,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "eeb4601d2bba5de88ec07a8db0adb323295ce72c4db323c3e2d17e71a25902ae"
+  },
+  {
+    "id": "e02-coracao",
+    "title": "Coração botânico",
+    "category": "Elementos",
+    "prompt": "Create one standalone decorative illustration for Panda Mimo premium stationery and sublimation. Match the soft inflated rounded polished illustration finish and palette of the reference, but DO NOT include any panda or text or logo. Cream #F6F4EF peach #FFB59C sage #A8C5A2 sand #E7D8C3. Smooth exquisite shading and convincing details, soft satin highlights, no glitter, no scenery. Transparent PNG with actual alpha, no ground shadow or background, clean antialiased edges, ample transparent margins, complete subject. Highest native resolution. Subject: a single plump peach heart nestled in a small symmetric arrangement of sage leaves",
+    "file": "e02-coracao.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 56.27,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "01c252afaa823f2242845a5643ab56c028f2eaead46d54598e2cf7ded799db3b"
+  },
+  {
+    "id": "e03-margaridas",
+    "title": "Margaridas",
+    "category": "Elementos",
+    "prompt": "Create one standalone decorative illustration for Panda Mimo premium stationery and sublimation. Match the soft inflated rounded polished illustration finish and palette of the reference, but DO NOT include any panda or text or logo. Cream #F6F4EF peach #FFB59C sage #A8C5A2 sand #E7D8C3. Smooth exquisite shading and convincing details, soft satin highlights, no glitter, no scenery. Transparent PNG with actual alpha, no ground shadow or background, clean antialiased edges, ample transparent margins, complete subject. Highest native resolution. Subject: a graceful sprig of three cream daisies with peach centers and sage leaves",
+    "file": "e03-margaridas.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 45.94,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "35bbca8a6c6bd2e2d0551456231dfa36622e0d7ff0f141c30ed291abd7e6514b"
+  },
+  {
+    "id": "e04-presente",
+    "title": "Presente com carinho",
+    "category": "Elementos",
+    "prompt": "Create one standalone decorative illustration for Panda Mimo premium stationery and sublimation. Match the soft inflated rounded polished illustration finish and palette of the reference, but DO NOT include any panda or text or logo. Cream #F6F4EF peach #FFB59C sage #A8C5A2 sand #E7D8C3. Smooth exquisite shading and convincing details, soft satin highlights, no glitter, no scenery. Transparent PNG with actual alpha, no ground shadow or background, clean antialiased edges, ample transparent margins, complete subject. Highest native resolution. Subject: a single small sand kraft gift box tied with a luxurious peach satin bow and tiny sage leaf tag",
+    "file": "e04-presente.png",
+    "width": 1174,
+    "height": 1339,
+    "alpha_min": 0,
+    "alpha_max": 255,
+    "transparent_percent": 39.84,
+    "size_cm_300ppi": [
+      9.94,
+      11.34
+    ],
+    "sha256": "20316c544294b17be6bd689bf36a5918e8465bb892ee0cc4772ddb33730df6eb"
+  }
+]

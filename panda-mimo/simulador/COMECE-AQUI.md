@@ -3,7 +3,7 @@
 Documento de passagem do simulador de caneca da Panda Mimo. Quem chegar numa sessão nova lê este
 arquivo primeiro, depois `panda-mimo/MARCA.md` (o manual manda em cor, letra, mascote e tom de voz).
 
-Última atualização local: 22 de setembro de 2026. Os lotes e a revisão estão documentados em `LOTE-PRAZERES.md`, `LOTE-ATELIE.md` e `REVISAO-PAPELARIA.md`; ainda não foram publicados.
+Última atualização: 23 de setembro de 2026. Os lotes e a revisão estão documentados em `LOTE-PANDINHA-E-AQUARELA.md`, `LOTE-PRAZERES.md`, `LOTE-ATELIE.md` e `REVISAO-PAPELARIA.md`.
 
 ---
 
@@ -42,11 +42,14 @@ Três armadilhas que já custaram tempo:
 |---|---|
 | `caneca-3d.html` | A página: prévia à esquerda, painel da arte em abas à direita |
 | `simulador/estudio.js` | Liga tudo: abas, cartões, gestos, histórico, salvar, WhatsApp, Canva |
-| `simulador/modelos.js` | A arte em camadas: catálogo de 138 modelos e desenho em milímetros |
+| `simulador/modelos.js` | A arte em camadas: catálogo de 199 modelos e desenho em milímetros |
+| `simulador/pandinha-temas.js` | Com o Pandinha: 55 poses (ocasiões, profissões, saúde, esporte, paixões), uma arte para cada, e 4 adesivos do acervo |
+| `simulador/aquarelas.js` | Aquarela: 6 ilustrações em aquarela e uma arte para cada |
+| `simulador/imagens-do-acervo.js` | **Gerado**: o tamanho de cada imagem do acervo, para a caixa e o limite de 300 dpi |
 | `simulador/hobbies.js` e `hobbies-desenhos.js` | Pequenos Prazeres: 24 modelos e 12 ilustrações vetoriais |
 | `simulador/atelie.js` | Lote Ateliê: 12 modelos e oito novas ilustrações vetoriais |
 | `simulador/paleta.js` | A paleta da marca num lugar só; todo desenho pede cor por token |
-| `simulador/camadas.js` | Os atalhos para escrever uma camada: `foto`, `fotoRedonda`, `frase`, `ilustra`, `panda` |
+| `simulador/camadas.js` | Os atalhos para escrever uma camada: `foto`, `fotoRedonda`, `frase`, `ilustra`, `panda`, `elemento` |
 | `simulador/colecoes.js` | O balcão das coleções: junta categorias, modelos e ilustrações |
 | `simulador/nomes-de-ilustracao.js` | O nome que o cliente lê na camada de cada desenho |
 | `simulador/ilustracoes-refinadas.js` | As 67 matrizes de papelaria; gerado, não se edita à mão |
@@ -65,6 +68,8 @@ Três armadilhas que já custaram tempo:
 | `simulador/estudio.css` | Estilo do estúdio, sobre os tokens de `styles.css` |
 | `qa/audit.mjs` | Guardião: site inteiro + estúdio de ponta a ponta |
 | `qa/*-unit.test.mjs` | Testes unitários da arte e dos modelos |
+| `qa/artes-aprovadas-unit.test.mjs` | A impressão digital das 138 artes aprovadas até 22/09: mexer no motor não pode mover um traço delas |
+| `qa/imagens-unit.test.mjs` | As imagens do acervo: tabela certa, 300 dpi no tamanho máximo, caixa que abraça o desenho |
 | `qa/provas.mjs` | Gera as artes dos modelos para revisão visual, em `qa/shots` |
 | `qa/provas-colecoes.html` | Catálogo das artes das coleções, com filtro por coleção e assunto |
 
@@ -88,9 +93,11 @@ Três armadilhas que já custaram tempo:
 interior e da alça, quatro cenas (fundo claro, mesa de madeira, mesa clara, caixa de presente kraft),
 acabamento brilhante ou fosco, vídeo de cinco segundos girando em WebM, prévia em PNG e em 4K.
 
-**Arte.** 138 modelos em 37 categorias, agrupadas em nove grupos com ordem decidida à mão
+**Arte.** 199 modelos em 43 categorias, agrupadas em onze grupos com ordem decidida à mão
 (`ORDEM_DOS_GRUPOS` em `modelos.js`) e busca. Cada assunto tem pelo menos quatro artes, com teste. Camadas de foto, frase, enfeite (9 desenhos),
-elemento do acervo (8 ilustrações da marca) e Pandinha (9 poses, um por peça). Biblioteca de 15 letras.
+elemento do acervo (12 da marca e 6 aquarelas) e Pandinha (64 poses, quantos a pessoa quiser —
+a regra de um por caneca caiu em 23/09/2026). Imagem do acervo nunca cresce a ponto de imprimir abaixo
+de 300 dpi, e a caixa dela segue a proporção do arquivo (manual 9.1, "Imagem na arte"). Biblioteca de 15 letras.
 Cores da paleta. Frase em arco.
 Cinco coleções acrescentam ilustração própria, que entra na arte como camada comum e pinta só por
 token: datas comemorativas (24), bebê e maternidade (13), convites e agradecimentos (14),

@@ -19,7 +19,10 @@ import { pesoDaFonte } from './fontes.js';
 import { cor } from './paleta.js';
 import { foto, frase, panda } from './camadas.js';
 import { acabamentoPapelaria } from './acabamento.js';
-import { CATEGORIAS_DE_COLECAO, MODELOS_DE_COLECAO, proporcaoDaForma, desenhaIlustracaoDeColecao } from './colecoes.js';
+import {
+  CATEGORIAS_DE_COLECAO, MODELOS_DE_COLECAO, POSES_DE_COLECAO, ELEMENTOS_DE_COLECAO, proporcaoDaForma, desenhaIlustracaoDeColecao,
+} from './colecoes.js';
+import { IMAGENS_DO_ACERVO } from './imagens-do-acervo.js';
 
 const VOLTA_MM = Math.PI * 82, AREA_MM = 210;
 export const FRENTE = (0.25 * VOLTA_MM - (VOLTA_MM - AREA_MM) / 2) / AREA_MM;
@@ -81,6 +84,8 @@ export const ORDEM_DOS_GRUPOS = Object.freeze([
   'Esportes e movimento',
   'Profissões e vocações',
   'Hobbies e paixões',
+  'Com o Pandinha',
+  'Aquarela',
   'Do dia a dia',
 ]);
 
@@ -209,18 +214,23 @@ export function desenhaForma(ctx, forma, tamanho, tinta) {
 
 /**
  * Elementos do acervo da marca que entram na arte de quem monta: são as mesmas ilustrações do
- * site, com fundo transparente (manual 9). Nenhum deles tem texto ou logo: o que leva palavra
- * é composto no editor, com as letras da biblioteca.
+ * site, com fundo transparente (manual 9), e as aquarelas das coleções. Nenhum deles tem texto ou
+ * logo: o que leva palavra é composto no editor, com as letras da biblioteca. O `grupo` é o título
+ * que cada leva ganha na grade do estúdio.
  */
 export const ELEMENTOS = Object.freeze([
-  { arquivo: 'assets/coracao-costura.webp', nome: 'Coração de costura' },
-  { arquivo: 'assets/laco.webp', nome: 'Laço' },
-  { arquivo: 'assets/flor-nitida.webp', nome: 'Margarida' },
-  { arquivo: 'assets/folha.webp', nome: 'Folhinha' },
-  { arquivo: 'assets/pata-rosa.webp', nome: 'Patinha rosa' },
-  { arquivo: 'assets/pata-preta.webp', nome: 'Patinha preta' },
-  { arquivo: 'assets/sino.webp', nome: 'Sininho' },
-  { arquivo: 'assets/ic-presente.webp', nome: 'Presente' },
+  ...[
+    { arquivo: 'assets/coracao-costura.webp', nome: 'Coração de costura' },
+    { arquivo: 'assets/laco.webp', nome: 'Laço' },
+    // A de 512 px: a de 256 só podia crescer até 2 cm sem perder os 300 dpi.
+    { arquivo: 'assets/flor-nitida@2x.webp', nome: 'Margarida' },
+    { arquivo: 'assets/folha.webp', nome: 'Folhinha' },
+    { arquivo: 'assets/pata-rosa.webp', nome: 'Patinha rosa' },
+    { arquivo: 'assets/pata-preta.webp', nome: 'Patinha preta' },
+    { arquivo: 'assets/sino.webp', nome: 'Sininho' },
+    { arquivo: 'assets/ic-presente.webp', nome: 'Presente' },
+  ].map((item) => ({ ...item, grupo: 'Do acervo da Panda Mimo' })),
+  ...ELEMENTOS_DE_COLECAO,
 ]);
 
 /** Tratamentos de foto: o mesmo filtro vale na prévia e no arquivo de impressão. */
@@ -237,20 +247,60 @@ export const FILTROS = Object.freeze([
 const filtroCss = (valor) => FILTROS.find((f) => f.valor === valor)?.css || 'none';
 
 /**
- * Poses do Pandinha adesivo já aprovadas no acervo (manual 6.3). O 3D de cena (6.5) não entra
- * em peça de cliente, e vale sempre um Pandinha por caneca (6.4).
+ * Poses do Pandinha adesivo aprovadas no acervo (manual 6.3), inclusive as de profissões e paixões.
+ * O 3D de cena (6.5) não entra em peça de cliente. Quantos Pandinhas vão numa caneca é escolha de
+ * quem monta: o limite de um por peça caiu por decisão do dono em 23/09/2026 (manual 6.2).
  */
 export const ADESIVOS = Object.freeze([
-  { arquivo: 'assets/panda-coracao.webp', nome: 'Abraçando um coração' },
-  { arquivo: 'assets/panda-joinha.webp', nome: 'Fazendo joinha' },
-  { arquivo: 'assets/panda-presente.webp', nome: 'Com um presente' },
-  { arquivo: 'assets/panda-presente-2.webp', nome: 'Abrindo o presente' },
-  { arquivo: 'assets/panda-caixa.webp', nome: 'Dentro da caixa' },
-  { arquivo: 'assets/panda-carrinho.webp', nome: 'No carrinho' },
-  { arquivo: 'assets/panda-copo.webp', nome: 'Com o copo' },
-  { arquivo: 'assets/panda-dormindo.webp', nome: 'Dormindo' },
-  { arquivo: 'assets/panda-carinha.webp', nome: 'Só a carinha' },
+  ...[
+    { arquivo: 'assets/panda-coracao.webp', nome: 'Abraçando um coração' },
+    { arquivo: 'assets/panda-joinha.webp', nome: 'Fazendo joinha' },
+    { arquivo: 'assets/panda-presente.webp', nome: 'Com um presente' },
+    { arquivo: 'assets/panda-presente-2.webp', nome: 'Abrindo o presente' },
+    { arquivo: 'assets/panda-caixa.webp', nome: 'Dentro da caixa' },
+    { arquivo: 'assets/panda-carrinho.webp', nome: 'No carrinho' },
+    { arquivo: 'assets/panda-copo.webp', nome: 'Com o copo' },
+    { arquivo: 'assets/panda-dormindo.webp', nome: 'Dormindo' },
+    { arquivo: 'assets/panda-carinha.webp', nome: 'Só a carinha' },
+  ].map((item) => ({ ...item, grupo: 'Do dia a dia' })),
+  ...POSES_DE_COLECAO,
 ]);
+
+/** As nove poses de sempre, as que já estavam nos modelos antes das poses temáticas. */
+const POSES_DE_SEMPRE = new Set(ADESIVOS.filter((a) => a.grupo === 'Do dia a dia').map((a) => a.arquivo));
+
+/*
+  O que o estúdio sabe de cada imagem do acervo antes de ela chegar: a tabela é gerada a partir
+  dos arquivos (`marca/kit/prepara-imagens-do-estudio.py`) e conferida contra eles por teste.
+*/
+const MARGEM_MM = 5;          // a folga de segurança da produção, a mesma da vista aberta
+const DPI_MINIMO = 300;
+// 2% de tolerância: 294 dpi não se distingue de 300 na sublimação, e é o que deixa o teto da pose
+// "Abrindo o presente" (628 px de largura) onde sempre esteve.
+const TOLERANCIA_DO_DPI = 0.98;
+
+/** Quanto a imagem é mais alta que larga; `null` quando o arquivo não é do acervo. */
+export function proporcaoDaImagem(arquivo) {
+  const info = IMAGENS_DO_ACERVO[arquivo];
+  return info ? info.altura / info.largura : null;
+}
+
+/** A versão leve da imagem, para miniatura e grade. Sem versão leve, o próprio arquivo. */
+export const miniaturaDaImagem = (arquivo) => IMAGENS_DO_ACERVO[arquivo]?.mini || arquivo;
+
+/**
+ * Até onde uma imagem do acervo pode crescer, em fração da altura da área (é a largura dela):
+ * nunca a ponto de a impressão cair abaixo de 300 dpi, nem de passar da margem de segurança em
+ * altura. `teto` é o limite do tipo de camada; a imagem só aperta, nunca afrouxa.
+ */
+export function limiteDaImagem(arquivo, teto, alturaDaAreaMm = 90) {
+  const info = IMAGENS_DO_ACERVO[arquivo];
+  if (!info) return teto;
+  const porDpi = (info.largura / (DPI_MINIMO * TOLERANCIA_DO_DPI)) * 25.4 / alturaDaAreaMm;
+  const porAltura = ((alturaDaAreaMm - 2 * MARGEM_MM) / alturaDaAreaMm) / (info.altura / info.largura);
+  // Para baixo, sempre: arredondar para cima deixaria a imagem 0,01 mm além da margem.
+  return [teto[0], Math.floor(Math.min(teto[1], porDpi, porAltura) * 1000) / 1000];
+}
 
 /** Sorteio sempre igual para o mesmo modelo: a arte nunca muda entre a prévia e o arquivo final. */
 function sorteio(semente) {
@@ -456,8 +506,14 @@ const MODELOS = [
 
 export const TEMPLATES = Object.freeze([...MODELOS.map(acabamentoPapelaria), ...MODELOS_DE_COLECAO].map((m) => Object.freeze({ ...m, camadas: Object.freeze(m.camadas) })));
 export const modeloPorId = (id) => TEMPLATES.find((m) => m.id === id) || null;
+/**
+ * Os modelos de um assunto. Um modelo mora numa categoria e pode aparecer também em outras
+ * (`tambemEm`): o Pandinha ciclista é da coleção do Pandinha e aparece em Ciclismo, onde quem
+ * procura por ciclismo vai olhar. Em "todos", cada modelo aparece uma vez só.
+ */
 export const modelosDaCategoria = (categoria) =>
-  (!categoria || categoria === 'todos' ? TEMPLATES : TEMPLATES.filter((m) => m.categoria === categoria));
+  (!categoria || categoria === 'todos' ? TEMPLATES
+    : TEMPLATES.filter((m) => m.categoria === categoria || (m.tambemEm || []).includes(categoria)));
 
 const clone = (valor) => (typeof structuredClone === 'function' ? structuredClone(valor) : JSON.parse(JSON.stringify(valor)));
 
@@ -501,8 +557,11 @@ export function caixaDaCamada(camada, printArea, medidor) {
     }
   } else {
     largura = camada.tamanho * printArea.height;
-    // Ilustração de coleção não é quadrada: a caixa acompanha a proporção do desenho.
-    const proporcao = camada.tipo === 'enfeite' ? proporcaoDaForma(camada.forma) : null;
+    // Nem ilustração de coleção nem imagem do acervo são quadradas: a caixa acompanha a proporção
+    // do desenho, senão a alça fica no vazio ou por cima dele. A imagem é desenhada pela largura e
+    // pelo centro, então só a caixa muda — o desenho sai igual.
+    const proporcao = camada.tipo === 'enfeite' ? proporcaoDaForma(camada.forma)
+      : (camada.tipo === 'adesivo' || camada.tipo === 'elemento') ? proporcaoDaImagem(camada.arquivo) : null;
     altura = proporcao ? largura * proporcao : largura;
   }
   return { x: centroX - largura / 2, y: centroY - altura / 2, width: largura, height: altura, centroX, centroY };
@@ -727,7 +786,11 @@ export function desenhaArte(ctx, arte, printArea, dados = {}) {
   // Enfeites do fundo: sempre no mesmo lugar, longe das fotos e das frases.
   const conf = arte.enfeites;
   if (conf?.quantidade) {
-    const reservados = caixas.map((item) => item.caixa);
+    // O confete desvia da caixa de cada camada. As nove poses de sempre do Pandinha reservam o
+    // quadrado que reservavam antes de a caixa passar a seguir a imagem (23/09/2026): com a caixa
+    // verdadeira, o confete de um modelo já aprovado ("amizade-formatura") mudava de lugar.
+    const reservados = caixas.map(({ camada, caixa }) => (camada.tipo === 'adesivo' && POSES_DE_SEMPRE.has(camada.arquivo)
+      ? { ...caixa, y: caixa.centroY - caixa.width / 2, height: caixa.width } : caixa));
     const aleatorio = sorteio(arte.semente || 1);
     const folga = 1.5;
     for (let i = 0, postos = 0; i < conf.quantidade * 6 && postos < conf.quantidade; i += 1) {

@@ -21,7 +21,7 @@ h2{font-size:20px;margin:0 0 4px}canvas{width:100%;height:auto}small{color:var(-
   <p>Cada arte aqui é desenhada pelo mesmo motor do estúdio, na medida de uso (21 × 9 cm). Serve para
      a revisão humana antes de publicar: o guardião confere regra, não gosto.</p>
   <div class="filtros">
-    <div><label for="lote">Lote</label><select id="lote"><option value="todos">Todos os modelos</option><option value="atelie">Ateliê · 12 modelos</option><option value="prazeres">Pequenos Prazeres · 24 modelos</option></select></div>
+    <div><label for="lote">Lote</label><select id="lote"><option value="todos">Todos os modelos</option><option value="atelie">Ateliê · 12 modelos</option><option value="prazeres">Pequenos Prazeres · 24 modelos</option><option value="pandinha">Com o Pandinha · 20 modelos</option><option value="aquarela">Aquarela · 6 modelos</option></select></div>
     <div><label for="grupo">Coleção</label><select id="grupo"><option value="todos">Todas as coleções</option></select></div>
     <div><label for="categoria">Assunto</label><select id="categoria"><option value="todos">Todos os assuntos</option></select></div>
   </div>
@@ -38,7 +38,7 @@ await Promise.all(['600 14px Fredoka', '600 14px Nunito', '600 14px Caveat'].map
 const elGrupo = document.getElementById('grupo');
 const elLote = document.getElementById('lote');
 const lotePedido = new URLSearchParams(location.search).get('lote');
-elLote.value = ['atelie','prazeres'].includes(lotePedido) ? lotePedido : 'todos';
+elLote.value = ['atelie','prazeres','pandinha','aquarela'].includes(lotePedido) ? lotePedido : 'todos';
 const modelosDoLote = () => TEMPLATES.filter(m => elLote.value === 'todos' || m.id.startsWith(`${elLote.value}-`));
 const elCategoria = document.getElementById('categoria');
 const lista = document.getElementById('modelos');
@@ -46,6 +46,20 @@ const conta = document.getElementById('conta');
 const todasAsCategorias = [...new Map([...CATEGORIAS_DE_COLECAO, ...CATEGORIAS].map(c => [c.id, c])).values()];
 const categoria = (id) => todasAsCategorias.find((c) => c.id === id) || null;
 const nomeDaCategoria = (id) => categoria(id)?.nome || id;
+
+/*
+  As imagens do acervo (Pandinha e aquarelas) fazem parte da arte: sem elas a prova mostrava os
+  modelos sem o Pandinha e as artes das coleções de imagem sem o protagonista. A página desenha
+  logo e redesenha quando as imagens chegam; `data-pronto` avisa o guardião que acabou.
+*/
+const imagens = {};
+const arquivosDasArtes = [...new Set(TEMPLATES.flatMap((m) => m.camadas.filter((c) => c.arquivo).map((c) => c.arquivo)))];
+const imagensProntas = Promise.all(arquivosDasArtes.map((arquivo) => new Promise((pronto) => {
+  const imagem = new Image();
+  imagem.onload = () => { imagens[arquivo] = imagem; pronto(); };
+  imagem.onerror = pronto;
+  imagem.src = `../${arquivo}`;
+})));
 
 const grupoDosModelos = new Set(TEMPLATES.map((m) => categoria(m.categoria)?.grupo).filter(Boolean));
 for (const nome of grupoDosModelos) {
@@ -79,7 +93,7 @@ function desenha() {
     canvas.setAttribute('aria-label', `${m.nome} — arte aberta`);
     const ctx = canvas.getContext('2d');
     ctx.scale(6, 6);
-    desenhaArte(ctx, novaArte(m), { x: 0, y: 0, width: 210, height: 90 });
+    desenhaArte(ctx, novaArte(m), { x: 0, y: 0, width: 210, height: 90 }, { imagens });
     cartao.append(titulo, legenda, canvas);
     lista.append(cartao);
   }
@@ -90,5 +104,6 @@ elLote.addEventListener('change', () => { elGrupo.value = 'todos'; montaCategori
 elCategoria.addEventListener('change', desenha);
 montaCategorias();
 desenha();
+imagensProntas.then(() => { desenha(); document.body.dataset.pronto = '1'; });
 </script>
 </html>
