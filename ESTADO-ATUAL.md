@@ -18,32 +18,44 @@ Frente aberta, o que ficou pronto e o que vem a seguir. Atualizado em 21 de sete
 
 ---
 
-## Onde estamos
+## Onde estamos (fim de 23/09/2026)
 
-**Frente:** estúdio da caneca em 360° da Panda Mimo (`panda-mimo/caneca-3d.html`) e as **coleções de
-arte** que enchem o catálogo de modelos.
+**Frente:** o estúdio da caneca em 360° da Panda Mimo. O dono o considerou "perfeito" em 23/09/2026 —
+é a base a preservar. Ele mora em dois lugares com uma marcação só:
 
-**Publicado em 21/09/2026**, com o estúdio no ar pela primeira vez:
-<https://reinaldo3010.github.io/Claude-desk/caneca-3d.html>
+- na seção **Monte seu mimo** da página inicial (<https://reinaldo3010.github.io/Claude-desk/#monte>),
+  no lugar do simulador de desenho, que saiu; a home busca o `.studio-layout` de `caneca-3d.html` e
+  carrega o estúdio quando a seção se aproxima (`carregaEstudio()` em `script.js`);
+- em `caneca-3d.html`, que continua no ar para os links de montagem e as páginas de fora.
+
+**Próximo passo que o dono anunciou:** fazer o estúdio crescer para **garrafas, ecobags e outras
+peças**. Ver "O que vem a seguir", item 1.
+
+**Publicado em 23/09/2026** (merge `341c9e4`, mais o `5cdbea0` só de documentação), conferido no ar
+com navegador de verdade em 1280 e 390 px. O registro do fim da sessão (este arquivo, `COMECE-AQUI.md` e
+`LICOES-APRENDIDAS.md`) ficou num commit só de documentação na `main` daqui, sem push: sobe junto com a
+próxima publicação.
 
 **O caminho até o ar tem três pernas**, e a do meio costuma ser esquecida:
 
 1. este repositório (`Downloads/imagens site panda mimo/Claude-desk-simulador`), onde o trabalho é
-   feito e mesclado na `main`;
+   feito num ramo e mesclado na `main`;
 2. o repositório do dono (`OneDrive - MINGARDI & ELIAS/Área de Trabalho/Claude-desk`), que é o
    `origin` daqui. Como ele está com a `main` aberta, não dá para empurrar direto: de lá se puxa,
    com `git pull --ff-only <caminho deste repositório> main`;
-3. o GitHub (`reinaldo3010/Claude-desk`). O `git push origin main` de lá dispara o workflow
-   "Panda Mimo · publicar no GitHub Pages". Leva uns cinco minutos para o ar.
+3. o GitHub (`reinaldo3010/Claude-desk`). O `git push origin main` de lá dispara o "guardião de
+   qualidade" e o "publicar no GitHub Pages". Leva **uns 15 minutos** para o ar (o guardião roda lá
+   antes de publicar). Conferir pela API pública, sem `gh`:
+   `curl -s "https://api.github.com/repos/reinaldo3010/Claude-desk/actions/runs?per_page=6"`.
 
-**Antes de publicar de novo:** o WhatsApp do site ainda é o número de reserva (`5500000000000`), em
-`script.js`. Quem clicar em "fazer o pedido" no estúdio não chega em ninguém.
+**Número de WhatsApp:** o site ainda usa o de reserva (`5500000000000`, em `script.js`). É decisão do
+dono esperar; o guardião avisa sem bloquear. Enquanto isso, o pedido do estúdio não chega em ninguém.
 
 ## O catálogo hoje
 
-138 modelos, em nove grupos no seletor (a ordem é escrita à mão em `ORDEM_DOS_GRUPOS`):
+199 modelos, 42 ocasiões em onze grupos (a ordem é escrita à mão em `ORDEM_DOS_GRUPOS`):
 
-| Grupo | Assuntos | Artes |
+| Grupo | Ocasiões | Artes |
 |---|---|---|
 | Datas comemorativas | Natal, Mães, Pais, Namorados, Professores, Páscoa | 24 |
 | Momentos | Aniversário, Amizade e formatura, Casa nova | 7 |
@@ -51,71 +63,82 @@ arte** que enchem o catálogo de modelos.
 | Convites e agradecimentos | Padrinhos de casamento, Padrinhos de batismo, Madrinhas e daminhas, Agradecimento | 17 |
 | Pets e bichinhos | Várias fotos, Cachorros, Gatos, Homenagem, Mãe e pai de pet | 17 |
 | Esportes e movimento | funcional, musculação, ciclismo, corrida, yoga e pilates, futebol | 26 |
-| Profissões e vocações | Profissões e vocações (uma categoria só, por enquanto) | 4 |
+| Profissões e vocações | Profissões e vocações (uma ocasião só, por enquanto) | 4 |
 | Hobbies e paixões | Leitura, Café, Música, Jardinagem, Viagens, Culinária | 24 |
+| Com o Pandinha | ocasiões, profissões, saúde, esporte, paixões (imagens do acervo) | 55 |
+| Aquarela | Aquarelas delicadas (imagens do acervo) | 6 |
 | Do dia a dia | Só fotos | 3 |
 
-As ilustrações foram refeitas em setembro de 2026 com acabamento de papelaria (contorno suave,
-preenchimento em camadas, Nunito no lugar de Fredoka, metade do confete). O antes e depois dos 67
-desenhos está em `panda-mimo/qa/revisao-papelaria.html`.
-
-Cada assunto tem pelo menos quatro artes, e o teste cobra. As exceções ficam numa lista à vista
-(`AINDA_MAGROS` em `qa/colecoes-unit.test.mjs`): hoje só Aniversário e Amizade e formatura.
+Artes do Pandinha e das aquarelas aparecem também nas ocasiões que já existiam (`tambemEm`). Cada
+ocasião tem pelo menos quatro artes, e o teste cobra; as exceções ficam à vista (`AINDA_MAGROS` em
+`qa/colecoes-unit.test.mjs`): hoje só Aniversário. As 138 artes aprovadas até 22/09 saem idênticas
+pixel a pixel (`qa/artes-aprovadas-unit.test.mjs`).
 
 ## Como está a qualidade
 
-- 41 testes unitários (`npm run test:arte`), verdes.
-- Guardião funcional em 390 e 1280 px, verde, cobrindo o site, o estúdio de ponta a ponta, as duas
-  coleções e a página de provas.
-- Nitidez em sete combinações de tela e densidade, verde. axe-core sem violação.
-- Um aviso que não bloqueia e é decisão do dono: o WhatsApp do site ainda é o número de reserva.
+- 49 testes unitários (`npm run test:arte`), verdes.
+- Guardião completo em 14 resoluções, verde (uns 11 minutos, `npm test`), com nitidez em sete
+  combinações de tela e densidade e axe-core sem violação.
+- **O guardião roda por bloco:** `QA_SO=<bloco> QA_VIEWPORTS=1280 node qa/audit.mjs` leva de 20 s a
+  2 min. Blocos: `site`, `cabecalho`, `conversao`, `conteudo`, `nitidez`, `medicao`, `banco`,
+  `painel`, `paginas`, `estudio`, `sobreposicao`, `layout`, `arte-maior`, `toque`, `passo`, `peca`,
+  `peca-a-vista`, `cardapio`, `minha-arte`, `miniaturas`, `camera`, `provas`, `estudio-no-site`.
+  No trabalho, só os blocos que a mudança toca; o guardião inteiro uma vez, antes de publicar.
+- **Prova de defeito** numa pasta sobreposta, nunca no arquivo do site:
+  `QA_SOBREPOR=<pasta> QA_SO=<bloco> QA_VIEWPORTS=1280 node qa/audit.mjs`.
+- Um aviso que não bloqueia e é decisão do dono: o WhatsApp de reserva.
 
 ## Como fazer uma coleção nova
 
 Está escrito com detalhe em `panda-mimo/simulador/COMECE-AQUI.md`, seção 7. O resumo:
 `simulador/pets.js` é o molde — ilustrações em cima (no vocabulário de `desenho.js`, que mede e
 centra sozinho), modelos embaixo (com os atalhos de `camadas.js`), e três linhas em
-`simulador/colecoes.js` para registrar. Depois: olhar as provas em `qa/provas-colecoes.html` e rodar
+`simulador/colecoes.js` para registrar. Imagem do acervo segue
+`simulador/LOTE-PANDINHA-E-AQUARELA.md`. Depois: olhar as provas em `qa/provas-colecoes.html` e rodar
 `npm run test:arte`.
 
 ## O que vem a seguir
 
-### 1. Mais coleções (a lista que o dono aprovou)
+### 1. O estúdio para outras peças (o próximo passo do dono)
+
+Garrafas, ecobags e outras peças no mesmo estúdio. O que existe hoje é de caneca, e é por onde começar:
+`MUG_SPEC` e o modelo 3D em `simulador/caneca-3d.js` (caneca reta de 325 ml, área de 210 × 90 mm), a
+área de impressão que `arte.js` e `modelos.js` usam em milímetros, as cores da cerâmica (`CERAMICA` em
+`estudio.js`) e a mensagem do pedido ("Caneca reta de 325 ml"). Com a peça nova, voltar a mostrar o
+"Ver com meu nome" no detalhe dela (`baseDoProduto` em `script.js`, hoje só `caneca`) e rever o texto da
+seção Monte seu mimo, que hoje fala só de caneca. Garrafa e copo ficaram sem montagem no site desde que
+o simulador de desenho saiu (decisão do dono, 23/09/2026); a quantidade (1 a 500), que ele levava na
+mensagem, também não existe no estúdio (sugerido um campo; sem resposta).
+
+### 2. Mais coleções (a lista que o dono aprovou)
 
 Em ordem de valor, na minha leitura — o dono decide a ordem de verdade:
 
 | Coleção | Assuntos | Situação |
 |---|---|---|
-| Profissões e vocações | professor, enfermagem, medicina, direito, veterinária, engenharia, quem empreende | não existe |
+| Profissões e vocações | professor, enfermagem, medicina, direito, veterinária, engenharia, quem empreende | um balde só: 4 artes próprias; a ocasião mostra 21, contando as do Pandinha que aparecem ali também |
 | Pessoas especiais | amiga, casal, mãe, pai, avós, irmãos, filhos, colegas | não existe |
-| Celebrações e novas fases | noivado, formatura, aposentadoria | Aniversário com 1 arte; Casa nova já tem 4 |
+| Celebrações e novas fases | noivado, formatura, aposentadoria | Aniversário com 2 artes; Casa nova com 6 |
 | Humor e personalidade | frases engraçadas, signo, jeito de ser, piada entre amigos | não existe |
 | Fé e espiritualidade | frases de fé, celebrações, símbolos | não existe |
 | Empresas e equipes | boas-vindas, reconhecimento, evento, brinde, conquista | não existe |
-
-Prontas: datas comemorativas, bebê e maternidade, convites e agradecimentos, pets, esportes,
-hobbies e paixões. **Profissões e vocações** existe mas é um balde só, com quatro artes: a lista
-aprovada pedia professor, enfermagem, medicina, direito, veterinária, engenharia e quem empreende
-como assuntos separados.
 
 **Três pontas da revisão de papelaria ficaram em aberto** (detalhe em
 `panda-mimo/simulador/CONSERTOS-22-09.md`): 12 ilustrações não têm nenhum traço a 3:1 contra a
 cerâmica clara e precisam de prova física antes de mexer no traço; a coleção esportiva é a única que
 ainda usa Fredoka; e "Profissões e vocações" precisa virar assuntos de verdade.
 
-Uma ideia registrada e ainda não feita: **uma arte pode aparecer em mais de um caminho** (a caneca da
-amiga ciclista podia estar em Esportes → Ciclismo *e* em Pessoas especiais → Amigas). Hoje cada arte
-tem uma categoria só. Vale quando o catálogo crescer mais.
+### 3. Pendências que dependem do dono
 
-### 2. Pendências que dependem do dono
-
-1. **Tipos de caneca e cores da peça.** Depende da lista real do fornecedor: quais peças existem
+1. **Trocar o número do WhatsApp** pelo real, no painel ou em `script.js`, e republicar.
+2. **Tipos de caneca e cores da peça.** Depende da lista real do fornecedor: quais peças existem
    (mágica, cônica, alça de coração, 15 oz) e a área de impressão de cada uma.
-2. **Decidir a cena "caixa de presente".** Foi refeita; o dono quer olhar antes de manter.
-3. **Trocar o número do WhatsApp** pelo real, no painel ou em `script.js`.
-4. **Republicar** depois de trocar o WhatsApp: o caminho das três pernas está no começo deste arquivo.
+3. **A cena "caixa de presente".** Foi refeita; o dono quer olhar antes de manter.
+4. **Vetorizar as 55 poses do Pandinha para o kit** (uns 190 MB no preset que passa na qualidade).
+5. **O lugar dos grupos novos no seletor** (Com o Pandinha e Aquarela estão perto do fim) e **o teto de
+   tamanho do Pandinha** (54 mm, pelo piso de 300 dpi).
 
-### 3. Ideias recusadas de propósito
+### 4. Ideias recusadas de propósito
 
 Não voltar a elas sem decisão nova: extrator de arte de terceiros por inteligência artificial, loja
 com checkout embutido, biblioteca de milhares de cliparts genéricos, mapas e fase da lua, e arte
@@ -124,8 +147,11 @@ gerada por inteligência artificial na peça.
 ## Por onde começar depois da compactação
 
 1. `panda-mimo/simulador/COMECE-AQUI.md` — o que é, como rodar, como a arte funciona, como nasce uma
-   coleção.
-2. `panda-mimo/simulador/LICOES-APRENDIDAS.md` — as armadilhas que já custaram tempo.
-3. `panda-mimo/MARCA.md` — o manual; manda em cor, letra, mascote e tom de voz. A seção 9.1 é a das
-   ilustrações de coleção. O histórico no fim conta o que mudou e por quê.
-4. Este arquivo, para o estado da frente.
+   coleção, e onde o estúdio mora (nas duas páginas).
+2. `panda-mimo/simulador/LICOES-APRENDIDAS.md` — as armadilhas que já custaram tempo, inclusive as do
+   processo (guardião por bloco, prova de defeito em pasta sobreposta, aba do navegador compartilhada).
+3. `panda-mimo/simulador/REDESENHO-LEVE.md` e `MINHA-ARTE-EM-CAMADAS.md` — o desenho de 23/09/2026 e
+   por que cada escolha foi feita.
+4. `panda-mimo/MARCA.md` — o manual; manda em cor, letra, mascote e tom de voz. O histórico no fim
+   conta o que mudou e por quê (a última versão é a 2.20).
+5. Este arquivo, para o estado da frente.

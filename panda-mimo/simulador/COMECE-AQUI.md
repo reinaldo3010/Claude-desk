@@ -29,7 +29,7 @@ anexada, que é o fluxo de venda da casa.
 cd panda-mimo
 npm install                 # só na primeira vez
 npm run servir              # abre em http://127.0.0.1:8765 (o estúdio está na página inicial, em #monte, e em /caneca-3d.html)
-npm test                    # testes unitários + guardião + nitidez (uns 25 min; antes de publicar)
+npm test                    # testes unitários + guardião + nitidez (uns 11 min; antes de publicar)
 QA_VIEWPORTS=390,1280 npm test   # a passada rápida, a mesma do GitHub Actions
 QA_SO=cardapio,minha-arte QA_VIEWPORTS=1280 node qa/audit.mjs   # só esses blocos (segundos a 2 min)
 npm run test:arte           # só os testes unitários (segundos)

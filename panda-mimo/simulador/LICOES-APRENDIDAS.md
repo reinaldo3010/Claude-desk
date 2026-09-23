@@ -165,7 +165,7 @@ repetir. Companheiro de `COMECE-AQUI.md`.
   recarregar, o navegador devolve a rolagem de antes e o clique cai em outro botão (um "Baixar prévia"
   saiu assim).
 - **O guardião roda por bloco.** `QA_SO=minha-arte QA_VIEWPORTS=1280 node qa/audit.mjs` leva 33 s; o
-  guardião inteiro, uns 25 minutos. Numa tarde, 13 provas de defeito rodando o guardião inteiro custaram
+  guardião inteiro, uns 11 minutos aqui e 15 no GitHub. Numa tarde, 13 provas de defeito rodando o guardião inteiro custaram
   mais de uma hora de espera, e o dono cobrou. Regra: no trabalho e na prova de defeito, só os blocos que
   a mudança toca; o guardião inteiro uma vez, antes de publicar (em segundo plano, fazendo outra coisa).
 
