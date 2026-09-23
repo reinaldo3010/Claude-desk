@@ -49,7 +49,8 @@ próxima publicação.
    `origin` daqui. Como ele está com a `main` aberta, não dá para empurrar direto: de lá se puxa,
    com `git pull --ff-only <caminho deste repositório> main`;
 3. o GitHub (`reinaldo3010/Claude-desk`). O `git push origin main` de lá dispara o "guardião de
-   qualidade" e o "publicar no GitHub Pages". Leva **uns 15 minutos** para o ar (o guardião roda lá
+   qualidade" e o "publicar no GitHub Pages" (só quando o commit mexe em `panda-mimo/**`: commit só de
+   documentação na raiz não dispara nada). Leva **uns 15 minutos** para o ar (o guardião roda lá
    antes de publicar). Conferir pela API pública, sem `gh`:
    `curl -s "https://api.github.com/repos/reinaldo3010/Claude-desk/actions/runs?per_page=6"`.
 
@@ -91,6 +92,9 @@ pixel a pixel (`qa/artes-aprovadas-unit.test.mjs`).
   `painel`, `paginas`, `estudio`, `sobreposicao`, `layout`, `arte-maior`, `toque`, `passo`, `peca`,
   `peca-a-vista`, `cardapio`, `minha-arte`, `miniaturas`, `camera`, `provas`, `estudio-no-site`, `pecas`.
   No trabalho, só os blocos que a mudança toca; o guardião inteiro uma vez, antes de publicar.
+- **Três ferramentas de olhar** (fora do guardião, na pasta `qa/`): `mede-caneca.mjs` prova pixel a
+  pixel que uma mudança não moveu a caneca; `folha-de-modelos.mjs` monta a folha de contato dos modelos
+  de uma peça; `confere-no-ar.mjs` confere o site publicado com navegador de verdade.
 - **Prova de defeito** numa pasta sobreposta, nunca no arquivo do site:
   `QA_SOBREPOR=<pasta> QA_SO=<bloco> QA_VIEWPORTS=1280 node qa/audit.mjs`.
 - Um aviso que não bloqueia e é decisão do dono: o WhatsApp de reserva.
@@ -155,10 +159,12 @@ gerada por inteligência artificial na peça.
 
 1. `panda-mimo/simulador/COMECE-AQUI.md` — o que é, como rodar, como a arte funciona, como nasce uma
    coleção, e onde o estúdio mora (nas duas páginas).
-2. `panda-mimo/simulador/LICOES-APRENDIDAS.md` — as armadilhas que já custaram tempo, inclusive as do
+2. `panda-mimo/simulador/PECAS-NO-ESTUDIO.md` — caneca, garrafa e ecobag no mesmo estúdio: o que mora em
+   `pecas.js`, o 3D de cada peça, os modelos delas, o que o guardião cobra e o passo a passo de peça nova.
+3. `panda-mimo/simulador/LICOES-APRENDIDAS.md` — as armadilhas que já custaram tempo, inclusive as do
    processo (guardião por bloco, prova de defeito em pasta sobreposta, aba do navegador compartilhada).
-3. `panda-mimo/simulador/REDESENHO-LEVE.md` e `MINHA-ARTE-EM-CAMADAS.md` — o desenho de 23/09/2026 e
+4. `panda-mimo/simulador/REDESENHO-LEVE.md` e `MINHA-ARTE-EM-CAMADAS.md` — o desenho de 23/09/2026 e
    por que cada escolha foi feita.
-4. `panda-mimo/MARCA.md` — o manual; manda em cor, letra, mascote e tom de voz. O histórico no fim
-   conta o que mudou e por quê (a última versão é a 2.20).
-5. Este arquivo, para o estado da frente.
+5. `panda-mimo/MARCA.md` — o manual; manda em cor, letra, mascote e tom de voz. O histórico no fim
+   conta o que mudou e por quê (a última versão é a 2.21).
+6. Este arquivo, para o estado da frente.

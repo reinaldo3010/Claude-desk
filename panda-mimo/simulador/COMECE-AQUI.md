@@ -16,7 +16,8 @@ visualizador 3D de qualquer peça é `peca-3d.js`, e cada peça tem o seu arquiv
 bloco `pecas`.
 
 **O estúdio mora em dois lugares com uma marcação só.** A fonte é `caneca-3d.html`. A seção Monte seu mimo
-da página inicial (`#estudio-no-site`) busca o `.studio-layout` dessa página, põe a folha `estudio.css` e
+da página inicial (`#estudio-no-site`) busca o `.studio-layout` dessa página (e a linha "Qual peça?", `#pecas`,
+que fica logo acima dele, fora da grade), põe a folha `estudio.css` e
 importa `estudio.js` quando a seção se aproxima da tela (`carregaEstudio()` em `script.js`). Mudou o
 estúdio? Muda em `caneca-3d.html` e vale nos dois. Dentro da home, `--estudio-topo` é a altura da barra do
 topo do site, para a caneca grudar abaixo dela; o guardião cobra isso no bloco `estudio-no-site`. Os lotes e a revisão estão documentados em `LOTE-PANDINHA-E-AQUARELA.md`, `LOTE-PRAZERES.md`, `LOTE-ATELIE.md` e `REVISAO-PAPELARIA.md`.
@@ -43,6 +44,8 @@ QA_VIEWPORTS=390,1280 npm test   # a passada rápida, a mesma do GitHub Actions
 QA_SO=cardapio,minha-arte QA_VIEWPORTS=1280 node qa/audit.mjs   # só esses blocos (segundos a 2 min)
 npm run test:arte           # só os testes unitários (segundos)
 node qa/mede-caneca.mjs fotografa <pasta>   # a caneca pixel a pixel, para provar que uma mudança não a moveu
+node qa/folha-de-modelos.mjs garrafa salvia  # folha de contato dos modelos de uma peça (arte aberta, frente e verso)
+node qa/confere-no-ar.mjs 5d2b347           # o site publicado, com navegador de verdade, depois do deploy
 npm run provas              # gera as artes dos modelos em qa/shots, para revisão humana
 ```
 

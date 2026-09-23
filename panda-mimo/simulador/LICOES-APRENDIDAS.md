@@ -210,3 +210,15 @@ repetir. Companheiro de `COMECE-AQUI.md`.
 - **Desenhar, olhar, corrigir, também nas peças novas.** A primeira leva da garrafa passou em todos os
   testes e estava miúda: frases de 6 mm e o nome de 30 mm sumiam numa peça de 27 cm, e a metade de
   baixo ficava vazia. Só a folha de contato (arte aberta, frente e verso em 3D) mostrou.
+
+## Da publicação das peças (23/09/2026)
+
+- **Logo depois do "publicar" terminar, a primeira visita pode levar 503.** O estúdio não abriu em 1280
+  e o console mostrou dois "status of 503"; um minuto depois, a mesma conferência passou limpa. O GitHub
+  Pages ainda estava espalhando a versão nova. Repetir antes de chamar de defeito, e anotar a URL de cada
+  resposta com erro (`qa/confere-no-ar.mjs` faz as duas coisas).
+- **Os fluxos do GitHub só rodam quando o commit mexe em `panda-mimo/**`.** Commit só de documentação na
+  raiz (`ESTADO-ATUAL.md`) não dispara guardião nem publicação — esperar por ele é esperar à toa.
+- **A API do GitHub sem login aceita 60 consultas por hora.** Uma espera de 30 em 30 segundos por uma
+  rodada que não existia esgotou o limite. Consultar a cada minuto ou mais, e desistir se a rodada não
+  aparecer nas primeiras consultas.
