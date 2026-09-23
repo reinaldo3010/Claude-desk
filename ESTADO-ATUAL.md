@@ -1,6 +1,6 @@
 # Estado atual do trabalho
 
-**O estúdio com garrafa e ecobag — 23/09/2026 (ramo `pecas-no-estudio`, sem commit):** a pedido do dono ("vamos começar a evoluir o estúdio para garrafas e ecobags"), com as três recomendações que ele escolheu: modelos próprios de cada peça, medidas de referência e "Qual peça? Caneca · Garrafa · Ecobag" numa linha no topo do estúdio. A garrafa térmica de 1 L (arte de 23 × 18 cm envolvendo, nas quatro cores das peças) e a ecobag de algodão cru (arte de 25 × 30 cm só na frente) têm 3D próprio, 8 modelos cada (duas ocasiões de quatro), a arte sobre a cor da peça, arquivo de 300 dpi sem fundo, frases que acompanham a cor (7.4) e "Ver com meu nome" no detalhe delas. **A caneca não mudou um pixel** (40 imagens idênticas; a linha nova desce o estúdio 52 px). Três defeitos meus no caminho viraram checagem (bloco novo `pecas`) e doze provas de defeito reprovaram; o guardião inteiro passou nas 14 resoluções. Manual 4.7, 7.4, 10.3, 13.3 e histórico 2.21. Leia `panda-mimo/simulador/PECAS-NO-ESTUDIO.md`. Fica com o dono: a tinta na garrafa pêssego (7.4 × 7.3), medidas e cores do fornecedor, estampa no verso da ecobag, o copo e o campo de quantidade.
+**O estúdio com garrafa e ecobag — 23/09/2026 (publicado em 23/09/2026, merge 5d2b347):** a pedido do dono ("vamos começar a evoluir o estúdio para garrafas e ecobags"), com as três recomendações que ele escolheu: modelos próprios de cada peça, medidas de referência e "Qual peça? Caneca · Garrafa · Ecobag" numa linha no topo do estúdio. A garrafa térmica de 1 L (arte de 23 × 18 cm envolvendo, nas quatro cores das peças) e a ecobag de algodão cru (arte de 25 × 30 cm só na frente) têm 3D próprio, 8 modelos cada (duas ocasiões de quatro), a arte sobre a cor da peça, arquivo de 300 dpi sem fundo, frases que acompanham a cor (7.4) e "Ver com meu nome" no detalhe delas. **A caneca não mudou um pixel** (40 imagens idênticas; a linha nova desce o estúdio 52 px). Três defeitos meus no caminho viraram checagem (bloco novo `pecas`) e doze provas de defeito reprovaram; o guardião inteiro passou nas 14 resoluções. Manual 4.7, 7.4, 10.3, 13.3 e histórico 2.21. Leia `panda-mimo/simulador/PECAS-NO-ESTUDIO.md`. Fica com o dono: a tinta na garrafa pêssego (7.4 × 7.3), medidas e cores do fornecedor, estampa no verso da ecobag, o copo e o campo de quantidade.
 
 **O estúdio dentro do site — 23/09/2026 (publicado em 23/09/2026, merge 341c9e4):** a pedido do dono ("ficou perfeito; não quero que ele fique fora do meu site"), a seção **Monte seu mimo** da página inicial passou a ser o estúdio da caneca em 360°, no lugar do simulador de desenho de garrafa, caneca e copo. Decisão dele: só o novo, porque o próximo passo é o estúdio crescer para garrafas, ecobags e outras peças. Uma marcação só (`caneca-3d.html`, que continua no ar para links de montagem); a home busca o `.studio-layout` e carrega o estúdio quando a seção se aproxima (`carregaEstudio()` em `script.js`). A caneca gruda abaixo da barra do topo, o botão flutuante sai do caminho, "Ver com meu nome" fica só no detalhe da caneca e leva ao estúdio. Conserto no caminho: ao fechar o detalhe de um produto, o foco devolvido ao cartão puxava a página de volta e desfazia a ida ao estúdio. Guardião: bloco `estudio-no-site`. Manual 4.7, 7.4, 10.3 e histórico 2.20, texto e visual.
 
@@ -31,8 +31,10 @@ a caneca não mudou um pixel com as peças novas. Ele mora em dois lugares com u
   carrega o estúdio quando a seção se aproxima (`carregaEstudio()` em `script.js`);
 - em `caneca-3d.html`, que continua no ar para os links de montagem e as páginas de fora.
 
-**Próximo passo:** a garrafa e a ecobag estão no ramo `pecas-no-estudio`, esperando o olhar do dono e o
-pedido de publicação. Depois: mais modelos para as duas, o copo e as outras peças (item 1 abaixo).
+**Publicado em 23/09/2026 (merge `5d2b347`):** a garrafa e a ecobag estão no ar, conferidas com
+navegador de verdade em 1280 e 390 (a primeira visita logo depois da publicação levou dois 503 do GitHub
+Pages, que ainda espalhava os arquivos; a segunda passou sem erro). Próximo passo: o olhar do dono sobre
+as duas peças; depois, mais modelos para elas, o copo e as outras peças (item 1 abaixo).
 
 **Publicado em 23/09/2026** (merge `341c9e4`, mais o `5cdbea0` só de documentação), conferido no ar
 com navegador de verdade em 1280 e 390 px. O registro do fim da sessão (este arquivo, `COMECE-AQUI.md` e
@@ -57,7 +59,7 @@ dono esperar; o guardião avisa sem bloquear. Enquanto isso, o pedido do estúdi
 ## O catálogo hoje
 
 Na caneca, 199 modelos e 42 ocasiões em onze grupos (a ordem é escrita à mão em `ORDEM_DOS_GRUPOS`).
-Desde 23/09/2026 (no ramo `pecas-no-estudio`), a garrafa tem 8 modelos em Com o seu nome e Treino, e a
+Desde 23/09/2026 (no ar), a garrafa tem 8 modelos em Com o seu nome e Treino, e a
 ecobag 8 em Com o seu nome e Pequenos prazeres; cada peça só mostra as ocasiões dela. A caneca:
 
 | Grupo | Ocasiões | Artes |
@@ -104,10 +106,10 @@ centra sozinho), modelos embaixo (com os atalhos de `camadas.js`), e três linha
 
 ## O que vem a seguir
 
-### 1. O estúdio para outras peças (garrafa e ecobag prontas no ramo)
+### 1. O estúdio para outras peças (garrafa e ecobag no ar desde 23/09/2026)
 
-A garrafa e a ecobag já estão no estúdio (`PECAS-NO-ESTUDIO.md`), no ramo `pecas-no-estudio`, sem
-commit. O que vem: o dono olhar e pedir a publicação; mais ocasiões para as duas (a leva é curta de
+A garrafa e a ecobag já estão no estúdio e no ar (`PECAS-NO-ESTUDIO.md`, merge `5d2b347`). O que vem:
+o dono olhar as duas; mais ocasiões para elas (a leva é curta de
 propósito: Com o seu nome e Treino na garrafa, Com o seu nome e Pequenos prazeres na ecobag); o copo
 térmico e as outras peças, pelo passo a passo do fim de `PECAS-NO-ESTUDIO.md`. A quantidade (1 a 500),
 que o simulador de desenho levava na mensagem, continua sem campo no estúdio (sugerido; sem resposta).
