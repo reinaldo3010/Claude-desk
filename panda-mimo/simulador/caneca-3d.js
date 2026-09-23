@@ -498,12 +498,12 @@ export async function createMugViewer(container, { onError, onReady, onChange, o
   canvas.style.touchAction = 'pan-y';
 
   /*
-    A roda do mouse sobre a caneca dava zoom e engolia a rolagem da página. Como a prévia ocupa quase
-    metade da tela larga, quem punha o cursor ali sentia o site travado. Agora vale o mesmo acordo dos
-    mapas: roda sozinha rola a página, Ctrl (ou ⌘) mais roda dá zoom. A barra de zoom continua sendo
-    o caminho principal, e o toque não muda — um dedo gira, dois aproximam.
-    O ouvinte é de captura: ele decide antes de o OrbitControls ver o evento. Com enableZoom em falso
-    o controle ignora a roda e não chama preventDefault, então a página rola como em qualquer lugar.
+    A roda sobre a caneca dá zoom — o dono pediu de volta em 23/09/2026 ("só scrollando já funcionava
+    bem"), depois de uma rodada em que ela só aproximava com Ctrl. O problema daquela época continua
+    resolvido de outro jeito: quando o zoom chega ao limite, a volta seguinte da roda é da página. Assim
+    ninguém fica preso com o cursor sobre a prévia, e quem quer aproximar não precisa de tecla.
+    O ouvinte é de captura e segura a roda para si: o OrbitControls nunca a vê (senão ele aproximaria
+    além do limite e engoliria a rolagem). O zoom dele fica ligado só para a pinça de dois dedos.
   */
   /*
     Teclado na caneca. O rótulo dizia "arraste para girar", o que não serve para quem não usa mouse.
@@ -522,8 +522,8 @@ export async function createMugViewer(container, { onError, onReady, onChange, o
     else if (evento.key === 'ArrowRight') esferica.theta += passo;
     else if (evento.key === 'ArrowUp') esferica.phi = Math.max(controls.minPolarAngle, esferica.phi - passo * 0.6);
     else if (evento.key === 'ArrowDown') esferica.phi = Math.min(controls.maxPolarAngle, esferica.phi + passo * 0.6);
-    else if (evento.key === '+' || evento.key === '=') esferica.radius = Math.max(controls.minDistance, esferica.radius - 0.4);
-    else if (evento.key === '-' || evento.key === '_') esferica.radius = Math.min(controls.maxDistance, esferica.radius + 0.4);
+    else if (evento.key === '+' || evento.key === '=') { evento.preventDefault(); aproxima(1.12); return; }
+    else if (evento.key === '-' || evento.key === '_') { evento.preventDefault(); aproxima(1 / 1.12); return; }
     else mexeu = false;
     if (!mexeu) return;
     evento.preventDefault();
@@ -533,28 +533,29 @@ export async function createMugViewer(container, { onError, onReady, onChange, o
     requestRender();
   });
 
-  const comModificador = (evento) => evento.ctrlKey || evento.metaKey;
-  canvas.addEventListener('wheel', (evento) => {
-    controls.enableZoom = comModificador(evento);
-    if (!controls.enableZoom) avisaComoDarZoom();
-  }, { capture: true, passive: true });
-  controls.enableZoom = false;
-
-  let avisoDeZoom = null, sumirAviso = 0;
-  function avisaComoDarZoom() {
-    const pai = canvas.parentElement;
-    if (!pai) return;
-    if (!avisoDeZoom) {
-      avisoDeZoom = document.createElement('p');
-      avisoDeZoom.className = 'studio-zoom-dica';
-      const tecla = /Mac|iPhone|iPad/.test(navigator.platform || '') ? '⌘' : 'Ctrl';
-      avisoDeZoom.textContent = `Use ${tecla} + roda para aproximar, ou a barra de zoom.`;
-      pai.appendChild(avisoDeZoom);
-    }
-    avisoDeZoom.classList.add('vendo');
-    clearTimeout(sumirAviso);
-    sumirAviso = setTimeout(() => avisoDeZoom?.classList.remove('vendo'), 1600);
+  const ZOOM_MINIMO = 0.75, ZOOM_MAXIMO = 1.4;
+  /** Aproxima (fator > 1) ou afasta, dentro do limite. Devolve `false` quando já estava no limite. */
+  function aproxima(fator) {
+    const distancia = camera.position.distanceTo(controls.target);
+    const atual = THREE.MathUtils.clamp(fitDistance / distancia, ZOOM_MINIMO, ZOOM_MAXIMO);
+    const novo = THREE.MathUtils.clamp(atual * fator, ZOOM_MINIMO, ZOOM_MAXIMO);
+    if (Math.abs(novo - atual) < 1e-4) return false;
+    zoom = novo;
+    transition = null;
+    const direcao = camera.position.clone().sub(controls.target).normalize();
+    camera.position.copy(direcao.multiplyScalar(fitDistance / zoom)).add(controls.target);
+    controls.update();
+    requestRender();
+    onChange?.({ type: 'zoom', value: zoom });
+    return true;
   }
+  canvas.addEventListener('wheel', (evento) => {
+    evento.stopImmediatePropagation();
+    // Roda de mouse vem em degraus de ~100; trackpad, em passos pequenos: o fator acompanha o tamanho.
+    const passo = THREE.MathUtils.clamp(evento.deltaY * (evento.deltaMode === 1 ? 33 : 1), -240, 240);
+    if (aproxima(Math.exp(-passo * 0.0016))) evento.preventDefault();
+  }, { capture: true, passive: false });
+  controls.enableZoom = true;
 
   let disposed = false, visible = true, contextLost = false;
 

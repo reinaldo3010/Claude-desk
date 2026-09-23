@@ -335,8 +335,13 @@ function mergedState(options) {
 /**
  * Geometria e avisos de uma arte em camadas: dpi de cada foto e espaços ainda vazios.
  * O medidor de texto vem de um canvas qualquer; sem canvas, a caixa da frase usa o limite.
+ *
+ * `artwork` é a arte que a pessoa trouxe pronta ("Minha arte"). Ela vai por baixo das camadas e é
+ * posta como sempre foi (frente, dois lados ou ao redor, com tamanho, lado, altura e inclinação),
+ * mas na altura inteira: o nome e o Pandinha agora são camadas por cima, e não reservam mais um
+ * rodapé que encolhia a arte (pedido do dono, 23/09/2026).
  */
-export function computeArtePlacement(arte, state = {}, spec = {}, fotos = {}, medidor = null) {
+export function computeArtePlacement(arte, state = {}, spec = {}, fotos = {}, medidor = null, artwork = null) {
   const normalized = normalizedState(state);
   const { canvasMm, printArea } = physicalSpec(spec);
   const slots = arte.camadas.filter((camada) => camada.tipo === 'foto').map((camada) => {
@@ -354,8 +359,9 @@ export function computeArtePlacement(arte, state = {}, spec = {}, fotos = {}, me
       effectiveDpi: preenchido ? 25.4 / escala : null,
     };
   });
+  const livre = artwork ? computePlacement(artwork, { ...state, name: '', withPanda: false }, spec) : null;
   return {
-    canvasMm, printArea, arte, slots,
+    canvasMm, printArea, arte, slots, livre,
     state: normalized,
     vazios: slots.filter((slot) => !slot.preenchido).map((slot) => slot.rotulo),
     effectiveDpi: slots.filter((slot) => slot.preenchido).reduce((menor, slot) => (menor === null ? slot.effectiveDpi : Math.min(menor, slot.effectiveDpi)), null),
@@ -375,7 +381,7 @@ function arteWarnings(placement) {
 }
 
 function warningsFor(placement) {
-  if (placement.arte) return arteWarnings(placement);
+  if (placement.arte) return [...arteWarnings(placement), ...(placement.livre ? warningsFor(placement.livre) : [])];
   const warnings = [];
   if (placement.effectiveDpi !== null && placement.effectiveDpi < 150) {
     warnings.push(`A imagem tem cerca de ${Math.max(1, Math.round(placement.effectiveDpi))} dpi neste tamanho. Uma imagem maior deixa a impressão mais nítida.`);
@@ -401,6 +407,17 @@ function drawContained(context, image, x, y, width, height) {
   context.drawImage(image, x + (width - w) / 2, y + (height - h) / 2, w, h);
 }
 
+/** A arte trazida pronta, em cada lugar da volta que o "Onde vai a arte?" pediu. */
+function desenhaArteLivre(context, items, image) {
+  for (const item of items) {
+    context.save();
+    context.translate(item.centerX, item.centerY);
+    context.rotate(item.angle);
+    context.drawImage(image, -item.width / 2, -item.height / 2, item.width, item.height);
+    context.restore();
+  }
+}
+
 function drawComposition(canvas, placement, options, cropToPrint = false) {
   const context = canvas.getContext('2d', { alpha: false });
   if (!context) throw fileError('Seu navegador não conseguiu preparar a prévia. Tente atualizar a página.');
@@ -419,24 +436,18 @@ function drawComposition(canvas, placement, options, cropToPrint = false) {
   context.rect(area.x, area.y, area.width, area.height);
   context.clip();
   if (options.arte) {
+    const livre = placement.livre && options.artwork?.image ? placement.livre : null;
     desenhaArte(context, options.arte, area, {
       fotos: options.fotos,
       imagens: options.imagens,
       semPandinha: !placement.state.withPanda,
+      antesDasCamadas: livre ? (ctx) => desenhaArteLivre(ctx, livre.items, options.artwork.image) : null,
     });
     context.restore();
     context.setTransform(1, 0, 0, 1, 0, 0);
     return;
   }
-  if (options.artwork?.image) {
-    for (const item of placement.items) {
-      context.save();
-      context.translate(item.centerX, item.centerY);
-      context.rotate(item.angle);
-      context.drawImage(options.artwork.image, -item.width / 2, -item.height / 2, item.width, item.height);
-      context.restore();
-    }
-  }
+  if (options.artwork?.image) desenhaArteLivre(context, placement.items, options.artwork.image);
   const { name, fontFamily, withPanda } = placement.state;
   const hasArtwork = Boolean(options.artwork?.image);
   const ink = typeof getComputedStyle === 'function' ? getComputedStyle(document.documentElement).getPropertyValue('--ink').trim() : '';
@@ -479,7 +490,7 @@ function drawComposition(canvas, placement, options, cropToPrint = false) {
  */
 export function composeArtwork(options = {}, canvas) {
   const placement = options.arte
-    ? computeArtePlacement(options.arte, mergedState(options), options.spec, options.fotos, options.medidor)
+    ? computeArtePlacement(options.arte, mergedState(options), options.spec, options.fotos, options.medidor, options.artwork)
     : computePlacement(options.artwork, mergedState(options), options.spec);
   const width = Math.round(clamp(number(options.widthPx, 2048), 256, 4096));
   const height = Math.max(1, Math.round(width * placement.canvasMm.height / placement.canvasMm.width));
@@ -525,7 +536,7 @@ async function pngAtDpi(blob, dpi) {
 /** Output: print-only PNG, 300 dpi metadata, artwork at the same mm placement as the preview. */
 export async function exportPrintArtwork(options = {}) {
   const placement = options.arte
-    ? computeArtePlacement(options.arte, mergedState(options), options.spec, options.fotos, options.medidor)
+    ? computeArtePlacement(options.arte, mergedState(options), options.spec, options.fotos, options.medidor, options.artwork)
     : computePlacement(options.artwork, mergedState(options), options.spec);
   const dpi = 300;
   const widthPx = Math.round(placement.printArea.width / 25.4 * dpi);

@@ -12,7 +12,7 @@
  * escritas no texto.
  */
 import { createMugViewer, MUG_SPEC, CENARIOS, ACABAMENTOS } from './caneca-3d.js';
-import { loadArtwork, composeArtwork, exportPrintArtwork, exportGuideArtwork, tamanhoRecomendado, printAreaOf } from './arte.js';
+import { loadArtwork, composeArtwork, computePlacement, exportPrintArtwork, exportGuideArtwork, tamanhoRecomendado, printAreaOf } from './arte.js';
 import { FONTES_DA_ARTE, carregaFontes, fontePorValor } from './fontes.js';
 import { ehIlustracao, TAMANHO_DA_ILUSTRACAO } from './colecoes.js';
 import { fazZip } from './zip.js';
@@ -20,13 +20,19 @@ import { salvaRascunho, leRascunho, apagaRascunho, quandoFoi } from './rascunho.
 import {
   gruposDeCategorias, ADESIVOS, ELEMENTOS, ENFEITES, FILTROS, CORES_DE_ARTE, FORMAS_DE_FOTO,
   modeloPorId, modelosDaCategoria, novaArte, desenhaArte, desenhaForma, camadaEm,
-  alcasDaCamada, medidorDeTexto, cor, FRENTE, VERSO, miniaturaDaImagem, limiteDaImagem,
+  alcasDaCamada, medidorDeTexto, cor, FRENTE, VERSO, miniaturaDaImagem, limiteDaImagem, proporcaoDaImagem,
 } from './modelos.js';
 
 // Cores da cerâmica: dado físico da peça (manual 7.4), não cor de interface.
 const CERAMICA = Object.freeze({
   branca: '#ffffff', preta: '#1d1b19', vermelha: '#b7262b', amarela: '#f0c233', rosa: '#f3a4b7', azul: '#1f5aa3',
 });
+// O nome de cada cor, como sai no pedido e no rótulo da bolinha. Morava nas opções de duas listas do
+// navegador, que deram lugar às bolinhas.
+const NOMES_DA_CERAMICA = Object.freeze({
+  branca: 'Branco', preta: 'Preto', vermelha: 'Vermelho', amarela: 'Amarelo', rosa: 'Rosa', azul: 'Azul',
+});
+const nomeDaCeramica = (cor) => NOMES_DA_CERAMICA[cor] || cor;
 const PRESETS = Object.freeze({
   branca: { inside: 'branca', handle: 'branca', nome: 'Toda branca' },
   preta: { inside: 'preta', handle: 'preta', nome: 'Preto e branco' },
@@ -35,6 +41,14 @@ const PRESETS = Object.freeze({
 const LAYOUTS = { front: 'só na frente', both: 'nos dois lados', wrap: 'ao redor' };
 const nomeDaLetra = (familia) => fontePorValor(familia)?.nome || familia;
 const PANDA_ADESIVO = 'assets/panda-coracao.webp';
+/*
+  "Minha arte" em camadas (pedido do dono, 23/09/2026). A arte que a pessoa traz pronta vai por baixo, e
+  por cima dela entram frases, Pandinhas, enfeites e elementos do acervo, como em qualquer modelo: cada um
+  se move, aumenta, gira e se sobrepõe. Antes o nome morava num rodapé fixo na frente, o Pandinha era um
+  só, e os dois reservavam o pé da caneca, que a arte não podia ocupar.
+*/
+const MINHA_ARTE = 'minha-arte';
+const TEXTO_DA_FRASE_NOVA = 'escreva aqui';
 const ARTE_EXEMPLO = { url: 'assets/coracao-jeito.webp', nome: 'Arte da Panda Mimo (exemplo)' };
 const PROJETO_TIPO = 'panda-mimo/caneca';
 const PROJETO_VERSAO = 4;
@@ -63,15 +77,17 @@ const ABAS = Object.freeze({
 const $ = (id) => document.getElementById(id);
 const el = {
   viewport: $('mug-viewport'), loading: $('viewer-loading'), fallback: $('viewer-fallback'), retry: $('viewer-retry'),
-  zoom: $('mug-zoom'), flat: $('flat-art'), flatDetails: $('flat-details'),
+  zoom: $('mug-zoom'), flat: $('flat-art'), colunaPeca: document.querySelector('.studio-coluna-peca'),
   travar: $('travar'), travarTexto: $('travar-texto'), cadeadoArco: $('cadeado-arco'), gesto: $('studio-gesture'),
-  cenas: $('cenas'), acabamentos: $('acabamentos'), cenaResumo: $('cena-resumo'), saveVideo: $('save-video'),
-  form: $('mug-form'), inside: $('inside-color'), handle: $('handle-color'), pecaResumo: $('peca-resumo'),
+  cenas: $('cenas'), acabamentos: $('acabamentos'), saveVideo: $('save-video'),
+  form: $('mug-form'), coresInterior: $('cores-interior'), coresAlca: $('cores-alca'),
   abas: $('abas'), dicaAba: $('dica-aba'), acoesArte: $('acoes-arte'),
   desfazer: $('desfazer'), refazer: $('refazer'),
   salvarModelo: $('salvar-modelo'), apagarModelo: $('apagar-modelo'), formMeuModelo: $('form-meu-modelo'),
   nomeMeuModelo: $('nome-meu-modelo'), confirmarMeuModelo: $('confirmar-meu-modelo'), cancelarMeuModelo: $('cancelar-meu-modelo'),
-  categoria: $('categoria-modelo'), busca: $('busca-modelo'), resultado: $('resultado-modelos'),
+  categoria: $('categoria-modelo'), painelAssuntos: $('painel-assuntos'), listaAssuntos: $('lista-assuntos'),
+  fecharAssuntos: $('fechar-assuntos'), assunto: document.querySelector('.studio-assunto'),
+  busca: $('busca-modelo'), resultado: $('resultado-modelos'),
   models: $('model-list'),
   passo: $('passo'), passoConta: $('passo-conta'), passoFalta: $('passo-falta'), passoBotao: $('passo-botao'),
   boasvindas: $('boasvindas'), boasvindasFechar: $('boasvindas-fechar'),
@@ -84,7 +100,7 @@ const el = {
   remove: $('remove-art'), example: $('use-example'), error: $('art-error'),
   scale: $('art-scale'), x: $('art-x'), y: $('art-y'), rotation: $('art-rotation'),
   scaleOut: $('scale-value'), xOut: $('x-value'), yOut: $('y-value'), rotationOut: $('rotation-value'), reset: $('reset-art'),
-  name: $('art-name'), font: $('art-font'), panda: $('art-panda'),
+  addFraseNaArte: $('arte-add-frase'), addPandinhaNaArte: $('arte-add-pandinha'),
   sizeGuide: $('size-guide'), saveGuide: $('save-guide'), abrirCanva: $('abrir-canva'),
   canvaFile: $('canva-file'), importarCanva: $('importar-canva'),
   rascunho: $('rascunho'), rascunhoTexto: $('rascunho-texto'), rascunhoContinuar: $('rascunho-continuar'), rascunhoApagar: $('rascunho-apagar'),
@@ -195,12 +211,17 @@ function setError(message) {
   el.error.hidden = !message;
 }
 const slug = (texto) => semAcento(texto).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-const optionLabel = (select, value) => select.querySelector(`option[value="${value}"]`)?.textContent || value;
 const camadaPorId = (id) => arte?.camadas.find((camada) => camada.id === id) || null;
 const camadasDo = (tipo) => (arte ? arte.camadas.filter((camada) => (tipo === 'enfeites'
   ? camada.tipo === 'enfeite' || camada.tipo === 'adesivo' || camada.tipo === 'elemento'
   : camada.tipo === tipo)) : []);
 const hasContent = () => Boolean(arte || artwork || state.name || state.withPanda);
+const ehMinhaArte = () => arte?.modelo === MINHA_ARTE;
+
+/** Abaixo de 760 px o estúdio vira uma coluna, com a caneca grudada no topo (o mesmo corte do CSS). */
+const umaColuna = () => window.matchMedia('(max-width: 759px)').matches;
+/** A barra do topo do site, quando o estúdio mora dentro dele; em caneca-3d.html é zero. */
+const topoDaPagina = () => parseFloat(getComputedStyle(document.querySelector('.studio-layout')).getPropertyValue('--estudio-topo')) || 0;
 
 /** Ponto da arte, em milímetros, a partir da fração da área de impressão. */
 const pontoMm = (fracao) => ({ x: areaMm.x + fracao.x * areaMm.width, y: areaMm.y + fracao.y * areaMm.height });
@@ -366,7 +387,7 @@ function opcoesDeComposicao(extra = {}) {
   for (const [id, item] of fotos) {
     if (item.asset) fotosDaArte[id] = { image: item.asset.image, width: item.asset.width, height: item.asset.height };
   }
-  return { ...base, arte, fotos: fotosDaArte, imagens: Object.fromEntries(adesivos), medidor };
+  return { ...base, arte, fotos: fotosDaArte, imagens: Object.fromEntries(adesivos), medidor, artwork: ehMinhaArte() ? artwork : null };
 }
 
 function schedule() {
@@ -491,12 +512,16 @@ function frasesDaArte() {
 
 function orderMessage() {
   const lines = ['Oi, Panda Mimo! Montei uma caneca no site 🐼', '• Caneca reta de 325 ml, branca por fora'];
-  lines.push(`• Interior: ${optionLabel(el.inside, state.inside)} · Alça: ${optionLabel(el.handle, state.handle)}`);
+  lines.push(`• Interior: ${nomeDaCeramica(state.inside)} · Alça: ${nomeDaCeramica(state.handle)}`);
   if (arte) {
     const espacos = camadasDo('foto');
     const escolhidas = espacos.filter((camada) => fotos.get(camada.id)?.asset);
-    lines.push(`• Modelo: ${modeloAtual?.nome || 'arte montada aqui'} (arte ao redor)`);
-    lines.push(`• Fotos escolhidas: ${escolhidas.length} de ${espacos.length}`);
+    if (ehMinhaArte()) {
+      lines.push(artwork ? `• Arte: ${artwork.name}, ${LAYOUTS[state.layout]}` : '• Arte: ainda não escolhida');
+    } else {
+      lines.push(`• Modelo: ${modeloAtual?.nome || 'arte montada aqui'} (arte ao redor)`);
+      lines.push(`• Fotos escolhidas: ${escolhidas.length} de ${espacos.length}`);
+    }
     const frases = frasesDaArte();
     if (frases.length) lines.push(`• Frases: ${frases.map((f) => `"${f}"`).join(' · ')}`);
     const enfeites = arte.camadas.filter((camada) => camada.tipo === 'enfeite').length;
@@ -622,6 +647,7 @@ async function startViewer() {
       onError: showFallback,
       onPointer: aoPonteiro,
       onChange: (event) => {
+        if (event?.type === 'zoom') { el.zoom.value = String(Math.round(event.value * 20) * 5); return; }
         if (event?.type !== 'view') return;
         // Vista escolhida no botão fica marcada; giro livre desmarca todas.
         for (const button of viewButtons) button.setAttribute('aria-pressed', String(button.dataset.view === event.view));
@@ -642,11 +668,13 @@ async function startViewer() {
 }
 
 /* ---------- cena e acabamento da prévia ---------- */
+// À vista, na mesma pílula das combinações de cor: não há mais bloco fechado nem resumo dele.
 function montaCenas() {
   const monta = (alvo, itens, atual, aoEscolher) => {
     alvo.replaceChildren(...itens.map((item) => {
       const botao = document.createElement('button');
       botao.type = 'button';
+      botao.className = 'studio-chip';
       botao.dataset.valor = item.id;
       botao.textContent = item.nome;
       botao.title = item.descricao;
@@ -654,24 +682,66 @@ function montaCenas() {
       botao.addEventListener('click', () => {
         aoEscolher(item.id);
         for (const outro of alvo.children) outro.setAttribute('aria-pressed', String(outro.dataset.valor === item.id));
-        atualizaResumoDaCena();
       });
       return botao;
     }));
   };
   monta(el.cenas, CENARIOS, () => cenaAtual, (id) => { cenaAtual = id; viewer?.setCenario(id); });
   monta(el.acabamentos, ACABAMENTOS, () => acabamentoAtual, (id) => { acabamentoAtual = id; viewer?.setAcabamento(id); });
-  atualizaResumoDaCena();
 }
 
-function atualizaResumoDaCena() {
-  const cena = CENARIOS.find((c) => c.id === cenaAtual)?.nome || 'Fundo claro';
-  const acabamento = ACABAMENTOS.find((a) => a.id === acabamentoAtual)?.nome.toLowerCase() || 'brilhante';
-  if (el.cenaResumo) el.cenaResumo.textContent = `${cena} · ${acabamento}`;
+/* ---------- cores da peça ---------- */
+// Em bolinhas, à vista. Eram duas listas do navegador dentro de um bloco que só abria com um clique.
+function montaCoresDaPeca() {
+  const monta = (alvo, parte, aoEscolher) => {
+    alvo.replaceChildren(...Object.entries(CERAMICA).map(([cor, tinta]) => {
+      const bolinha = document.createElement('button');
+      bolinha.type = 'button';
+      bolinha.className = 'studio-cor';
+      bolinha.dataset.cor = cor;
+      bolinha.style.setProperty('--tinta', tinta);
+      bolinha.setAttribute('aria-label', nomeDaCeramica(cor));
+      bolinha.title = `${parte}: ${nomeDaCeramica(cor).toLowerCase()}`;
+      bolinha.addEventListener('click', () => aoEscolher(cor));
+      return bolinha;
+    }));
+  };
+  monta(el.coresInterior, 'Interior', (cor) => setColors(cor, null));
+  monta(el.coresAlca, 'Alça', (cor) => setColors(null, cor));
+  markPreset();
+}
+
+/*
+  A coluna da peça (caneca, cores e arte aberta) passa da altura da janela quase sempre. Grudada pelo
+  topo, o pé dela, que é a arte aberta, ficaria fora de alcance enquanto o editor rola. Grudada pelo pé,
+  ela rola com a página até a arte aberta aparecer inteira e ali fica. Quando cabe, gruda pelo topo,
+  como sempre grudou.
+*/
+function ajustaColunaDaPeca() {
+  const coluna = el.colunaPeca;
+  if (!coluna) return;
+  const alta = !umaColuna() && coluna.offsetHeight + 36 + topoDaPagina() > window.innerHeight;
+  coluna.classList.toggle('studio-coluna-peca--alta', alta);
+}
+
+/*
+  A arte aberta cresceu e é também onde se edita (pedido do dono, 23/09/2026). O canvas acompanha o
+  tamanho em que aparece, na densidade da tela, para a frase e as alças não saírem borradas; nunca
+  abaixo dos 840 px de sempre, nunca acima dos 2.480 px da própria arte a 300 dpi.
+*/
+function ajustaVistaAberta() {
+  const largura = el.flat.getBoundingClientRect().width;
+  if (!largura) return;
+  const alvo = Math.round(clamp(largura * (window.devicePixelRatio || 1), 840, 2480));
+  if (Math.abs(alvo - el.flat.width) < 8) return;
+  el.flat.width = alvo;
+  el.flat.height = Math.round(alvo * 360 / 840);
+  schedule();
 }
 
 /* ---------- abas ---------- */
-const abasVisiveis = () => (arte ? ['modelo', 'fotos', 'frases', 'enfeites'] : ['modelo', 'arte']);
+const abasVisiveis = () => (ehMinhaArte() ? ['modelo', 'arte', 'frases', 'enfeites']
+  : arte ? ['modelo', 'fotos', 'frases', 'enfeites'] : ['modelo', 'arte']);
 
 function contaDaAba(id) {
   if (!arte) return null;
@@ -688,7 +758,8 @@ function contaDaAba(id) {
 */
 function situacaoDoPasso(id) {
   if (!arte) return id === 'modelo' ? 'fazendo' : 'aberto';
-  if (id === 'modelo' || id === 'enfeites' || id === 'arte') return 'feito';
+  if (id === 'arte') return ehMinhaArte() && !artwork ? { falta: 1, tipo: 'arte' } : 'feito';
+  if (id === 'modelo' || id === 'enfeites') return 'feito';
   if (id === 'fotos') {
     const espacos = camadasDo('foto');
     const vazios = espacos.filter((c) => !fotos.get(c.id)?.asset).length;
@@ -696,9 +767,11 @@ function situacaoDoPasso(id) {
   }
   if (id === 'frases') {
     const base = modeloPorId(arte.modelo);
-    if (!base) return 'feito';
+    // "escreva aqui" é o texto de toda frase acrescentada: sair impresso assim é o mesmo erro que
+    // imprimir a frase de exemplo de um modelo.
     const deExemplo = camadasDo('frase').filter((c) => {
-      const original = base.camadas.find((b) => b.id === c.id);
+      if (String(c.texto || '').trim() === TEXTO_DA_FRASE_NOVA) return true;
+      const original = base?.camadas.find((b) => b.id === c.id);
       return original && original.tipo === 'frase' && original.texto === c.texto;
     }).length;
     return deExemplo ? { falta: deExemplo, tipo: 'frases' } : 'feito';
@@ -723,7 +796,8 @@ function montaPasso() {
 
   const aqui = situacaoDoPasso(abaAtual);
   el.passoFalta.textContent = PENDENTE(aqui)
-    ? (aqui.tipo === 'fotos'
+    ? (aqui.tipo === 'arte' ? 'Falta escolher a sua arte.'
+      : aqui.tipo === 'fotos'
       ? (aqui.falta === 1 ? 'Falta escolher uma foto.' : `Faltam ${aqui.falta} fotos.`)
       : (aqui.falta === 1 ? 'Uma frase ainda é a de exemplo.' : `${aqui.falta} frases ainda são as de exemplo.`))
     : '';
@@ -738,8 +812,8 @@ function montaPasso() {
       const fim = document.querySelector('.studio-finish');
       if (!fim) return;
       const peca = document.querySelector('.studio-preview');
-      const grudada = peca && getComputedStyle(peca).position === 'sticky' && window.innerWidth <= 850;
-      fim.style.scrollMarginTop = `${grudada ? Math.round(peca.getBoundingClientRect().height) + 8 : 8}px`;
+      const grudada = peca && getComputedStyle(peca).position === 'sticky' && umaColuna();
+      fim.style.scrollMarginTop = `${topoDaPagina() + (grudada ? Math.round(peca.getBoundingClientRect().height) + 8 : 8)}px`;
       fim.scrollIntoView({ block: 'start', behavior: 'instant' });
     };
   }
@@ -815,35 +889,117 @@ function andaNasAbas(event) {
 const abaDaCamada = (camada) => (camada.tipo === 'foto' ? 'fotos' : camada.tipo === 'frase' ? 'frases' : 'enfeites');
 
 /* ---------- aba modelo ---------- */
+/*
+  O seletor de ocasião. A lista nativa do navegador abria 43 assuntos em letra grande, sem ordem que
+  se visse (reclamação do dono, 23/09/2026). Agora é um painel que abre no lugar, sem cobrir nada: o
+  grupo em rótulo miúdo e os assuntos em pílulas pequenas, tudo de uma vez à vista. Abre e fecha pelo
+  botão, fecha com Esc, com clique fora e ao escolher.
+*/
+/*
+  O seletor de ocasião, na forma de cardápio (pedido do dono, 23/09/2026). A lista nativa do navegador
+  saía com os nomes grandes e sem ordem; a primeira troca, pílulas num painel que abria no lugar, virou
+  uma parede de 43 botões com rolagem própria, colada na lista de modelos, que também rola. Agora, na tela
+  larga, ele flutua sobre a página em colunas: o grupo num rótulo miúdo, cada ocasião numa linha com
+  quantos modelos tem. No celular sobe como uma folha. Não empurra nada; fecha com Esc, com um clique fora
+  e ao escolher.
+*/
+const emFolha = () => umaColuna();
+
+function itemDeAssunto(item) {
+  const botao = document.createElement('button');
+  botao.type = 'button';
+  botao.className = 'studio-assunto__item';
+  botao.dataset.assunto = item.id;
+  const nome = document.createElement('span');
+  nome.className = 'studio-assunto__nome';
+  nome.textContent = item.nome;
+  const quantos = listaDeModelos(item.id).length;
+  const conta = document.createElement('span');
+  conta.className = 'studio-assunto__conta';
+  conta.textContent = String(quantos);
+  conta.setAttribute('aria-label', `${quantos} ${quantos === 1 ? 'modelo' : 'modelos'}`);
+  botao.append(nome, conta);
+  botao.addEventListener('click', () => escolheAssunto(item.id));
+  return botao;
+}
+
 function montaCategorias() {
-  const opcoes = [];
-  const todos = document.createElement('option');
-  todos.value = 'todos';
-  todos.textContent = 'Todos os modelos';
-  opcoes.push(todos);
-  if (meusModelos.length) {
-    const grupo = document.createElement('optgroup');
-    grupo.label = 'Sua arte';
-    const meus = document.createElement('option');
-    meus.value = 'meus';
-    meus.textContent = `Meus modelos (${meusModelos.length})`;
-    grupo.appendChild(meus);
-    opcoes.push(grupo);
+  const primeiros = document.createElement('div');
+  primeiros.className = 'studio-assunto__primeiros';
+  primeiros.append(itemDeAssunto({ id: 'todos', nome: 'Todos os modelos' }));
+  if (meusModelos.length) primeiros.append(itemDeAssunto({ id: 'meus', nome: 'Meus modelos' }));
+  const grupos = document.createElement('div');
+  grupos.className = 'studio-assunto__grupos';
+  gruposDeCategorias().forEach(([nome, itens], indice) => {
+    const grupo = document.createElement('div');
+    grupo.className = 'studio-assunto__grupo';
+    grupo.setAttribute('role', 'group');
+    const titulo = document.createElement('p');
+    titulo.className = 'studio-assunto__titulo';
+    titulo.id = `grupo-de-assunto-${indice}`;
+    titulo.textContent = nome;
+    grupo.setAttribute('aria-labelledby', titulo.id);
+    grupo.append(titulo, ...itens.map(itemDeAssunto));
+    grupos.append(grupo);
+  });
+  el.listaAssuntos.replaceChildren(primeiros, grupos);
+  if (!el.listaAssuntos.querySelector(`[data-assunto="${categoria}"]`)) categoria = 'todos';
+  atualizaBotaoDeAssunto();
+}
+
+function atualizaBotaoDeAssunto() {
+  let nome = 'Todos os modelos';
+  for (const botao of el.listaAssuntos.querySelectorAll('[data-assunto]')) {
+    const este = botao.dataset.assunto === categoria;
+    botao.setAttribute('aria-pressed', String(este));
+    if (este) nome = botao.querySelector('.studio-assunto__nome').textContent;
   }
-  for (const [nome, itens] of gruposDeCategorias()) {
-    const grupo = document.createElement('optgroup');
-    grupo.label = nome;
-    for (const item of itens) {
-      const opcao = document.createElement('option');
-      opcao.value = item.id;
-      opcao.textContent = item.nome;
-      grupo.appendChild(opcao);
-    }
-    opcoes.push(grupo);
+  el.categoria.textContent = nome;
+}
+
+/** Na tela larga o cardápio sai do pé do botão, alinhado à direita dele, e cresce sobre a caneca. */
+function posicionaAssuntos() {
+  const painel = el.painelAssuntos;
+  if (!painel.open || painel.classList.contains('studio-assunto__painel--folha')) return;
+  const caixa = el.assunto.getBoundingClientRect();
+  const botao = el.categoria.getBoundingClientRect();
+  const margem = 16;
+  const largura = Math.min(880, window.innerWidth - margem * 2);
+  const esquerda = clamp(botao.right - largura, margem, window.innerWidth - margem - largura);
+  painel.style.width = `${Math.round(largura)}px`;
+  painel.style.left = `${Math.round(esquerda - caixa.left)}px`;
+  painel.style.top = `${Math.round(botao.bottom - caixa.top + 6)}px`;
+}
+
+function abreAssuntos(abrir = !el.painelAssuntos.open, { foco = false } = {}) {
+  const painel = el.painelAssuntos;
+  if (!abrir) { if (painel.open) painel.close(); return; }
+  if (painel.open) return;
+  const folha = emFolha();
+  painel.classList.toggle('studio-assunto__painel--folha', folha);
+  if (folha) {
+    painel.removeAttribute('style');
+    painel.showModal();
+  } else {
+    painel.show();
+    posicionaAssuntos();
   }
-  el.categoria.replaceChildren(...opcoes);
-  el.categoria.value = [...el.categoria.options].some((o) => o.value === categoria) ? categoria : 'todos';
-  categoria = el.categoria.value;
+  el.categoria.setAttribute('aria-expanded', 'true');
+  // Pelo teclado, e na folha, o foco vai para a ocasião escolhida: dá para seguir com as setas, e na
+  // folha ela aparece mesmo que more no fim da lista. Pelo mouse o foco fica no botão, como sempre
+  // ficou, e nenhum item amanhece com anel.
+  const escolhida = painel.querySelector('.studio-assunto__item[aria-pressed="true"]') || painel.querySelector('[data-assunto]');
+  if (foco || folha) escolhida?.focus({ preventScroll: !folha });
+  else el.categoria.focus({ preventScroll: true });
+}
+
+function escolheAssunto(id) {
+  categoria = id;
+  atualizaBotaoDeAssunto();
+  abreAssuntos(false);
+  el.categoria.focus({ preventScroll: true });
+  el.models.scrollTop = 0;
+  montaModelos();
 }
 
 function desenhaMiniatura(canvas, modelo) {
@@ -856,6 +1012,127 @@ function desenhaMiniatura(canvas, modelo) {
   context.setTransform(escalaX, 0, 0, escalaY, -areaMm.x * escalaX, -areaMm.y * escalaY);
   desenhaArte(context, novaArte(modelo), areaMm, { imagens: imagensDaMiniatura() });
   context.setTransform(1, 0, 0, 1, 0, 0);
+}
+
+/* ---------- a arte do modelo, maior ---------- */
+/*
+  Descansar o mouse num cartão mostra a arte maior, ao lado (pedido do dono, 23/09/2026): a miniatura
+  tem a caneca inteira, mas frase e detalhe ficam miúdos. No celular, tocar e segurar abre a arte
+  maior numa folha, com "Usar este modelo". O toque curto continua escolhendo o modelo.
+*/
+const DESCANSO_DO_MOUSE = 380;
+const SEGURAR_O_DEDO = 450;
+let previaDoModelo = null, relogioDaPrevia = 0, folhaDoModelo = null, seguraDedo = null;
+
+function desenhaArteMaior(canvas, modelo) {
+  const redesenha = () => desenhaMiniatura(canvas, modelo);
+  redesenha();
+  const faltam = arquivosDaArte(modelo.camadas).filter((a) => !adesivos.has(a) && !miniaturasCarregadas.has(a));
+  if (faltam.length) Promise.all(faltam.map(pedeImagemLeve)).then(redesenha);
+}
+
+function caixaDaArteMaior(classe) {
+  const caixa = document.createElement(classe === 'studio-folha-modelo' ? 'dialog' : 'div');
+  caixa.className = classe;
+  const canvas = document.createElement('canvas');
+  canvas.width = 1050;
+  canvas.height = Math.round(1050 * areaMm.height / areaMm.width);
+  canvas.setAttribute('aria-hidden', 'true');
+  const nome = document.createElement('strong');
+  const descricao = document.createElement('p');
+  caixa.append(canvas, nome, descricao);
+  document.body.appendChild(caixa);
+  return { caixa, canvas, nome, descricao };
+}
+
+function mostraArteMaior(cartao, modelo) {
+  if (!previaDoModelo) {
+    previaDoModelo = caixaDaArteMaior('studio-previa-modelo');
+    previaDoModelo.caixa.setAttribute('aria-hidden', 'true');
+  }
+  const { caixa, canvas, nome, descricao } = previaDoModelo;
+  nome.textContent = modelo.nome;
+  descricao.textContent = modelo.descricao || '';
+  desenhaArteMaior(canvas, modelo);
+  caixa.classList.add('vendo');
+  // Do lado do cartão onde houver espaço (na tela larga, por cima da caneca); senão, em cima dele.
+  const c = cartao.getBoundingClientRect();
+  const largura = caixa.offsetWidth, altura = caixa.offsetHeight, folga = 14;
+  let x = c.left - largura - folga;
+  let y = c.top + c.height / 2 - altura / 2;
+  if (x < folga) {
+    x = c.right + folga;
+    if (x + largura > window.innerWidth - folga) {
+      x = Math.min(Math.max(folga, c.left + c.width / 2 - largura / 2), window.innerWidth - largura - folga);
+      y = c.top - altura - folga < folga ? c.bottom + folga : c.top - altura - folga;
+    }
+  }
+  y = Math.min(Math.max(folga, y), window.innerHeight - altura - folga);
+  caixa.style.left = `${Math.round(x)}px`;
+  caixa.style.top = `${Math.round(y)}px`;
+}
+
+function escondeArteMaior() {
+  clearTimeout(relogioDaPrevia);
+  previaDoModelo?.caixa.classList.remove('vendo');
+}
+
+function abreFolhaDoModelo(modelo) {
+  if (!folhaDoModelo) {
+    folhaDoModelo = caixaDaArteMaior('studio-folha-modelo');
+    const acoes = document.createElement('div');
+    acoes.className = 'studio-folha-modelo__acoes';
+    const usar = document.createElement('button');
+    usar.type = 'button';
+    usar.className = 'btn btn--dark btn--sm';
+    usar.textContent = 'Usar este modelo';
+    const fechar = document.createElement('button');
+    fechar.type = 'button';
+    fechar.className = 'btn btn--ghost btn--sm';
+    fechar.textContent = 'Fechar';
+    fechar.addEventListener('click', () => folhaDoModelo.caixa.close());
+    acoes.append(usar, fechar);
+    folhaDoModelo.caixa.appendChild(acoes);
+    folhaDoModelo.usar = usar;
+    folhaDoModelo.caixa.setAttribute('aria-label', 'Arte do modelo, maior');
+    // Toque fora da folha fecha, como em qualquer folha de celular.
+    folhaDoModelo.caixa.addEventListener('click', (evento) => { if (evento.target === folhaDoModelo.caixa) folhaDoModelo.caixa.close(); });
+  }
+  const { caixa, canvas, nome, descricao, usar } = folhaDoModelo;
+  nome.textContent = modelo.nome;
+  descricao.textContent = modelo.descricao || '';
+  usar.onclick = () => { caixa.close(); escolheModelo(modelo.id); };
+  desenhaArteMaior(canvas, modelo);
+  if (!caixa.open) caixa.showModal();
+  usar.focus();
+}
+
+function preparaArteMaior(button, modelo) {
+  button.addEventListener('pointerenter', (evento) => {
+    if (evento.pointerType !== 'mouse') return;
+    clearTimeout(relogioDaPrevia);
+    relogioDaPrevia = setTimeout(() => { if (button.isConnected && button.matches(':hover')) mostraArteMaior(button, modelo); }, DESCANSO_DO_MOUSE);
+  });
+  button.addEventListener('pointerleave', escondeArteMaior);
+  button.addEventListener('pointerdown', (evento) => {
+    escondeArteMaior();
+    if (evento.pointerType === 'mouse') return;
+    const inicio = { x: evento.clientX, y: evento.clientY };
+    seguraDedo = { button, disparou: false, inicio, relogio: setTimeout(() => {
+      if (!seguraDedo || seguraDedo.button !== button) return;
+      seguraDedo.disparou = true;
+      abreFolhaDoModelo(modelo);
+    }, SEGURAR_O_DEDO) };
+  });
+  const solta = () => { if (seguraDedo && seguraDedo.button === button && !seguraDedo.disparou) { clearTimeout(seguraDedo.relogio); seguraDedo = null; } };
+  button.addEventListener('pointerup', solta);
+  button.addEventListener('pointercancel', solta);
+  button.addEventListener('pointermove', (evento) => {
+    if (!seguraDedo || seguraDedo.button !== button || seguraDedo.disparou) return;
+    if (Math.hypot(evento.clientX - seguraDedo.inicio.x, evento.clientY - seguraDedo.inicio.y) > 10) { clearTimeout(seguraDedo.relogio); seguraDedo = null; }
+  });
+  // O menu de "copiar imagem" do celular não pode aparecer por cima da folha.
+  button.addEventListener('contextmenu', (evento) => { if (seguraDedo?.button === button) evento.preventDefault(); });
 }
 
 function cartaoDeModelo(modelo) {
@@ -878,7 +1155,13 @@ function cartaoDeModelo(modelo) {
   const descricao = document.createElement('small');
   descricao.textContent = modelo ? modelo.descricao : 'Sua arte pronta, do jeito que você fez';
   button.append(figura, nome, descricao);
-  button.addEventListener('click', () => escolheModelo(modelo ? modelo.id : null));
+  button.addEventListener('click', (evento) => {
+    // Depois de segurar o dedo, o toque que solta não pode escolher o modelo por baixo da folha.
+    if (seguraDedo?.button === button && seguraDedo.disparou) { seguraDedo = null; evento.preventDefault(); return; }
+    escondeArteMaior();
+    escolheModelo(modelo ? modelo.id : null);
+  });
+  if (modelo) preparaArteMaior(button, modelo);
   return button;
 }
 
@@ -954,7 +1237,7 @@ function pintaMiniatura(figura, modelo) {
 
 function marcaModeloEscolhido() {
   for (const button of el.models.children) {
-    button.setAttribute('aria-pressed', String(arte ? button.dataset.modelo === arte.modelo : button.dataset.modelo === ''));
+    button.setAttribute('aria-pressed', String(arte && !ehMinhaArte() ? button.dataset.modelo === arte.modelo : button.dataset.modelo === ''));
   }
 }
 
@@ -980,10 +1263,14 @@ async function garanteImagens() {
 
 function escolheModelo(id) {
   const modelo = id ? acheModelo(id) : null;
-  if (modelo ? arte?.modelo === modelo.id : arte === null) {
+  if (modelo ? arte?.modelo === modelo.id : (arte === null || ehMinhaArte())) {
     if (!modelo) mostraAba('arte');
     return;
   }
+  // Onde o cartão clicado está na tela: a barra do modelo escolhido pode surgir acima dele, e ele não
+  // pode fugir de debaixo do dedo ou do mouse.
+  const cartaoClicado = el.models.querySelector(`[data-modelo="${id || ''}"]`);
+  const alturaAntes = cartaoClicado?.getBoundingClientRect().top;
   for (const item of fotos.values()) item.asset?.dispose();
   fotos.clear();
   lixeira.clear();
@@ -996,13 +1283,92 @@ function escolheModelo(id) {
   limpaHistorico();
   marcaModeloEscolhido();
   atualizaModo();
-  mostraAba(arte ? 'fotos' : 'arte');
-  // Na tela larga, a vista aberta já abre: dá para arrastar e usar as alças ali.
-  if (arte && el.flatDetails && window.innerWidth >= 850) el.flatDetails.open = true;
+  /*
+    Escolher o modelo não troca de etapa nem mexe na rolagem (pedido do dono, 23/09/2026): a pessoa
+    ainda está decidindo — compara modelos, muda a cor do fundo, que fica no topo desta aba. Quem leva
+    adiante é o botão "Continuar para fotos". "Trazer a minha arte" é outro caminho e abre a aba dela.
+  */
+  mostraAba(arte ? 'modelo' : 'arte');
+  if (arte && cartaoClicado?.isConnected && Number.isFinite(alturaAntes)) {
+    const desvio = cartaoClicado.getBoundingClientRect().top - alturaAntes;
+    if (Math.abs(desvio) > 1) window.scrollBy({ top: desvio, behavior: 'instant' });
+  }
   garanteImagens();
   garanteFontes();
   schedule();
-  levaParaAPeca();
+  // Voltando de um modelo para "Trazer a minha arte", a arte que a pessoa já tinha trazido volta.
+  if (!arte && artwork) entraNaMinhaArte();
+  if (!arte || ehMinhaArte()) levaParaAPeca();
+}
+
+/*
+  Leva a montagem para a Minha arte em camadas. O que a caneca já mostrava continua igual, agora em
+  camadas: o nome da arte livre de antes vira frase (repetida nos dois lados, quando a arte vai nos
+  dois) e o Pandinha vira adesivo, cada um no lugar e no tamanho em que o rodapé antigo os desenhava.
+  Assim um rascunho antigo abre como estava, e daí para a frente tudo se move.
+*/
+function entraNaMinhaArte({ nome = state.name } = {}) {
+  if (ehMinhaArte()) return;
+  const base = computePlacement(artwork, { ...state, name: nome, withPanda: state.withPanda }, MUG_SPEC);
+  const area = base.printArea;
+  const fx = (xMm) => (xMm - area.x) / area.width;
+  const fy = (yMm) => (yMm - area.y) / area.height;
+  const temArte = Boolean(artwork);
+  const temPanda = Boolean(state.withPanda);
+  const camadas = [];
+  if (nome) {
+    const grupo = base.centers.length > 1 ? `nome-${Date.now().toString(36)}` : null;
+    const centroY = temArte ? area.y + area.height - base.footerHeight / 2 : area.y + area.height * (temPanda ? 0.8 : 0.5);
+    const largura = base.slotWidth - (temPanda && temArte ? 22 : 6);
+    for (const centro of base.centers) {
+      camadas.push({
+        id: novoId(), tipo: 'frase', rotulo: 'Nome', texto: nome, fonte: state.fontFamily, cor: '--ink',
+        tamanho: temArte ? 8 : 11, largura: clamp(largura / area.width, 0.05, 1),
+        x: fx(centro + (temPanda && temArte ? 10 : 0)), y: fy(centroY), rotacao: 0, ...(grupo ? { grupo } : {}),
+      });
+    }
+  }
+  if (temPanda) {
+    const centro = base.centers[0];
+    const lado = temArte ? Math.min(16, base.footerHeight - 2) : Math.min(42, base.slotWidth - 6, area.height * 0.6);
+    const cx = temArte ? centro - base.slotWidth / 2 + 2 + lado / 2 : centro;
+    const cy = temArte ? area.y + area.height - base.footerHeight + 1 + lado / 2 : area.y + area.height * (nome ? 0.35 : 0.5);
+    // O rodapé encaixava o Pandinha num quadrado; a camada desenha pela largura.
+    const proporcao = proporcaoDaImagem(PANDA_ADESIVO) || 1;
+    const largura = proporcao > 1 ? lado / proporcao : lado;
+    camadas.push({ id: novoId(), tipo: 'adesivo', rotulo: 'Pandinha', arquivo: PANDA_ADESIVO, tamanho: largura / area.height, x: fx(cx), y: fy(cy), rotacao: 0 });
+  }
+  arte = { modelo: MINHA_ARTE, fundo: null, semente: 1, enfeites: null, camadas };
+  modeloAtual = null;
+  selecionada = null;
+  state.withPanda = true;
+  state.name = '';
+  limpaHistorico();
+  marcaModeloEscolhido();
+  atualizaModo();
+  mostraAba('arte');
+  garanteImagens();
+  garanteFontes();
+  schedule();
+}
+
+/** "+ Nome ou frase" na aba Minha arte: a frase nasce ali mesmo e abre para escrever. */
+function acrescentaNomeNaArte() {
+  if (!ehMinhaArte()) {
+    entraNaMinhaArte({ nome: TEXTO_DA_FRASE_NOVA });
+    const nova = arte.camadas.find((camada) => camada.tipo === 'frase');
+    if (nova) seleciona(nova.id, { mostrarPainel: true });
+  } else {
+    adicionaFrase();
+  }
+  const campoDoTexto = document.querySelector(`[data-corpo="${selecionada}"] input[type="text"]`);
+  campoDoTexto?.focus();
+  campoDoTexto?.select();
+}
+
+async function acrescentaPandinhaNaArte() {
+  if (!ehMinhaArte()) entraNaMinhaArte();
+  await adicionaPandinha();
 }
 
 /**
@@ -1018,13 +1384,13 @@ function levaParaAPeca() {
   const abas = document.getElementById('abas');
   if (!abas) return;
   const caixa = abas.getBoundingClientRect();
-  if (caixa.top >= 0 && caixa.bottom <= window.innerHeight) return; // o próximo passo já está à vista
+  if (caixa.top >= topoDaPagina() && caixa.bottom <= window.innerHeight) return; // o próximo passo já está à vista
   const peca = document.querySelector('.studio-preview');
-  const grudada = peca && getComputedStyle(peca).position === 'sticky' && window.innerWidth <= 850;
+  const grudada = peca && getComputedStyle(peca).position === 'sticky' && umaColuna();
   // `scrollMarginTop` reserva o espaço da caneca grudada; sem ele as abas parariam atrás dela.
   // Vale `scrollIntoView` e não `window.scrollTo`: além de respeitar essa folga, ele é quem funciona
   // quando a página está dentro de um contêiner com escala.
-  abas.style.scrollMarginTop = `${grudada ? Math.round(peca.getBoundingClientRect().height) + 8 : 8}px`;
+  abas.style.scrollMarginTop = `${topoDaPagina() + (grudada ? Math.round(peca.getBoundingClientRect().height) + 8 : 8)}px`;
   // Salto seco, e precisa ser 'instant': o CSS desta página tem `scroll-behavior: smooth` no html,
   // e 'auto' obedece a ele — a rolagem vira animada, não completa em navegador automatizado e a
   // checagem do guardião nunca pegaria a regressão. A troca de passo já mudou o painel inteiro;
@@ -1034,6 +1400,9 @@ function levaParaAPeca() {
 
 function atualizaModo() {
   el.apagarModelo.hidden = !(arte && ehMeuModelo(arte.modelo));
+  // A arte trazida pronta não vira modelo: o modelo guarda a montagem sem as imagens, e sem ela
+  // sobraria só o nome solto.
+  el.salvarModelo.hidden = ehMinhaArte();
   if (!arte) el.formMeuModelo.hidden = true;
   montaAbas();
   montaListas();
@@ -1497,8 +1866,23 @@ function lugarLivre() {
   return { x: clamp(fracao, 0.08, 0.92), y: 0.5 };
 }
 
-function acrescenta(camada) {
+/*
+  Item novo não nasce escondido embaixo de outro: tocar "+ Pandinha" duas vezes punha o segundo
+  exatamente em cima do primeiro, e parecia que nada tinha acontecido. Ele anda para o lado até achar
+  lugar (e dá a volta, se chegar na borda).
+*/
+function desviaDeQuemEstaAli(camada) {
+  for (let tentativa = 0; tentativa < 12; tentativa += 1) {
+    const ocupado = arte.camadas.some((outra) => Math.abs(outra.x - camada.x) < 0.03 && Math.abs(outra.y - camada.y) < 0.06);
+    if (!ocupado) return;
+    const adiante = camada.x + 0.07;
+    camada.x = adiante > 0.94 ? 0.06 + (adiante - 0.94) : adiante;
+  }
+}
+
+function acrescenta(camada, { desvia = true } = {}) {
   registra('estrutura');
+  if (desvia) desviaDeQuemEstaAli(camada);
   arte.camadas.push(camada);
   montaAbas();
   seleciona(camada.id);
@@ -1519,7 +1903,7 @@ function adicionaFrase() {
   if (!arte) return;
   const lugar = lugarLivre();
   acrescenta({
-    id: novoId(), tipo: 'frase', rotulo: 'Frase', texto: 'escreva aqui',
+    id: novoId(), tipo: 'frase', rotulo: 'Frase', texto: TEXTO_DA_FRASE_NOVA,
     x: lugar.x, y: 0.5, tamanho: 10, largura: 0.28, fonte: 'Caveat', cor: '--hand-ink', rotacao: 0,
   });
   document.querySelector(`[data-corpo="${selecionada}"] input[type="text"]`)?.focus();
@@ -1558,17 +1942,6 @@ async function adicionaPandinha(arquivo = ADESIVOS[0].arquivo, { y = 0.78, taman
   schedule();
 }
 
-/** O seletor de letra da arte livre usa a mesma biblioteca dos modelos. */
-function montaSeletorDeLetras() {
-  el.font.replaceChildren(...FONTES_DA_ARTE.map((fonte) => {
-    const opcao = document.createElement('option');
-    opcao.value = fonte.valor;
-    opcao.textContent = fonte.nome;
-    return opcao;
-  }));
-  el.font.value = state.fontFamily;
-}
-
 /** Um botão de grade com a imagem do acervo em versão leve. */
 function botaoDeImagem(item, rotulo, aoTocar) {
   const botaoElemento = document.createElement('button');
@@ -1602,10 +1975,12 @@ function montaFundoDaArte() {
   el.fundoArte.hidden = !arte;
   if (!arte) { el.fundoArte.replaceChildren(); return; }
   const titulo = document.createElement('p');
-  titulo.className = 'studio-campo';
+  titulo.className = 'studio-escolhido__titulo';
+  const nome = document.createElement('strong');
+  nome.textContent = modeloAtual?.nome || 'Sua arte';
   const texto = document.createElement('span');
-  texto.textContent = 'Cor do fundo da arte';
-  titulo.appendChild(texto);
+  texto.textContent = 'Cor do fundo';
+  titulo.append(nome, texto);
   const grupo = document.createElement('div');
   grupo.className = 'studio-cores';
   grupo.setAttribute('role', 'group');
@@ -1625,8 +2000,8 @@ function montaFundoDaArte() {
       registra('fundo-da-arte');
       arte.fundo = item.token;
       for (const outro of grupo.children) outro.setAttribute('aria-pressed', String(outro === botaoCor));
-      montaModelos();
-      marcaModeloEscolhido();
+      // Sem refazer a lista: a miniatura desenha o modelo, não a arte, e refazer 199 cartões a cada
+      // cor custava e podia mexer na rolagem da lista.
       schedule();
     });
     grupo.appendChild(botaoCor);
@@ -1777,6 +2152,7 @@ async function handleFile(file, destino = destinoDoArquivo) {
       artworkBlob = file;
       el.fileName.textContent = asset.name;
       el.fileInfo.hidden = false;
+      if (!arte) entraNaMinhaArte();
     }
     schedule();
   } catch (error) {
@@ -1789,6 +2165,8 @@ async function soltaNaCaneca(event) {
   const arquivo = event.dataTransfer?.files?.[0];
   if (!arquivo || !arte) return;
   event.preventDefault();
+  // Na Minha arte, a imagem solta em cima da caneca troca a arte, como no quadro de soltar.
+  if (ehMinhaArte()) { await handleFile(arquivo, { tipo: 'livre' }); return; }
   const ponto = viewer?.pontoEm?.(event);
   let destino = null;
   if (ponto) {
@@ -1800,7 +2178,7 @@ async function soltaNaCaneca(event) {
         id: novoId(), tipo: 'foto', rotulo: `Foto ${camadasDo('foto').length + 1}`, forma: 'arredondado',
         x: clamp(fracao.x, 0.06, 0.94), y: clamp(fracao.y, 0.1, 0.9), largura: 0.24, altura: 0.6,
         rotacao: 0, ajuste: { scale: 1, offsetX: 0, offsetY: 0 },
-      });
+      }, { desvia: false }); // soltou ali, fica ali
       destino = { tipo: 'camada', id: nova.id };
     }
   } else {
@@ -1862,29 +2240,20 @@ function resetAdjustments() {
 }
 
 function markPreset() {
-  let nome = `Interior ${optionLabel(el.inside, state.inside).toLowerCase()} · alça ${optionLabel(el.handle, state.handle).toLowerCase()}`;
   for (const button of presetButtons) {
     const preset = PRESETS[button.dataset.preset];
-    const igual = preset.inside === state.inside && preset.handle === state.handle;
-    button.setAttribute('aria-pressed', String(igual));
-    if (igual) nome = preset.nome;
+    button.setAttribute('aria-pressed', String(preset.inside === state.inside && preset.handle === state.handle));
   }
-  if (el.pecaResumo) el.pecaResumo.textContent = nome;
+  for (const bolinha of el.coresInterior.children) bolinha.setAttribute('aria-pressed', String(bolinha.dataset.cor === state.inside));
+  for (const bolinha of el.coresAlca.children) bolinha.setAttribute('aria-pressed', String(bolinha.dataset.cor === state.handle));
 }
 
 function setColors(inside, handle) {
-  if (inside && CERAMICA[inside]) { state.inside = inside; el.inside.value = inside; }
-  if (handle && CERAMICA[handle]) { state.handle = handle; el.handle.value = handle; }
+  if (inside && CERAMICA[inside]) state.inside = inside;
+  if (handle && CERAMICA[handle]) state.handle = handle;
   markPreset();
   applyColors();
   updateOrderLink();
-}
-
-function readTextOptions() {
-  state.name = el.name.value.trim();
-  state.fontFamily = el.font.value;
-  if (!arte) state.withPanda = el.panda.checked;
-  schedule();
 }
 
 function readLayout() {
@@ -1960,6 +2329,13 @@ function montagemAtual() {
 
 function guardaRascunho() {
   clearTimeout(rascunhoPendente);
+  /*
+    Só se guarda o que valeria a pena oferecer de volta. A abertura da página desenha a caneca vazia
+    antes de ler o rascunho, e esse desenho gravava a caneca vazia por cima dele 1,2 s depois: quem
+    recarregava duas vezes sem tocar em "Continuar de onde parei" perdia o trabalho — e, em aparelho
+    lento, o rascunho sumia antes até de ser oferecido (visto em 23/09/2026).
+  */
+  if (!arte && !artwork) return;
   rascunhoPendente = setTimeout(async () => {
     const fotosSalvas = {};
     for (const [id, item] of fotos) if (item.blob) fotosSalvas[id] = item.blob;
@@ -1985,17 +2361,55 @@ async function ofereceRascunho() {
 }
 
 /** Coloca na tela uma montagem guardada (rascunho, projeto em arquivo ou link). */
+/** Nome, letra e Pandinha de uma montagem guardada antes de a Minha arte ser em camadas. */
+function leEscolhasAntigas(c) {
+  state.name = String(c.name || '').slice(0, 24).trim();
+  state.fontFamily = fontePorValor(c.fontFamily) ? c.fontFamily : 'Fredoka';
+  state.withPanda = c.withPanda !== false;
+}
+
+/** Onde vai a arte livre e os ajustes dela, de uma montagem guardada. */
+function leAjustesDaArte(c) {
+  if (LAYOUTS[c.layout]) { state.layout = c.layout; el.form.elements.layout.value = c.layout; }
+  el.scale.value = String(Math.round((Number(c.scale) || 1) * 100));
+  el.x.value = String(Math.round((Number(c.offsetX) || 0) * 100));
+  el.y.value = String(Math.round((Number(c.offsetY) || 0) * 100));
+  el.rotation.value = String(Math.round(Number(c.rotation) || 0));
+  readAdjustments();
+}
+
 async function aplicaMontagem(dados, { fotos: fotosDoArquivo = null } = {}) {
   const c = dados.escolhas || {};
+  // Abre sempre de uma caneca limpa: a Minha arte que está na tela não empresta camadas à que chega.
+  if (ehMinhaArte()) { arte = null; selecionada = null; atualizaModo(); }
   setColors(c.inside, c.handle);
-  el.name.value = String(c.name || '').slice(0, 24);
-  el.font.value = fontePorValor(c.fontFamily) ? c.fontFamily : 'Fredoka';
-  el.panda.checked = c.withPanda !== false;
-  readTextOptions();
+  leEscolhasAntigas(c);
   if (dados.cena) { cenaAtual = dados.cena; viewer?.setCenario(cenaAtual); }
   if (dados.acabamento) { acabamentoAtual = dados.acabamento; viewer?.setAcabamento(acabamentoAtual); }
   montaCenas();
-  if (dados.arte?.camadas?.length) {
+  const livre = dados.arteLivre;
+  const arquivoLivre = livre instanceof Blob ? new File([livre], dados.nomeDaArte || 'Minha arte', { type: livre.type })
+    : livre?.dados ? await arquivoDeDados(livre) : null;
+  if (dados.arte?.modelo === MINHA_ARTE) {
+    // A Minha arte em camadas: as camadas voltam como estavam e a arte volta por baixo delas.
+    escolheModelo(null);
+    leAjustesDaArte(c);
+    arte = { ...dados.arte, camadas: (dados.arte.camadas || []).map((camada) => ({ ...camada })) };
+    modeloAtual = null;
+    contador = arte.camadas.length + 10;
+    selecionada = null;
+    state.withPanda = true;
+    state.name = '';
+    limpaHistorico();
+    marcaModeloEscolhido();
+    atualizaModo();
+    // A arte primeiro: é o que mais aparece na caneca. Letras e imagens das camadas vêm logo depois.
+    if (arquivoLivre) await handleFile(arquivoLivre, { tipo: 'livre' });
+    else removeArtwork();
+    mostraAba('arte');
+    await garanteImagens();
+    await garanteFontes();
+  } else if (dados.arte?.camadas?.length) {
     escolheModelo(dados.arte.modelo || null);
     arte = { ...dados.arte, camadas: dados.arte.camadas.map((camada) => ({ ...camada })) };
     modeloAtual = acheModelo(arte.modelo);
@@ -2016,17 +2430,13 @@ async function aplicaMontagem(dados, { fotos: fotosDoArquivo = null } = {}) {
     }
     mostraAba('fotos');
   } else {
+    // Montagem de antes das camadas na Minha arte: a arte entra e o nome e o Pandinha viram camadas.
     escolheModelo(null);
-    if (LAYOUTS[c.layout]) { state.layout = c.layout; el.form.elements.layout.value = c.layout; }
-    el.scale.value = String(Math.round((Number(c.scale) || 1) * 100));
-    el.x.value = String(Math.round((Number(c.offsetX) || 0) * 100));
-    el.y.value = String(Math.round((Number(c.offsetY) || 0) * 100));
-    el.rotation.value = String(Math.round(Number(c.rotation) || 0));
-    readAdjustments();
-    const livre = dados.arteLivre;
-    if (livre instanceof Blob) await handleFile(new File([livre], dados.nomeDaArte || 'Minha arte', { type: livre.type }), { tipo: 'livre' });
-    else if (livre?.dados) await handleFile(await arquivoDeDados(livre), { tipo: 'livre' });
+    leAjustesDaArte(c);
+    if (arquivoLivre) await handleFile(arquivoLivre, { tipo: 'livre' });
     else removeArtwork();
+    if (!arte && state.name) entraNaMinhaArte();
+    await garanteFontes();
   }
   limpaHistorico();
   schedule();
@@ -2233,7 +2643,7 @@ async function saveProject() {
       escolhas: { ...state },
       arte: arte ? { ...arte, camadas: arte.camadas.map((camada) => ({ ...camada })) } : null,
       fotos: fotosSalvas,
-      arteLivre: arte ? null : await arquivoDe(artworkBlob, artwork?.name),
+      arteLivre: arte && !ehMinhaArte() ? null : await arquivoDe(artworkBlob, artwork?.name),
     };
     download(new Blob([JSON.stringify(project)], { type: 'application/json' }), `caneca-panda-mimo${modeloAtual ? `-${slug(modeloAtual.nome)}` : ''}.json`);
     setStatus('Projeto salvo. Para continuar depois, solte esse arquivo na área da arte.');
@@ -2254,42 +2664,12 @@ async function openProject(file) {
   try {
     const project = JSON.parse(await file.text());
     if (project?.tipo !== PROJETO_TIPO || !project.escolhas) throw new Error('Esse arquivo não é um projeto de caneca da Panda Mimo.');
-    const c = project.escolhas;
-    setColors(c.inside, c.handle);
-    el.name.value = String(c.name || '').slice(0, 24);
-    el.font.value = fontePorValor(c.fontFamily) ? c.fontFamily : 'Fredoka';
-    el.panda.checked = c.withPanda !== false;
-    readTextOptions();
-    if (project.arte?.camadas?.length) {
-      escolheModelo(project.arte.modelo || null);
-      arte = { ...project.arte, camadas: project.arte.camadas.map((camada) => ({ ...camada })) };
-      modeloAtual = acheModelo(arte.modelo);
-      contador = arte.camadas.length + 10;
-      selecionada = null;
-      state.withPanda = true;
-      limpaHistorico();
-      marcaModeloEscolhido();
-      atualizaModo();
-      await garanteImagens();
-      await garanteFontes();
-      for (const [id, registro] of Object.entries(project.fotos || {})) {
-        if (registro?.dados) await handleFile(await arquivoDeDados(registro), { tipo: 'camada', id });
-      }
-      mostraAba('fotos');
-    } else {
-      escolheModelo(null);
-      if (LAYOUTS[c.layout]) { state.layout = c.layout; el.form.elements.layout.value = c.layout; }
-      el.scale.value = String(Math.round((Number(c.scale) || 1) * 100));
-      el.x.value = String(Math.round((Number(c.offsetX) || 0) * 100));
-      el.y.value = String(Math.round((Number(c.offsetY) || 0) * 100));
-      el.rotation.value = String(Math.round(Number(c.rotation) || 0));
-      readAdjustments();
-      const registro = project.arteLivre || project.arte;
-      if (registro?.dados) await handleFile(await arquivoDeDados(registro), { tipo: 'livre' });
-      else removeArtwork();
-    }
-    limpaHistorico();
-    schedule();
+    // Projetos antigos guardavam a arte livre em `arte`, quando ainda não havia arte em camadas.
+    const arteLivre = project.arteLivre || (project.arte?.dados ? project.arte : null);
+    const emCamadas = project.arte && Array.isArray(project.arte.camadas) ? project.arte : null;
+    const fotosDoArquivo = {};
+    for (const [id, registro] of Object.entries(project.fotos || {})) if (registro?.dados) fotosDoArquivo[id] = registro;
+    await aplicaMontagem({ escolhas: project.escolhas, arte: emCamadas, arteLivre, nomeDaArte: arteLivre?.nome }, { fotos: fotosDoArquivo });
     setStatus('Projeto aberto. Continue de onde parou.');
   } catch (error) {
     setError(error.message || 'Não conseguimos abrir esse projeto.');
@@ -2406,6 +2786,8 @@ function ligaVistaAberta() {
     const fracao = fracaoDoEventoPlano(event);
     if (!arquivo || !fracao) return;
     event.preventDefault();
+    // Na Minha arte, o arquivo solto aqui troca a arte, como em cima da caneca.
+    if (ehMinhaArte()) { await handleFile(arquivo, { tipo: 'livre' }); return; }
     const camada = camadaEm(arte, pontoMm(fracao), areaMm, medidor);
     if (camada?.tipo === 'foto') await handleFile(arquivo, { tipo: 'camada', id: camada.id });
     else {
@@ -2413,7 +2795,7 @@ function ligaVistaAberta() {
         id: novoId(), tipo: 'foto', rotulo: `Foto ${camadasDo('foto').length + 1}`, forma: 'arredondado',
         x: clamp(fracao.x, 0.06, 0.94), y: clamp(fracao.y, 0.1, 0.9), largura: 0.24, altura: 0.6,
         rotacao: 0, ajuste: { scale: 1, offsetX: 0, offsetY: 0 },
-      });
+      }, { desvia: false }); // soltou ali, fica ali
       await handleFile(arquivo, { tipo: 'camada', id: nova.id });
     }
   });
@@ -2429,8 +2811,6 @@ function bind() {
     const preset = PRESETS[button.dataset.preset];
     if (preset) setColors(preset.inside, preset.handle);
   });
-  el.inside.addEventListener('change', () => setColors(el.inside.value, null));
-  el.handle.addEventListener('change', () => setColors(null, el.handle.value));
 
   el.travar.addEventListener('click', alternaCadeado);
   // O atalho "Ir direto para o editor" leva a #abas; sem tabindex o foco pararia no vazio e a
@@ -2453,11 +2833,54 @@ function bind() {
 
   el.abas.tabIndex = -1;
   el.abas.addEventListener('keydown', andaNasAbas);
-  el.categoria.addEventListener('change', () => {
-    categoria = el.categoria.value;
-    el.models.scrollTop = 0;
-    montaModelos();
+  // O cardápio de ocasiões: abre pelo botão (pelo teclado, clique com detail 0), anda com as setas,
+  // fecha com Esc, com o X da folha, com um clique fora e ao escolher.
+  el.categoria.addEventListener('click', (evento) => abreAssuntos(undefined, { foco: evento.detail === 0 }));
+  el.fecharAssuntos.addEventListener('click', () => abreAssuntos(false));
+  // No conjunto (botão e cardápio): aberto pelo mouse, o foco está no botão, e dali Esc fecha e a seta
+  // para baixo entra na lista.
+  el.assunto.addEventListener('keydown', (evento) => {
+    if (!el.painelAssuntos.open) return;
+    if (evento.key === 'Escape') {
+      evento.preventDefault();
+      abreAssuntos(false);
+      el.categoria.focus();
+      return;
+    }
+    const itens = [...el.listaAssuntos.querySelectorAll('[data-assunto]')];
+    if (document.activeElement === el.categoria && evento.key === 'ArrowDown') {
+      evento.preventDefault();
+      (el.listaAssuntos.querySelector('[aria-pressed="true"]') || itens[0])?.focus();
+      return;
+    }
+    const atual = itens.indexOf(document.activeElement);
+    const destino = { ArrowDown: atual + 1, ArrowUp: atual - 1, Home: 0, End: itens.length - 1 }[evento.key];
+    if (atual < 0 || destino === undefined) return;
+    evento.preventDefault();
+    itens[clamp(destino, 0, itens.length - 1)].focus();
   });
+  el.painelAssuntos.addEventListener('close', () => {
+    el.categoria.setAttribute('aria-expanded', 'false');
+    if (!document.activeElement || document.activeElement === document.body || el.painelAssuntos.contains(document.activeElement)) {
+      el.categoria.focus({ preventScroll: true });
+    }
+  });
+  // Na folha, o clique no fundo escurecido cai no próprio <dialog>, que não tem respiro por dentro.
+  el.painelAssuntos.addEventListener('click', (evento) => {
+    if (evento.target === el.painelAssuntos) abreAssuntos(false);
+  });
+  document.addEventListener('pointerdown', (evento) => {
+    if (!el.painelAssuntos.open || evento.target.closest('.studio-assunto')) return;
+    abreAssuntos(false);
+  });
+  window.addEventListener('resize', () => {
+    if (!el.painelAssuntos.open) return;
+    if (el.painelAssuntos.classList.contains('studio-assunto__painel--folha') !== emFolha()) abreAssuntos(false);
+    else posicionaAssuntos();
+  });
+  // A arte maior some quando a lista ou a página rolam: ela ficaria apontando para outro cartão.
+  el.models.addEventListener('scroll', escondeArteMaior, { passive: true });
+  window.addEventListener('scroll', escondeArteMaior, { passive: true });
   el.busca.addEventListener('input', () => {
     busca = semAcento(el.busca.value.trim());
     el.models.scrollTop = 0;
@@ -2511,6 +2934,8 @@ function bind() {
   document.addEventListener('paste', (event) => {
     const item = [...(event.clipboardData?.items || [])].find((i) => i.kind === 'file' && i.type.startsWith('image/'));
     if (!item) return;
+    // Dentro do site, colar num campo de outra seção (a busca, o depoimento) não é com o estúdio.
+    if (event.target.closest?.('input, textarea') && !event.target.closest('.studio-layout')) return;
     const destino = arte && selecionada && camadaPorId(selecionada)?.tipo === 'foto'
       ? { tipo: 'camada', id: selecionada } : { tipo: 'livre' };
     handleFile(item.getAsFile(), destino);
@@ -2521,9 +2946,8 @@ function bind() {
   for (const input of [el.scale, el.x, el.y, el.rotation]) input.addEventListener('input', readAdjustments);
   el.reset.addEventListener('click', resetAdjustments);
   for (const radio of el.form.elements.layout) radio.addEventListener('change', readLayout);
-  el.name.addEventListener('input', readTextOptions);
-  el.font.addEventListener('change', () => { readTextOptions(); garanteFontes(); });
-  el.panda.addEventListener('change', readTextOptions);
+  el.addFraseNaArte.addEventListener('click', acrescentaNomeNaArte);
+  el.addPandinhaNaArte.addEventListener('click', acrescentaPandinhaNaArte);
 
   el.saveGuide.addEventListener('click', saveGuide);
   // O clique abre o Canva pelo próprio link e, no mesmo gesto, baixa a arte.
@@ -2559,12 +2983,18 @@ async function init() {
   montaModelos();
   montaGradeDeEnfeites();
   montaGradeDeElementos();
-  montaSeletorDeLetras();
   montaCenas();
+  montaCoresDaPeca();
   atualizaCadeado();
   atualizaModo();
-  markPreset();
   syncRangeOutputs();
+  if (typeof ResizeObserver === 'function') {
+    new ResizeObserver(ajustaColunaDaPeca).observe(el.colunaPeca);
+    new ResizeObserver(ajustaVistaAberta).observe(el.flat);
+  }
+  window.addEventListener('resize', () => { ajustaColunaDaPeca(); ajustaVistaAberta(); });
+  ajustaColunaDaPeca();
+  ajustaVistaAberta();
   const fontsReady = document.fonts?.load
     ? Promise.allSettled(['600 16px "Fredoka"', '600 16px "Caveat"', '600 16px "Nunito"'].map((font) => document.fonts.load(font)))
     : Promise.resolve();

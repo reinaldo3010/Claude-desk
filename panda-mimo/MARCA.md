@@ -165,7 +165,7 @@ adultos que presenteiam), não é luxo frio. Não fala em "produto", fala em **p
 | Título comercial do hero | Presentes personalizados com o nome de quem você ama. | Só no hero do site, em Fredoka; diz o que a marca vende antes da assinatura dizer como |
 | Assinatura de produto | Mais que um presente, um mimo. | Seção de diferenciais, embalagem, post de apresentação |
 | Adesivo / faixa | Personalizados com amor | Faixa sobre a seção de produtos, sticker em stories |
-| Adesivo / selo | Personalizado do seu jeito | Coração pontilhado no simulador, tag |
+| Adesivo / selo | Personalizado do seu jeito | Coração pontilhado na seção Monte seu mimo, tag |
 | Adesivo / etiqueta | Feito especialmente para você! | Etiqueta na hero, tag da embalagem |
 | Adesivo / faixa | Para momentos especiais | Faixa de ocasiões |
 | Convite | Vamos fazer o seu? | Contato, fim de post, CTA final |
@@ -214,16 +214,16 @@ Poucas chamadas, sempre as mesmas, para a pessoa nunca precisar decidir o que um
 
 | Papel | Texto | Onde | Leva para |
 |---|---|---|---|
-| Principal | **Quero criar meu mimo** | hero, contato | simulador (hero) ou WhatsApp (contato) |
+| Principal | **Quero criar meu mimo** | hero, contato | estúdio da caneca, na seção Monte seu mimo (hero), ou WhatsApp (contato) |
 | Secundária | **Ver as peças** | hero | catálogo |
 | Peça | **Quero essa** | cartão e detalhe da peça | WhatsApp com a peça no texto |
-| Simulador | **Pedir esse mimo no WhatsApp** | abaixo da prévia (nome) e no estúdio da caneca | WhatsApp com nome, base e cor; no estúdio, com cores, arte e nome |
-| Estúdio da caneca | **Ver minha foto na caneca** | seção Monte seu mimo | `caneca-3d.html`, a caneca em 360° |
+| Estúdio | **Pedir esse mimo no WhatsApp** | no estúdio da caneca (seção Monte seu mimo e `caneca-3d.html`) | WhatsApp com a montagem: modelo ou arte, fotos, frases e cores da peça |
+| Peça (caneca) | **Ver com meu nome** | detalhe da caneca | o estúdio, na seção Monte seu mimo |
 | Empresas | **Orçamento para 10+ unidades** | pedidos em quantidade | WhatsApp com a pergunta de quantidade |
 | Lançamento | **Me avise** | cartão em teste | WhatsApp pedindo aviso |
 | Apoio | Pedir pelo WhatsApp · Perguntar no WhatsApp | busca sem resultado, dúvidas | WhatsApp |
 
-Junto da principal e do simulador vai sempre a frase de segurança: **"Nada é produzido sem o seu
+Junto da principal e do estúdio vai sempre a frase de segurança: **"Nada é produzido sem o seu
 'pode fazer'."** Ela vale para todo pedido, ao contrário de "só paga depois", que só vale até 10
 unidades e por isso não vai para o hero.
 
@@ -277,8 +277,8 @@ orelhas e almofadinhas das patas em rosa-pêssego, olhos grandes e brilhantes, u
 cabeça. Acabamento macio e volumoso, como pelúcia ou adesivo inflado. Ele é **o cuidado da marca em
 forma de personagem**: quem embala, quem entrega, quem diz "feito pra você".
 
-Nome oficial: **Pandinha**. É como o site já o chama no simulador ("Com o pandinha") e como a marca
-se refere a ele em qualquer canal.
+Nome oficial: **Pandinha**. É como o site já o chama no estúdio ("+ Pandinha", e "Com o Pandinha" no
+pedido) e como a marca se refere a ele em qualquer canal.
 
 ### 6.2 Papel na comunicação
 - Ele **acompanha**, nunca compete com a peça. Segura, abraça, entrega, espia, aponta.
@@ -403,9 +403,10 @@ Proibido: pêssego oficial `#FFB59C` como cor de texto sobre fundo claro (não p
 branco sobre pêssego; sálvia sobre areia.
 
 ### 7.4 Cores das peças
-As peças físicas saem em quatro cores, e o simulador do site usa exatamente estas: **Creme**
-`#F3EEE4` · **Sálvia** `#A8C5A2` · **Pêssego** `#FFB59C` · **Preta** `#1F1D1A`. Na peça preta e na
-pêssego, a arte vai em papel `#FBF6EF`; nas demais, em nanquim.
+As peças físicas saem em quatro cores: **Creme** `#F3EEE4` · **Sálvia** `#A8C5A2` · **Pêssego**
+`#FFB59C` · **Preta** `#1F1D1A`. Na peça preta e na pêssego, a arte vai em papel `#FBF6EF`; nas demais,
+em nanquim. (O simulador de desenho, que usava estas quatro, saiu do site em 23/09/2026; o estúdio da
+caneca trabalha com as cores da cerâmica, 10.3.)
 
 ### 7.5 Não fazer
 Sem gradientes coloridos, sem neon, sem azul, roxo, vermelho ou amarelo puro. Sem preto `#000000`
@@ -484,9 +485,9 @@ sistema de terceiros), use **Nunito para tudo** e mantenha o manuscrito só como
 | **Faixas (fitinhas)** | fita pêssego com texto em Caveat e coração: *Personalizados com amor*, *Para momentos especiais*, *Feito com carinho* | Só como rótulo de seção ou sticker de story. Não empilhar faixas. |
 | **Corações** | pontilhado ("do seu jeito"), costurado, cheio pêssego | O coração é o segundo símbolo da marca depois do panda. Pode aparecer sozinho como marca mínima. |
 | **Patas** | preta e rosa | Marcador de lista, separador, detalhe de canto. Nunca como padrão repetido em toda a tela. |
-| **Pontilhado de fundo** | pontos pêssego a 45% de opacidade em grade de 16 a 20 px sobre areia suave | Fundo dos quadros de produto e do simulador. É a "textura" da marca. |
+| **Pontilhado de fundo** | pontos pêssego a 45% de opacidade em grade de 16 a 20 px sobre areia suave | Fundo dos quadros de produto. É a "textura" da marca. |
 | **Sombra** | `0 14px 40px -18px rgba(23,21,18,.28)` | Só em cartões e diálogos. Nunca em texto ou logo. |
-| **Linhas** | 1,5 px em areia | Divisórias e bordas. Nunca preto. |
+| **Linhas** | 1,5 px em areia | Divisórias e bordas. Nunca preto. No estúdio da caneca, 1 px: ali é ferramenta, e traço leve deixa a arte da pessoa em primeiro plano (decisão do dono, 23/09/2026). |
 
 Ícones (`ic-*.webp`, `badge-*.webp`): traço arredondado, duas cores (nanquim + pêssego), fundo
 transparente. Ícones novos seguem esse desenho; não misturar com bibliotecas de ícones de linha fina.
@@ -556,13 +557,15 @@ tons quentes, superfícies de madeira, linho, papel. Fundos limpos e neutros (cr
 cinza quente). Estas podem ter fundo, pois vivem na galeria em cantos arredondados; nunca no catálogo.
 
 ### 10.3 Prévia real
-O simulador do site desenha o nome na foto real da peça (garrafa, caneca, copo) usando uma "placa"
-posicionada em porcentagem da foto. Ao trocar a foto-base de uma dessas três peças, a posição e a cor
-da placa precisam ser recalibradas em `script.js` (`FOTO_REAL`). Prévias enviadas por WhatsApp seguem o
-mesmo princípio: arte aplicada na peça, cor e posição reais, nada de arte solta.
+A prévia do site é o estúdio da caneca em 360°, e prévias enviadas por WhatsApp seguem o mesmo
+princípio: arte aplicada na peça, cor e posição reais, nada de arte solta. (Até 23/09/2026 havia também
+um simulador de desenho, que punha o nome na foto real da garrafa, da caneca e do copo; saiu a pedido do
+dono, e o estúdio vai crescer para as outras peças.)
 
-**Estúdio da caneca em 360° (`caneca-3d.html`, setembro de 2026).** Para foto ou arte própria, o site tem
-um segundo simulador, só de caneca: um modelo paramétrico de referência (caneca reta de 325 ml, 82 × 95 mm,
+**Estúdio da caneca em 360° (setembro de 2026).** Mora na seção **Monte seu mimo** da página inicial,
+dentro do site (desde 23/09/2026), e em `caneca-3d.html`, que é a mesma marcação e serve aos links de
+montagem e às páginas de fora. Na página inicial ele só carrega quando a seção se aproxima da tela, para
+não pesar a abertura, e a caneca gruda logo abaixo da barra do topo. É um modelo paramétrico de referência (caneca reta de 325 ml, 82 × 95 mm,
 área de personalização de 210 × 90 mm com folga junto à alça), renderizado no navegador, com cores do
 interior e da alça, arte em um lado, nos dois ou ao redor, nome em Fredoka ou Caveat e o Pandinha adesivo
 (`panda-coracao.webp`, nunca a versão 3D da 6.5). A imagem da pessoa fica no navegador e só vira arquivo
@@ -602,18 +605,21 @@ regras:
 **Como o estúdio se organiza (setembro de 2026).** A tela tem dois lados com papéis fixos, e é assim
 que ela cresce sem virar uma pilha de controles:
 
-- **A peça, à esquerda.** A caneca em 360°, as vistas, o zoom, as cores do interior e da alça (num
-  bloco que abre) e a arte aberta. Tudo o que é da peça mora junto da peça.
-- **A arte, à direita, em abas.** Modelo, Fotos, Frases e Enfeites, ou Modelo e Minha arte quando a
-  pessoa traz a arte pronta. Cada aba mostra só o seu tipo de item, com a contagem ao lado do nome.
+- **A peça, à esquerda.** A caneca em 360°, as vistas e o zoom e, logo abaixo dela e sempre à vista, as
+  cores da peça (combinações prontas e bolinhas de interior e alça), o acabamento, a cena e a arte aberta
+  na largura da coluna. Tudo o que é da peça mora junto da peça, e nada dela fica atrás de um clique.
+- **A arte, à direita, em abas.** Modelo, Fotos, Frases e Enfeites, ou Modelo, Minha arte, Frases e
+  Enfeites quando a pessoa traz a arte pronta: a arte dela vai por baixo, na altura inteira, e nome,
+  Pandinhas e enfeites entram por cima, livres como em qualquer modelo. Cada aba mostra só o seu tipo de item, com a contagem ao lado do nome.
   Um item é um cartão que abre no lugar, com os controles dele dentro, e só um fica aberto por vez.
-- **A ocasião é um seletor, não uma parede de botões.** As categorias vêm agrupadas (Datas
-  comemorativas, Momentos, Do dia a dia, Sua arte) e há busca por nome. A lista abre com seis modelos
-  e cresce sob pedido. Dá para acrescentar ocasiões sem mexer no layout.
+- **A ocasião é um cardápio, não uma parede de botões.** As ocasiões vêm agrupadas em colunas, cada
+  uma com quantos modelos tem, num menu que flutua sobre a página (no celular, uma folha que sobe de
+  baixo); há busca por nome, e a lista de modelos tem rolagem própria. Dá para acrescentar ocasiões sem
+  mexer no layout.
 - **Clicar na caneca abre a aba do item.** A peça e o painel falam a mesma língua: escolher pela peça
   leva ao cartão certo, e escolher pelo cartão contorna o item na arte aberta.
 - **Um só padrão de campo.** Todo seletor e todo campo de texto do estúdio tem o mesmo desenho: canto
-  arredondado, borda de areia, 46 px de altura e a letra da marca. Mudar um controle de lugar não pode
+  arredondado, borda de areia, 44 px de altura no dedo e 40 no mouse, e a letra da marca. Mudar um controle de lugar não pode
   devolvê-lo à aparência crua do navegador, e o guardião reprova qualquer campo fora desse padrão.
 - **Cadeado na prévia, fechado por padrão.** Com ele fechado, arrastar na caneca só gira a peça: um
   toque escolhe o item, mas nada sai do lugar sem querer. Abrindo o cadeado, arrastar move o item.
@@ -671,6 +677,17 @@ fora abrir um projeto já com a arte dentro sem integração oficial, e a págin
 prometer o que não faz. Quem quiser começar do zero baixa só o gabarito, com a margem de segurança de
 5 mm e as marcas da frente, do verso e da alça. Na volta, "Trazer a arte do Canva" recebe o PNG e
 aplica ao redor da caneca; se a proporção não bater, a página avisa em vez de cortar em silêncio.
+
+**Como o estúdio se comporta (23/09/2026, pedido do dono).** Escolher um modelo não troca de etapa: a
+aba continua Modelo, com o modelo e a cor do fundo no topo, e quem leva adiante é "Continuar para
+fotos". A roda do mouse sobre a caneca dá zoom; no limite do zoom, a roda volta a rolar a página. As
+ocasiões abrem num cardápio em colunas, e a arte de um modelo aparece maior quando o mouse descansa no
+cartão (no celular, segurando o dedo). Cores da peça, acabamento, cena e arte aberta ficam à vista logo
+abaixo da caneca; o escolhido é leve (fundo areia, contorno pêssego), nunca pílula preta. Quando a
+coluna da peça passa da altura da janela, ela gruda pelo pé, para a arte aberta nunca ficar fora de
+alcance. Abaixo de 760 px o estúdio é uma coluna: a caneca gruda no topo na largura inteira e nunca
+passa de 45% da altura da tela, e a peça vem depois do editor. Botões na medida de ferramenta, preto só
+em "Pedir esse mimo no WhatsApp". Detalhes e números em `simulador/REDESENHO-LEVE.md`.
 
 ### 10.4 Não fazer
 Sem fundo branco recortado às pressas, sem sombra dura, sem filtro colorido, sem peça cortada pela
@@ -835,7 +852,7 @@ de layout com `overflow: hidden` · apagar assets existentes ao ampliar o acervo
 | Paleta (seção 7) | variáveis em `styles.css` (`--ink`, `--paper`, `--peach`...) |
 | Tipografia e escala (seção 8) | `--f-display`, `--f-hand`, `--f-body`, `--fs-*` |
 | Raios, sombra, largura (seção 9) | `--r-lg/md/sm`, `--shadow`, `--wrap` |
-| Cores das peças (7.4) | `--sw` nos rótulos de cor do simulador, `FOTO_REAL` em `script.js` |
+| Cores das peças (7.4) | só o manual e as fotos do catálogo; as cores da cerâmica do estúdio ficam em `CERAMICA`, `simulador/estudio.js` |
 | Regras de foto (seção 10) | `preparaFoto` em `admin.js` e as travas de pixel em `qa/audit.mjs` |
 | Assinaturas e rótulos (seção 4) | textos de `index.html`, `produtos.js` e mensagens `data-msg` |
 | Acervo do mascote e adesivos (6, 9) | `assets/panda-*.webp`, `assets/faixa-*.webp` etc. |
@@ -917,7 +934,7 @@ O botão flutuante usa o símbolo SVG do WhatsApp já presente no site.
 pixelada. Fotos e mascotes continuam em WebP com as versões de alta densidade quando
 necessárias; ampliar um arquivo não recupera detalhes ausentes na fonte.
 
-No simulador, o coração vetorial acompanha a frase HTML “Personalizado do seu jeito”.
+Na seção Monte seu mimo, o coração vetorial acompanha a frase HTML “Personalizado do seu jeito”.
 O celular da seção de redes é uma composição de CSS, Pandinha do acervo e “Siga-nos!”
 em HTML. Essas frases têm ao menos 18 px. Os links das redes usam os símbolos SVG
 já presentes no site. O azulejo em teste ganhou ilustração própria (`lanc-azulejo-frase.webp`, em
@@ -953,6 +970,8 @@ adereço pequeno no Pandinha em datas comemorativas, com aprovação prévia (6.
 ## Histórico
 | Data | Versão | O que mudou |
 |---|---|---|
+| set/2026 | 2.20 | O estúdio da caneca em 360° passa a morar na seção Monte seu mimo da página inicial, dentro do site, no lugar do simulador de desenho de garrafa, caneca e copo (decisão do dono: o estúdio vai crescer para as outras peças). Carrega só quando a seção se aproxima; a caneca gruda abaixo da barra do topo; o botão flutuante sai do caminho sobre ele. A chamada "Ver minha foto na caneca" sai (4.7); "Ver com meu nome" fica só na caneca e leva ao estúdio (4.7, 7.4, 10.3). |
+| set/2026 | 2.19 | Estúdio leve (10.3 e 9): a Minha arte passa a ser em camadas — a arte trazida pronta vai por baixo, na altura inteira, e nome, Pandinhas e enfeites entram por cima, livres (o rodapé fixo com nome e um Pandinha saiu). Escolher o modelo não troca de etapa, a roda dá zoom e devolve a rolagem no limite, ocasiões num cardápio em colunas (folha no celular), arte do modelo maior no mouse e no dedo, traço de 1 px no estúdio e preto só na chamada do pedido. Cores da peça, acabamento, cena e arte aberta à vista logo abaixo da caneca, com o escolhido leve; a coluna da peça gruda pelo pé quando passa da janela. O layout de uma coluna passa a valer abaixo de 760 px, com a caneca na largura inteira e no máximo 45% da altura da tela. |
 | set/2026 | 2.18 | Segundo lote do mesmo dia: mais 35 poses do Pandinha (profissões, saúde, esporte, paixões e ocasiões — formatura, aniversário, Natal, Páscoa, padrinhos, bebê, casa nova, amizade, agradecimento e carinho) e 4 adesivos do acervo (laço, coração com folhas, margaridas, presente), com uma arte pronta para cada pose. A coleção "Com o Pandinha" passa a 55 artes em cinco assuntos (6.3, exceção de 6.4). |
 | set/2026 | 2.17 | As 26 imagens do acervo entram no estúdio, aprovadas pelo dono: 20 poses do Pandinha em profissões e paixões (6.3, exceção de 6.4) e 6 aquarelas, com uma arte pronta para cada em duas coleções novas, "Com o Pandinha" e "Aquarela". Imagem na arte ganha regra própria em 9.1: nunca abaixo de 300 dpi, caixa que abraça o desenho, mestre no kit e versão no site. E o limite de um Pandinha por caneca cai (6.2 e 10.3): na arte que a pessoa monta, a quantidade é dela. |
 | set/2026 | 2.16 | Acervo PNG interno: seis ilustrações delicadas de teste e 20 poses temáticas do Pandinha (profissões e paixões), geradas por IA a pedido do dono em 22/09/2026, em `marca/kit/png/`. **A regra 6.4 não mudou:** vestir o Pandinha com uniforme ou tema segue proibido no que é publicado, e este acervo é material de revisão até o dono aprovar caso a caso. O guardião (`qa/acervo-unit.test.mjs`) reprova qualquer página servida ao visitante que aponte para essas artes. |

@@ -15,6 +15,14 @@
   --fs-corpo: .85rem;    /* tudo o mais: controle, valor, nome, ajuda, legenda */
   --fs-secao: 1rem;      /* título de bloco */
 }
+/*
+  ---------- Traço leve (23/09/2026) ----------
+
+  O dono achou o estúdio "grosso" perto do site: borda de 1,5 px em tudo, botão preto de 50 px em
+  Fredoka, faixa tingida atrás de cada aviso. O site é leve — muito respiro, pílula fina, peso guardado
+  para uma chamada por vez. O estúdio passa a falar igual: traço de 1 px, controle compacto onde há
+  mouse, preto só na chamada principal ("Pedir esse mimo no WhatsApp").
+*/
 
 /* A interface usa os tokens oficiais; cores da cerâmica são dados da peça. */
 .studio-topbar { border-bottom:1px solid var(--sand); background:var(--paper); }
@@ -29,47 +37,62 @@
 .studio-heading h1 .hand { font-size:1.2em; }
 .studio-heading > p { max-width:30em; color:var(--ink-soft); font-size:1rem; }
 .studio-layout { display:grid; grid-template-columns:minmax(0,1.45fr) minmax(320px,1fr); gap:28px; align-items:start; }
-/* A coluna da peça estica até a altura do editor; sem isso a caneca para de grudar no meio. */
 /*
-  Na tela larga quem gruda é a COLUNA inteira, não só a caneca. Os ajustes da peça (cores, cena, arte
-  aberta) nasceram dentro do cartão da prévia; quando só a caneca grudava, eles passavam por trás
-  dela ao rolar e ficavam inalcançáveis. Grudando a coluna, sobem junto, como sempre subiram.
+  Na tela larga quem gruda é a COLUNA inteira, não só a caneca: quando só a caneca grudava, o que vinha
+  embaixo dela passava por trás ao rolar e ficava inalcançável.
 
-  O vão é zero e as bordas emendam porque cada bloco tem `border-top` de divisória e a legenda fecha
-  a base arredondada: com vão entre eles, as divisórias ficam soltas e a base não fecha nada.
+  Desde 23/09/2026 a coluna leva a caneca, as cores, o acabamento, a cena e a arte aberta, tudo à vista
+  (pedido do dono), e quase sempre passa da altura da janela. Grudada pelo topo, a arte aberta ficaria
+  fora de alcance enquanto o editor rola; por isso, quando não cabe, ela gruda pelo PÉ
+  (`studio-coluna-peca--alta`, ligada pelo estúdio): rola com a página até a arte aberta aparecer
+  inteira e ali fica. Quando cabe, gruda pelo topo, como sempre.
+
+  O vão é zero e as bordas emendam: a caneca e os detalhes da peça formam um cartão só, com divisória.
 */
+/* `--estudio-topo` é a barra do topo do site quando o estúdio mora dentro dele (0 em caneca-3d.html). */
 .studio-coluna-peca {
-  display:flex; flex-direction:column; gap:0; min-width:0; position:sticky; top:18px;
-  /* Sem limite de altura de propósito. Havia um `max-height` aqui de quando os ajustes da peça
-     moravam dentro da coluna e ela precisava rolar por dentro. Com os ajustes numa faixa própria, a
-     coluna é só a caneca e os controles de vista — e o limite virou armadilha: em janela baixa o
-     conteúdo passava do limite, vazava para fora da caixa e, como elemento posicionado pinta acima
-     do conteúdo estático, a prévia cobria a faixa de ajustes logo abaixo. */
+  display:flex; flex-direction:column; gap:0; min-width:0; position:sticky; top:calc(var(--estudio-topo, 0px) + 18px);
+  /* Sem limite de altura de propósito: `max-height` sem rolagem própria não corta nada, só deixa o
+     conteúdo vazar da caixa — e, como elemento posicionado pinta acima do conteúdo estático, o que
+     vaza cobre o que vem depois (já aconteceu, em janela baixa). */
 }
+.studio-coluna-peca--alta { top:auto; bottom:18px; align-self:end; }
 .studio-preview { border:1px solid var(--sand); border-radius:var(--r-lg); background:var(--cream); min-width:0; }
-.studio-preview__bar { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:22px 24px 0; color:var(--ink-soft); font-size:var(--fs-corpo); }
+.studio-peca-detalhes { border:1px solid var(--sand); border-radius:var(--r-lg); background:var(--cream); min-width:0; }
+@media (min-width:760px) {
+  .studio-preview { border-bottom:0; border-radius:var(--r-lg) var(--r-lg) 0 0; }
+  .studio-peca-detalhes { border-radius:0 0 var(--r-lg) var(--r-lg); }
+}
+.studio-preview__bar { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:18px 20px 0; color:var(--ink-soft); font-size:var(--fs-corpo); }
 .studio-preview__bar { flex-wrap:wrap; }
-.studio-cadeado { display:inline-flex; align-items:center; gap:7px; border:1.5px solid var(--sand); border-radius:999px; background:var(--paper); color:var(--ink-soft); padding:9px 12px; font:600 var(--fs-corpo) var(--f-body); cursor:pointer; min-height:44px; }
+.studio-cadeado { display:inline-flex; align-items:center; gap:7px; border:1px solid var(--sand); border-radius:999px; background:var(--paper); color:var(--ink-soft); padding:9px 12px; font:600 var(--fs-corpo) var(--f-body); cursor:pointer; min-height:44px; }
 .studio-cadeado:hover { border-color:var(--peach-ink); color:var(--peach-ink); }
 .studio-cadeado[aria-pressed="false"] { background:var(--sand-soft); border-color:var(--peach-ink); color:var(--peach-ink); }
 .studio-badge { background:var(--paper); color:var(--peach-ink); border:1px solid var(--sand); border-radius:999px; padding:5px 11px; font-weight:800; font-size:var(--fs-rotulo); letter-spacing:.08em; }
-.studio-viewport { width:100%; height:470px; position:relative; isolation:isolate; }
+/* A caneca acompanha a largura da coluna: 470 px da tela larga para baixo, sem ficar uma faixa alta e
+   estreita quando a janela encolhe. */
+.studio-viewport { width:100%; height:clamp(300px, 42vw, 470px); position:relative; isolation:isolate; }
 .studio-viewport canvas { display:block; width:100%; height:100%; touch-action:pan-y; cursor:grab; }
 .studio-viewport canvas:active { cursor:grabbing; }
 .studio-loading,.studio-fallback { position:absolute; inset:0; margin:auto; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; max-width:320px; padding:24px; color:var(--ink-soft); z-index:1; }
 .studio-loading { pointer-events:none; }
 .studio-view-tools { padding:0 24px; display:flex; flex-direction:column; align-items:center; gap:12px; }
+/* Na tela larga, vistas e zoom numa linha só quando cabem: a coluna ficou alta, e cada faixa conta.
+   (Depois da regra base de propósito: antes dela, perdia na cascata.) */
+@media (min-width:760px) { .studio-view-tools { flex-direction:row; flex-wrap:wrap; justify-content:center; gap:10px 22px; } }
 .studio-view-buttons { display:flex; flex-wrap:wrap; justify-content:center; gap:5px; padding:5px; border:1px solid var(--sand); background:var(--paper); border-radius:999px; }
-.studio-view-buttons button,.studio-color-presets button { border:0; border-radius:999px; padding:10px 15px; background:transparent; font-weight:700; font-size:var(--fs-corpo); cursor:pointer; min-height:44px; }
-.studio-view-buttons button[aria-pressed="true"],.studio-color-presets button[aria-pressed="true"] { background:var(--ink); color:var(--paper); }
+.studio-view-buttons button { border:0; border-radius:999px; padding:10px 15px; background:transparent; font-weight:600; font-size:var(--fs-corpo); cursor:pointer; min-height:44px; }
+.studio-view-buttons button[aria-pressed="true"] { background:var(--ink); color:var(--paper); }
 .studio-zoom { display:flex; align-items:center; gap:12px; width:200px; font-size:var(--fs-corpo); color:var(--ink-soft); }
 .studio-zoom input { min-width:0; width:100%; }
 input[type="range"] { accent-color:var(--peach-ink); cursor:pointer; min-height:30px; }
 .studio-gesture { text-align:center; padding:12px 20px 18px; font-size:var(--fs-corpo); color:var(--ink-soft); }
-.studio-flat { border-top:1px solid var(--sand); padding:16px 24px; }
-.studio-flat summary { cursor:pointer; font-weight:700; font-size:var(--fs-corpo); }
-.studio-flat summary span { margin-left:.6rem; font-weight:400; font-size:var(--fs-corpo); color:var(--ink-soft); }
-.studio-flat__paper { margin-top:16px; border:1px solid var(--sand); border-radius:4px; background:var(--white); }
+/* A arte aberta: sempre aberta, na largura da coluna, logo abaixo das opções da peça. */
+.studio-flat { border-top:1px solid var(--sand); padding:18px 24px 16px; }
+.studio-flat__topo { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:4px 16px; }
+.studio-flat__titulo { font-size:var(--fs-corpo); font-weight:700; line-height:1.4; }
+.studio-flat__titulo span { margin-left:.5rem; font-weight:400; color:var(--ink-soft); }
+.studio-flat__paper { margin-top:12px; border:1px solid var(--sand); border-radius:6px; background:var(--white); }
 .studio-flat canvas { width:100%; height:auto; display:block; }
 .studio-flat p { margin-top:9px; color:var(--ink-soft); font-size:var(--fs-corpo); }
 .studio-caption { display:flex; align-items:center; gap:16px; padding:20px 24px; background:var(--paper); border-radius:0 0 var(--r-lg) var(--r-lg); border-top:1px solid var(--sand); }
@@ -77,15 +100,12 @@ input[type="range"] { accent-color:var(--peach-ink); cursor:pointer; min-height:
 .studio-caption p { font-size:var(--fs-corpo); color:var(--ink-soft); line-height:1.5; }
 .studio-controls { background:var(--white); border:1px solid var(--sand); border-radius:var(--r-lg); min-width:0; }
 .studio-help { color:var(--ink-soft); font-size:var(--fs-corpo); line-height:1.5; }
-.studio-color-presets { display:flex; flex-wrap:wrap; gap:5px; margin:12px 0; }
-.studio-color-presets button { background:var(--paper); padding:7px 11px; border:1px solid var(--sand); font-size:var(--fs-corpo); }
-.studio-color-fields { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-.studio-color-fields label { display:block; font-weight:600; font-size:var(--fs-corpo); }
 /* Um só padrão de campo em toda a página do estúdio: mudar um controle de lugar não pode
    devolvê-lo à aparência crua do navegador. O guardião confere isso em cada campo. */
-.studio-page select,.studio-page input[type="text"],.studio-page input[type="search"] { width:100%; display:block; margin-top:6px; border:1.5px solid var(--sand); border-radius:10px; padding:10px 12px; background:var(--paper); color:var(--ink); font:600 1rem var(--f-body); min-height:46px; }
+.studio-page select,.studio-page input[type="text"],.studio-page input[type="search"] { width:100%; display:block; margin-top:6px; border:1px solid var(--sand); border-radius:10px; padding:10px 12px; background:var(--paper); color:var(--ink); font:500 1rem var(--f-body); min-height:44px; }
+.studio-page input[type="search"]::placeholder,.studio-page input[type="text"]::placeholder { color:var(--ink-soft); opacity:.75; }
 .studio-page select { appearance:none; -webkit-appearance:none; padding-right:36px; background-image:linear-gradient(45deg,transparent 50%,var(--peach-ink) 50%),linear-gradient(135deg,var(--peach-ink) 50%,transparent 50%); background-position:calc(100% - 19px) center,calc(100% - 13px) center; background-size:6px 6px,6px 6px; background-repeat:no-repeat; }
-.studio-drop { border:1.5px dashed var(--kraft); border-radius:var(--r-md); padding:22px 16px; display:flex; flex-direction:column; gap:8px; align-items:center; background:var(--paper); text-align:center; transition:background .15s; }
+.studio-drop { border:1px dashed var(--kraft); border-radius:var(--r-md); padding:22px 16px; display:flex; flex-direction:column; gap:8px; align-items:center; background:var(--paper); text-align:center; transition:background .15s; }
 .studio-drop.dragging { background:var(--sand-soft); border-color:var(--peach-ink); }
 .studio-drop > svg { color:var(--peach-ink); }
 .studio-drop p { font-size:var(--fs-corpo); color:var(--ink-soft); }
@@ -120,9 +140,10 @@ input[type="range"] { accent-color:var(--peach-ink); cursor:pointer; min-height:
 .studio-finish #save-status:not(:empty) { padding-top:9px; }
 .studio-page .footer { margin-top:24px; padding-top:2.4rem; }
 /* edição da arte: barra, lista de camadas e painel de propriedades */
-.studio-dica { background:var(--sand-soft); border-radius:var(--r-sm); padding:10px 12px; margin:12px 0; }
+/* O aviso da aba é texto, não caixa: a faixa tingida vazava do alinhamento do painel e pesava. */
+.studio-dica { margin:0; }
 .studio-toolbar { display:flex; flex-wrap:wrap; gap:6px; margin:12px 0; }
-.studio-toolbar button { flex:1 1 auto; border:1.5px solid var(--sand); border-radius:999px; background:var(--paper); padding:9px 12px; font-weight:600; font-size:var(--fs-corpo); cursor:pointer; min-height:44px; }
+.studio-toolbar button { flex:1 1 auto; border:1px solid var(--sand); border-radius:999px; background:var(--paper); padding:9px 12px; font-weight:600; font-size:var(--fs-corpo); cursor:pointer; min-height:44px; }
 .studio-toolbar button:hover { border-color:var(--peach-ink); color:var(--peach-ink); }
 .studio-camadas { display:grid; gap:6px; margin:12px 0; padding:0; list-style:none; }
 .studio-camada { display:flex; align-items:center; gap:8px; width:100%; border:1px solid var(--sand); border-radius:var(--r-sm); background:var(--paper); padding:7px 10px; cursor:pointer; font:inherit; color:inherit; text-align:left; min-height:52px; }
@@ -140,14 +161,14 @@ input[type="range"] { accent-color:var(--peach-ink); cursor:pointer; min-height:
 .studio-campo { display:grid; gap:5px; font-weight:600; font-size:var(--fs-corpo); }
 .studio-campo--range input { width:100%; margin:0; }
 .studio-letras { display:grid; grid-template-columns:repeat(auto-fill,minmax(104px,1fr)); gap:6px; max-height:216px; overflow-y:auto; padding:3px; border:1px solid var(--sand); border-radius:10px; background:var(--white); }
-.studio-letra { border:1.5px solid transparent; border-radius:9px; background:var(--paper); color:var(--ink); padding:9px 6px; font-size:1.02rem; line-height:1.3; cursor:pointer; min-height:48px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.studio-letra { border:1px solid transparent; border-radius:9px; background:var(--paper); color:var(--ink); padding:9px 6px; font-size:1.02rem; line-height:1.3; cursor:pointer; min-height:48px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .studio-letra:hover { border-color:var(--kraft); }
 .studio-letra[aria-pressed="true"] { border-color:var(--peach-ink); background:var(--sand-soft); }
 .studio-cores { display:flex; flex-wrap:wrap; gap:6px; }
 .studio-cor { width:34px; height:34px; border-radius:50%; border:2px solid var(--sand); background:var(--tinta); cursor:pointer; padding:0; }
 .studio-cor[aria-pressed="true"] { border-color:var(--ink); box-shadow:0 0 0 2px var(--paper) inset; }
 .studio-formas { display:flex; flex-wrap:wrap; gap:6px; }
-.studio-forma { width:46px; height:46px; display:grid; place-items:center; border:1.5px solid var(--sand); border-radius:10px; background:var(--white); cursor:pointer; padding:0; }
+.studio-forma { width:46px; height:46px; display:grid; place-items:center; border:1px solid var(--sand); border-radius:10px; background:var(--white); cursor:pointer; padding:0; }
 .studio-forma[aria-pressed="true"] { border-color:var(--peach-ink); background:var(--sand-soft); }
 .studio-forma canvas { display:block; width:28px; height:28px; }
 .studio-passos { margin:8px 0; padding-left:18px; list-style:decimal; font-size:var(--fs-corpo); color:var(--ink-soft); line-height:1.6; }
@@ -157,7 +178,7 @@ input[type="range"] { accent-color:var(--peach-ink); cursor:pointer; min-height:
 /* painel da arte: abas, cartões que abrem no lugar e ações */
 .studio-intro { padding:20px 22px 0; color:var(--ink-soft); font-size:var(--fs-corpo); line-height:1.5; }
 .studio-abas { display:flex; gap:4px; padding:16px 22px 0; border-bottom:1px solid var(--sand); }
-.studio-abas button { flex:1 1 0; display:flex; align-items:center; justify-content:center; gap:5px; border:0; background:none; padding:11px 6px; font:700 var(--fs-corpo) var(--f-body); color:var(--ink-soft); cursor:pointer; border-bottom:3px solid transparent; margin-bottom:-1px; min-height:48px; }
+.studio-abas button { flex:1 1 0; display:flex; align-items:center; justify-content:center; gap:5px; border:0; background:none; padding:11px 6px; font:600 var(--fs-corpo) var(--f-body); color:var(--ink-soft); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; min-height:48px; }
 .studio-abas button:hover { color:var(--ink); }
 .studio-abas button[aria-selected="true"] { color:var(--peach-ink); border-bottom-color:var(--peach-ink); }
 .studio-aba__conta { display:grid; place-items:center; min-width:19px; height:19px; padding:0 5px; border-radius:999px; background:var(--sand-soft); color:var(--ink-soft); font-size:var(--fs-rotulo); font-weight:600; }
@@ -167,7 +188,7 @@ input[type="range"] { accent-color:var(--peach-ink); cursor:pointer; min-height:
 .studio-painel:focus-visible { outline:3px solid var(--peach-deep); outline-offset:-3px; }
 .studio-acoes-arte { display:flex; flex-wrap:wrap; align-items:center; gap:8px 16px; padding:14px 22px 0; }
 .studio-historico__botoes { display:flex; gap:6px; }
-.studio-historico__botoes button { border:1.5px solid var(--sand); border-radius:999px; background:var(--paper); padding:8px 14px; font-weight:600; font-size:var(--fs-corpo); cursor:pointer; min-height:40px; }
+.studio-historico__botoes button { border:1px solid var(--sand); border-radius:999px; background:var(--paper); padding:8px 14px; font-weight:600; font-size:var(--fs-corpo); cursor:pointer; min-height:40px; }
 .studio-historico__botoes button:disabled { opacity:.45; cursor:default; }
 .studio-historico__botoes button:not(:disabled):hover { border-color:var(--peach-ink); color:var(--peach-ink); }
 .studio-salvar-modelo { border:1px dashed var(--kraft); border-radius:var(--r-sm); background:var(--paper); padding:12px 14px; margin:12px 20px 0; display:grid; gap:9px; }
@@ -175,20 +196,20 @@ input[type="range"] { accent-color:var(--peach-ink); cursor:pointer; min-height:
 .studio-salvar-modelo__acoes { display:flex; gap:16px; }
 .studio-filtros { display:grid; gap:12px; margin-bottom:12px; }
 .studio-filtros select,.studio-filtros input { margin-top:0; }
-.studio-acrescentar { width:100%; border:1.5px dashed var(--kraft); border-radius:var(--r-sm); background:var(--paper); color:var(--peach-ink); padding:12px; font:600 var(--fs-corpo) var(--f-body); cursor:pointer; min-height:48px; margin-bottom:12px; }
+.studio-acrescentar { display:inline-flex; align-items:center; justify-content:center; gap:6px; border:1px dashed var(--kraft); border-radius:999px; background:transparent; color:var(--peach-ink); padding:8px 16px; font:600 var(--fs-corpo) var(--f-body); cursor:pointer; min-height:44px; margin-bottom:12px; }
 .studio-acrescentar:hover { border-color:var(--peach-ink); background:var(--sand-soft); }
 .studio-itens { display:grid; gap:8px; padding:0; margin:0; list-style:none; }
 .studio-vazio { border:1px dashed var(--sand); border-radius:var(--r-sm); padding:14px; color:var(--ink-soft); font-size:var(--fs-corpo); line-height:1.5; text-align:center; }
 .studio-item { border:1px solid var(--sand); border-radius:var(--r-sm); background:var(--paper); overflow:hidden; }
 .studio-item--aberto { border-color:var(--peach-ink); background:var(--sand-soft); }
-.studio-item__cabeca { display:flex; align-items:center; gap:8px; width:100%; border:0; background:none; padding:9px 11px; cursor:pointer; font:inherit; color:inherit; text-align:left; min-height:56px; }
-.studio-item__icone { flex:0 0 40px; width:40px; height:40px; border-radius:8px; border:1px solid var(--sand); background:var(--white); display:grid; place-items:center; overflow:hidden; font-weight:600; font-size:var(--fs-corpo); color:var(--peach-ink); }
+.studio-item__cabeca { display:flex; align-items:center; gap:10px; width:100%; border:0; background:none; padding:7px 10px; cursor:pointer; font:inherit; color:inherit; text-align:left; min-height:52px; }
+.studio-item__icone { flex:0 0 36px; width:36px; height:36px; border-radius:8px; border:1px solid var(--sand); background:var(--white); display:grid; place-items:center; overflow:hidden; font-weight:600; font-size:var(--fs-corpo); color:var(--peach-ink); }
 .studio-item__icone canvas,.studio-item__icone img { display:block; width:100%; height:100%; object-fit:contain; }
 .studio-item__icone--vazio { border-style:dashed; border-color:var(--kraft); }
 .studio-item__texto { display:grid; gap:2px; min-width:0; flex:1 1 auto; }
-.studio-item__texto > span { font-weight:700; font-size:var(--fs-corpo); overflow-wrap:anywhere; }
+.studio-item__texto > span { font-weight:600; font-size:var(--fs-corpo); overflow-wrap:anywhere; }
 .studio-item__texto small { font-size:var(--fs-rotulo); color:var(--ink-soft); overflow-wrap:anywhere; }
-.studio-item__seta { flex:0 0 auto; width:26px; height:26px; display:grid; place-items:center; border-radius:50%; border:1px solid var(--sand); background:var(--white); font-weight:600; color:var(--peach-ink); }
+.studio-item__seta { flex:0 0 auto; width:24px; height:24px; display:grid; place-items:center; border-radius:50%; border:1px solid var(--sand); background:var(--white); font-weight:600; color:var(--peach-ink); }
 .studio-item__corpo { padding:2px 12px 14px; display:grid; gap:12px; }
 .studio-item__acoes { display:flex; flex-wrap:wrap; gap:12px; }
 .studio-ajuste-fino { border:1px solid var(--sand); border-radius:10px; background:var(--white); padding:9px 11px; display:grid; gap:9px; }
@@ -202,27 +223,41 @@ input[type="range"] { accent-color:var(--peach-ink); cursor:pointer; min-height:
 .studio-cor[aria-pressed="true"] { border-color:var(--ink); box-shadow:0 0 0 2px var(--paper) inset; }
 .studio-formas { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
 .studio-elementos { display:flex; flex-wrap:wrap; gap:6px; margin:8px 0 12px; }
-.studio-elemento { width:58px; height:58px; display:grid; place-items:center; border:1.5px solid var(--sand); border-radius:12px; background:var(--white); cursor:pointer; padding:6px; }
+.studio-elemento { width:52px; height:52px; display:grid; place-items:center; border:1px solid var(--sand); border-radius:12px; background:var(--white); cursor:pointer; padding:6px; }
 .studio-elemento:hover { border-color:var(--peach-ink); background:var(--sand-soft); }
 .studio-elemento img { display:block; width:100%; height:100%; object-fit:contain; }
 .studio-fundo-arte { margin-top:16px; padding-top:14px; border-top:1px solid var(--sand); }
-.studio-forma { width:52px; height:52px; display:grid; place-items:center; border:1.5px solid var(--sand); border-radius:12px; background:var(--white); cursor:pointer; padding:0; }
+.studio-forma { width:46px; height:46px; display:grid; place-items:center; border:1px solid var(--sand); border-radius:12px; background:var(--white); cursor:pointer; padding:0; }
 .studio-forma:hover { border-color:var(--peach-ink); background:var(--sand-soft); }
 .studio-forma canvas { display:block; width:30px; height:30px; }
 .studio-nome-livre { display:grid; gap:12px; margin-top:16px; padding-top:16px; border-top:1px solid var(--sand); }
-.studio-nome-livre select,.studio-nome-livre input[type="text"] { margin-top:0; }
+.studio-nome-livre__acoes { display:flex; flex-wrap:wrap; gap:8px; }
+.studio-nome-livre .studio-acrescentar { margin-bottom:0; }
 .studio-passos { margin:8px 0; padding-left:18px; list-style:decimal; font-size:var(--fs-corpo); color:var(--ink-soft); line-height:1.6; }
 .studio-canva { display:flex; flex-wrap:wrap; gap:12px; }
 .studio-flat canvas { touch-action:none; }
-.studio-peca { border-top:1px solid var(--sand); padding:14px 24px; }
-.studio-peca summary { display:flex; align-items:center; justify-content:space-between; gap:12px; cursor:pointer; font-weight:700; font-size:var(--fs-corpo); list-style:none; }
-.studio-peca summary::-webkit-details-marker { display:none; }
-.studio-peca__resumo { font-weight:400; font-size:var(--fs-corpo); color:var(--ink-soft); }
-.studio-peca .studio-help { margin-top:8px; }
-.studio-cenas { display:flex; flex-wrap:wrap; gap:5px; margin-top:12px; }
-.studio-cenas button { border:1.5px solid var(--sand); border-radius:999px; background:var(--paper); padding:10px 13px; font-weight:600; font-size:var(--fs-corpo); cursor:pointer; min-height:44px; }
-.studio-cenas button:hover { border-color:var(--peach-ink); color:var(--peach-ink); }
-.studio-cenas button[aria-pressed="true"] { background:var(--ink); color:var(--paper); border-color:var(--ink); }
+/*
+  Opções da peça, à vista: rótulo à esquerda, escolhas à direita, uma linha por assunto. Combinações,
+  acabamento e cena usam a mesma pílula; interior e alça, bolinhas da cor da cerâmica.
+*/
+.studio-opcoes { display:grid; gap:14px; padding:18px 24px 20px; }
+.studio-opcao { display:grid; grid-template-columns:104px minmax(0,1fr); gap:6px 16px; align-items:start; }
+.studio-opcao__rotulo { font-weight:700; font-size:var(--fs-corpo); line-height:1.4; padding-top:9px; }
+.studio-opcao__valores { display:grid; gap:10px; justify-items:start; min-width:0; }
+.studio-opcao__valores .studio-help { margin:0; }
+.studio-color-presets, .studio-cenas { display:flex; flex-wrap:wrap; gap:6px; }
+.studio-chip { border:1px solid var(--sand); border-radius:999px; background:var(--paper); color:var(--ink); padding:9px 14px; font:600 var(--fs-corpo) var(--f-body); cursor:pointer; min-height:44px; }
+.studio-chip:hover { border-color:var(--peach-ink); color:var(--peach-ink); }
+/* Escolhido é leve, como o cartão de modelo escolhido: preto fica para a chamada do pedido e para a vista da caneca. */
+.studio-chip[aria-pressed="true"] { background:var(--sand-soft); border-color:var(--peach-ink); color:var(--peach-ink); }
+.studio-cores-peca { display:flex; flex-wrap:wrap; align-items:center; gap:8px 20px; }
+.studio-cores-peca .studio-cores { gap:5px; }
+/* O dedo pede 44 px de alvo, e estas bolinhas ficam à vista desde a abertura: no toque elas crescem, e no
+   celular estreito o nome sobe para cima da fileira, para as seis caberem numa linha. No mouse, 26 px. */
+.studio-cores-peca .studio-cor { width:44px; height:44px; }
+@media (max-width:480px) { .studio-cores-peca__grupo { flex-direction:column; align-items:flex-start; gap:6px; } }
+.studio-cores-peca__grupo { display:flex; align-items:center; gap:10px; }
+.studio-cores-peca__nome { font-size:var(--fs-corpo); font-weight:600; color:var(--ink-soft); min-width:3.4em; }
 .studio-rascunho { margin:12px 20px 0; padding:12px 14px; border:1px solid var(--kraft); border-radius:var(--r-sm); background:var(--sand-soft); display:grid; gap:8px; }
 .studio-rascunho p { font-size:var(--fs-corpo); color:var(--ink); line-height:1.5; }
 .studio-rascunho__acoes { display:flex; flex-wrap:wrap; gap:16px; }
@@ -230,7 +265,7 @@ input[type="range"] { accent-color:var(--peach-ink); cursor:pointer; min-height:
 .studio-lote { margin-top:16px; padding:12px 14px; border:1px dashed var(--kraft); border-radius:var(--r-sm); background:var(--paper); }
 .studio-lote summary { cursor:pointer; font-weight:700; font-size:var(--fs-corpo); color:var(--peach-ink); }
 .studio-lote .studio-campo { margin-top:12px; }
-.studio-lote textarea { width:100%; border:1.5px solid var(--sand); border-radius:10px; padding:10px 12px; background:var(--white); color:var(--ink); font:600 var(--fs-secao) var(--f-body); resize:vertical; min-height:96px; }
+.studio-lote textarea { width:100%; border:1px solid var(--sand); border-radius:10px; padding:10px 12px; background:var(--white); color:var(--ink); font:600 var(--fs-secao) var(--f-body); resize:vertical; min-height:96px; }
 .studio-lote__acoes { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-top:12px; }
 .studio-finish { padding:20px 22px 24px; border-top:1px solid var(--sand); }
 .studio-finish h2 { font:600 1.17rem/1.3 var(--f-display); margin-bottom:8px; }
@@ -248,16 +283,19 @@ input[type="range"] { accent-color:var(--peach-ink); cursor:pointer; min-height:
 .studio-models { max-height:min(58vh, 560px); overflow-y:auto; overscroll-behavior:contain; padding-right:4px; }
 .studio-models::-webkit-scrollbar { width:10px; }
 .studio-models::-webkit-scrollbar-thumb { background:var(--sand); border-radius:99px; border:3px solid var(--paper); }
-.studio-model { display:grid; gap:5px; text-align:left; padding:9px; border:1.5px solid var(--sand); border-radius:var(--r-sm); background:var(--paper); cursor:pointer; font:inherit; color:inherit; }
-.studio-model:hover { border-color:var(--kraft); }
+/* `position:relative` segura a descrição escondida dentro do cartão: sem ele, as 199 descrições
+   ficavam presas à página, fora da rolagem da lista, e a página ia a 13.654 px. */
+.studio-model { position:relative; display:grid; gap:6px; align-content:start; text-align:left; padding:6px 6px 8px; border:1px solid var(--sand); border-radius:var(--r-sm); background:var(--white); cursor:pointer; font:inherit; color:inherit; transition:border-color .15s ease, transform .15s ease; }
+.studio-model:hover { border-color:var(--kraft); transform:translateY(-1px); }
 .studio-model[aria-pressed="true"] { border-color:var(--peach-ink); background:var(--sand-soft); }
 /* A proporção reserva a altura antes de o canvas existir, para o cartão não pular quando a
    miniatura é desenhada ao entrar na tela. */
 .studio-model__art { display:block; border-radius:6px; overflow:hidden; border:1px solid var(--sand); background:var(--white); aspect-ratio:210/90; }
 .studio-model__art canvas { display:block; width:100%; height:auto; }
 .studio-model__art--livre { display:grid; place-items:center; aspect-ratio:210/90; color:var(--peach-ink); }
-.studio-model__nome { font-weight:700; font-size:var(--fs-corpo); line-height:1.3; }
-.studio-model small { font-size:var(--fs-corpo); color:var(--ink-soft); line-height:1.5; }
+.studio-model__nome { font-weight:600; font-size:var(--fs-corpo); line-height:1.3; padding-inline:2px; }
+/* A descrição continua no cartão para quem usa leitor de tela; na tela, ela aparece na arte maior. */
+.studio-model small { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
 .studio-slots { display:grid; gap:8px; margin:12px 0; }
 .studio-slot { display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; border:1px solid var(--sand); border-radius:var(--r-sm); background:var(--paper); padding:8px 11px; }
 .studio-slot:has(.studio-slot__pick[aria-pressed="true"]) { border-color:var(--peach-ink); background:var(--sand-soft); }
@@ -277,24 +315,38 @@ input[type="range"] { accent-color:var(--peach-ink); cursor:pointer; min-height:
 .studio-sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
 .studio-controls button:disabled { opacity:.5; cursor:wait; }
 @media(min-width:1400px) { .studio-viewport { height:510px; } }
-@media(max-width:850px) {
+/*
+  ---------- Uma coluna, abaixo de 760 px ----------
+
+  Até 23/09/2026 a quebra era em 850 px, e duas coisas escapavam: a caneca herdava o `align-items:start`
+  da grade, não esticava, ficava com 422 px no meio de um painel de 640 e, grudada no topo, cobria 27 a
+  40% dele (o print do dono); e no celular uma regra de 320 px por cima da de 210 px fazia a caneca
+  grudada tomar 54 a 94% da altura da tela. Agora a caneca estica na largura inteira, fica baixa (uma
+  fração da altura da tela) e as duas colunas vão até 760 px, onde ainda cabem com folga.
+*/
+@media(max-width:759px) {
   /* Fluxo normal em vez de grade: assim o bloco da peça consegue grudar ao longo de todo o editor.
      Em grade de uma coluna cada item fica preso à sua linha, e o sticky não teria onde correr. */
   /* Coluna flexível para o sticky valer contra a página inteira e para poder reordenar. */
-  .studio-layout { display:flex; flex-direction:column; }
+  .studio-layout { display:flex; flex-direction:column; align-items:stretch; }
   /* A coluna sai do fluxo e quem gruda é só a caneca: a coluna toda no topo tomaria a tela e não
      sobraria lugar para editar. */
   .studio-coluna-peca { display:contents; position:static; }
-  /* Os ajustes da peça vão para depois do editor. Entre a caneca grudada e o editor eles passariam
-     por trás dela e não dava para abrir nem mexer; embaixo, ficam à mão. */
+  /* No celular a caneca gruda sozinha, e o editor vem logo depois dela: é por ele que a montagem
+     anda. Cores, cena e arte aberta, à vista, vêm depois do editor, num cartão próprio. Entre a
+     caneca grudada e o editor eles empurrariam o editor para baixo da primeira tela. */
   .studio-preview { order:1; }
   .studio-controls { order:2; }
-  .studio-preview-extra { order:3; }
+  .studio-peca-detalhes { order:3; margin-top:20px; }
   .studio-layout > * + * { margin-top:20px; }
-  .studio-preview-extra { margin-top:20px; }
   /* A caneca acompanha a edição. Antes ela ficava 513 px acima da tela e a pessoa editava às cegas. */
-  .studio-preview { position:sticky; top:0; z-index:5; background:var(--cream); }
-  .studio-viewport { height:210px; }
+  .studio-preview { position:sticky; top:var(--estudio-topo, 0px); z-index:5; background:var(--cream); width:100%; }
+  .studio-viewport { height:clamp(150px, 26vh, 240px); }
+  /* O selo e o cadeado flutuam no canto de cima da caneca, que é fundo vazio: uma faixa a menos. */
+  .studio-preview__bar { position:absolute; top:8px; left:10px; right:10px; z-index:2; padding:0; pointer-events:none; }
+  .studio-preview__bar > * { pointer-events:auto; }
+  .studio-view-tools { flex-direction:row; flex-wrap:wrap; justify-content:center; gap:4px 14px; padding:2px 8px 8px; }
+  .studio-zoom { width:150px; }
   .studio-preview .studio-gesture { display:none; }
   /* A rolagem própria vale também no celular: sem ela a página voltava a ter 11.877 px e o
      clique num modelo jogava a pessoa para o rodapé. */
@@ -311,66 +363,38 @@ input[type="range"] { accent-color:var(--peach-ink); cursor:pointer; min-height:
   .studio-main { padding-top:25px; }
   .studio-heading h1 { font-size:2rem; }
   .studio-heading > p { font-size:var(--fs-corpo); }
-  .studio-preview__bar { padding:16px 15px 0; gap:7px; font-size:var(--fs-rotulo); }
+  .studio-preview__bar { gap:7px; font-size:var(--fs-rotulo); }
   .studio-badge { font-size:.6rem; padding:5px 7px; }
-  .studio-viewport { height:320px; }
-  .studio-view-tools { padding-inline:12px; }
-  .studio-view-buttons button { padding:10px 12px; font-size:var(--fs-corpo); }
+  .studio-view-tools { padding-inline:10px; }
+  /* Numa linha só até 320 px: quatro pílulas compactas, sem descer dos 44 px de altura do dedo. */
+  .studio-view-buttons { gap:2px; padding:3px; }
+  .studio-view-buttons button { padding:8px 9px; font-size:.8rem; }
+  .studio-zoom { width:140px; }
   .studio-caption { display:block; padding:17px 19px; }
   .studio-caption p { margin-top:5px; font-size:var(--fs-corpo); }
   .studio-intro,.studio-abas,.studio-dica,.studio-acoes-arte { padding-inline:17px; }
   .studio-painel,.studio-finish { padding-inline:17px; }
-  .studio-salvar-modelo,.studio-message { margin-inline:16px; }
+  .studio-salvar-modelo,.studio-message,.studio-boasvindas { margin-inline:16px; }
   .studio-abas button { font-size:var(--fs-corpo); padding-inline:2px; }
-  .studio-peca { padding-inline:19px; }
+  .studio-opcoes { padding-inline:17px; }
+  .studio-opcao { grid-template-columns:1fr; }
+  .studio-opcao__rotulo { padding-top:0; }
   .studio-models { gap:8px; }
   .studio-model { padding:7px; }
   .studio-model small { display:none; }
   .studio-slot__acoes { width:100%; justify-content:flex-end; }
   .studio-flat { padding:14px 17px; }
-  .studio-flat summary span { display:block; margin-left:0; margin-top:4px; }
+  .studio-flat__titulo span { display:block; margin-left:0; }
 }
 
-
-/* Os ajustes da peça saíram de dentro do bloco que gruda; na tela larga seguem embaixo da caneca. */
-/* Ajustes da peça: faixa própria abaixo do layout, larga e calma. Dentro da coluna eles obrigavam
-   a caneca a rolar por dentro; aqui têm espaço e não disputam com nada. */
-.studio-preview-extra {
-  min-width:0; display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:0;
-  border:1px solid var(--sand); border-radius:var(--r-lg); background:var(--cream); overflow:hidden;
-  margin-top:28px;
-}
-.studio-preview-extra > * { border-top:0; border-left:1px solid var(--sand); }
-.studio-preview-extra > :first-child { border-left:0; }
-.studio-preview-extra .studio-caption { grid-column:1/-1; border-left:0; border-top:1px solid var(--sand); border-radius:0; }
-@media (max-width:850px) {
-  .studio-preview-extra { grid-template-columns:1fr; }
-  .studio-preview-extra > * { border-left:0; border-top:1px solid var(--sand); }
-  .studio-preview-extra > :first-child { border-top:0; }
-}
-/* No celular a caneca gruda sozinha no topo, então ela fecha o próprio cartão e os ajustes abrem o
-   deles logo abaixo — dois cartões inteiros em vez de um partido ao meio. */
-@media (max-width:850px) {
-  .studio-preview-extra { margin-top:20px; }
-}
-
-/* Aviso curto quando a pessoa rola sobre a caneca esperando zoom. */
-.studio-zoom-dica {
-  position:absolute; left:50%; bottom:14px; transform:translateX(-50%) translateY(6px);
-  margin:0; padding:8px 14px; border-radius:999px; pointer-events:none;
-  background:rgba(32,26,22,.86); color:#fff; font:700 var(--fs-corpo) var(--f-body);
-  opacity:0; transition:opacity .18s ease, transform .18s ease; z-index:4; white-space:nowrap;
-}
-.studio-zoom-dica.vendo { opacity:1; transform:translateX(-50%) translateY(0); }
-@media (prefers-reduced-motion: reduce) { .studio-zoom-dica { transition:none; } }
 
 /* Onde a pessoa está na montagem e para onde vai depois. Fica entre o painel e a área do pedido. */
 .studio-passo {
   display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
-  margin-top:16px; padding:14px 16px; border:1px solid var(--sand); border-radius:var(--r-sm);
+  margin-top:16px; padding:10px 12px 10px 14px; border:1px solid var(--sand); border-radius:var(--r-sm);
   background:var(--paper);
 }
-.studio-passo__onde { display:flex; flex-direction:column; gap:3px; font-size:var(--fs-corpo); font-weight:700; color:var(--ink); }
+.studio-passo__onde { display:flex; flex-direction:column; gap:2px; font-size:var(--fs-corpo); font-weight:600; color:var(--ink); }
 .studio-passo__falta { font-weight:400; color:var(--peach-ink); }
 .studio-passo__falta:empty { display:none; }
 .studio-passo .btn { flex:0 0 auto; }
@@ -391,21 +415,89 @@ input[type="range"] { accent-color:var(--peach-ink); cursor:pointer; min-height:
 .studio-duvida summary::-webkit-details-marker { display:none; }
 .studio-duvida summary::before {
   content:"?"; display:grid; place-items:center; width:18px; height:18px; border-radius:50%;
-  border:1.5px solid currentColor; font-size:.68rem; line-height:1; flex:0 0 auto;
+  border:1px solid currentColor; font-size:.68rem; line-height:1; flex:0 0 auto;
 }
 .studio-duvida summary:hover { color:var(--ink); }
 .studio-duvida summary:focus-visible { outline:3px solid var(--peach-deep); outline-offset:3px; border-radius:6px; }
 .studio-duvida p { margin-top:4px; color:var(--ink-soft); font-size:var(--fs-corpo); line-height:1.5; max-width:62ch; }
 
 /* Só na primeira visita, e some com um clique. */
+/* Com a mesma folga do aviso de rascunho logo abaixo: sem margem ela encostava nas bordas do painel e o
+   traço dela dobrava o do painel (visto em 23/09/2026; só aparece na primeira visita). */
 .studio-boasvindas {
-  margin:12px 0 0; padding:16px 18px; border:1px solid var(--sand); border-radius:var(--r-sm);
-  background:var(--sand-soft);
+  margin:12px 20px 0; padding:14px 16px; border:1px solid var(--sand); border-radius:var(--r-sm);
+  background:var(--paper);
 }
-.studio-boasvindas h2 { font-size:var(--fs-secao); font-weight:700; margin:0 0 8px; }
+.studio-boasvindas h2 { font-size:var(--fs-corpo); font-weight:700; margin:0 0 8px; }
 .studio-boasvindas ol { margin:0 0 12px; padding-left:1.15rem; display:grid; gap:7px; }
 .studio-boasvindas li { font-size:var(--fs-corpo); line-height:1.5; color:var(--ink-soft); }
 .studio-boasvindas li strong { color:var(--ink); font-weight:600; }
+
+
+/* ---------- Botões do estúdio: a mesma pílula do site, na medida de ferramenta ---------- */
+.studio-page .btn { font-size:.92rem; padding:.7rem 1.25rem; }
+.studio-page .btn--sm { font-size:var(--fs-corpo); padding:.62rem 1.05rem; }
+/* Continuar é convite, não alarme: pêssego, como a chamada principal do site. O preto fica para o pedido. */
+.studio-passo .btn { background:var(--peach); color:var(--ink); }
+.studio-passo .btn:hover { background:var(--peach-deep); }
+
+/* ---------- O modelo escolhido e a cor do fundo, no topo da aba Modelo ---------- */
+.studio-escolhido { display:grid; gap:8px; margin-bottom:14px; padding:10px 12px; border:1px solid var(--sand); border-radius:var(--r-sm); background:var(--paper); }
+.studio-escolhido__titulo { display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 10px; font-size:var(--fs-corpo); }
+.studio-escolhido__titulo strong { font-weight:700; color:var(--ink); }
+.studio-escolhido__titulo span { color:var(--ink-soft); }
+
+/*
+  ---------- Seletor de ocasião: um cardápio ----------
+
+  Na tela larga flutua sobre a página, a partir do botão, e cresce para o lado da caneca: quatro ou cinco colunas,
+  o grupo num rótulo miúdo e cada ocasião numa linha, com quantos modelos tem. No celular é uma folha que
+  sobe de baixo. Não empurra a lista de modelos nem disputa rolagem com ela.
+*/
+.studio-assunto { position:relative; }
+.studio-assunto__botao { width:100%; display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:6px; border:1px solid var(--sand); border-radius:10px; padding:10px 36px 10px 12px; background:var(--paper); color:var(--ink); font:500 1rem var(--f-body); min-height:44px; text-align:left; cursor:pointer; background-image:linear-gradient(45deg,transparent 50%,var(--peach-ink) 50%),linear-gradient(135deg,var(--peach-ink) 50%,transparent 50%); background-position:calc(100% - 19px) center,calc(100% - 13px) center; background-size:6px 6px,6px 6px; background-repeat:no-repeat; }
+.studio-assunto__botao:hover { border-color:var(--kraft); }
+.studio-assunto__botao[aria-expanded="true"] { border-color:var(--peach-ink); background-image:linear-gradient(135deg,transparent 50%,var(--peach-ink) 50%),linear-gradient(45deg,var(--peach-ink) 50%,transparent 50%); }
+.studio-assunto__painel { position:absolute; z-index:30; inset:auto; margin:0; padding:0; width:min(880px, calc(100vw - 32px)); max-width:none; max-height:min(76vh, 640px); overflow-y:auto; overscroll-behavior:contain; border:1px solid var(--sand); border-radius:var(--r-md); background:var(--white); color:var(--ink); box-shadow:var(--shadow); font-weight:400; }
+.studio-assunto__painel[open] { animation:studio-aparece .14s ease-out; }
+.studio-assunto__topo { display:none; }
+.studio-assunto__conteudo { padding:14px 16px 6px; }
+.studio-assunto__primeiros { display:flex; flex-wrap:wrap; gap:2px 12px; padding-bottom:10px; margin-bottom:14px; border-bottom:1px solid var(--sand); }
+.studio-assunto__primeiros .studio-assunto__item { width:auto; min-width:min(100%, 220px); }
+.studio-assunto__grupos { columns:150px; column-gap:22px; }
+.studio-assunto__grupo { break-inside:avoid; margin-bottom:12px; }
+.studio-assunto__titulo { margin:0 0 2px; padding-inline:8px; font-size:var(--fs-rotulo); font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--peach-ink); }
+.studio-assunto__item { display:flex; align-items:baseline; justify-content:space-between; gap:10px; width:100%; border:0; border-radius:8px; background:none; color:var(--ink); padding:8px; font:500 var(--fs-corpo)/1.3 var(--f-body); text-align:left; cursor:pointer; min-height:44px; }
+.studio-assunto__item:hover { background:var(--sand-soft); }
+.studio-assunto__item[aria-pressed="true"] { background:var(--sand-soft); color:var(--peach-ink); font-weight:700; }
+.studio-assunto__conta { flex:0 0 auto; font-size:var(--fs-rotulo); font-weight:600; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
+.studio-assunto__item[aria-pressed="true"] .studio-assunto__conta { color:var(--peach-ink); }
+.studio-assunto__item:focus-visible, .studio-assunto__botao:focus-visible, .studio-assunto__fechar:focus-visible { outline:3px solid var(--peach-deep); outline-offset:1px; }
+/* No celular: folha que sobe de baixo, com título e X; a lista rola dentro dela. */
+.studio-assunto__painel--folha { position:fixed; inset:auto 0 0 0; width:100%; max-height:min(86vh, 760px); border-bottom:0; border-radius:var(--r-lg) var(--r-lg) 0 0; }
+.studio-assunto__painel--folha[open] { animation:studio-sobe .2s ease-out; }
+.studio-assunto__painel--folha .studio-assunto__topo { display:flex; position:sticky; top:0; z-index:1; align-items:center; justify-content:space-between; gap:12px; padding:10px 8px 8px 20px; background:var(--white); border-bottom:1px solid var(--sand); }
+.studio-assunto__cabeca { font-weight:700; font-size:var(--fs-secao); }
+.studio-assunto__fechar { display:grid; place-items:center; width:44px; height:44px; border:0; border-radius:50%; background:none; color:var(--ink); cursor:pointer; }
+.studio-assunto__fechar:hover { background:var(--sand-soft); }
+.studio-assunto__painel--folha .studio-assunto__conteudo { padding:12px 12px 20px; }
+.studio-assunto__painel--folha .studio-assunto__grupos { columns:140px; column-gap:12px; }
+@keyframes studio-aparece { from { opacity:0; transform:translateY(-4px); } }
+@keyframes studio-sobe { from { opacity:.6; transform:translateY(32px); } }
+
+/* ---------- A arte do modelo, maior ---------- */
+.studio-dica-toque { display:none; }
+@media (hover: none) { .studio-dica-toque { display:block; margin:-4px 0 8px; } }
+.studio-previa-modelo { position:fixed; left:0; top:0; z-index:40; width:min(480px, calc(100vw - 28px)); padding:10px 10px 12px; border:1px solid var(--sand); border-radius:var(--r-md); background:var(--white); box-shadow:var(--shadow); pointer-events:none; opacity:0; visibility:hidden; transform:scale(.97); transform-origin:center; transition:opacity .16s ease, transform .16s ease, visibility 0s linear .16s; }
+.studio-previa-modelo.vendo { opacity:1; visibility:visible; transform:none; transition:opacity .16s ease, transform .16s ease; }
+.studio-previa-modelo canvas, .studio-folha-modelo canvas { display:block; width:100%; height:auto; border-radius:8px; border:1px solid var(--sand); background:var(--white); }
+.studio-previa-modelo strong, .studio-folha-modelo strong { display:block; margin:9px 2px 0; font-size:var(--fs-corpo); font-weight:700; color:var(--ink); }
+.studio-previa-modelo p, .studio-folha-modelo p { margin:2px 2px 0; font-size:var(--fs-corpo); color:var(--ink-soft); line-height:1.45; }
+.studio-folha-modelo { width:min(560px, calc(100vw - 24px)); max-width:none; border:1px solid var(--sand); border-radius:var(--r-md); padding:12px; background:var(--white); color:var(--ink); box-shadow:var(--shadow); }
+/* O ::backdrop não herda as variáveis do :root em todo navegador: é o --ink (23 21 18) a 45%. */
+.studio-folha-modelo::backdrop, .studio-assunto__painel--folha::backdrop { background:rgb(23 21 18 / .45); }
+.studio-folha-modelo__acoes { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+@media (prefers-reduced-motion: reduce) { .studio-previa-modelo, .studio-previa-modelo.vendo, .studio-model { transition:none; } .studio-model:hover { transform:none; } .studio-assunto__painel[open] { animation:none; } }
 
 /*
   ---------- Tamanho de controle por tipo de ponteiro ----------
@@ -419,13 +511,26 @@ input[type="range"] { accent-color:var(--peach-ink); cursor:pointer; min-height:
   pede 24 px mínimos para ponteiro fino, e nada aqui chega perto disso.
 */
 @media (pointer: fine) {
-  .studio-view-buttons button, .studio-color-presets button { min-height:36px; padding:7px 14px; }
-  .studio-cenas button { min-height:34px; padding:6px 12px; }
+  .studio-view-buttons button { min-height:36px; padding:7px 14px; }
+  .studio-chip { min-height:32px; padding:5px 12px; }
+  .studio-opcao__rotulo { padding-top:6px; }
   .studio-cadeado { min-height:34px; padding:6px 11px; }
   .studio-text-button { min-height:32px; padding:4px 0; }
   .studio-back { min-height:34px; }
   .studio-abas button { min-height:40px; padding:9px 6px; }
   .studio-duvida summary { min-height:32px; }
-  .studio-finish > .btn { padding-block:var(--fs-corpo); }
-  .studio-passo .btn { padding-block:var(--fs-rotulo); }
+  .studio-finish > .btn { padding-block:.72rem; }
+  .studio-passo .btn { padding-block:.5rem; }
+  .studio-page .btn--sm { padding:.45rem .95rem; }
+  .studio-page select,.studio-page input[type="text"],.studio-page input[type="search"] { min-height:40px; padding:8px 12px; font-size:.92rem; }
+  .studio-assunto__botao { min-height:40px; padding-block:8px; font-size:.92rem; }
+  .studio-assunto__item { min-height:28px; padding:4px 8px; }
+  .studio-acrescentar { min-height:34px; padding:6px 14px; }
+  .studio-historico__botoes button { min-height:32px; padding:5px 12px; }
+  .studio-abas button { min-height:40px; }
+  .studio-item__cabeca { min-height:46px; }
+  .studio-cor, .studio-cores-peca .studio-cor { width:26px; height:26px; }
+  .studio-elemento { width:46px; height:46px; padding:5px; }
+  .studio-forma { width:40px; height:40px; }
+  .studio-forma canvas { width:24px; height:24px; }
 }

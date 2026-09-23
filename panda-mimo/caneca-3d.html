@@ -47,9 +47,10 @@
   <noscript><p class="studio-message">Ative o JavaScript para personalizar a caneca. Você também pode <a href="index.html#contato">contar sua ideia pra gente</a>.</p></noscript>
   <div class="studio-layout">
 
-    <!-- A peça e os ajustes dela vivem numa coluna só: assim a caneca consegue grudar ao
-         longo de todo o editor na tela larga, e no celular (onde a coluna vira display:contents)
-         ela gruda ao longo da página inteira. -->
+    <!-- A peça, as cores dela e a arte aberta vivem numa coluna só. Na tela larga a coluna gruda
+         pelo topo quando cabe na janela e pelo pé quando passa dela (quase sempre, com a arte
+         aberta), para nada ficar fora de alcance. No celular ela vira display:contents e só a
+         caneca gruda. -->
     <div class="studio-coluna-peca">
     <!-- ===================== A PEÇA ===================== -->
     <section class="studio-preview" aria-label="Prévia da caneca">
@@ -77,6 +78,51 @@
 
     </section>
 
+    <!-- A peça por inteiro, logo abaixo da caneca e sempre à vista (pedido do dono, 23/09/2026). As
+         cores, o acabamento e a cena moravam em blocos que só abriam com um clique, e ninguém
+         descobria que dava para mudar a peça; a arte aberta ficava pequena, no pé da página. -->
+    <div class="studio-peca-detalhes">
+      <section class="studio-opcoes" aria-label="Cores, acabamento e cena da peça">
+        <div class="studio-opcao" id="peca-cores">
+          <p class="studio-opcao__rotulo" id="rotulo-cores">Cores da peça</p>
+          <div class="studio-opcao__valores">
+            <div class="studio-color-presets" role="group" aria-labelledby="rotulo-cores"><button type="button" class="studio-chip" data-preset="branca" aria-pressed="true">Toda branca</button><button type="button" class="studio-chip" data-preset="preta" aria-pressed="false">Preto e branco</button><button type="button" class="studio-chip" data-preset="rosa" aria-pressed="false">Toque rosa</button></div>
+            <div class="studio-cores-peca">
+              <div class="studio-cores-peca__grupo" role="group" aria-labelledby="rotulo-interior"><span class="studio-cores-peca__nome" id="rotulo-interior">Interior</span><span class="studio-cores" id="cores-interior"></span></div>
+              <div class="studio-cores-peca__grupo" role="group" aria-labelledby="rotulo-alca"><span class="studio-cores-peca__nome" id="rotulo-alca">Alça</span><span class="studio-cores" id="cores-alca"></span></div>
+            </div>
+            <p class="studio-help">Por fora, branca. O carinho fica por sua conta.</p>
+          </div>
+        </div>
+        <div class="studio-opcao" id="peca-acabamento">
+          <p class="studio-opcao__rotulo" id="rotulo-acabamento">Acabamento</p>
+          <div class="studio-opcao__valores"><div class="studio-cenas" id="acabamentos" role="group" aria-labelledby="rotulo-acabamento"></div></div>
+        </div>
+        <div class="studio-opcao" id="peca-cena">
+          <p class="studio-opcao__rotulo" id="rotulo-cena">Cena</p>
+          <div class="studio-opcao__valores">
+            <div class="studio-cenas" id="cenas" role="group" aria-labelledby="rotulo-cena"></div>
+            <p class="studio-help">Veja a caneca como ela vai aparecer na foto do presente.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="studio-flat" id="flat-details" aria-labelledby="flat-titulo">
+        <div class="studio-flat__topo">
+          <h2 class="studio-flat__titulo" id="flat-titulo">A arte aberta <span>área de 21 × 9 cm</span></h2>
+          <label class="studio-check"><input type="checkbox" id="mostrar-margem" checked> Mostrar a margem de segurança</label>
+        </div>
+        <div class="studio-flat__paper"><canvas id="flat-art" width="840" height="360" role="img" aria-label="Arte plana dentro da área de personalização"></canvas></div>
+        <p>Esta é a área que envolve a caneca, com um espaço livre junto à alça. Puxe um canto para aumentar e o botão de cima para girar.</p>
+        <details class="studio-duvida"><summary>O que é a margem de segurança?</summary>
+          <p>É a faixa de 5 mm nas bordas da arte. A caneca é estampada com a folha envolvendo a peça, e essa
+          folha pode escorregar um fio de milímetro. O que estiver fora da margem corre o risco de sair cortado —
+          então nome, data e rosto ficam para dentro dela.</p>
+        </details>
+      </section>
+      <div class="studio-caption"><span class="hand">Só uma prévia, tá?</span><p>Modelo de referência de 325 ml. A gente confere a peça, a combinação de cores e a arte final antes de produzir.</p></div>
+    </div>
+
     </div>
 
     <!-- ===================== A ARTE ===================== -->
@@ -92,7 +138,7 @@
             <li><strong>Ponha suas fotos e escreva do seu jeito.</strong> A caneca gira para você ver de todos os lados antes de decidir.</li>
             <li><strong>Peça pelo WhatsApp.</strong> A gente confere a arte com você antes de produzir — nada sai da sua mão sem o seu "pode fazer".</li>
           </ol>
-          <button type="button" class="btn btn--dark btn--sm" id="boasvindas-fechar">Entendi, vamos montar</button>
+          <button type="button" class="btn btn--ghost btn--sm" id="boasvindas-fechar">Entendi, vamos montar</button>
         </aside>
         <div class="studio-rascunho" id="rascunho" hidden>
           <p id="rascunho-texto">Você tem um rascunho guardado neste aparelho.</p>
@@ -126,17 +172,27 @@
 
         <!-- aba: modelo -->
         <div class="studio-painel" id="painel-modelo" role="tabpanel" aria-labelledby="aba-modelo" tabindex="0">
+          <div class="studio-escolhido" id="fundo-arte" hidden></div>
           <div class="studio-filtros">
-            <label class="studio-campo" for="categoria-modelo">Para qual ocasião?
-              <select id="categoria-modelo"></select>
-            </label>
+            <div class="studio-campo studio-assunto">
+              <span id="rotulo-assunto">Para qual ocasião?</span>
+              <button type="button" class="studio-assunto__botao" id="categoria-modelo" aria-haspopup="dialog" aria-expanded="false"
+                aria-controls="painel-assuntos" aria-labelledby="rotulo-assunto categoria-modelo">Todos os modelos</button>
+              <dialog class="studio-assunto__painel" id="painel-assuntos" aria-labelledby="titulo-assuntos">
+                <div class="studio-assunto__topo">
+                  <p class="studio-assunto__cabeca" id="titulo-assuntos">Para qual ocasião?</p>
+                  <button type="button" class="studio-assunto__fechar" id="fechar-assuntos" aria-label="Fechar a lista de ocasiões"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+                </div>
+                <div class="studio-assunto__conteudo" id="lista-assuntos"></div>
+              </dialog>
+            </div>
             <label class="studio-campo" for="busca-modelo">Buscar por nome
               <input id="busca-modelo" type="search" placeholder="Ex.: coração, fotos, Natal" autocomplete="off">
             </label>
           </div>
           <p class="studio-help" id="resultado-modelos" role="status"></p>
+          <p class="studio-help studio-dica-toque">Toque e segure um modelo para ver a arte maior.</p>
           <div class="studio-models" id="model-list" role="group" aria-label="Modelos de arte"></div>
-          <div class="studio-fundo-arte" id="fundo-arte" hidden></div>
 
           <details class="studio-guide" id="bloco-canva">
             <summary>Quer montar a arte no Canva?</summary>
@@ -205,10 +261,15 @@
             <label for="art-rotation">Inclinação <output id="rotation-value" for="art-rotation">0°</output><input id="art-rotation" type="range" min="-180" max="180" value="0" step="1"></label>
           </div>
           <button type="button" id="reset-art" class="studio-text-button">Centralizar e voltar ao tamanho inicial</button>
+          <!-- Nome, Pandinha e enfeites são camadas por cima da arte, como nos modelos (pedido do dono,
+               23/09/2026). Antes o nome morava num rodapé fixo, o Pandinha era um só e os dois tomavam
+               o pé da caneca, que a arte não podia ocupar. -->
           <div class="studio-nome-livre">
-            <label class="studio-campo" for="art-name">Nome ou frase curta<input id="art-name" type="text" maxlength="24" placeholder="Ex.: Malu"></label>
-            <label class="studio-campo" for="art-font">Jeito da letra<select id="art-font"><option value="Fredoka">Redondinha</option><option value="Caveat">Manuscrita</option></select></label>
-            <label class="studio-check"><input id="art-panda" type="checkbox" checked> Com o Pandinha</label>
+            <p class="studio-help">Nome, Pandinha e enfeites vão por cima da sua arte, e cada um se move, aumenta e gira do jeito que você quiser. Frases e enfeites têm aba própria.</p>
+            <div class="studio-nome-livre__acoes">
+              <button type="button" class="studio-acrescentar" id="arte-add-frase">+ Nome ou frase</button>
+              <button type="button" class="studio-acrescentar" id="arte-add-pandinha">+ Pandinha</button>
+            </div>
           </div>
         </div>
 
@@ -256,37 +317,6 @@
     </aside>
   </div>
 
-  <!-- Ajustes da peça: faixa própria abaixo do layout, larga e calma. Dentro da coluna eles
-       obrigavam a caneca a rolar por dentro. -->
-  <section class="studio-preview-extra" aria-label="Ajustes da peça">
-      <!-- cores da peça ficam junto da peça, não no editor da arte -->
-      <details class="studio-peca" id="peca-cores">
-        <summary><span>Cores da peça</span><span class="studio-peca__resumo" id="peca-resumo">Toda branca</span></summary>
-        <p class="studio-help">Por fora, branca. O carinho fica por sua conta.</p>
-        <div class="studio-color-presets" role="group" aria-label="Combinações de cores"><button type="button" data-preset="branca" aria-pressed="true">Toda branca</button><button type="button" data-preset="preta" aria-pressed="false">Preto e branco</button><button type="button" data-preset="rosa" aria-pressed="false">Toque rosa</button></div>
-        <div class="studio-color-fields"><label for="inside-color">Interior<select id="inside-color" name="inside"><option value="branca">Branco</option><option value="preta">Preto</option><option value="vermelha">Vermelho</option><option value="amarela">Amarelo</option><option value="rosa">Rosa</option><option value="azul">Azul</option></select></label><label for="handle-color">Alça<select id="handle-color" name="handle"><option value="branca">Branco</option><option value="preta">Preto</option><option value="vermelha">Vermelho</option><option value="amarela">Amarelo</option><option value="rosa">Rosa</option><option value="azul">Azul</option></select></label></div>
-      </details>
-
-      <details class="studio-peca" id="peca-cena">
-        <summary><span>Cena e acabamento</span><span class="studio-peca__resumo" id="cena-resumo">Fundo claro · brilhante</span></summary>
-        <p class="studio-help">Veja a caneca como ela vai aparecer na foto do presente.</p>
-        <div class="studio-cenas" id="cenas" role="group" aria-label="Cena da prévia"></div>
-        <div class="studio-cenas" id="acabamentos" role="group" aria-label="Acabamento da cerâmica"></div>
-      </details>
-
-      <details class="studio-flat" id="flat-details">
-        <summary>Ver a arte aberta <span>área de 21 × 9 cm</span></summary>
-        <div class="studio-flat__paper"><canvas id="flat-art" width="840" height="360" role="img" aria-label="Arte plana dentro da área de personalização"></canvas></div>
-        <p>Esta é a área que envolve a caneca, com um espaço livre junto à alça. Puxe um canto para aumentar e o botão de cima para girar.</p>
-        <label class="studio-check"><input type="checkbox" id="mostrar-margem" checked> Mostrar a margem de segurança</label>
-        <details class="studio-duvida"><summary>O que é a margem de segurança?</summary>
-          <p>É a faixa de 5 mm nas bordas da arte. A caneca é estampada com a folha envolvendo a peça, e essa
-          folha pode escorregar um fio de milímetro. O que estiver fora da margem corre o risco de sair cortado —
-          então nome, data e rosto ficam para dentro dela.</p>
-        </details>
-      </details>
-      <div class="studio-caption"><span class="hand">Só uma prévia, tá?</span><p>Modelo de referência de 325 ml. A gente confere a peça, a combinação de cores e a arte final antes de produzir.</p></div>
-  </section>
 </main>
 <footer class="footer">
   <div class="wrap footer__in">

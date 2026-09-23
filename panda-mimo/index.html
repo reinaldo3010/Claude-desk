@@ -295,143 +295,19 @@
         <div class="personalization-sticker"><img src="assets/ic-coracao.svg" alt="" width="296" height="296" loading="lazy" decoding="async"><p class="art-caption">Personalizado do seu jeito</p></div>
         <p class="eyebrow"><span class="eyebrow__dot"></span> Crie agora <span class="eyebrow__dot"></span></p>
         <h2 class="display">Monte seu mimo</h2>
-        <p class="lede">Digite um nome, escolha a peça e a cor e veja uma prévia de como pode ficar. A arte final a gente faz juntos.</p>
+        <p class="lede">Escolha um modelo ou traga a sua arte, ponha suas fotos e escreva do seu jeito: a caneca gira para você ver de todos os lados. A arte final a gente confere junto.</p>
       </header>
 
-      <div class="builder">
-        <form class="builder__form" id="builder" autocomplete="off">
-          <div class="field">
-            <label for="b-nome">O que vai escrito?</label>
-            <input id="b-nome" name="nome" type="text" maxlength="18" value="Malu" placeholder="Um nome, um apelido, uma palavra">
-            <small class="field__hint"><span id="b-count">4</span>/18 caracteres</small>
-          </div>
-
-          <fieldset class="field">
-            <legend>Base</legend>
-            <div class="seg">
-              <input type="radio" name="item" id="i-garrafa" value="garrafa" checked><label for="i-garrafa">Garrafa</label>
-              <input type="radio" name="item" id="i-caneca" value="caneca"><label for="i-caneca">Caneca</label>
-              <input type="radio" name="item" id="i-copo" value="copo"><label for="i-copo">Copo</label>
-            </div>
-          </fieldset>
-
-          <fieldset class="field">
-            <legend>Cor da peça</legend>
-            <div class="swatches">
-              <input type="radio" name="cor" id="c-creme" value="creme" checked><label for="c-creme" style="--sw:#F3EEE4">Creme</label>
-              <input type="radio" name="cor" id="c-salvia" value="salvia"><label for="c-salvia" style="--sw:#A8C5A2">Sálvia</label>
-              <input type="radio" name="cor" id="c-pessego" value="pessego"><label for="c-pessego" style="--sw:#FFB59C">Pêssego</label>
-              <input type="radio" name="cor" id="c-preta" value="preta"><label for="c-preta" style="--sw:#1F1D1A">Preta</label>
-            </div>
-            <small class="field__hint" id="dica-foto" hidden>Na foto real a peça aparece em creme. A cor certa você escolhe no pedido.</small>
-          </fieldset>
-
-          <fieldset class="field">
-            <legend>Letra</legend>
-            <div class="seg">
-              <input type="radio" name="letra" id="l-redonda" value="redonda" checked><label for="l-redonda" class="f-redonda">Redondinha</label>
-              <input type="radio" name="letra" id="l-manuscrita" value="manuscrita"><label for="l-manuscrita" class="f-manuscrita">Manuscrita</label>
-            </div>
-          </fieldset>
-
-          <div class="field field--row">
-            <div class="field field--check">
-              <input type="checkbox" id="b-panda" name="panda" checked>
-              <label for="b-panda">Com o pandinha</label>
-            </div>
-            <div class="field field--qty">
-              <label for="b-qtd">Quantidade</label>
-              <input id="b-qtd" name="qtd" type="number" min="1" max="500" step="1" value="1" inputmode="numeric" aria-describedby="b-qtd-hint">
-              <small class="field__hint" id="b-qtd-hint">De 1 a 500</small>
-            </div>
-          </div>
-
-          <button type="button" class="btn btn--dark" id="b-send">Pedir esse mimo no WhatsApp</button>
-          <p class="builder__garantia">Sem compromisso: nada é produzido sem o seu "pode fazer".</p>
-          <p class="field__hint">Abre uma conversa já com as suas escolhas escritas. Nada é cobrado aqui.</p>
-        </form>
-
-        <div class="builder__stage" aria-live="polite">
-          <div class="seg seg--modo" role="group" aria-label="Como ver a prévia">
-            <input type="radio" name="modo" id="m-desenho" value="desenho" checked><label for="m-desenho">Desenho</label>
-            <input type="radio" name="modo" id="m-foto" value="foto"><label for="m-foto">Foto real</label>
-          </div>
-          <div class="foto-real" id="foto-real" hidden>
-            <img id="foto-real-img" src="assets/prod-caneca.webp" srcset="assets/prod-caneca.webp 1x, assets/prod-caneca@2x.webp 2x" alt="Foto real do produto com o nome escolhido" width="760" height="760" decoding="async">
-            <div class="foto-real__placa" id="foto-real-placa" aria-hidden="true"><span id="foto-real-nome">Malu</span></div>
-          </div>
-          <svg class="preview" viewBox="0 0 260 320" role="img" aria-labelledby="preview-title">
-            <title id="preview-title">Prévia do item personalizado</title>
-            <defs>
-              <linearGradient id="sheen" x1="0" x2="1">
-                <stop offset="0" stop-color="#fff" stop-opacity=".28"/>
-                <stop offset=".45" stop-color="#fff" stop-opacity="0"/>
-                <stop offset="1" stop-color="#000" stop-opacity=".10"/>
-              </linearGradient>
-              <g id="panda-face">
-                <circle cx="-15" cy="-15" r="8" fill="#171512"/>
-                <circle cx="15" cy="-15" r="8" fill="#171512"/>
-                <ellipse cx="0" cy="0" rx="22" ry="19" fill="#FFFDF8" stroke="#171512" stroke-width="1.6"/>
-                <ellipse cx="-9" cy="-2" rx="6.5" ry="7.5" fill="#171512" transform="rotate(-15 -9 -2)"/>
-                <ellipse cx="9" cy="-2" rx="6.5" ry="7.5" fill="#171512" transform="rotate(15 9 -2)"/>
-                <circle cx="-8" cy="-2" r="2.4" fill="#fff"/>
-                <circle cx="10" cy="-2" r="2.4" fill="#fff"/>
-                <circle cx="-7.3" cy="-2.7" r=".9" fill="#171512"/>
-                <circle cx="10.7" cy="-2.7" r=".9" fill="#171512"/>
-                <ellipse cx="0" cy="6" rx="2.6" ry="1.8" fill="#171512"/>
-                <path d="M-3 9q3 3 6 0" fill="none" stroke="#171512" stroke-width="1.4" stroke-linecap="round"/>
-                <circle cx="-15" cy="6" r="3" fill="#FFB59C" opacity=".8"/>
-                <circle cx="15" cy="6" r="3" fill="#FFB59C" opacity=".8"/>
-              </g>
-            </defs>
-
-            <ellipse cx="130" cy="300" rx="70" ry="9" fill="#171512" opacity=".10"/>
-
-            <!-- GARRAFA -->
-            <g id="pv-garrafa">
-              <rect x="105" y="26" width="50" height="14" rx="6" fill="#171512"/>
-              <path d="M112 26 q0 -16 18 -16 q18 0 18 16" fill="none" stroke="#171512" stroke-width="7" stroke-linecap="round"/>
-              <rect x="92" y="38" width="76" height="22" rx="8" fill="#2A2724"/>
-              <rect x="82" y="56" width="96" height="232" rx="26" class="pv-body"/>
-              <rect x="82" y="56" width="96" height="232" rx="26" fill="url(#sheen)"/>
-              <use href="#panda-face" x="130" y="120" class="pv-panda"/>
-              <text x="130" y="205" text-anchor="middle" class="pv-text">Malu</text>
-              <path class="pv-heart" d="M130 240c-7-4.5-10.5-9-10.5-13.5a5 5 0 0 1 10.5-2.5 5 5 0 0 1 10.5 2.5c0 4.5-3.5 9-10.5 13.5z"/>
-            </g>
-
-            <!-- CANECA -->
-            <g id="pv-caneca" hidden>
-              <path d="M186 130 h22 a30 30 0 0 1 0 60 h-22" fill="none" stroke="#171512" stroke-width="16" stroke-linecap="round"/>
-              <path d="M186 130 h22 a30 30 0 0 1 0 60 h-22" fill="none" stroke="#3a3632" stroke-width="7" stroke-linecap="round"/>
-              <rect x="56" y="82" width="136" height="200" rx="18" class="pv-body"/>
-              <rect x="56" y="82" width="136" height="200" rx="18" fill="url(#sheen)"/>
-              <ellipse cx="124" cy="84" rx="68" ry="12" fill="#171512"/>
-              <ellipse cx="124" cy="84" rx="60" ry="8" fill="#2E2A26"/>
-              <use href="#panda-face" x="124" y="140" class="pv-panda"/>
-              <text x="124" y="222" text-anchor="middle" class="pv-text">Malu</text>
-            </g>
-
-            <!-- COPO -->
-            <g id="pv-copo" hidden>
-              <path d="M168 44 l24 -30" stroke="#FFB59C" stroke-width="8" stroke-linecap="round"/>
-              <rect x="78" y="40" width="104" height="26" rx="10" fill="#2A2724"/>
-              <rect x="72" y="62" width="116" height="12" rx="6" fill="#171512"/>
-              <path d="M78 74 h104 l-9 206 a12 12 0 0 1 -12 10 h-62 a12 12 0 0 1 -12 -10 z" class="pv-body"/>
-              <path d="M78 74 h104 l-9 206 a12 12 0 0 1 -12 10 h-62 a12 12 0 0 1 -12 -10 z" fill="url(#sheen)"/>
-              <use href="#panda-face" x="130" y="130" class="pv-panda"/>
-              <text x="130" y="212" text-anchor="middle" class="pv-text">Malu</text>
-              <path class="pv-heart" d="M130 246c-7-4.5-10.5-9-10.5-13.5a5 5 0 0 1 10.5-2.5 5 5 0 0 1 10.5 2.5c0 4.5-3.5 9-10.5 13.5z"/>
-            </g>
-          </svg>
-          <div class="builder__foot">
-            <img src="assets/panda-joinha.webp" alt="" width="848" height="824" loading="lazy" decoding="async">
-            <p class="builder__note"><span class="hand">Só uma prévia, tá?</span> Cores e proporções finais variam com a peça.</p>
-          </div>
+      <!-- O estúdio da caneca em 360°, aqui mesmo na página (pedido do dono, 23/09/2026), no lugar do
+           simulador de desenho. É o mesmo de caneca-3d.html: a marcação vem de lá (uma fonte só para as
+           duas páginas), e o estúdio só carrega quando a seção chega perto da tela, para não pesar a
+           abertura do site. `studio-page` faz as regras do estúdio valerem aqui dentro. -->
+      <div class="estudio-no-site studio-page" id="estudio-no-site" data-origem="caneca-3d.html" aria-busy="true">
+        <div class="estudio-no-site__espera">
+          <img src="assets/prod-caneca.webp" srcset="assets/prod-caneca.webp 1x, assets/prod-caneca@2x.webp 2x" alt="" width="760" height="760" loading="lazy" decoding="async">
+          <p class="estudio-no-site__aviso" id="estudio-no-site-aviso" role="status">Preparando sua caneca em 360°…</p>
+          <noscript><p class="estudio-no-site__aviso">Ative o JavaScript para montar a sua caneca. Você também pode <a href="#contato">contar sua ideia pra gente</a>.</p></noscript>
         </div>
-      </div>
-      <div class="builder__estudio">
-        <p><span class="hand">Quer colocar uma foto?</span> Na caneca dá pra montar a arte em 360°: escolha um modelo de Natal, aniversário, Dia das Mães ou pet, coloque suas fotos, escreva sua frase e mexa em tudo clicando na própria caneca.</p>
-        <a class="btn btn--ghost" href="caneca-3d.html">Ver minha foto na caneca</a>
       </div>
     </div>
   </section>
@@ -830,7 +706,7 @@
     <nav class="footer__nav" aria-label="Rodapé">
       <a href="#produtos">Produtos</a>
       <a href="#monte">Monte seu mimo</a>
-      <a href="caneca-3d.html">Caneca em 360°</a>
+      <a href="#monte">Caneca em 360°</a>
       <a href="#ocasioes">Ocasiões</a>
       <a href="#empresas">Empresas</a>
       <a href="#cuidados">Cuidados</a>
