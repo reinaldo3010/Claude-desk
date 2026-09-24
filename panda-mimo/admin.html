@@ -46,6 +46,7 @@
   <div class="wrap">
     <div class="adm-abas" role="tablist">
       <button class="adm-aba" role="tab" id="aba-produtos" aria-selected="true" aria-controls="secao-produtos">Produtos</button>
+      <button class="adm-aba" role="tab" id="aba-artes" aria-selected="false" aria-controls="secao-artes">Artes prontas</button>
       <button class="adm-aba" role="tab" id="aba-config" aria-selected="false" aria-controls="secao-config">Configurações</button>
       <button class="adm-aba" role="tab" id="aba-depoimentos" aria-selected="false" aria-controls="secao-depoimentos">Depoimentos</button>
       <button class="adm-aba" role="tab" id="aba-metricas" aria-selected="false" aria-controls="secao-metricas">Métricas</button>
@@ -208,6 +209,48 @@
           <button class="btn btn--peach btn--sm" type="button" id="baixar-copia">Baixar produtos.js</button>
         </div>
       </div>
+    </section>
+
+    <!-- ---------- ARTES PRONTAS ---------- -->
+    <section class="adm-secao" id="secao-artes" role="tabpanel" aria-labelledby="aba-artes" hidden>
+      <div class="adm-cabecalho">
+        <h2>Artes prontas</h2>
+        <span class="adm-item__meta" id="conta-artes"></span>
+      </div>
+      <p class="campo"><small>A galeria do estúdio. Cada arte entra numa categoria e aparece no cardápio de ocasiões, junto dos modelos da casa, e a pessoa escreve o nome e põe o Pandinha por cima. A arte precisa ter a proporção da volta da caneca (21 × 9 cm): o painel prepara a versão de impressão (2480 × 1063 px, 300 dpi) e a miniatura.</small></p>
+
+      <div class="adm-editor">
+        <h3>Subir artes</h3>
+        <div class="linha">
+          <div class="campo">
+            <label for="a-categoria">Categoria das artes que chegarem</label>
+            <select id="a-categoria"></select>
+            <small>Com o <code>galeria.json</code> da análise junto, cada arte já chega com a categoria e o nome dela.</small>
+          </div>
+          <div class="campo">
+            <span class="rotulo">Categoria nova</span>
+            <div class="adm-nova-categoria">
+              <input id="a-nova-nome" type="text" maxlength="60" placeholder="Nome, como aparece no cardápio" aria-label="Nome da categoria nova">
+              <input id="a-nova-grupo" type="text" maxlength="60" placeholder="Grupo" list="a-grupos" aria-label="Grupo da categoria nova">
+              <datalist id="a-grupos"></datalist>
+              <button class="mini" type="button" id="a-criar-categoria">Criar</button>
+            </div>
+          </div>
+        </div>
+        <div class="solta" id="solta-artes" tabindex="0" role="button">
+          <strong>Clique ou arraste as artes aqui</strong><br>
+          <small>PNG, JPG ou WebP. Pode mandar várias de uma vez, e o galeria.json junto.</small>
+        </div>
+        <input type="file" id="arquivo-artes" accept="image/*,.json,application/json" multiple hidden>
+        <div class="adm-fila" id="fila-artes"></div>
+        <p class="aviso" id="recado-artes"></p>
+        <div class="adm-rodape">
+          <button class="btn btn--dark" type="button" id="subir-artes" disabled>Subir as artes</button>
+          <button class="mini" type="button" id="limpar-fila" hidden>Limpar a fila</button>
+        </div>
+      </div>
+
+      <div id="lista-artes"></div>
     </section>
   </div>
 </div>

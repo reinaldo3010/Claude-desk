@@ -84,11 +84,13 @@ export const ORDEM_DOS_GRUPOS = Object.freeze([
   'Datas comemorativas',
   'Momentos',
   'Bebê e maternidade',
+  'Para os pequenos', // da galeria de artes prontas (pm_arte_categorias)
   'Convites e agradecimentos',
   'Pets e bichinhos',
   'Esportes e movimento',
   'Profissões e vocações',
   'Hobbies e paixões',
+  'Fé e espiritualidade', // da galeria de artes prontas
   'Com o Pandinha',
   'Aquarela',
   'Do dia a dia',

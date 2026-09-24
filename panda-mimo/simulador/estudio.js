@@ -20,10 +20,11 @@ import { ehIlustracao, TAMANHO_DA_ILUSTRACAO } from './colecoes.js';
 import { fazZip } from './zip.js';
 import { salvaRascunho, leRascunho, apagaRascunho, quandoFoi } from './rascunho.js';
 import {
-  gruposDeCategorias, ADESIVOS, ELEMENTOS, ENFEITES, FILTROS, CORES_DE_ARTE, FORMAS_DE_FOTO,
+  gruposDeCategorias, ORDEM_DOS_GRUPOS, ADESIVOS, ELEMENTOS, ENFEITES, FILTROS, CORES_DE_ARTE, FORMAS_DE_FOTO,
   modeloPorId, modelosDaCategoria, novaArte, desenhaArte, desenhaForma, camadaEm,
   alcasDaCamada, medidorDeTexto, cor, miniaturaDaImagem, limiteDaImagem, proporcaoDaImagem,
 } from './modelos.js';
+import { carregaGaleria, arquivoDaGaleria, PREFIXO_DA_GALERIA } from './galeria.js';
 
 /*
   A peça que está no estúdio (pecas.js): caneca, garrafa… A caneca abre por padrão. Medida, cores,
@@ -125,6 +126,11 @@ let categoria = 'todos';
 let busca = '';
 let artwork = null;           // arte livre: { image, width, height, name, dispose }
 let artworkBlob = null;
+// A galeria de artes prontas (galeria.js): chega do banco depois da abertura, e a escolhida vira a
+// arte livre, na volta inteira, como a que vem do Canva.
+let galeria = { categorias: [], artes: [] };
+let arteDaGaleria = null;     // { id, nome } da arte da galeria que está como arte livre
+let galeriaChegando = null;   // a arte da galeria que o próximo arquivo livre traz
 const fotos = new Map();      // id da camada de foto → { asset, blob }
 const lixeira = new Map();    // fotos tiradas da arte, guardadas para o desfazer
 const adesivos = new Map();   // arquivo → Image já carregada
@@ -337,10 +343,58 @@ const ehMeuModelo = (id) => meusModelos.some((m) => m.id === id);
 // Modelo meu de antes das outras peças não diz a peça: era de caneca.
 const meusDaPeca = () => meusModelos.filter((m) => (m.peca || PECA_PADRAO) === peca.id);
 
+/*
+  A arte da galeria entra na lista como um cartão de modelo. Ela vem depois dos modelos da casa, em
+  "Todos os modelos" e em cada ocasião: a primeira tela do estúdio continua a mesma de sempre.
+*/
+const cartoesDaGaleria = new Map(); // id da arte → o cartão dela na lista, para ser sempre o mesmo objeto
+
+function modeloDaGaleria(arteDoBanco) {
+  if (!cartoesDaGaleria.has(arteDoBanco.id)) {
+    const categoriaDela = galeria.categorias.find((c) => c.id === arteDoBanco.categoria_id);
+    cartoesDaGaleria.set(arteDoBanco.id, {
+      id: PREFIXO_DA_GALERIA + arteDoBanco.id,
+      nome: arteDoBanco.nome,
+      descricao: arteDoBanco.descricao || `Arte pronta${categoriaDela ? ` · ${categoriaDela.nome}` : ''}. O nome e o Pandinha vão por cima.`,
+      galeria: arteDoBanco,
+    });
+  }
+  return cartoesDaGaleria.get(arteDoBanco.id);
+}
+
+const daGaleria = (qual) => galeria.artes
+  .filter((a) => a.peca === peca.id && (qual === 'todos' || a.categoria_id === qual || a.tambem_em.includes(qual)))
+  .map(modeloDaGaleria);
+
 function listaDeModelos(qual) {
   if (qual === 'meus') return meusDaPeca();
-  const base = modelosDaCategoria(qual, peca.id);
+  const base = [...modelosDaCategoria(qual, peca.id), ...daGaleria(qual)];
   return qual === 'todos' ? [...meusDaPeca(), ...base] : base;
+}
+
+/** Os grupos do cardápio: os do estúdio e, onde a galeria pedir, as categorias novas dela. */
+function gruposDoCardapio() {
+  const grupos = gruposDeCategorias().map(([nome, itens]) => [nome, [...itens]]);
+  const conhecidas = new Set(grupos.flatMap(([, itens]) => itens.map((item) => item.id)));
+  // A categoria nova entra no grupo na ordem que tem no banco: Destinos do Brasil logo depois de Viagens.
+  const ordemNoBanco = new Map(galeria.categorias.map((c) => [c.id, Number(c.ordem) || 0]));
+  const novos = [];
+  for (const c of galeria.categorias) {
+    if (conhecidas.has(c.id)) continue;
+    let grupo = grupos.find(([nome]) => nome === c.grupo) || novos.find(([nome]) => nome === c.grupo);
+    if (!grupo) { grupo = [c.grupo, []]; novos.push(grupo); }
+    const itens = grupo[1];
+    const ordem = Number(c.ordem) || 0;
+    const novo = { id: c.id, grupo: c.grupo, nome: c.nome, descricao: c.descricao || '' };
+    // Só contam as ocasiões que o banco conhece (a da ecobag, por exemplo, não está lá).
+    const comOrdem = itens.map((item, i) => [i, ordemNoBanco.get(item.id)]).filter(([, o]) => o !== undefined);
+    if (!comOrdem.length) { itens.push(novo); continue; }
+    const depoisDe = comOrdem.reduce((ultimo, [i, o]) => (o <= ordem ? i : ultimo), -1);
+    itens.splice(depoisDe + 1, 0, novo);
+  }
+  if (!novos.length) return grupos;
+  const posicao = (nome) => { const i = ORDEM_DOS_GRUPOS.indexOf(nome); return i < 0 ? ORDEM_DOS_GRUPOS.length : i; };
+  return [...grupos, ...novos].sort((a, b) => posicao(a[0]) - posicao(b[0]));
 }
 
 function salvaModeloAtual() {
@@ -530,7 +584,9 @@ function orderMessage() {
   if (arte) {
     const espacos = camadasDo('foto');
     const escolhidas = espacos.filter((camada) => fotos.get(camada.id)?.asset);
-    if (ehMinhaArte()) {
+    if (ehMinhaArte() && arteDaGaleria && artwork) {
+      lines.push(`• Arte pronta da galeria: ${arteDaGaleria.nome} (${arteDaGaleria.id}), ${LAYOUTS[state.layout]}`);
+    } else if (ehMinhaArte()) {
       lines.push(artwork ? `• Arte: ${artwork.name}, ${LAYOUTS[state.layout]}` : '• Arte: ainda não escolhida');
     } else {
       lines.push(`• Modelo: ${modeloAtual?.nome || 'arte montada aqui'} (arte ao redor)`);
@@ -545,7 +601,9 @@ function orderMessage() {
     if (state.name) lines.push(`• Nome ou frase: "${state.name}" (letra ${nomeDaLetra(state.fontFamily)})`);
   }
   const temPandinha = arte ? arte.camadas.some((camada) => camada.tipo === 'adesivo') : state.withPanda;
-  lines.push(temPandinha ? '• Com o Pandinha' : '• Sem o Pandinha');
+  // A arte da galeria já traz o Pandinha desenhado: "Sem o Pandinha" ali seria mentira.
+  if (temPandinha) lines.push('• Com o Pandinha');
+  else if (!(ehMinhaArte() && arteDaGaleria && artwork)) lines.push('• Sem o Pandinha');
   lines.push('Vou anexar a prévia aqui na conversa.');
   return lines.join('\n');
 }
@@ -1099,7 +1157,7 @@ function montaCategorias() {
   if (meusDaPeca().length) primeiros.append(itemDeAssunto({ id: 'meus', nome: 'Meus modelos' }));
   const grupos = document.createElement('div');
   grupos.className = 'studio-assunto__grupos';
-  gruposDeCategorias().forEach(([nome, todos], indice) => {
+  gruposDoCardapio().forEach(([nome, todos], indice) => {
     const itens = todos.filter((item) => listaDeModelos(item.id).length);
     if (!itens.length) return;
     const grupo = document.createElement('div');
@@ -1201,7 +1259,37 @@ const DESCANSO_DO_MOUSE = 380;
 const SEGURAR_O_DEDO = 450;
 let previaDoModelo = null, relogioDaPrevia = 0, folhaDoModelo = null, seguraDedo = null;
 
+/** A imagem da galeria no canvas da arte maior (a miniatura dela, que já veio para o cartão). */
+const imagensDaGaleria = new Map(); // endereço → promessa da imagem
+function pedeImagemDaGaleria(url) {
+  if (!imagensDaGaleria.has(url)) {
+    imagensDaGaleria.set(url, new Promise((ok) => {
+      const imagem = new Image();
+      imagem.decoding = 'async';
+      imagem.onload = () => ok(imagem);
+      imagem.onerror = () => ok(null);
+      imagem.src = url;
+    }));
+  }
+  return imagensDaGaleria.get(url);
+}
+
 function desenhaArteMaior(canvas, modelo) {
+  if (modelo.galeria) {
+    const alvo = modelo.galeria.miniaturaUrl;
+    canvas.dataset.imagem = alvo;
+    canvas.getContext('2d')?.clearRect(0, 0, canvas.width, canvas.height);
+    pedeImagemDaGaleria(alvo).then((imagem) => {
+      const context = canvas.getContext('2d');
+      if (!imagem || !context || canvas.dataset.imagem !== alvo) return;
+      context.setTransform(1, 0, 0, 1, 0, 0);
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.imageSmoothingQuality = 'high';
+      context.drawImage(imagem, 0, 0, canvas.width, canvas.height);
+    });
+    return;
+  }
+  delete canvas.dataset.imagem;
   const redesenha = () => desenhaMiniatura(canvas, modelo);
   redesenha();
   const faltam = arquivosDaArte(modelo.camadas).filter((a) => !adesivos.has(a) && !miniaturasCarregadas.has(a));
@@ -1317,7 +1405,8 @@ function cartaoDeModelo(modelo) {
   button.type = 'button';
   button.className = 'studio-model';
   button.dataset.modelo = modelo ? modelo.id : '';
-  button.setAttribute('aria-pressed', String(modelo ? arte?.modelo === modelo.id : arte === null));
+  button.setAttribute('aria-pressed', String(modelo?.galeria ? ehMinhaArte() && arteDaGaleria?.id === modelo.galeria.id
+    : modelo ? arte?.modelo === modelo.id : arte === null));
   const figura = document.createElement('span');
   figura.className = 'studio-model__art';
   if (modelo) {
@@ -1399,6 +1488,18 @@ function pintaAsQueChegaram() {
 }
 
 function pintaMiniatura(figura, modelo) {
+  if (modelo.galeria) {
+    // A arte da galeria já vem pronta: a miniatura é a imagem que o painel preparou.
+    if (figura.querySelector('img')) return;
+    const imagem = document.createElement('img');
+    imagem.alt = '';
+    imagem.decoding = 'async';
+    imagem.width = 640;
+    imagem.height = Math.round(640 * areaMm.height / areaMm.width);
+    imagem.src = modelo.galeria.miniaturaUrl;
+    figura.appendChild(imagem);
+    return;
+  }
   if (figura.querySelector('canvas')) return;
   const canvas = document.createElement('canvas');
   canvas.width = 420;
@@ -1413,8 +1514,11 @@ function pintaMiniatura(figura, modelo) {
 }
 
 function marcaModeloEscolhido() {
+  // Na Minha arte com uma arte da galeria, quem fica marcado é o cartão dela, não o "Trazer a minha arte".
+  const escolhidaDaGaleria = ehMinhaArte() && arteDaGaleria ? PREFIXO_DA_GALERIA + arteDaGaleria.id : null;
   for (const button of el.models.children) {
-    button.setAttribute('aria-pressed', String(arte && !ehMinhaArte() ? button.dataset.modelo === arte.modelo : button.dataset.modelo === ''));
+    button.setAttribute('aria-pressed', String(escolhidaDaGaleria ? button.dataset.modelo === escolhidaDaGaleria
+      : arte && !ehMinhaArte() ? button.dataset.modelo === arte.modelo : button.dataset.modelo === ''));
   }
 }
 
@@ -1439,6 +1543,7 @@ async function garanteImagens() {
 }
 
 function escolheModelo(id) {
+  if (id?.startsWith(PREFIXO_DA_GALERIA)) { usaArteDaGaleria(id); return; }
   const modelo = id ? acheModelo(id) : null;
   if (modelo ? arte?.modelo === modelo.id : (arte === null || ehMinhaArte())) {
     if (!modelo) mostraAba('arte');
@@ -2329,6 +2434,9 @@ async function handleFile(file, destino = destinoDoArquivo) {
       artwork?.dispose();
       artwork = asset;
       artworkBlob = file;
+      // Arquivo que a pessoa trouxe deixa de ser a arte da galeria; o da galeria chega marcado.
+      arteDaGaleria = galeriaChegando;
+      galeriaChegando = null;
       el.fileName.textContent = asset.name;
       el.fileInfo.hidden = false;
       if (!arte) entraNaMinhaArte();
@@ -2371,6 +2479,7 @@ function removeArtwork() {
   artwork?.dispose();
   artwork = null;
   artworkBlob = null;
+  arteDaGaleria = null;
   el.fileInfo.hidden = true;
   el.fileName.textContent = '';
   el.file.value = '';
@@ -2518,6 +2627,78 @@ async function importaDoCanva(file) {
   }
 }
 
+/*
+  A arte da galeria entra pelo mesmo caminho da que vem do Canva: vira a arte livre, na volta inteira, e
+  nome, Pandinhas e enfeites vão por cima, na Minha arte em camadas. Como qualquer modelo, escolhê-la
+  não troca de etapa: a aba continua Modelo, e o cartão clicado não sai de baixo do mouse.
+*/
+let vezDaGaleria = 0;
+
+async function usaArteDaGaleria(id) {
+  const escolhida = galeria.artes.find((a) => PREFIXO_DA_GALERIA + a.id === id);
+  if (!escolhida) return;
+  if (ehMinhaArte() && artwork && arteDaGaleria?.id === escolhida.id) return;
+  const cartaoClicado = [...el.models.children].find((botao) => botao.dataset.modelo === id);
+  const alturaAntes = cartaoClicado?.getBoundingClientRect().top;
+  const vez = ++vezDaGaleria;
+  setError('');
+  setStatus(`Abrindo "${escolhida.nome}"…`);
+  let arquivo;
+  try {
+    arquivo = await arquivoDaGaleria(escolhida);
+  } catch (erro) {
+    if (vez === vezDaGaleria) { setStatus(''); setError(erro.message); }
+    return;
+  }
+  if (vez !== vezDaGaleria) return; // a pessoa já escolheu outra enquanto esta chegava
+  escondeArteMaior();
+  // Sai do modelo como o "Trazer a minha arte": fotos e desfazer do modelo anterior não passam para cá.
+  for (const item of fotos.values()) item.asset?.dispose();
+  fotos.clear();
+  lixeira.clear();
+  modeloAtual = null;
+  arte = null;
+  selecionada = null;
+  // A arte já traz o Pandinha e as frases desenhados: a Minha arte nasce sem camadas por cima.
+  state.name = '';
+  state.withPanda = false;
+  state.layout = 'wrap';
+  if (el.form.elements.layout) el.form.elements.layout.value = 'wrap';
+  resetAdjustments();
+  galeriaChegando = { id: escolhida.id, nome: escolhida.nome };
+  await handleFile(arquivo, { tipo: 'livre' });
+  galeriaChegando = null;
+  if (!arte) { atualizaModo(); marcaModeloEscolhido(); schedule(); } // o arquivo não abriu: a tela não fica pela metade
+  if (!artwork || arteDaGaleria?.id !== escolhida.id) return;
+  marcaModeloEscolhido();
+  mostraAba('modelo');
+  if (cartaoClicado?.isConnected && Number.isFinite(alturaAntes)) {
+    const desvio = cartaoClicado.getBoundingClientRect().top - alturaAntes;
+    if (Math.abs(desvio) > 1) window.scrollBy({ top: desvio, behavior: 'instant' });
+  }
+  // A caneca gira para o meio da arte, onde a arte de volta inteira põe o Pandinha.
+  viewer?.setView('meio');
+  setStatus(`"${escolhida.nome}" na volta inteira da ${peca.palavra}. O nome e o Pandinha entram pelas abas Frases e Enfeites.`);
+}
+
+/** Uma montagem guardada com arte da galeria e sem o arquivo dela (o link da montagem) busca a arte no banco. */
+async function recuperaArteDaGaleria(guardada) {
+  if (!guardada?.id) return;
+  if (artwork) { arteDaGaleria = { id: guardada.id, nome: guardada.nome || guardada.id }; marcaModeloEscolhido(); return; }
+  const { artes } = await carregaGaleria();
+  const escolhida = artes.find((a) => a.id === guardada.id);
+  if (!escolhida) { setStatus('A arte da galeria desta montagem saiu do ar. Escolha outra no Modelo.'); return; }
+  try {
+    galeriaChegando = { id: escolhida.id, nome: escolhida.nome };
+    await handleFile(await arquivoDaGaleria(escolhida), { tipo: 'livre' });
+    marcaModeloEscolhido();
+  } catch (erro) {
+    setError(erro.message);
+  } finally {
+    galeriaChegando = null;
+  }
+}
+
 /* ---------- rascunho: o trabalho não se perde ao fechar a aba ---------- */
 let rascunhoPendente = 0;
 
@@ -2529,6 +2710,8 @@ function montagemAtual() {
     arte: arte ? { ...arte, camadas: arte.camadas.map((camada) => ({ ...camada })) } : null,
     cena: cenaAtual,
     acabamento: acabamentoAtual,
+    // A arte da galeria vai pelo nome dela: o link da montagem, que não leva arquivo, a busca no banco.
+    ...(arteDaGaleria && artwork ? { galeria: { ...arteDaGaleria } } : {}),
   };
 }
 
@@ -2613,6 +2796,7 @@ async function aplicaMontagem(dados, { fotos: fotosDoArquivo = null } = {}) {
     // A arte primeiro: é o que mais aparece na caneca. Letras e imagens das camadas vêm logo depois.
     if (arquivoLivre) await handleFile(arquivoLivre, { tipo: 'livre' });
     else removeArtwork();
+    if (dados.galeria) await recuperaArteDaGaleria(dados.galeria);
     mostraAba('arte');
     await garanteImagens();
     await garanteFontes();
@@ -3199,6 +3383,15 @@ async function init() {
   montaSeletorDePeca();
   montaCategorias();
   montaModelos();
+  // A galeria de artes prontas chega do banco sem segurar a abertura. Com arte para a peça na tela, o
+  // cardápio e a lista ganham as dela, depois dos modelos da casa.
+  carregaGaleria().then((dados) => {
+    galeria = dados;
+    cartoesDaGaleria.clear();
+    if (!dados.artes.some((a) => a.peca === peca.id)) return;
+    montaCategorias();
+    montaModelos();
+  });
   montaGradeDeEnfeites();
   montaGradeDeElementos();
   montaCenas();

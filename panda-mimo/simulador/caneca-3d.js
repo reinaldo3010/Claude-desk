@@ -24,6 +24,9 @@ const VIEW_ANGLES = {
   back: { theta: 0.015, phi: 1.34 },
   handle: { theta: Math.PI / 2, phi: 1.30 },
   inside: { theta: Math.PI + 0.30, phi: 0.46 },
+  // Sem botão: o meio da arte, do lado oposto ao da alça. A arte da galeria abre por aqui, porque é
+  // onde ela põe o Pandinha (a arte de volta inteira tem o centro longe da alça).
+  meio: { theta: -Math.PI / 2, phi: 1.34 },
 };
 
 /** A continuous ceramic cross-section with a rounded lip and a real cavity. */

@@ -211,6 +211,32 @@ repetir. Companheiro de `COMECE-AQUI.md`.
   testes e estava miúda: frases de 6 mm e o nome de 30 mm sumiam numa peça de 27 cm, e a metade de
   baixo ficava vazia. Só a folha de contato (arte aberta, frente e verso em 3D) mostrou.
 
+## Da galeria de artes prontas (23/09/2026)
+
+- **Conteúdo que cresce toda semana mora no banco, não no código.** Mil artes passariam do limite de 1 GB
+  do GitHub Pages, e cada lote dependeria de commit e publicação. No banco, o dono sobe pelo painel.
+- **Guardião não pode depender do banco de verdade.** O estúdio passou a ler a galeria do Supabase; sem
+  a rota que devolve a galeria vazia em toda página do guardião, as contagens do cardápio mudariam a cada
+  arte que o dono sobe. Só o bloco `galeria` monta a dele. E a leitura confere a forma da resposta: um
+  bloco que devolvia `[{"whatsapp":…}]` para tudo viraria uma ocasião sem nome com o catálogo inteiro.
+- **Arte gerada por IA erra texto, e erra miúdo.** Das 102 artes do primeiro lote, 17 tinham texto
+  errado ("Acrédite", "tormam", "Uniáo", "MANHÂ", "ViLA", letra inventada numa lombada). Na folha de
+  contato, três apareceram; lendo cada arte em tamanho real, em duas metades, com ampliação no que era
+  miúdo, apareceram as outras catorze. Todo erro apontado por revisor foi conferido de novo antes de valer.
+- **Tema é livre; o que identifica a obra, não.** A análise primeiro pôs 28 artes em "personagem
+  licenciado"; o dono pediu revisão, e 7 delas eram só o Pandinha num tema (bruxo, ninja, dinossauros)
+  com símbolos ou cenários de franquia que dá para tirar. A pergunta que separa: a pessoa compraria a
+  caneca por ser "do Harry Potter"? Personagem, roupa que é o desenho dele, símbolo e cenário próprio da
+  obra fazem a resposta ser sim.
+- **Nada se apaga da pasta do dono.** "Excluir" virou mover para `fora-da-galeria/<motivo>`, com o
+  motivo de cada arte no `catalogo.csv`.
+- **Categoria nova custa altura no cardápio, e o guardião não vê** (ele roda com a galeria vazia). Dois grupos
+  novos levaram o cardápio de 468 para 597 px, e ele passou a rolar por dentro em 1366 × 768 — escondendo
+  ocasião. Só a medida com as categorias de verdade, servidas por rota, mostrou; com as quatro em Momentos
+  ficou em 537 px. Antes de criar grupo novo, medir o cardápio nas telas baixas.
+- **Arte de volta inteira tem o centro longe da alça.** Na vista Frente a caneca mostrava a borda do
+  Pandinha; a arte da galeria abre na vista `meio`, sem botão novo.
+
 ## Da publicação das peças (23/09/2026)
 
 - **Logo depois do "publicar" terminar, a primeira visita pode levar 503.** O estúdio não abriu em 1280

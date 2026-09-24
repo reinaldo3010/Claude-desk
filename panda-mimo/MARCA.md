@@ -586,6 +586,24 @@ nome" do detalhe de cada peça abre o estúdio já nela. As regras:
 
 Detalhes, números e o caminho para uma peça nova em `simulador/PECAS-NO-ESTUDIO.md`.
 
+**Galeria de artes prontas (23/09/2026, pedido do dono).** Além dos modelos da casa, o estúdio mostra artes
+prontas de volta inteira, que o dono sobe pelo painel (aba Artes prontas) e que moram no banco, cada uma
+numa categoria. As regras:
+
+- A arte entra no cardápio na categoria dela, **depois dos modelos da casa**: a primeira tela do estúdio
+  não muda. A categoria pode ser uma ocasião que o estúdio já tem ou uma nova, num grupo novo.
+- A arte vai inteira na volta da caneca, na medida de impressão (2480 × 1063 px, 300 dpi), sobre o branco
+  da cerâmica; o painel recusa arte fora da proporção da volta. Nome, Pandinhas e enfeites vão por cima,
+  como na Minha arte, e escolher a arte não troca de etapa.
+- **Arte com texto errado não entra** (pedido do dono). **Arte com personagem, marca ou símbolo de terceiros
+  também não**: tema é livre (bruxo, ninja, dinossauro, pirata); o que identifica a obra de outra pessoa
+  (o personagem, o desenho da roupa dele, o símbolo, o cenário que só existe nela) não é.
+- **Pendências do dono:** o nome Panda Mimo desenhado pela IA dentro da arte (13.5, 11.5 e 11.7), o
+  Pandinha 3D na arte de volta inteira (6.5) e a resolução dos originais do primeiro lote (232 dpi na
+  volta, ampliados para 300).
+
+Detalhes, a análise do primeiro lote e o que o guardião cobra em `simulador/GALERIA-DE-ARTES.md`.
+
 **Estúdio da caneca em 360° (setembro de 2026).** Mora na seção **Monte seu mimo** da página inicial,
 dentro do site (desde 23/09/2026), e em `caneca-3d.html`, que é a mesma marcação e serve aos links de
 montagem e às páginas de fora. Na página inicial ele só carrega quando a seção se aproxima da tela, para
@@ -877,6 +895,7 @@ de layout com `overflow: hidden` · apagar assets existentes ao ampliar o acervo
 | Tipografia e escala (seção 8) | `--f-display`, `--f-hand`, `--f-body`, `--fs-*` |
 | Raios, sombra, largura (seção 9) | `--r-lg/md/sm`, `--shadow`, `--wrap` |
 | Cores das peças (7.4) | o manual, as fotos do catálogo e `simulador/pecas.js`: `CORES_DAS_PECAS` (a garrafa), `CERAMICA` (a caneca) e `CORES_DA_ECOBAG` |
+| Galeria de artes prontas (10.3) | `pm_arte_categorias` e `pm_artes` no Supabase, `simulador/galeria.js` e a aba Artes prontas do painel |
 | Regras de foto (seção 10) | `preparaFoto` em `admin.js` e as travas de pixel em `qa/audit.mjs` |
 | Assinaturas e rótulos (seção 4) | textos de `index.html`, `produtos.js` e mensagens `data-msg` |
 | Acervo do mascote e adesivos (6, 9) | `assets/panda-*.webp`, `assets/faixa-*.webp` etc. |
@@ -994,6 +1013,7 @@ adereço pequeno no Pandinha em datas comemorativas, com aprovação prévia (6.
 ## Histórico
 | Data | Versão | O que mudou |
 |---|---|---|
+| set/2026 | 2.22 | Galeria de artes prontas no estúdio (10.3), a pedido do dono: artes de volta inteira que ele sobe pelo painel, com a categoria no banco, entram no cardápio depois dos modelos da casa e vão para a caneca como a arte do Canva, com nome e Pandinhas por cima. Arte com texto errado, ou com personagem, marca ou símbolo de terceiros, fica fora. O primeiro lote: 102 artes lidas uma a uma, 52 prontas. Ficam com o dono o nome Panda Mimo desenhado pela IA (13.5), o Pandinha 3D na arte de volta inteira (6.5) e a resolução dos originais. |
 | set/2026 | 2.21 | O estúdio cresce para a garrafa e a ecobag (10.3), a pedido do dono: "Qual peça?" no topo do estúdio, a caneca por padrão, cada peça com os próprios modelos (8 na garrafa, em Com o seu nome e Treino; 8 na ecobag, em Com o seu nome e Pequenos prazeres), medidas de referência, a arte sobre a cor da peça e as frases dos modelos seguindo a regra de 7.4. "Ver com meu nome" passa a valer para as três peças (4.7). A caneca não mudou um pixel; a linha nova desce o estúdio 52 px. Fica com o dono o conflito entre 7.4 e 7.3 na peça pêssego. |
 | set/2026 | 2.20 | O estúdio da caneca em 360° passa a morar na seção Monte seu mimo da página inicial, dentro do site, no lugar do simulador de desenho de garrafa, caneca e copo (decisão do dono: o estúdio vai crescer para as outras peças). Carrega só quando a seção se aproxima; a caneca gruda abaixo da barra do topo; o botão flutuante sai do caminho sobre ele. A chamada "Ver minha foto na caneca" sai (4.7); "Ver com meu nome" fica só na caneca e leva ao estúdio (4.7, 7.4, 10.3). |
 | set/2026 | 2.19 | Estúdio leve (10.3 e 9): a Minha arte passa a ser em camadas — a arte trazida pronta vai por baixo, na altura inteira, e nome, Pandinhas e enfeites entram por cima, livres (o rodapé fixo com nome e um Pandinha saiu). Escolher o modelo não troca de etapa, a roda dá zoom e devolve a rolagem no limite, ocasiões num cardápio em colunas (folha no celular), arte do modelo maior no mouse e no dedo, traço de 1 px no estúdio e preto só na chamada do pedido. Cores da peça, acabamento, cena e arte aberta à vista logo abaixo da caneca, com o escolhido leve; a coluna da peça gruda pelo pé quando passa da janela. O layout de uma coluna passa a valer abaixo de 760 px, com a caneca na largura inteira e no máximo 45% da altura da tela. |

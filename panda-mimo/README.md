@@ -241,6 +241,8 @@ O catálogo do site sai do banco de dados, e quem manda nele é o painel em **`a
   Pandinha (ou um adesivo da marca) no lugar da foto e o botão "Me avise"; os lançamentos aparecem agrupados
   sob "Você escolhe o que sai primeiro" e cada clique é medido com o nome da peça na aba Métricas;
 - subir fotos, reordenar, escrever a descrição de cada uma e apagar;
+- subir as **artes prontas** da galeria do estúdio, cada uma numa categoria, criar categoria, trocar,
+  tirar do ar e apagar (aba Artes prontas; ver `simulador/GALERIA-DE-ARTES.md`);
 - mudar o WhatsApp, o Instagram, o TikTok e o aviso da barra do topo;
 - baixar a cópia de segurança do catálogo (`produtos.js`).
 
@@ -275,6 +277,9 @@ mandar um PNG que já venha com fundo transparente.
 | `pm_produto_fotos` | as fotos de cada produto, na ordem em que aparecem no carrossel, com a versão 2x (`url_2x`) |
 | `pm_config` | WhatsApp, Instagram, TikTok e o aviso do topo |
 | `pm_eventos` | medição própria: visitas, cliques e uso do simulador (lida pela função `pm_metricas`) |
+| `pm_depoimentos` | os depoimentos enviados pelo site, que só aparecem depois de aprovados no painel |
+| `pm_arte_categorias` | as categorias da galeria de artes prontas do estúdio (desde 23/09/2026): mesmo id, nome e grupo das ocasiões do estúdio, mais as novas que as artes pediram |
+| `pm_artes` | as artes prontas da galeria: categoria, nome, peça, e os caminhos da versão de impressão e da miniatura no bucket `panda-mimo` (pasta `artes/`) |
 | `pm_admins` | os e-mails que podem alterar o catálogo |
 
 As regras de acesso ficam no próprio banco: qualquer visitante lê o que está publicado,
