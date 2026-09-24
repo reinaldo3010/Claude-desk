@@ -109,15 +109,17 @@ async function abrePainel() {
    Abas
 --------------------------------------------------------- */
 function mostraAba(qual) {
-  for (const nome of ["produtos", "config", "depoimentos", "metricas"]) {
+  for (const nome of ["produtos", "artes", "config", "depoimentos", "metricas"]) {
     $(`#aba-${nome}`).setAttribute("aria-selected", String(nome === qual));
     $(`#secao-${nome}`).hidden = nome !== qual;
   }
   if (qual !== "produtos") fechaEditor();
   if (qual === "metricas") carregaMetricas();
   if (qual === "depoimentos") carregaDepoimentos();
+  if (qual === "artes") carregaArtes();
 }
 $("#aba-produtos").addEventListener("click", () => mostraAba("produtos"));
+$("#aba-artes").addEventListener("click", () => mostraAba("artes"));
 $("#aba-config").addEventListener("click", () => mostraAba("config"));
 $("#aba-depoimentos").addEventListener("click", () => mostraAba("depoimentos"));
 $("#aba-metricas").addEventListener("click", () => mostraAba("metricas"));
@@ -753,6 +755,312 @@ async function carregaMetricas() {
   } catch (e) {
     recado("#recado-metricas", `Não consegui carregar as métricas: ${e.message}`, "erro");
   }
+}
+
+/* ---------------------------------------------------------
+   Artes prontas: a galeria do estúdio
+   A arte sobe na medida da volta da caneca (2480 × 1063 px, 300 dpi, sobre o branco da
+   cerâmica) com uma miniatura, e entra numa categoria de pm_arte_categorias. O estúdio
+   lê daqui e mostra cada arte no cardápio de ocasiões, junto dos modelos da casa.
+--------------------------------------------------------- */
+const ARTE_DA_GALERIA = { peca: "caneca", largura: 2480, altura: 1063, miniatura: 640 };
+const PROPORCAO_DA_VOLTA = 210 / 90;
+const LIMITE_DO_ARQUIVO = 6 * 1024 * 1024; // o limite do bucket panda-mimo
+let categoriasDeArte = [];
+let artesDaGaleria = [];
+let filaDeArtes = [];
+let manifestoDaGaleria = null;
+let subindoArtes = false;
+
+const urlPublica = (caminho) => `${CFG.URL}/storage/v1/object/public/${CFG.BUCKET}/${caminho}`;
+const nomeDoArquivo = (nome) => nome.replace(/\.[a-z0-9]+$/i, "").replace(/[_-]+/g, " ").trim().slice(0, 80) || "Arte";
+
+async function carregaArtes() {
+  try {
+    [categoriasDeArte, artesDaGaleria] = await Promise.all([
+      rest("pm_arte_categorias?select=*&order=ordem"),
+      rest("pm_artes?select=*&order=ordem"),
+    ]);
+    const escolhida = $("#a-categoria").value;
+    opcoesDeCategoria($("#a-categoria"), escolhida || categoriasDeArte[0]?.id);
+    $("#a-grupos").innerHTML = "";
+    for (const grupo of new Set(categoriasDeArte.map((c) => c.grupo))) {
+      const o = document.createElement("option");
+      o.value = grupo;
+      $("#a-grupos").appendChild(o);
+    }
+    desenhaFila();
+    desenhaArtes();
+  } catch (e) {
+    recado("#recado-artes", `Não consegui carregar as artes: ${e.message}`, "erro");
+  }
+}
+
+/** As categorias num seletor, agrupadas como no cardápio do estúdio. */
+function opcoesDeCategoria(select, escolhida) {
+  select.innerHTML = "";
+  const grupos = new Map();
+  for (const c of categoriasDeArte) {
+    if (!grupos.has(c.grupo)) {
+      const g = document.createElement("optgroup");
+      g.label = c.grupo;
+      grupos.set(c.grupo, g);
+      select.appendChild(g);
+    }
+    const o = document.createElement("option");
+    o.value = c.id;
+    o.textContent = c.nome;
+    grupos.get(c.grupo).appendChild(o);
+  }
+  if (escolhida && categoriasDeArte.some((c) => c.id === escolhida)) select.value = escolhida;
+}
+
+$("#a-criar-categoria").addEventListener("click", async () => {
+  const nome = $("#a-nova-nome").value.trim();
+  const grupo = $("#a-nova-grupo").value.trim();
+  if (nome.length < 2 || grupo.length < 2) { recado("#recado-artes", "Dê um nome e um grupo para a categoria nova.", "erro"); return; }
+  const id = apelido(nome).slice(0, 40);
+  if (categoriasDeArte.some((c) => c.id === id)) { recado("#recado-artes", `Já existe a categoria "${nome}".`, "erro"); return; }
+  try {
+    const ordem = Math.max(0, ...categoriasDeArte.map((c) => c.ordem)) + 10;
+    await rest("pm_arte_categorias", { method: "POST", headers: { Prefer: "return=representation" }, body: JSON.stringify({ id, nome, grupo, ordem }) });
+    $("#a-nova-nome").value = "";
+    $("#a-nova-grupo").value = "";
+    await carregaArtes();
+    $("#a-categoria").value = id;
+    recado("#recado-artes", `Categoria "${nome}" criada no grupo ${grupo}.`, "ok");
+  } catch (e) {
+    recado("#recado-artes", `Não consegui criar a categoria: ${e.message}`, "erro");
+  }
+});
+
+/** O galeria.json da análise: para cada arquivo, a categoria, o nome e se ele fica fora da galeria. */
+function leManifesto(texto) {
+  const dados = JSON.parse(texto);
+  const mapa = new Map();
+  for (const a of dados.artes || []) mapa.set(a.original, a);
+  return mapa;
+}
+
+function aplicaManifesto(item) {
+  const entrada = manifestoDaGaleria?.get(item.arquivo.name);
+  if (!entrada) return;
+  if (entrada.situacao !== "galeria") { item.fora = entrada.motivo || "fica fora da galeria pela análise"; return; }
+  item.fora = "";
+  if (entrada.nome) item.nome = entrada.nome;
+  if (entrada.categoria) item.categoria = entrada.categoria;
+  if (entrada.codigo) item.codigo = entrada.codigo;
+  if (entrada.n) item.ordem = entrada.n * 10;
+}
+
+async function recebeArquivosDeArte(arquivos) {
+  const json = arquivos.find((f) => /\.json$/i.test(f.name) || f.type === "application/json");
+  if (json) {
+    try {
+      manifestoDaGaleria = leManifesto(await json.text());
+      filaDeArtes.forEach(aplicaManifesto);
+    } catch (e) {
+      recado("#recado-artes", `O arquivo ${json.name} não é o galeria.json da análise: ${e.message}`, "erro");
+    }
+  }
+  for (const arquivo of arquivos.filter((f) => f.type.startsWith("image/"))) {
+    if (filaDeArtes.some((i) => i.arquivo.name === arquivo.name && i.arquivo.size === arquivo.size)) continue;
+    const item = {
+      arquivo, nome: nomeDoArquivo(arquivo.name), categoria: $("#a-categoria").value, codigo: null,
+      ordem: 1000 + filaDeArtes.length, fora: "", erro: "", estado: "espera", previa: URL.createObjectURL(arquivo),
+    };
+    aplicaManifesto(item);
+    try {
+      const bmp = await createImageBitmap(arquivo);
+      item.medida = `${bmp.width} × ${bmp.height} px`;
+      if (Math.abs(bmp.width / bmp.height - PROPORCAO_DA_VOLTA) / PROPORCAO_DA_VOLTA > 0.03)
+        item.erro = `${item.medida}: não tem a proporção da volta da caneca (21 × 9 cm, como 2480 × 1063 px).`;
+      bmp.close();
+    } catch {
+      item.erro = "não consegui abrir esta imagem.";
+    }
+    filaDeArtes.push(item);
+  }
+  $("#arquivo-artes").value = "";
+  desenhaFila();
+}
+
+function desenhaFila() {
+  const alvo = $("#fila-artes");
+  alvo.innerHTML = "";
+  filaDeArtes.forEach((item, i) => {
+    const el = document.createElement("div");
+    el.className = "adm-fila-item" + (item.fora || item.erro ? " adm-fila-item--fora" : "");
+    el.innerHTML = `
+      <img src="${item.previa}" alt="">
+      <div class="campo"><label for="fila-nome-${i}">Nome da arte</label><input id="fila-nome-${i}" type="text" maxlength="80"></div>
+      <div class="campo"><label for="fila-cat-${i}">Categoria</label><select id="fila-cat-${i}"></select></div>
+      <small class="adm-fila-item__estado"></small>
+      <button class="mini" type="button" aria-label="Tirar da fila">×</button>`;
+    const nome = el.querySelector("input");
+    nome.value = item.nome;
+    nome.addEventListener("input", () => (item.nome = nome.value));
+    const cat = el.querySelector("select");
+    opcoesDeCategoria(cat, item.categoria);
+    cat.addEventListener("change", () => (item.categoria = cat.value));
+    const estado = { espera: item.medida || "", subindo: "subindo…", feita: "na galeria", erro: "" }[item.estado];
+    el.querySelector(".adm-fila-item__estado").textContent = item.fora ? `fica fora: ${item.fora}` : item.erro || estado;
+    nome.disabled = cat.disabled = item.estado !== "espera" || subindoArtes;
+    el.querySelector("button").addEventListener("click", () => { URL.revokeObjectURL(item.previa); filaDeArtes.splice(i, 1); desenhaFila(); });
+    alvo.appendChild(el);
+  });
+  const prontas = filaDeArtes.filter((i) => i.estado === "espera" && !i.fora && !i.erro).length;
+  $("#subir-artes").disabled = !prontas || subindoArtes;
+  $("#subir-artes").textContent = prontas ? `Subir ${prontas} ${prontas === 1 ? "arte" : "artes"}` : "Subir as artes";
+  $("#limpar-fila").hidden = !filaDeArtes.length || subindoArtes;
+}
+
+/** A versão de impressão na medida da volta, sobre o branco da cerâmica, e a miniatura. */
+async function preparaArte(arquivo) {
+  const bmp = await createImageBitmap(arquivo);
+  const quadro = (largura, altura) => {
+    const c = document.createElement("canvas");
+    c.width = largura;
+    c.height = altura;
+    const x = c.getContext("2d");
+    x.fillStyle = "#FFFFFF"; // o branco da cerâmica: onde a arte é transparente, a caneca fica sem tinta
+    x.fillRect(0, 0, largura, altura);
+    x.imageSmoothingEnabled = true;
+    x.imageSmoothingQuality = "high";
+    x.drawImage(bmp, 0, 0, largura, altura);
+    return c;
+  };
+  const blob = (c, q) => new Promise((ok, falha) => c.toBlob((b) => (b ? ok(b) : falha(new Error("o navegador não gerou a imagem"))), "image/webp", q));
+  const { largura, altura, miniatura } = ARTE_DA_GALERIA;
+  const impressao = await blob(quadro(largura, altura), 0.92);
+  const mini = await blob(quadro(miniatura, Math.round(miniatura * altura / largura)), 0.84);
+  bmp.close();
+  if (impressao.size > LIMITE_DO_ARQUIVO) throw new Error("a versão de impressão passou de 6 MB");
+  return { impressao, mini, largura, altura };
+}
+
+async function sobeArquivo(caminho, blob, tentouRenovar = false) {
+  const r = await fetch(`${CFG.URL}/storage/v1/object/${CFG.BUCKET}/${caminho}`, {
+    method: "POST",
+    headers: { apikey: CFG.CHAVE, Authorization: `Bearer ${sessao.token}`, "Content-Type": "image/webp", "x-upsert": "true" },
+    body: blob,
+  });
+  if ((r.status === 401 || r.status === 403) && !tentouRenovar && (await renovaSessao())) return sobeArquivo(caminho, blob, true);
+  if (!r.ok) throw new Error((await r.text()).slice(0, 160));
+}
+
+$("#subir-artes").addEventListener("click", async () => {
+  const fila = filaDeArtes.filter((i) => i.estado === "espera" && !i.fora && !i.erro);
+  if (!fila.length || subindoArtes) return;
+  subindoArtes = true;
+  let feitas = 0;
+  for (const item of fila) {
+    item.estado = "subindo";
+    desenhaFila();
+    recado("#recado-artes", `Subindo ${feitas + 1} de ${fila.length}…`);
+    try {
+      const { impressao, mini, largura, altura } = await preparaArte(item.arquivo);
+      const id = item.codigo || `${item.categoria}-${Math.random().toString(36).slice(2, 7)}`;
+      const base = `artes/${ARTE_DA_GALERIA.peca}/${id}`;
+      await sobeArquivo(`${base}.webp`, impressao);
+      await sobeArquivo(`${base}-mini.webp`, mini);
+      await rest("pm_artes", {
+        method: "POST",
+        headers: { Prefer: "resolution=merge-duplicates,return=representation" },
+        body: JSON.stringify({
+          id, categoria_id: item.categoria, nome: item.nome.trim() || "Arte", peca: ARTE_DA_GALERIA.peca,
+          arquivo: `${base}.webp`, miniatura: `${base}-mini.webp`, largura, altura, original: item.arquivo.name, ordem: item.ordem,
+        }),
+      });
+      item.estado = "feita";
+      feitas++;
+    } catch (e) {
+      item.estado = "erro";
+      item.erro = `não subiu: ${e.message}`;
+    }
+  }
+  subindoArtes = false;
+  const falharam = fila.length - feitas;
+  recado("#recado-artes", falharam ? `${feitas} subiram; ${falharam} não (veja o motivo em cada uma).` : `${feitas} ${feitas === 1 ? "arte entrou" : "artes entraram"} na galeria.`, falharam ? "erro" : "ok");
+  await carregaArtes();
+});
+
+$("#limpar-fila").addEventListener("click", () => {
+  filaDeArtes.forEach((i) => URL.revokeObjectURL(i.previa));
+  filaDeArtes = [];
+  desenhaFila();
+});
+$("#solta-artes").addEventListener("click", () => $("#arquivo-artes").click());
+$("#solta-artes").addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("#arquivo-artes").click(); } });
+$("#arquivo-artes").addEventListener("change", (e) => recebeArquivosDeArte([...e.target.files]));
+["dragenter", "dragover"].forEach((ev) => $("#solta-artes").addEventListener(ev, (e) => { e.preventDefault(); $("#solta-artes").classList.add("ativa"); }));
+["dragleave", "drop"].forEach((ev) => $("#solta-artes").addEventListener(ev, (e) => { e.preventDefault(); $("#solta-artes").classList.remove("ativa"); }));
+$("#solta-artes").addEventListener("drop", (e) => recebeArquivosDeArte([...e.dataTransfer.files]));
+
+function desenhaArtes() {
+  const alvo = $("#lista-artes");
+  alvo.innerHTML = "";
+  const noAr = artesDaGaleria.filter((a) => a.publicado).length;
+  $("#conta-artes").textContent = artesDaGaleria.length ? `${artesDaGaleria.length} na galeria, ${noAr} no ar` : "";
+  for (const c of categoriasDeArte) {
+    const daqui = artesDaGaleria.filter((a) => a.categoria_id === c.id);
+    if (!daqui.length) continue;
+    const bloco = document.createElement("section");
+    bloco.className = "adm-artes__bloco";
+    const titulo = document.createElement("h3");
+    titulo.textContent = `${c.nome} `;
+    const conta = document.createElement("small");
+    conta.textContent = `${c.grupo} · ${daqui.length}`;
+    titulo.appendChild(conta);
+    const grade = document.createElement("div");
+    grade.className = "adm-artes";
+    daqui.forEach((a) => grade.appendChild(cartaoDeArte(a)));
+    bloco.append(titulo, grade);
+    alvo.appendChild(bloco);
+  }
+}
+
+function cartaoDeArte(a) {
+  const el = document.createElement("div");
+  el.className = "adm-arte";
+  el.innerHTML = `
+    <img src="${urlPublica(a.miniatura)}" alt="" loading="lazy">
+    <div class="adm-arte__nome"></div>
+    <div class="adm-item__meta"><span class="selo ${a.publicado ? "selo--no-ar" : "selo--rascunho"}">${a.publicado ? "no ar" : "fora do ar"}</span></div>
+    <select></select>
+    <div class="adm-arte__acoes">
+      <button class="mini" type="button" data-a="publica">${a.publicado ? "Tirar do ar" : "Publicar"}</button>
+      <button class="mini mini--perigo" type="button" data-a="apaga">Apagar</button>
+    </div>`;
+  el.querySelector(".adm-arte__nome").textContent = a.nome;
+  const cat = el.querySelector("select");
+  cat.setAttribute("aria-label", `Categoria de ${a.nome}`);
+  opcoesDeCategoria(cat, a.categoria_id);
+  cat.addEventListener("change", () => mexeNaArte(a, { categoria_id: cat.value }, "Não consegui trocar a categoria"));
+  el.querySelector('[data-a="publica"]').addEventListener("click", () => mexeNaArte(a, { publicado: !a.publicado }, "Não consegui mudar a publicação"));
+  el.querySelector('[data-a="apaga"]').addEventListener("click", () => apagaArte(a));
+  return el;
+}
+
+async function mexeNaArte(a, campos, falha) {
+  try {
+    await rest(`pm_artes?id=eq.${encodeURIComponent(a.id)}`, { method: "PATCH", headers: { Prefer: "return=representation" }, body: JSON.stringify(campos) });
+    await carregaArtes();
+  } catch (e) {
+    recado("#recado-artes", `${falha}: ${e.message}`, "erro");
+  }
+}
+
+async function apagaArte(a) {
+  if (!confirm(`Apagar "${a.nome}" da galeria? A arte sai do estúdio e os arquivos dela saem do banco.`)) return;
+  try {
+    await rest(`pm_artes?id=eq.${encodeURIComponent(a.id)}`, { method: "DELETE" });
+    await api(`/storage/v1/object/${CFG.BUCKET}`, { method: "DELETE", body: JSON.stringify({ prefixes: [a.arquivo, a.miniatura] }) });
+    recado("#recado-artes", `"${a.nome}" saiu da galeria.`, "ok");
+  } catch (e) {
+    recado("#recado-artes", `Não consegui apagar: ${e.message}`, "erro");
+  }
+  await carregaArtes();
 }
 
 /* ---------------------------------------------------------

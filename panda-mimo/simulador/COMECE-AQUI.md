@@ -15,6 +15,12 @@ visualizador 3D de qualquer peça é `peca-3d.js`, e cada peça tem o seu arquiv
 `garrafa-modelos.js`, `ecobag-modelos.js`). A caneca não mudou um pixel, e o guardião cobra as três no
 bloco `pecas`.
 
+**Desde 23/09/2026 há também a galeria de artes prontas** (`GALERIA-DE-ARTES.md`): artes de volta inteira
+que o dono sobe pelo painel (aba Artes prontas), com a categoria no banco (`pm_arte_categorias` e
+`pm_artes`, no Supabase). `simulador/galeria.js` as lê, e elas entram no cardápio depois dos modelos da casa;
+escolher uma leva a arte para a caneca pelo caminho da arte do Canva. Sem banco, a galeria só não aparece.
+O guardião cobra no bloco `galeria`, com um banco de mentira; nos outros blocos a galeria chega vazia.
+
 **O estúdio mora em dois lugares com uma marcação só.** A fonte é `caneca-3d.html`. A seção Monte seu mimo
 da página inicial (`#estudio-no-site`) busca o `.studio-layout` dessa página (e a linha "Qual peça?", `#pecas`,
 que fica logo acima dele, fora da grade), põe a folha `estudio.css` e
@@ -87,6 +93,7 @@ Três armadilhas que já custaram tempo:
 | `simulador/caneca-3d.js` | A caneca: geometria, cerâmica, vistas e enquadramento |
 | `simulador/garrafa-3d.js` e `ecobag-3d.js` | A garrafa de 1 L e a ecobag de algodão cru, no mesmo formato de forma |
 | `simulador/garrafa-modelos.js` e `ecobag-modelos.js` | Os 8 modelos de cada peça nova, com `atalhos-da-peca.js` |
+| `simulador/galeria.js` | A galeria de artes prontas: lê do banco as categorias e as artes publicadas (o painel sobe, aba Artes prontas) |
 | `simulador/fontes.js` | Biblioteca de 15 letras (3 da marca + 12 OFL em `assets/fontes/arte/`) |
 | `simulador/rascunho.js` | Rascunho no IndexedDB do aparelho |
 | `simulador/zip.js` | Empacotador ZIP sem compressão, para o lote de nomes |

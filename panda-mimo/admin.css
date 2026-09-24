@@ -183,3 +183,37 @@ body { background: var(--paper); }
 .campo--check input { width: 18px; height: 18px; accent-color: var(--peach-deep); margin: 0; }
 .adm-acoes { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: .8rem; }
 
+
+/* ---------- artes prontas ---------- */
+.adm-nova-categoria { display: grid; grid-template-columns: 1fr 1fr auto; gap: .5rem; align-items: center; }
+.adm-nova-categoria input {
+  width: 100%; padding: .7rem .9rem; border: 2px solid var(--sand); border-radius: var(--r-sm);
+  background: var(--paper); font: inherit; font-size: 1rem;
+}
+.adm-nova-categoria input:focus { border-color: var(--peach-deep); outline: none; }
+.adm-fila { display: grid; gap: .5rem; margin-top: .8rem; }
+.adm-fila:empty { display: none; }
+.adm-fila-item {
+  display: grid; grid-template-columns: 150px 1fr 1fr minmax(0, 11rem) auto; gap: .8rem; align-items: center;
+  padding: .55rem; border: 1.5px solid var(--sand); border-radius: var(--r-sm); background: var(--white);
+}
+.adm-fila-item img { width: 150px; aspect-ratio: 210 / 90; object-fit: cover; border-radius: 8px; }
+.adm-fila-item--fora { opacity: .62; }
+.adm-fila-item__estado { font-size: var(--fs-xs); color: var(--ink-soft); }
+.adm-artes__bloco { margin-top: 1.4rem; }
+.adm-artes__bloco h3 { font-family: var(--f-display); font-weight: 600; font-size: 1.1rem; margin-bottom: .6rem; }
+.adm-artes__bloco h3 small { font-family: var(--f-body); font-weight: 400; font-size: var(--fs-xs); color: var(--ink-soft); }
+.adm-artes { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: .8rem; }
+.adm-arte { display: grid; gap: .4rem; align-content: start; padding: .55rem; border: 1.5px solid var(--sand); border-radius: var(--r-sm); background: var(--white); }
+.adm-arte img { width: 100%; aspect-ratio: 210 / 90; object-fit: cover; border-radius: 8px; }
+.adm-arte__nome { font-family: var(--f-display); font-weight: 600; font-size: .95rem; }
+.adm-arte select {
+  width: 100%; padding: .45rem .6rem; border: 1.5px solid var(--sand); border-radius: 8px;
+  background: var(--paper); font: inherit; font-size: var(--fs-s);
+}
+.adm-arte__acoes { display: flex; gap: .3rem; flex-wrap: wrap; }
+@media (max-width: 760px) {
+  .adm-fila-item { grid-template-columns: 110px 1fr; }
+  .adm-fila-item img { width: 110px; }
+  .adm-nova-categoria { grid-template-columns: 1fr; }
+}

@@ -100,6 +100,21 @@ process.on('unhandledRejection', relataQuebra);
 const exe = process.env.CHROMIUM_PATH;
 const browser = await chromium.launch({ ...(exe ? { executablePath: exe } : {}), args: ['--allow-file-access-from-files'] });
 
+/*
+  A galeria de artes prontas vem do banco de verdade (simulador/galeria.js). No guardião ela chega vazia
+  em toda página, e só o bloco `galeria` monta a dele: sem isto, as contagens do cardápio mudariam a cada
+  arte que o dono sobe pelo painel, e o guardião reprovaria o que não quebrou.
+*/
+const ROTA_DA_GALERIA = /\/rest\/v1\/pm_arte(s|_categorias)\b/;
+const galeriaVazia = async (alvo) => {
+  await alvo.route(ROTA_DA_GALERIA, (rota) => rota.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+  return alvo;
+};
+const novaPagina = browser.newPage.bind(browser);
+const novoContexto = browser.newContext.bind(browser);
+browser.newPage = async (...args) => galeriaVazia(await novaPagina(...args));
+browser.newContext = async (...args) => galeriaVazia(await novoContexto(...args));
+
 async function loadImages(page) {
   // o catálogo pode vir do banco: espera assentar antes de conferir qualquer coisa
   await page.evaluate(() => window.PANDA_CATALOGO || true).catch(() => {});
@@ -2914,6 +2929,203 @@ if (roda('paginas')) {
     if (!detalhe.foiNaCaneca.naSecao || !detalhe.foiNaCaneca.fechou || detalhe.foiNaCaneca.peca !== 'caneca') failures.push(`${onde} "Ver com meu nome" da caneca não levou ao estúdio na caneca (${JSON.stringify(detalhe.foiNaCaneca)})`);
     errosDaHome.forEach((e) => failures.push(`${onde} erro: ${e}`));
     await contexto.close();
+  }
+
+  /*
+    A galeria de artes prontas (simulador/galeria.js e a aba Artes prontas do painel), com um banco de
+    mentira: duas categorias (Natal, que o estúdio já tem, e uma nova num grupo novo) e três artes.
+    Confere que elas entram no cardápio na ocasião certa, com a contagem certa e depois dos modelos da
+    casa; que a arte escolhida vai para a caneca sem trocar de etapa; que o pedido diz qual arte é; e,
+    no painel, que a subida prepara a arte na medida da volta e grava no lugar certo.
+  */
+  if (roda('galeria')) {
+    const fabrica = await browser.newPage();
+    // Numa cor que o estúdio não tem, para reconhecer a arte na prévia.
+    const imagens = await fabrica.evaluate(async () => {
+      const faz = async (largura, altura, tipo) => {
+        const c = document.createElement('canvas');
+        c.width = largura; c.height = altura;
+        const g = c.getContext('2d');
+        g.fillStyle = 'rgb(46, 123, 207)'; g.fillRect(0, 0, largura, altura);
+        g.fillStyle = 'rgb(242, 194, 0)'; g.fillRect(largura * 0.45, 0, largura * 0.1, altura);
+        const b = await new Promise((ok) => c.toBlob(ok, tipo, 0.9));
+        const bytes = new Uint8Array(await b.arrayBuffer());
+        let texto = '';
+        for (let i = 0; i < bytes.length; i += 8192) texto += String.fromCharCode(...bytes.subarray(i, i + 8192));
+        return btoa(texto);
+      };
+      return {
+        arte: await faz(2480, 1063, 'image/webp'), mini: await faz(640, 274, 'image/webp'),
+        doDono: await faz(1916, 821, 'image/png'), quadrada: await faz(800, 800, 'image/png'),
+      };
+    });
+    await fabrica.close();
+    const CATEGORIAS_FALSAS = [
+      { id: 'natal', nome: 'Natal', grupo: 'Datas comemorativas', descricao: '', ordem: 10 },
+      { id: 'pequenos-aventuras', nome: 'Aventuras e diversão', grupo: 'Para os pequenos', descricao: 'Circo, trem e piratas', ordem: 160 },
+    ];
+    const arteFalsa = (id, categoria, nome, ordem) => ({
+      id, categoria_id: categoria, tambem_em: [], nome, descricao: '', peca: 'caneca', largura: 2480, altura: 1063, ordem,
+      arquivo: `artes/caneca/${id}.webp`, miniatura: `artes/caneca/${id}-mini.webp`,
+    });
+    const ARTES_FALSAS = [
+      arteFalsa('natal-01', 'natal', 'Natal de teste', 10),
+      arteFalsa('natal-02', 'natal', 'Outro Natal de teste', 20),
+      arteFalsa('pequenos-aventuras-01', 'pequenos-aventuras', 'Aventura de teste', 30),
+    ];
+    for (const [w, h] of [[1280, 800], [390, 844]]) {
+      const onde = `[galeria ${w}]`;
+      const contexto = await browser.newContext({ viewport: { width: w, height: h } });
+      const pg = await contexto.newPage();
+      const erros = [];
+      pg.on('pageerror', (e) => erros.push(e.message));
+      pg.on('console', (m) => m.type() === 'error' && erros.push(m.text()));
+      await pg.route('**/rest/v1/**', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: '[{"whatsapp":"5511999999999"}]' }));
+      await pg.route('**/rest/v1/pm_arte_categorias*', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(CATEGORIAS_FALSAS) }));
+      await pg.route('**/rest/v1/pm_artes*', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ARTES_FALSAS) }));
+      await pg.route('**/storage/v1/object/public/panda-mimo/artes/**', (r) => r.fulfill({
+        status: 200, contentType: 'image/webp', body: Buffer.from(/-mini\.webp$/.test(r.request().url()) ? imagens.mini : imagens.arte, 'base64'),
+      }));
+      await pg.goto(servidor.url + 'caneca-3d.html', { waitUntil: 'load' });
+      const abriu = await pg.waitForFunction(() => document.getElementById('viewer-loading')?.hidden && document.querySelector('#mug-viewport canvas.mug-3d-canvas'), null, { timeout: 20000 }).then(() => true).catch(() => false);
+      if (!abriu) { failures.push(`${onde} o estúdio não abriu`); await contexto.close(); continue; }
+      await pg.click('#boasvindas-fechar').catch(() => {});
+      const chegou = await pg.waitForFunction(() => !!document.querySelector('.studio-model[data-modelo="galeria:natal-01"]'), null, { timeout: 8000 }).then(() => true).catch(() => false);
+      if (!chegou) { failures.push(`${onde} as artes da galeria não entraram na lista de modelos`); await contexto.close(); continue; }
+
+      const lista = await pg.evaluate(async () => {
+        const { modelosDaCategoria } = await import('./simulador/modelos.js');
+        const cartoes = [...document.querySelectorAll('#model-list .studio-model')].map((b) => b.dataset.modelo);
+        const daGaleria = (id) => id.startsWith('galeria:');
+        const conta = (id) => Number(document.querySelector(`#lista-assuntos [data-assunto="${id}"] .studio-assunto__conta`)?.textContent);
+        const grupoDe = (id) => document.querySelector(`#lista-assuntos [data-assunto="${id}"]`)?.closest('.studio-assunto__grupo')?.querySelector('.studio-assunto__titulo')?.textContent;
+        return {
+          primeiraDaGaleria: cartoes.findIndex(daGaleria),
+          ultimaDaCasa: cartoes.map((id) => !daGaleria(id)).lastIndexOf(true),
+          segunda: cartoes[1], primeiraDaCasa: modelosDaCategoria('todos', 'caneca')[0]?.id,
+          todos: conta('todos'), todosDaCasa: modelosDaCategoria('todos', 'caneca').length,
+          natal: conta('natal'), natalDaCasa: modelosDaCategoria('natal', 'caneca').length,
+          aventuras: conta('pequenos-aventuras'), grupo: grupoDe('pequenos-aventuras'),
+        };
+      });
+      if (lista.primeiraDaGaleria < lista.ultimaDaCasa) failures.push(`${onde} arte da galeria na frente de modelo da casa: a primeira tela do estúdio mudou`);
+      if (lista.segunda !== lista.primeiraDaCasa) failures.push(`${onde} o primeiro modelo da lista mudou com a galeria (${lista.segunda}, era ${lista.primeiraDaCasa})`);
+      if (lista.todos !== lista.todosDaCasa + 3) failures.push(`${onde} "Todos os modelos" conta ${lista.todos}, e deviam ser ${lista.todosDaCasa} da casa e 3 da galeria`);
+      if (lista.natal !== lista.natalDaCasa + 2) failures.push(`${onde} Natal conta ${lista.natal}, e deviam ser ${lista.natalDaCasa} da casa e 2 da galeria`);
+      if (lista.aventuras !== 1 || lista.grupo !== 'Para os pequenos') failures.push(`${onde} a categoria nova da galeria não entrou no cardápio no grupo dela (${lista.aventuras} em "${lista.grupo}")`);
+
+      // O cartão mostra a miniatura que o painel preparou.
+      await pg.evaluate(() => document.querySelector('.studio-model[data-modelo="galeria:natal-01"]').scrollIntoView({ block: 'center', behavior: 'instant' }));
+      const miniatura = await pg.waitForFunction(() => {
+        const i = document.querySelector('.studio-model[data-modelo="galeria:natal-01"] img');
+        return !!i && i.complete && i.naturalWidth > 0;
+      }, null, { timeout: 8000, polling: 150 }).then(() => true).catch(() => false);
+      if (!miniatura) failures.push(`${onde} a miniatura da arte da galeria não apareceu no cartão`);
+
+      const abaAntes = await pg.evaluate(() => document.querySelector('#abas [aria-selected="true"]')?.dataset.aba);
+      await pg.evaluate(() => document.querySelector('.studio-model[data-modelo="galeria:natal-01"]').click());
+      const marcada = await pg.waitForFunction(() => document.querySelector('.studio-model[data-modelo="galeria:natal-01"]')?.getAttribute('aria-pressed') === 'true', null, { timeout: 10000 }).then(() => true).catch(() => false);
+      if (!marcada) failures.push(`${onde} a arte da galeria escolhida não ficou marcada`);
+      await pg.waitForTimeout(700);
+      const depois = await pg.evaluate(() => {
+        const pedido = document.getElementById('mug-order');
+        const zap = new URL(pedido.href, location.href).searchParams.get('text') || pedido.dataset.msg || '';
+        const plana = document.getElementById('flat-art');
+        const d = plana.getContext('2d').getImageData(Math.round(plana.width * 0.3), Math.round(plana.height * 0.5), 3, 3).data;
+        return {
+          zap, aba: document.querySelector('#abas [aria-selected="true"]')?.dataset.aba, cor: [d[0], d[1], d[2]],
+          semModelo: document.querySelector('.studio-model[data-modelo=""]')?.getAttribute('aria-pressed'),
+        };
+      });
+      if (depois.aba !== abaAntes) failures.push(`${onde} escolher a arte da galeria trocou de etapa (${abaAntes} → ${depois.aba})`);
+      if (!/Arte pronta da galeria: Natal de teste \(natal-01\)/.test(depois.zap)) failures.push(`${onde} o pedido não diz qual arte da galeria foi escolhida`);
+      if (/Sem o Pandinha/.test(depois.zap)) failures.push(`${onde} o pedido diz "Sem o Pandinha" numa arte da galeria, que já traz o Pandinha`);
+      if (!(depois.cor[2] > 150 && depois.cor[0] < 110)) failures.push(`${onde} a arte aberta não mostra a arte da galeria (cor ${depois.cor.join(', ')})`);
+      if (depois.semModelo === 'true') failures.push(`${onde} "Trazer a minha arte" ficou marcado no lugar da arte da galeria`);
+      // A caneca gira para o meio da arte: a faixa amarela da arte de mentira fica no meio da prévia.
+      await pg.waitForTimeout(900);
+      const foto = (await pg.locator('#mug-viewport canvas.mug-3d-canvas').screenshot()).toString('base64');
+      const meio = await pg.evaluate(async (b64) => {
+        const img = new Image();
+        await new Promise((ok) => { img.onload = ok; img.src = `data:image/png;base64,${b64}`; });
+        const c = document.createElement('canvas'); c.width = img.width; c.height = img.height;
+        const g = c.getContext('2d'); g.drawImage(img, 0, 0);
+        const d = g.getImageData(Math.round(img.width * 0.5) - 2, Math.round(img.height * 0.55) - 2, 4, 4).data;
+        return [d[0], d[1], d[2]];
+      }, foto);
+      if (!(meio[0] > 150 && meio[1] > 120 && meio[0] - meio[2] > 70)) failures.push(`${onde} a caneca não virou para o meio da arte da galeria (cor no meio da prévia ${meio.join(', ')})`);
+
+      // Voltar para um modelo da casa desmarca a arte da galeria e o pedido volta a falar do modelo.
+      await pg.evaluate(() => document.querySelector('.studio-model[data-modelo="namorados-coracoes"]').click());
+      await pg.waitForTimeout(500);
+      const deVolta = await pg.evaluate(() => {
+        const pedido = document.getElementById('mug-order');
+        return {
+          galeria: document.querySelector('.studio-model[data-modelo="galeria:natal-01"]')?.getAttribute('aria-pressed'),
+          zap: new URL(pedido.href, location.href).searchParams.get('text') || pedido.dataset.msg || '',
+        };
+      });
+      if (deVolta.galeria === 'true' || !/Modelo: /.test(deVolta.zap)) failures.push(`${onde} ao voltar para um modelo da casa, a arte da galeria continuou escolhida`);
+      erros.filter((e) => !/setPointerCapture/.test(e)).forEach((e) => failures.push(`${onde} erro: ${e}`));
+      await contexto.close();
+    }
+
+    // ---- o painel sobe a arte na medida da volta e grava no lugar certo ----
+    const pa = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+    const errosPainel = [];
+    pa.on('pageerror', (e) => errosPainel.push(e.message));
+    const subidas = [];
+    const gravadas = [];
+    await pa.route('**/rest/v1/**', (r) => {
+      const u = r.request().url();
+      if (/pm_arte_categorias/.test(u)) return r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(CATEGORIAS_FALSAS) });
+      if (/pm_artes/.test(u) && r.request().method() === 'POST') {
+        gravadas.push(JSON.parse(r.request().postData() || '{}'));
+        return r.fulfill({ status: 201, contentType: 'application/json', body: '[]' });
+      }
+      return r.fulfill({ status: 200, contentType: 'application/json', body: '[]' });
+    });
+    await pa.route('**/storage/v1/object/panda-mimo/**', (r) => {
+      subidas.push({ url: r.request().url(), bytes: (r.request().postDataBuffer() || Buffer.alloc(0)).toString('base64') });
+      return r.fulfill({ status: 200, contentType: 'application/json', body: '{"Key":"ok"}' });
+    });
+    await pa.addInitScript(() => localStorage.setItem('pm_token', 'token-de-teste'));
+    // Pelo servidor, e não por file://: assim a prova de defeito (QA_SOBREPOR) vale para o painel também.
+    await pa.goto(servidor.url + 'admin.html', { waitUntil: 'load' });
+    await pa.click('#aba-artes');
+    const temCategorias = await pa.waitForFunction(() => document.querySelectorAll('#a-categoria option').length === 2, null, { timeout: 5000 }).then(() => true).catch(() => false);
+    if (!temCategorias) failures.push('[galeria · painel] as categorias do banco não chegaram ao seletor');
+    const manifesto = { artes: [{ original: 'Imagem do dono.png', situacao: 'galeria', categoria: 'pequenos-aventuras', nome: 'Aventura do catálogo', codigo: 'pequenos-aventuras-07', n: 7 }] };
+    await pa.setInputFiles('#arquivo-artes', [
+      { name: 'galeria.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(manifesto)) },
+      { name: 'Imagem do dono.png', mimeType: 'image/png', buffer: Buffer.from(imagens.doDono, 'base64') },
+      { name: 'quadrada.png', mimeType: 'image/png', buffer: Buffer.from(imagens.quadrada, 'base64') },
+    ]);
+    await pa.waitForFunction(() => document.querySelectorAll('#fila-artes .adm-fila-item').length === 2, null, { timeout: 5000 }).catch(() => {});
+    const fila = await pa.evaluate(() => [...document.querySelectorAll('#fila-artes .adm-fila-item')].map((item) => ({
+      nome: item.querySelector('input')?.value, categoria: item.querySelector('select')?.value,
+      estado: item.querySelector('.adm-fila-item__estado')?.textContent || '',
+    })).concat([{ botao: document.getElementById('subir-artes').textContent }]));
+    if (fila[0]?.nome !== 'Aventura do catálogo' || fila[0]?.categoria !== 'pequenos-aventuras') failures.push(`[galeria · painel] a arte não chegou com o nome e a categoria do galeria.json (${JSON.stringify(fila[0])})`);
+    if (!/proporção/.test(fila[1]?.estado || '')) failures.push('[galeria · painel] a arte quadrada não foi recusada pela proporção da volta');
+    if (fila[2]?.botao !== 'Subir 1 arte') failures.push(`[galeria · painel] o botão devia oferecer subir só a arte boa (diz "${fila[2]?.botao}")`);
+    await pa.click('#subir-artes');
+    await pa.waitForFunction(() => /entrou na galeria|entraram na galeria|não subiu/.test(document.getElementById('recado-artes').textContent), null, { timeout: 15000 }).catch(() => {});
+    const caminhos = subidas.map((s) => s.url.replace(/^.*\/storage\/v1\/object\/panda-mimo\//, ''));
+    if (caminhos.join(' ') !== 'artes/caneca/pequenos-aventuras-07.webp artes/caneca/pequenos-aventuras-07-mini.webp') failures.push(`[galeria · painel] a arte não subiu para o lugar certo (${caminhos.join(', ') || 'nada subiu'})`);
+    const g = gravadas[0] || {};
+    if (g.id !== 'pequenos-aventuras-07' || g.categoria_id !== 'pequenos-aventuras' || g.largura !== 2480 || g.altura !== 1063 || g.original !== 'Imagem do dono.png' || g.arquivo !== 'artes/caneca/pequenos-aventuras-07.webp')
+      failures.push(`[galeria · painel] a arte não foi gravada no banco como devia (${JSON.stringify(g)})`);
+    if (subidas[0]) {
+      const medida = await pa.evaluate(async (b64) => {
+        const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+        const bmp = await createImageBitmap(new Blob([bytes], { type: 'image/webp' }));
+        return `${bmp.width}×${bmp.height}`;
+      }, subidas[0].bytes).catch(() => 'ilegível');
+      if (medida !== '2480×1063') failures.push(`[galeria · painel] a versão de impressão saiu em ${medida}, e não em 2480×1063 (300 dpi na volta da caneca)`);
+    }
+    errosPainel.forEach((e) => failures.push(`[galeria · painel] erro: ${e}`));
+    await pa.close();
   }
 
   await servidor.close();
