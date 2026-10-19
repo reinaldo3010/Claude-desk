@@ -49,6 +49,16 @@ eventos via `store.ingest`). Duas garantias que o tornam seguro:
 Por isso o botão "Aprovar" é seguro ali: não há Claude Code atrás dele. É a
 única forma de exercitar o portão de permissão sem apostar numa aprovação real.
 
+### Deck lateral (mod do Claude Code)
+
+`mods/deck-lateral/` é um mod: painel ao lado do chat. Testes com
+`claude plugin test mods/deck-lateral`, validação com
+`claude plugin validate mods/deck-lateral`. A quota vem de
+`$.session.usage()`, não da statusLine. Os hooks só observam e têm `.catch`
+que deixa o motor seguir — um painel quebrado nunca bloqueia ferramenta nem
+muda decisão de permissão. **Não tem verificação visual**: os testes provam o
+conteúdo do painel, não a aparência dele no app desktop.
+
 ## Verificado × suposto
 
 Esta seção existe porque já custou caro. **Não trate suposição como fato, e

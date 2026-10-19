@@ -1,0 +1,11 @@
+{
+  "name": "claude-desk",
+  "owner": { "name": "Reinaldo Borgonovi" },
+  "plugins": [
+    {
+      "name": "deck-lateral",
+      "source": "./mods/deck-lateral",
+      "description": "Mini deck ao lado do chat: marca animada pelo estado, ferramenta em uso e quota de 5h/semana"
+    }
+  ]
+}

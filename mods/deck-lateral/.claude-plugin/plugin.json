@@ -1,0 +1,7 @@
+{
+  "name": "deck-lateral",
+  "version": "0.1.0",
+  "description": "Mini deck ao lado do chat: marca animada pelo estado, ferramenta em uso e quota de 5h/semana",
+  "author": { "name": "Reinaldo Borgonovi" },
+  "types": "./types/index.d.ts"
+}

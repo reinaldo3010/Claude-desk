@@ -154,6 +154,28 @@ documentado, então pode quebrar sem aviso — mas é a diferença entre ter quo
 e não ter. E se nenhum dos dois vier, os medidores encolhem sozinhos e o
 espaço vai para os botões.
 
+## Deck lateral: o mini deck dentro do Claude Code
+
+Para quando o tablet não está por perto. É um mod do próprio Claude Code: um
+painel ao lado do chat com a marca do Claude animada pelo estado (respira
+ocioso, onda trabalhando, pisca vermelho quando está te esperando), a
+ferramenta em uso, e as barras de 5 horas, semana e contexto.
+
+```
+/plugin install deck-lateral --marketplace reinaldo3010/Claude-desk
+```
+
+Depois, `/deck` abre o painel se ele estiver fechado.
+
+**A quota aqui não depende da statusLine.** O mod lê direto do motor
+(`$.session.usage()` e o evento `session.measure`), então ela aparece também
+no app desktop — onde a statusLine continua sendo um "não sabido".
+
+O mod só observa: não aprova, não recusa, não digita. Se ele falhar, cada hook
+cai num `.catch` que deixa o Claude Code seguir como se o painel não existisse
+— testado. Código em [`mods/deck-lateral/`](mods/deck-lateral/), testes com
+`claude plugin test mods/deck-lateral`.
+
 ## A cara do painel
 
 A identidade é do Claude, e ela mora nos dois lugares que sobrevivem a um
